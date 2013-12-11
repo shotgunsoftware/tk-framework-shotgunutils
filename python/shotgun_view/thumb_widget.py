@@ -11,7 +11,7 @@
 import tank
 
 from tank.platform.qt import QtCore, QtGui
-from ..ui.thumb_widget import Ui_ThumbWidget
+from .ui.thumb_widget import Ui_ThumbWidget
 
 class ThumbWidget(QtGui.QWidget):
     """

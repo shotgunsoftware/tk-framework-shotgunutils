@@ -69,7 +69,7 @@ class OverlayWidget(QtGui.QWidget):
         
         self._message_pixmap = None
         self._message = None
-        self._sg_icon = QtGui.QPixmap(":/tk_framework_shotgunutils/sg_logo.png")
+        self._sg_icon = QtGui.QPixmap(":/tk_framework_shotgunutils.shotgun_model/sg_logo.png")
  
     def _on_parent_resized(self):
         """

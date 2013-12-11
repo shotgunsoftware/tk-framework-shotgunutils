@@ -1,5 +1,5 @@
 <RCC>
-  <qresource prefix="tk_framework_shotgunutils">
+  <qresource prefix="tk_framework_shotgunutils.shotgun_model">
     <file>sg_logo.png</file>
   </qresource>
 </RCC>

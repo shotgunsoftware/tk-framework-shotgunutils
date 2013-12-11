@@ -11,7 +11,7 @@
 import tank
 
 from tank.platform.qt import QtCore, QtGui
-from ..ui.list_widget import Ui_ListWidget
+from .ui.list_widget import Ui_ListWidget
 
 class ListWidget(QtGui.QWidget):
     """
