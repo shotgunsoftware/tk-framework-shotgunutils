@@ -484,7 +484,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             if isinstance(val, unicode):
                 # u"foo" --> "foo"
                 str_val = val.encode('UTF-8')
-            if isinstance(val, dict):
+            elif isinstance(val, dict):
                 # assume sg link dict - convert name to str
                 # {"id": 123, "name": u"foo"} ==> "foo"
                 str_val = _to_utf8(val["name"])
