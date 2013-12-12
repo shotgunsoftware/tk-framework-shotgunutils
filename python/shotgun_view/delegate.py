@@ -16,6 +16,16 @@ class WidgetDelegate(QtGui.QStyledItemDelegate):
     """
     Convenience wrapper that makes it straight forward to use
     widgets inside of delegates.
+    
+    This class is basically an adapter which lets you connect a 
+    view (QAbstractItemView) with a QWidget of choice. This widget
+    is used to "paint" the view when it is being rendered. 
+    
+    Deriving classes simply implement the _create_widget, 
+    _draw_widget and _configure_widget methods.
+    
+    This class can be used in conjunction with the various widgets found
+    as part of the framework module (for example list_widget and thumb_widget).
     """
 
     def __init__(self, view):

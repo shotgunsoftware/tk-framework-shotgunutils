@@ -15,10 +15,11 @@ from .ui.thumb_widget import Ui_ThumbWidget
 
 class ThumbWidget(QtGui.QWidget):
     """
-    Widget that is used to represent a publish item in the main publish spreadsheet. 
-    It has got three distinct 
+    Thumbnail style widget which contains an image and some 
+    text underneath. The widget scales gracefully.
     
-    
+    This class is typically used in conjunction with a QT View and the 
+    ShotgunDelegate class.     
     """
     def __init__(self, parent):
         QtGui.QWidget.__init__(self, parent)
@@ -93,7 +94,7 @@ class ThumbWidget(QtGui.QWidget):
     def set_thumbnail(self, pixmap):
         """
         Set a thumbnail given the current pixmap.
-        The pixmap must be 512x400 or it will appear squeezed
+        The pixmap must be 512x400 aspect ratio or it will appear squeezed
         """
         self.ui.thumbnail.setPixmap(pixmap)
     
