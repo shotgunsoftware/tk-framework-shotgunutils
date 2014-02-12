@@ -497,7 +497,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
             
         for k in a:
             
-            if "image" in k or "amazonaws" in _to_utf8(a[k]):
+            # seem to have multiple url formats coming back from sg api so need to try to 
+            # catchall time stamps and crypt keys because they keep changing all the time
+            if "image" in k or "amazonaws" in _to_utf8(a[k]) or "AccessKeyId" in _to_utf8(a[k]):
                 # skip thumbnail fields in the comparison - these 
                 # change all the time!
                 continue
