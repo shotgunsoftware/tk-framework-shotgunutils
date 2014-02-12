@@ -39,6 +39,8 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         self._queue_mutex = QtCore.QMutex()
         self._queue = []
         
+        self._process_queue = True
+        
         self._not_found_thumb_path = os.path.join(self._app.disk_location, "resources", "thumb_not_found.png")
         
     ############################################################################################################
@@ -54,6 +56,14 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
             self._queue = []
         finally:
             self._queue_mutex.unlock()
+        
+    def stop(self):
+        """
+        Gracefully stop the thread. Will synchronounsly wait until queue has completed.
+        """
+        self._process_queue = False
+        self._wait_condition.wakeAll()
+        self.wait()
         
     def execute_find(self, entity_type, filters, fields, order = None):    
         """
@@ -90,7 +100,7 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         the id will be populated with a request id (uuid) string and path will
         be None. 
         """
-        
+        return {"path": None, "id": None }
         uid = uuid.uuid4().hex
         path_to_cached_thumb = self._get_thumbnail_path(url)
         
@@ -169,7 +179,8 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         # append the folders
         cache_path_items.extend(new_chunks)
         # and append the file name
-        cache_path_items.append(path_chunks[-1])
+        # all sg thumbs are jpegs so append extension too - some url forms don't have this.
+        cache_path_items.append("%s.jpeg" % path_chunks[-1])
         
         # join up the path
         path_to_cached_thumb = os.path.join(*cache_path_items)
@@ -183,7 +194,7 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
     def run(self):
 
         # keep running until thread is terminated
-        while True:
+        while self._process_queue:
             
             # Step 1. get the next item to process. 
             item_to_process = None

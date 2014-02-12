@@ -71,10 +71,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # first disconnect our worker completely
         self.__sg_data_retriever.work_completed.disconnect( self.__on_worker_signal)
         self.__sg_data_retriever.work_failure.disconnect( self.__on_worker_failure)
-        # hard terminate the queue
-        self.__sg_data_retriever.terminate()
-        # wait for OS to properly shut down on a scheduler level
-        self.__sg_data_retriever.wait()
+        # gracefully stop thread
+        self.__sg_data_retriever.stop()
         # finally totally deallocate it just to make GC happy
         self.__sg_data_retriever = None
     
@@ -260,6 +258,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
         :param entity_type: Shotgun entity type
         :param entity_id: Shotgun entity id 
         """
+        if url is None:
+            return
+        
         data = self.__sg_data_retriever.request_thumbnail(url, entity_type, entity_id, field)
         # data is on two possible forms:
         # {"id": "12321323", "path": None } # thumbnail was requested
@@ -672,7 +673,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
         for field in sg_data.keys():
         
-            if "image" in field:
+            if "image" in field and sg_data[field] is not None:
                 # we have a thumb we are supposed to download!
                 # get the thumbnail - store the unique id we get back from
                 # the data retrieve in a dict for fast lookup later
