@@ -32,7 +32,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
     IS_SG_MODEL_ROLE = QtCore.Qt.UserRole + 2
     SG_ASSOCIATED_FIELD_ROLE = QtCore.Qt.UserRole + 3
 
-    def __init__(self, overlay_parent_widget, download_thumbs):
+    def __init__(self, parent, overlay_parent_widget, download_thumbs):
         """
         Constructor. This will create a model which can later be used to load
         and manage Shotgun data.
@@ -43,7 +43,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                 to download and process thumbnails for the downloaded data.
         
         """
-        QtGui.QStandardItemModel.__init__(self)
+        QtGui.QStandardItemModel.__init__(self, parent)
         
         # set up data fetcher
         self.__sg_data_retriever = ShotgunAsyncDataRetriever(self)
