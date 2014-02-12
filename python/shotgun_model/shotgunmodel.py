@@ -68,7 +68,16 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Call this method prior to destroying this object.
         This will ensure all worker threads etc are stopped.
         """
-        self.__sg_data_retriever.stop()
+        
+        # first disconnect our worker completely
+        self.__sg_data_retriever.work_completed.disconnect( self.__on_worker_signal)
+        self.__sg_data_retriever.work_failure.disconnect( self.__on_worker_failure)
+        # hard terminate the queue
+        self.__sg_data_retriever.terminate()
+        # wait for OS to properly shut down on a scheduler level
+        self.__sg_data_retriever.wait()
+        # finally totally deallocate it just to make GC happy
+        self.__sg_data_retriever = None
     
     def item_from_entity(self, entity_type, entity_id):
         """

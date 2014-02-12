@@ -34,9 +34,7 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         Construction
         """
         QtCore.QThread.__init__(self, parent)
-        
         self._app = tank.platform.current_bundle()
-        self._execute_tasks = True
         self._wait_condition = QtCore.QWaitCondition()
         self._queue_mutex = QtCore.QMutex()
         self._queue = []
@@ -53,14 +51,6 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
             self._queue = []
         finally:
             self._queue_mutex.unlock()
-        
-    def stop(self):
-        """
-        Stops the worker, run this before shutdown
-        """
-        self._execute_tasks = False
-        self._wait_condition.wakeAll()
-        self.wait()        
         
     def execute_find(self, entity_type, filters, fields, order = None):    
         """
@@ -178,8 +168,8 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
     def run(self):
 
         #############################################
-        # keep running until stop() is being called
-        while self._execute_tasks:
+        # keep running until thread is terminated
+        while True:
             
             
             #########################################
@@ -277,9 +267,8 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
                     
                 
             except Exception, e:
-                if self._execute_tasks:
                     self.work_failure.emit(item_to_process["id"], "An error occurred: %s" % e)
             else:
-                if self._execute_tasks and data:
+                if data is not None:
                     self.work_completed.emit(item_to_process["id"], data)
                 
