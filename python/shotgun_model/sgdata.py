@@ -128,10 +128,14 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         CHUNK_LEN = 16
         
         # post process the path
-        # old style result
-        # [ "", "thumbs", "1", "2", "2.jpg"]
-        # s3 result
-        # [u'', u'9902b5f5f336fae2fb248e8a8748fcd9aedd822e', u'be4236b8f198ae84df2366920e7ee327cc0a567e', u'render_0400_t.jpg']
+        # old (pre-S3) style result:
+        # path_chunks: [ "", "thumbs", "1", "2", "2.jpg"]
+        
+        # s3 result, form 1:
+        # path_chunks: [u'', u'9902b5f5f336fae2fb248e8a8748fcd9aedd822e', u'be4236b8f198ae84df2366920e7ee327cc0a567e', u'render_0400_t.jpg']
+        
+        # s3 result, form 2:
+        # path_chunks: [u'', u'thumbnail', u'api_image', u'150']
 
         def _to_chunks(s):
             #split the string 'abcdefghxx' into ['abcdefgh', 'xx']
