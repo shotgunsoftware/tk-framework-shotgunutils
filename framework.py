@@ -10,7 +10,6 @@
 
 """
 Basic Tank Widget Framework
-
 """
 
 import tank

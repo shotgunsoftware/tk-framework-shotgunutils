@@ -14,6 +14,7 @@ import tank
 import uuid
 import sys
 import urlparse
+import tempfile
 import os
 import urllib
 import shutil
@@ -258,23 +259,16 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
                     else:
                         # download from sg
                         url = sg_data[field]
+                        path_to_cached_thumb = self._get_thumbnail_path(url)
+                        self._app.ensure_folder_exists(os.path.dirname(path_to_cached_thumb))
+                        tank.util.download_url(self._app.shotgun, url, path_to_cached_thumb)
+                        # modify the permissions of the file so it's writeable by others
+                        old_umask = os.umask(0)
                         try:
-                            (temp_file, _) = urllib.urlretrieve(url)
-                        except Exception, e:
-                            raise Exception("Could not download data from the url '%s'. Error: %s" % (url, e))
+                            os.chmod(path_to_cached_thumb, 0666)
+                        finally:
+                            os.umask(old_umask)
                 
-                        # now try to cache it
-                        try:
-                            path_to_cached_thumb = self._get_thumbnail_path(url)
-                            self._app.ensure_folder_exists(os.path.dirname(path_to_cached_thumb))
-                            shutil.copy(temp_file, path_to_cached_thumb)
-                            # as a tmp file downloaded by urlretrieve, permissions are super strict
-                            # modify the permissions of the file so it's writeable by others
-                            os.chmod(path_to_cached_thumb, 0666)            
-                        except Exception, e:
-                            raise Exception("Could not cache thumbnail %s in %s. "
-                                            "Error: %s" % (url, path_to_cached_thumb, e))
-                 
                         data = {"thumb_path": path_to_cached_thumb }
                     
                 

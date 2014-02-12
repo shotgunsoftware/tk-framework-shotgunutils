@@ -107,7 +107,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Overloaded version of clear
         """
         QtGui.QStandardItemModel.clear(self)
-        self.__sg_data_retriever.clear()        
+        self.__sg_data_retriever.clear()
         # model data in alt format
         self.__entity_tree_data = {}
         # thumbnail download lookup
