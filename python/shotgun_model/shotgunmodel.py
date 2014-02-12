@@ -68,7 +68,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Call this method prior to destroying this object.
         This will ensure all worker threads etc are stopped.
         """
-        
         # first disconnect our worker completely
         self.__sg_data_retriever.work_completed.disconnect( self.__on_worker_signal)
         self.__sg_data_retriever.work_failure.disconnect( self.__on_worker_failure)
@@ -115,8 +114,14 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         Overloaded version of clear
         """
+        # clear base class model
         QtGui.QStandardItemModel.clear(self)
+        # ask async data retriever to clear its queue
+        # note that there may still be requests actually running
+        # - these are not cancelled
         self.__sg_data_retriever.clear()
+        # we are not looking for any data from the async processor
+        self.__current_work_id = 0
         # model data in alt format
         self.__entity_tree_data = {}
         # thumbnail download lookup
@@ -255,9 +260,21 @@ class ShotgunModel(QtGui.QStandardItemModel):
         :param entity_type: Shotgun entity type
         :param entity_id: Shotgun entity id 
         """
-        uid = self.__sg_data_retriever.request_thumbnail(url, entity_type, entity_id, field)
-        self.__thumb_map[uid] = {"item": item, "field": field }
+        data = self.__sg_data_retriever.request_thumbnail(url, entity_type, entity_id, field)
+        # data is on two possible forms:
+        # {"id": "12321323", "path": None } # thumbnail was requested
+        # {"id": None, "path": "/asdasd" }  # thumbnail exists already
         
+        uid = data.get("id")
+        path = data.get("path")
+        
+        if path:
+            # all done! tell subclassing implementation
+            self._populate_thumbnail(item, field, path)
+        
+        if uid:
+            # keep tabs of this and call out later
+            self.__thumb_map[uid] = {"item": item, "field": field }
         
         
     ########################################################################################

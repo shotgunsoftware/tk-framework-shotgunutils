@@ -19,7 +19,6 @@ import os
 import urllib
 import shutil
 
-
 from tank.platform.qt import QtCore, QtGui
 
 class ShotgunAsyncDataRetriever(QtCore.QThread):
@@ -36,10 +35,14 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         QtCore.QThread.__init__(self, parent)
         self._app = tank.platform.current_bundle()
         self._wait_condition = QtCore.QWaitCondition()
+        
         self._queue_mutex = QtCore.QMutex()
         self._queue = []
         
         self._not_found_thumb_path = os.path.join(self._app.disk_location, "resources", "thumb_not_found.png")
+        
+    ############################################################################################################
+    # Public methods
         
     def clear(self):
         """
@@ -47,14 +50,14 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         """
         self._queue_mutex.lock()
         try:
-            self._app.log_debug("Discarding %s items in sg queue..." % len(self._queue))
+            self._app.log_debug("%s: Clearing queue. %s items discarded." % (self, len(self._queue)))
             self._queue = []
         finally:
             self._queue_mutex.unlock()
         
     def execute_find(self, entity_type, filters, fields, order = None):    
         """
-        Run a shotgun find
+        Requests that a shotgun find query is executed.
         """
         uid = uuid.uuid4().hex
         
@@ -79,33 +82,46 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         
     def request_thumbnail(self, url, entity_type, entity_id, field):
         """
-        Requests a thumbnail. Async call that may return quickly if the 
-        thumbnail is already cached, or may take more time if a download
-        from Shotgun is required.
+        Requests a thumbnail. Returns a dict with {"id": "XXX", "path": "xxx"}
+        If the thumbnail already exists on disk, the path key will be set
+        with a local path to the cached thumbnail. id in this case will be none.
+        
+        In the case the thumbnail does not exist locally, the opposite will happen:
+        the id will be populated with a request id (uuid) string and path will
+        be None. 
         """
-
+        
         uid = uuid.uuid4().hex
+        path_to_cached_thumb = self._get_thumbnail_path(url)
         
-        work = {"id": uid, 
-                "type": "thumbnail", 
-                "url": url,
-                "field": field,
-                "entity_type": entity_type,
-                "entity_id": entity_id }
-        self._queue_mutex.lock()
-        try:
-            # first in the queue - this way thumbnails that already exist
-            # cached on disk will load quickly and downloaded thumbs will
-            # always load as a low priority thing
-            self._queue.insert(0, work)
-        finally:
-            self._queue_mutex.unlock()
+        if os.path.exists(path_to_cached_thumb):
+            # we already have this on disk! Pass it back to the user straight away
+            return {"path": path_to_cached_thumb, "id": None }
             
-        # wake up execution loop!
-        self._wait_condition.wakeAll()
-        
-        return uid
+        else:
+            # no thumb on disk yet! Request that it is cached on disk 
+            work = {"id": uid, 
+                    "type": "thumbnail_download", 
+                    "url": url,
+                    "field": field,
+                    "entity_type": entity_type,
+                    "entity_id": entity_id }
+            self._queue_mutex.lock()
+            try:
+                # last in the queue - so that we process sg queries before thumbs
+                self._queue.append(work)
+            finally:
+                self._queue_mutex.unlock()
+                
+            # wake up execution loop!
+            self._wait_condition.wakeAll()
+            
+            return {"path": None, "id": uid }
 
+    
+    ############################################################################################################
+    # Internal methods
+    
     def _get_thumbnail_path(self, url):
         """
         Returns the location on disk suitable for a thumbnail given its metadata
@@ -122,7 +138,10 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         # path_chunks: [ "", "thumbs", "1", "2", "2.jpg"]
         
         # s3 result, form 1:
-        # path_chunks: [u'', u'9902b5f5f336fae2fb248e8a8748fcd9aedd822e', u'be4236b8f198ae84df2366920e7ee327cc0a567e', u'render_0400_t.jpg']
+        # path_chunks: [u'', 
+        #               u'9902b5f5f336fae2fb248e8a8748fcd9aedd822e', 
+        #               u'be4236b8f198ae84df2366920e7ee327cc0a567e', 
+        #               u'render_0400_t.jpg']
         
         # s3 result, form 2:
         # path_chunks: [u'', u'thumbnail', u'api_image', u'150']
@@ -158,21 +177,14 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         return path_to_cached_thumb
     
 
-
-
     ############################################################################################
-    # async stuff
-
-
-
+    # main thread loop
+    
     def run(self):
 
-        #############################################
         # keep running until thread is terminated
         while True:
             
-            
-            #########################################
             # Step 1. get the next item to process. 
             item_to_process = None
             self._queue_mutex.lock()
@@ -193,9 +205,6 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
             finally:
                 self._queue_mutex.unlock()
 
-
-
-            ##############################################
             # Step 2. Process next item and send signals. 
             data = None
             try:
@@ -208,31 +217,6 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
                                                   item_to_process["order"])
                     # need to wrap it in a dict not to confuse pyqts signals and type system
                     data = {"sg": sg}
-                
-                elif item_to_process["type"] == "thumbnail":
-                    
-                    url = item_to_process["url"]                    
-                    path_to_cached_thumb = self._get_thumbnail_path(url)
-                    
-                    if not os.path.exists(path_to_cached_thumb):
-                        # no cached thumb yet. Re-queue this task, this time
-                        # at the back of the queue (the slow end of the queue)
-                        # give it a new status to indicate that we should download
-                        item_to_process["type"] = "thumbnail_download"
-                        self._queue_mutex.lock()
-                        try:
-                            # back of the queue
-                            self._queue.append(item_to_process)
-                        finally:
-                            self._queue_mutex.unlock()
-                            
-                        # note that we are not setting the data variable to anything here,
-                        # so no signal will be sent.
-                        
-                    else:
-                        # we have a path on disk!
-                        data = {"thumb_path": path_to_cached_thumb }
-                
                 
                 elif item_to_process["type"] == "thumbnail_download":
                     
@@ -264,11 +248,14 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
                             os.umask(old_umask)
                 
                         data = {"thumb_path": path_to_cached_thumb }
+                
+                else:
+                    raise Exception("Unknown task type!")
                     
                 
             except Exception, e:
-                    self.work_failure.emit(item_to_process["id"], "An error occurred: %s" % e)
+                self.work_failure.emit(item_to_process["id"], "An error occurred: %s" % e)
+                
             else:
-                if data is not None:
-                    self.work_completed.emit(item_to_process["id"], data)
+                self.work_completed.emit(item_to_process["id"], data)
                 
