@@ -676,11 +676,25 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # we have a thumb we are supposed to download!
                 # get the thumbnail - store the unique id we get back from
                 # the data retrieve in a dict for fast lookup later
-                uid = self.__sg_data_retriever.request_thumbnail(sg_data[field], 
+                data = self.__sg_data_retriever.request_thumbnail(sg_data[field], 
                                                                   sg_data["type"], 
                                                                   sg_data["id"],
                                                                   field)
-                self.__thumb_map[uid] = {"item": item, "field": field }
+                
+                # data is on two possible forms:
+                # {"id": "12321323", "path": None } # thumbnail was requested
+                # {"id": None, "path": "/asdasd" }  # thumbnail exists already
+                
+                uid = data.get("id")
+                path = data.get("path")
+                
+                if path:
+                    # all done! tell subclassing implementation
+                    self._populate_thumbnail(item, field, path)
+                
+                if uid:
+                    # keep tabs of this and call out later
+                    self.__thumb_map[uid] = {"item": item, "field": field }
             
     
     def __rebuild_whole_tree_from_sg_data(self, data):
