@@ -25,6 +25,10 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
     """
     Background worker class
     """    
+    
+    # async task types
+    THUMB_CHECK, SG_FIND_QUERY, THUMB_DOWNLOAD = range(3)
+    
     work_completed = QtCore.Signal(str, dict)
     work_failure = QtCore.Signal(str, str)
     
@@ -37,7 +41,10 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         self._wait_condition = QtCore.QWaitCondition()
         
         self._queue_mutex = QtCore.QMutex()
-        self._queue = []
+        
+        self._thumb_download_queue = []
+        self._sg_find_queue = []
+        self._thumb_check_queue = []
         
         self._process_queue = True
         
@@ -52,8 +59,14 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         """
         self._queue_mutex.lock()
         try:
-            self._app.log_debug("%s: Clearing queue. %s items discarded." % (self, len(self._queue)))
-            self._queue = []
+            self._app.log_debug("%s: Clearing queue. Discarded items: SG api requests: [%s] Thumb checks: [%s] "
+                                "Thumb downloads: [%s]" % (self, 
+                                                           len(self._sg_find_queue), 
+                                                           len(self._thumb_check_queue), 
+                                                           len(self._thumb_download_queue) ))
+            self._thumb_download_queue = []
+            self._sg_find_queue = []
+            self._thumb_check_queue = []
         finally:
             self._queue_mutex.unlock()
         
@@ -72,15 +85,13 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         uid = uuid.uuid4().hex
         
         work = {"id": uid, 
-                "type": "find", 
                 "entity_type": entity_type, 
                 "filters": filters, 
                 "fields": fields,
                 "order": order }
         self._queue_mutex.lock()
         try:
-            # first in the queue
-            self._queue.insert(0, work)
+            self._sg_find_queue.append(work)
         finally:
             self._queue_mutex.unlock()
             
@@ -92,41 +103,25 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         
     def request_thumbnail(self, url, entity_type, entity_id, field):
         """
-        Requests a thumbnail. Returns a dict with {"id": "XXX", "path": "xxx"}
-        If the thumbnail already exists on disk, the path key will be set
-        with a local path to the cached thumbnail. id in this case will be none.
-        
-        In the case the thumbnail does not exist locally, the opposite will happen:
-        the id will be populated with a request id (uuid) string and path will
-        be None. 
+        Requests a thumbnail. Returns a uid representing the async request. 
         """
-        
         uid = uuid.uuid4().hex
-        path_to_cached_thumb = self._get_thumbnail_path(url)
+
+        work = {"id": uid, 
+                "url": url,
+                "field": field,
+                "entity_type": entity_type,
+                "entity_id": entity_id }
+        self._queue_mutex.lock()
+        try:
+            self._thumb_check_queue.append(work)
+        finally:
+            self._queue_mutex.unlock()
+            
+        # wake up execution loop!
+        self._wait_condition.wakeAll()
         
-        if os.path.exists(path_to_cached_thumb):
-            # we already have this on disk! Pass it back to the user straight away
-            return {"path": path_to_cached_thumb, "id": None }
-            
-        else:
-            # no thumb on disk yet! Request that it is cached on disk 
-            work = {"id": uid, 
-                    "type": "thumbnail_download", 
-                    "url": url,
-                    "field": field,
-                    "entity_type": entity_type,
-                    "entity_id": entity_id }
-            self._queue_mutex.lock()
-            try:
-                # last in the queue - so that we process sg queries before thumbs
-                self._queue.append(work)
-            finally:
-                self._queue_mutex.unlock()
-                
-            # wake up execution loop!
-            self._wait_condition.wakeAll()
-            
-            return {"path": None, "id": uid }
+        return uid
 
     
     ############################################################################################################
@@ -197,42 +192,74 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         while self._process_queue:
             
             # Step 1. get the next item to process. 
+            # We check things in the following priority order:
+            # - If there is anything in the thumb check queue, do that first
+            # - Then check sg queue
+            # - Lastly, check thumb downloads 
             item_to_process = None
+            item_type = None
             self._queue_mutex.lock()
             try:
-                if len(self._queue) == 0:
+                
+                if len(self._thumb_check_queue) > 0:
+                    item_to_process = self._thumb_check_queue.pop(0)
+                    item_type = ShotgunAsyncDataRetriever.THUMB_CHECK
                     
+                elif len(self._sg_find_queue) > 0:
+                    item_to_process = self._sg_find_queue.pop(0)
+                    item_type = ShotgunAsyncDataRetriever.SG_FIND_QUERY
+                    
+                elif len(self._thumb_download_queue) > 0:
+                    item_to_process = self._thumb_download_queue.pop(0)
+                    item_type = ShotgunAsyncDataRetriever.THUMB_DOWNLOAD
+                    
+                else:
+                    # no work to be done!                
                     # wait for some more work - this unlocks the mutex
                     # until the wait condition is signalled where it
                     # will then attempt to obtain a lock before returning
                     self._wait_condition.wait(self._queue_mutex)
-                    
-                    if len(self._queue) == 0:
-                        # still nothing in the queue!
-                        continue
+                    # once the wait condition is triggered (usually by something 
+                    # inserted into one of the queues), trigger the check to happen again
+                    continue
                 
-                # take the first item in the queue
-                item_to_process = self._queue.pop(0)
             finally:
                 self._queue_mutex.unlock()
 
-            # Step 2. Process next item and send signals. 
-            data = None
+            # Step 2. Process next item and send signals.
             try:
+                
                 # process the item:
-                if item_to_process["type"] == "find":
-                    
+                
+                if item_type == ShotgunAsyncDataRetriever.SG_FIND_QUERY:
+                    # get stuff from shotgun
                     sg = self._app.shotgun.find(item_to_process["entity_type"],
                                                   item_to_process["filters"],
                                                   item_to_process["fields"],
                                                   item_to_process["order"])
-                    # need to wrap it in a dict not to confuse pyqts signals and type system
-                    data = {"sg": sg}
+                    # need to wrap it in a dict not to confuse pyqt's signals and type system
+                    self.work_completed.emit(item_to_process["id"], {"sg": sg } )
                 
-                elif item_to_process["type"] == "thumbnail_download":
-                    
+                
+                elif item_type == ShotgunAsyncDataRetriever.THUMB_CHECK:
+                    # check if a thumbnail exists on disk. If not, fall back onto
+                    # a thumbnail download from shotgun/s3
+                    url = item_to_process["url"]
+                    path_to_cached_thumb = self._get_thumbnail_path(url)
+                    if os.path.exists(path_to_cached_thumb):
+                        # thumbnail already here! yay!
+                        self.work_completed.emit(item_to_process["id"], {"thumb_path": path_to_cached_thumb} )
+                    else:
+                        # no thumb here. Stick the data into the thumb download queue to request download
+                        self._queue_mutex.lock()
+                        try:
+                            self._thumb_download_queue.append(item_to_process)
+                        finally:
+                            self._queue_mutex.unlock()
+                
+                elif item_type == ShotgunAsyncDataRetriever.THUMB_DOWNLOAD:
                     # download the actual thumbnail. Because of S3, the url
-                    # has most likely expired, so need to re-fetch it.
+                    # has most likely expired, so need to re-fetch it via a sg find
                     entity_id = item_to_process["entity_id"]
                     entity_type = item_to_process["entity_type"]
                     field = item_to_process["field"]
@@ -242,8 +269,9 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
                                                          [field])
                     
                     if sg_data is None or sg_data.get(field) is None:
-                        # no thumbnail!
-                        data = {"thumb_path": self._not_found_thumb_path }
+                        # no thumbnail! This is possible if the thumb has changed
+                        # while we were queueing it for download
+                        self.work_completed.emit(item_to_process["id"], {"thumb_path": self._not_found_thumb_path} )
                     
                     else:
                         # download from sg
@@ -257,8 +285,9 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
                             os.chmod(path_to_cached_thumb, 0666)
                         finally:
                             os.umask(old_umask)
-                
-                        data = {"thumb_path": path_to_cached_thumb }
+                        
+                        self.work_completed.emit(item_to_process["id"], {"thumb_path": path_to_cached_thumb} )
+                        
                 
                 else:
                     raise Exception("Unknown task type!")
@@ -267,6 +296,4 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
             except Exception, e:
                 self.work_failure.emit(item_to_process["id"], "An error occurred: %s" % e)
                 
-            else:
-                self.work_completed.emit(item_to_process["id"], data)
                 
