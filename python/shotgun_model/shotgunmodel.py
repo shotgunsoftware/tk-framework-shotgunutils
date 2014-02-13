@@ -425,10 +425,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
             added_ids = ids_from_shotgun.difference(ids_in_tree)
 
             if len(removed_ids) > 0:
-                self.__app.log_debug("Detected deleted items %s. Taking out of tree..." % removed_ids)
-                for removed_id in removed_ids:
-                    item = self.item_from_entity(self.__entity_type, removed_id)                
-                    self.__remove_sg_item_from_tree(item, removed_id)
+                self.__app.log_debug("Detected deleted items %s. Rebuilding tree..." % removed_ids)
+                self.__rebuild_whole_tree_from_sg_data(sg_data)
                 self.__app.log_debug("...done!")
                 modifications_made = True
                 
