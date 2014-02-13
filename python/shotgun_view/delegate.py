@@ -38,6 +38,9 @@ class WidgetDelegate(QtGui.QStyledItemDelegate):
         
         # tracks the currently active cell
         self.__current_editor_index = None    
+        
+        # help the GC
+        self.__editors = []
                 
         self.__selection_model = self.__view.selectionModel()
         if self.__selection_model:
@@ -83,6 +86,7 @@ class WidgetDelegate(QtGui.QStyledItemDelegate):
         
         """
         w = self._create_widget(parent_widget)
+        self.__editors.append(w)
         self._on_before_selection(w, model_index, style_options)
         return w
         
