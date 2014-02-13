@@ -20,10 +20,7 @@ class WidgetDelegate(QtGui.QStyledItemDelegate):
     This class is basically an adapter which lets you connect a 
     view (QAbstractItemView) with a QWidget of choice. This widget
     is used to "paint" the view when it is being rendered. 
-    
-    Deriving classes simply implement the _create_widget, 
-    _draw_widget and _configure_widget methods.
-    
+        
     This class can be used in conjunction with the various widgets found
     as part of the framework module (for example list_widget and thumb_widget).
     """
@@ -33,52 +30,68 @@ class WidgetDelegate(QtGui.QStyledItemDelegate):
         Constructor
         """
         QtGui.QStyledItemDelegate.__init__(self, view)
-        self._view = view        
+        self.__view = view        
         
         # set up the widget instance we will use 
         # when 'painting' large number of cells 
-        self._paint_widget = self._create_widget(view)
+        self.__paint_widget = self._create_widget(view)
         
         # tracks the currently active cell
-        self._current_editor_index = None    
-        self._current_widget = None
-        
-        # when mouse enters into a cell
-        self._view.clicked.connect( self._on_cell_clicked )
+        self.__current_editor_index = None    
                 
-    def _on_cell_clicked(self, model_index):
+        self.__selection_model = self.__view.selectionModel()
+        if self.__selection_model:
+            # note! Need to have a model connected to the view in order
+            # to have a selection model.
+            self.__selection_model.selectionChanged.connect(self._on_publish_selection)
+        
+    ########################################################################################
+    # private methods
+        
+    def _on_publish_selection(self, selected, deselected):
         """
-        Event handler called whenever the mouse enters into a cell
+        Signal triggered when someone changes the selection in the view
         """
-        if self._current_editor_index:
-            self._view.closePersistentEditor(self._current_editor_index)
-            self._current_editor_index = None
-            self._current_widget = None
+        # clean up        
+        if self.__current_editor_index:
+            self.__view.closePersistentEditor(self.__current_editor_index)
+            self.__current_editor_index = None
         
-        # select it in the view
-        self._view.selectionModel().select(model_index, QtGui.QItemSelectionModel.ClearAndSelect)
+        selected_indexes = selected.indexes()
         
-        # create an editor widget that we use for the selected item
-        self._current_editor_index = model_index
-        self._view.openPersistentEditor(model_index)
-        
+        if len(selected_indexes) > 0:
+            # get the currently selected model index
+            model_index = selected_indexes[0]
+            # create an editor widget that we use for the selected item
+            self.__current_editor_index = model_index
+            # this will trigger the call to createEditor
+            self.__view.openPersistentEditor(model_index)        
+
     def createEditor(self, parent_widget, style_options, model_index):
         """
-        Subclassed implementation which is typically called from
-        the delegate framework whenever the mouse enters a cell
-        """        
-        # create a new widget for this since it will persist
-        widget = self._create_widget(parent_widget)
-        self._current_widget = widget
-        # and let the subclass implemenation set up its hover state
-        self._configure_widget(widget, model_index, style_options)
-        return widget
+        Subclassed implementation from QStyledItemDelegate which is
+        called when an "editor" is set up - the editor is set up 
+        via the openPersistentEditor call and is created upon selection
+        of an item.
         
+        Normally, for performance, when we draw hundreds of grid cells, 
+        we use the same Qwidget as a brush and simply use it to paint.
+        
+        For the currently selected cell however, we need to be able to interact
+        with the widget (e.g. click a button for example) and therefore we need
+        to have a real widget for this. The widget  
+        
+        """
+        w = self._create_widget(parent_widget)
+        self._on_before_selection(w, model_index, style_options)
+        return w
         
     def updateEditorGeometry(self, editor_widget, style_options, model_index):        
         """
         Subclassed implementation which is typically called 
-        whenever a hover/editor widget is set up and needs resizing
+        whenever a editor widget is set up and needs resizing.
+        This happens immediately after creation and also for example
+        if the grid element size is changing.
         """
         editor_widget.resize(style_options.rect.size())
         editor_widget.move(style_options.rect.topLeft())
@@ -87,22 +100,21 @@ class WidgetDelegate(QtGui.QStyledItemDelegate):
         """
         Paint method to handle all cells that are not being currently edited.
         """        
-        if model_index == self._current_editor_index and self._current_widget is not None:
-            
-            self._draw_widget(self._current_widget, model_index, style_options)
-        
-        else:
+        if model_index != self.__current_editor_index:
+
             # for performance reasons, we are not creating a widget every time
             # but merely moving the same widget around. 
-            self._draw_widget(self._paint_widget, model_index, style_options)
+            # first call out to have the widget set the right values
+            self._on_before_paint(self.__paint_widget, model_index, style_options)
                     
+            # now paint!
             painter.save()
-            self._paint_widget.resize(style_options.rect.size())
+            self.__paint_widget.resize(style_options.rect.size())
             painter.translate(style_options.rect.topLeft())
             # note that we set the render flags NOT to render the background of the widget
             # this makes it consistent with the way the editor widget is mounted inside 
             # each element upon hover.
-            self._paint_widget.render(painter, 
+            self.__paint_widget.render(painter, 
                                       QtCore.QPoint(0,0), 
                                       renderFlags=QtGui.QWidget.DrawChildren)
             painter.restore()
@@ -114,26 +126,26 @@ class WidgetDelegate(QtGui.QStyledItemDelegate):
         """
         This needs to be implemented by any deriving classes.
         
-        Should return a widget that will be used both for editing and displaying a view cell
+        Should return a QWidget that will be used when normal grid cells are drawn by the delegate.
+        Prior to drawing a grid cell, the _before_draw_widget method is called.
         """
         raise NotImplementedError
     
-    def _draw_widget(self, widget, model_index, style_options):
+    def _on_before_paint(self, widget, model_index, style_options):
         """
         This needs to be implemented by any deriving classes.
         
-        Callback that is called whenever the delegate needs the widget to draw itself
-        with a particular set of model data, in this case for viewing.
+        This is called just before a cell is painted. This method should configure values
+        on the widget (such as labels, thumbnails etc) based on the data contained
+        in the model index parameter which is being passed.
         """
         raise NotImplementedError
             
-    def _configure_widget(self, widget, model_index, style_options):
+    def _on_before_selection(self, widget, model_index, style_options):
         """
         This needs to be implemented by any deriving classes.
-        
-        Callback that is called whenever the delegate needs the widget to configure itself
-        with a particular set of model data. This method is typically called when a widget
-        is initialized for editing.
+    
+        This method is being called every time an editor is being fired up.
         """
         raise NotImplementedError
             
