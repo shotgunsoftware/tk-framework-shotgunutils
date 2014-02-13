@@ -100,7 +100,7 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         the id will be populated with a request id (uuid) string and path will
         be None. 
         """
-        return {"path": None, "id": None }
+        
         uid = uuid.uuid4().hex
         path_to_cached_thumb = self._get_thumbnail_path(url)
         
