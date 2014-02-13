@@ -127,7 +127,7 @@ class ResizeEventFilter(QtCore.QObject):
     """
     resized = QtCore.Signal()
 
-    def eventFilter(self,  obj,  event):
+    def eventFilter(self, obj, event):
         # peek at the message
         if event.type() == QtCore.QEvent.Resize:
             # re-broadcast any resize events
