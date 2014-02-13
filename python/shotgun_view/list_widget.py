@@ -35,6 +35,7 @@ class ListWidget(QtGui.QWidget):
         self._menu = QtGui.QMenu()   
         self._actions = []             
         self.ui.button.setMenu(self._menu)
+        self.ui.button.setVisible(False)
         
     def set_actions(self, actions):
         """
