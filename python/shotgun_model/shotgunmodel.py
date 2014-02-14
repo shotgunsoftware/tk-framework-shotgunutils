@@ -49,12 +49,15 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__sg_data_retriever = ShotgunAsyncDataRetriever(self)
         self.__sg_data_retriever.work_completed.connect( self.__on_worker_signal)
         self.__sg_data_retriever.work_failure.connect( self.__on_worker_failure)
-        # start worker
+        self.__current_work_id = 0
+        # and start its thread!
         self.__sg_data_retriever.start()
         
         self.__overlay = OverlayWidget(overlay_parent_widget)
         
-        self.__current_work_id = 0
+        self.__all_tree_items = []
+        self.__entity_tree_data = {}
+        self.__thumb_map = {}
         
         self.__download_thumbs = download_thumbs
         
@@ -108,12 +111,13 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         return self.__entity_type
          
-    def clear(self):
+    def _reset_all_data(self):
         """
-        Overloaded version of clear
+        Deletes all the contents of the model. 
+        Very similar to the clear() method, however it
+        seems clear does not work properly on pyside so 
+        we are avoiding that method.
         """
-        # clear base class model
-        QtGui.QStandardItemModel.clear(self)
         # ask async data retriever to clear its queue
         # note that there may still be requests actually running
         # - these are not cancelled
@@ -127,6 +131,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # pyside will crash unless we actively hold a reference
         # to all items that we create.
         self.__all_tree_items = []
+
+        # remove all data in the underyling internal data storage
+        self.invisibleRootItem().removeRows(0,self.rowCount())
+        
         
 
     ########################################################################################
@@ -156,7 +164,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
                           the _refresh_data() method is being executed.
         :param order:     Order clause for the Shotgun data. Standard Shotgun API syntax.
         """
-        self.clear()
+        
+        # clear out old data
+        self._reset_all_data()
+        
         self.__overlay.hide()
         self.__entity_type = entity_type
         self.__filters = filters
@@ -379,7 +390,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             thumbnail_path = data["thumb_path"]
             
             item = self.__thumb_map[uid]["item"]
-            sg_field = self.__thumb_map[uid]["sg_field"]
+            sg_field = self.__thumb_map[uid]["field"]
             
             # call our deriving class implementation
             self._populate_thumbnail(item, sg_field, thumbnail_path)
@@ -519,42 +530,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         return True
 
-    def __remove_sg_item_from_tree(self, item, shotgun_id):
-        """
-        Remove a single item from the tree.
-        """
-        item_row = item.row()
-        parent = item.parent()
-
-        # make sure we are not letting go of this object just yet
-        # that causes the GC to go crazy...
-        self.__all_tree_items.append(item)
-        
-        # remove from lookup dict
-        del self.__entity_tree_data[ shotgun_id ]
-
-        # remove item from model
-        parent.takeRow(item_row)
-        
-        # now check if parent does not have any children, remove parent
-        curr_node = parent
-        done = False
-        while not done:
-            if curr_node.hasChildren():
-                done = True
-            else:
-                # parent does not have children!
-                # delete parent.
-                row = curr_node.row()
-                self.__all_tree_items.append(curr_node)
-                curr_node = curr_node.parent()
-                if curr_node is None:
-                    self.invisibleRootItem().takeRow(row)
-                    done = True
-                else:
-                    curr_node.takeRow(row)
-    
-    
     def __add_sg_item_to_tree(self, sg_item):
         """
         Add a single item to the tree.
@@ -669,9 +644,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Clears the tree and rebuilds it from the given shotgun data.
         Note that any selection and expansion states in the view will be lost.
         """
-        self.clear()
-        self.__entity_tree_data = {}
-        self.__all_tree_items = []
+        self._reset_all_data()
         
         # get any external payload from deriving classes
         self._load_external_data()
