@@ -12,6 +12,8 @@ import tank
 import copy
 import os
 import hashlib
+import datetime
+import time
 import tempfile
 from .overlaywidget import OverlayWidget
 from .sgdata import ShotgunAsyncDataRetriever
@@ -401,6 +403,20 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         Signaled whenever the worker completes something
         """
+        
+        # QT is struggling to handle the special timezone class that the shotgun API returns.
+        # in fact, on linux it is struggling to serialize any complex object via QDataStream.
+        #
+        # Convert time stamps to unix time. Note that we lose any time zone qualifications by
+        # by doing this - it is the the receiver's resposibility to handle this data correctly.
+        # generally speaking, local timezone objects are returned by shotgun by default and 
+        # this is how toolkit also initializes any shotgun connection it is making.
+                
+        for idx in range(len(sg_data)):
+            for k in sg_data[idx]:
+                if isinstance(sg_data[idx][k], datetime.datetime):
+                    # convert to unix timestamp, local time zone
+                    sg_data[idx][k] = time.mktime(sg_data[idx][k].timetuple())
         
         modifications_made = False
         
