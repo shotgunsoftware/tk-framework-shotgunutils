@@ -20,7 +20,7 @@ from tank.platform.qt import QtCore, QtGui
 
 # just so we can do some basic file validation
 FILE_MAGIC_NUMBER = 0xDEADBEEF # so we can validate file format correctness before loading
-FILE_VERSION = 8               # if we ever change the file format structure
+FILE_VERSION = 9               # if we ever change the file format structure
 
 
 class ShotgunModel(QtGui.QStandardItemModel):
@@ -133,6 +133,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__all_tree_items = []
 
         # remove all data in the underyling internal data storage
+        # note that we don't use clear() here since that causing
+        # crashing on nuke/pyside
         self.invisibleRootItem().removeRows(0,self.rowCount())
         
         
@@ -486,6 +488,28 @@ class ShotgunModel(QtGui.QStandardItemModel):
     ########################################################################################
     # shotgun data processing and tree building
     
+    def __utf8_to_unicode(self, sg_data):
+        """
+        Converts all strings values in this sg dictionary to unicode:
+        
+        in:  {"a":"aaa", "b": 123, "c": {"x":"y", "z":"aa"}, "d": [ {"x":"y", "z":"aa"} ] }
+        out: {'a': u'aaa', 'c': {'x': u'y', 'z': u'aa'}, 'b': 123, 'd': [{'x': u'y', 'z': u'aa'}]}
+        """
+        new_sg_data = {}
+        for x in sg_data:
+            val = sg_data[x]
+            if isinstance(val, list):
+                new_sg_data[x] = [ self.__utf8_to_unicode(d) for d in val ]
+            elif isinstance(val, dict):
+                new_sg_data[x] = self.__utf8_to_unicode(val)
+            elif isinstance(val, str):
+                new_sg_data[x] = val.decode("UTF-8")
+            else:
+                new_sg_data[x] = val
+        return new_sg_data
+                
+    
+    
     def __sg_compare_data(self, a, b):
         """
         Compare two sg dicts:
@@ -590,7 +614,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
             if on_leaf_level:                
                 # this is the leaf level!
                 # attach the shotgun data so that we can access it later
-                found_item.setData(sg_item, ShotgunModel.SG_DATA_ROLE)
+                # note: QT automatically changes everything to be unicode
+                # according to strange rules of its own, so force convert
+                # all shotgun values to be proper unicode prior to setData
+                found_item.setData(self.__utf8_to_unicode(sg_item), ShotgunModel.SG_DATA_ROLE)
                 
                 
                 # set the default thumbnail
@@ -720,7 +747,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 
                 # this is the leaf level
                 # attach the shotgun data so that we can access it later
-                item.setData(sg_item, ShotgunModel.SG_DATA_ROLE)
+                # note - pyqt converts everything automatically to unicode,
+                # but using somewhat strange rules, so properly convert
+                # values to unicode prior to insertion
+                item.setData(self.__utf8_to_unicode(sg_item), ShotgunModel.SG_DATA_ROLE)
 
                 # set the default thumbnail
                 self._populate_default_thumbnail(item)
@@ -771,7 +801,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
             
     def __sg_field_value_to_str(self, value):
         """
-        Turns a shotgun value to a string.
+        Turns a shotgun value to a string. This method receives values
+        that are coming straight from the Shotgun API so they are 
+        string based and not unicode based.
         """
         if isinstance(value, dict) and "name" in value:
             # linked fields
