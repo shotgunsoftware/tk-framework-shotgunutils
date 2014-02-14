@@ -377,22 +377,13 @@ class ShotgunModel(QtGui.QStandardItemModel):
         elif uid in self.__thumb_map:
             # a thumbnail is now present on disk!
             thumbnail_path = data["thumb_path"]
-            self.__update_thumbnail(uid, thumbnail_path)
-    
-
-    def __update_thumbnail(self, thumb_uid, path):
-        """
-        Set the thumbnail for an item in the model
-        """
-        # this is a thumbnail that has been fetched!
-        # update the publish icon based on this.
-        
-        d = self.__thumb_map[thumb_uid]
-        
-        # call deriving class implementation
-        self._populate_thumbnail(d["item"], d["field"], path)        
-
-
+            
+            item = self.__thumb_map[uid]["item"]
+            sg_field = self.__thumb_map[uid]["sg_field"]
+            
+            # call our deriving class implementation
+            self._populate_thumbnail(item, sg_field, thumbnail_path)
+            
     def __on_sg_data_arrived(self, sg_data):
         """
         Signaled whenever the worker completes something
