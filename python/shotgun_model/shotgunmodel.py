@@ -22,7 +22,7 @@ from tank.platform.qt import QtCore, QtGui
 
 # just so we can do some basic file validation
 FILE_MAGIC_NUMBER = 0xDEADBEEF # so we can validate file format correctness before loading
-FILE_VERSION = 9               # if we ever change the file format structure
+FILE_VERSION = 10               # if we ever change the file format structure
 
 
 class ShotgunModel(QtGui.QStandardItemModel):
