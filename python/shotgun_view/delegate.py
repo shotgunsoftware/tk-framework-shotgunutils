@@ -23,6 +23,13 @@ class WidgetDelegate(QtGui.QStyledItemDelegate):
         
     This class can be used in conjunction with the various widgets found
     as part of the framework module (for example list_widget and thumb_widget).
+    
+    You use this class by subclassing it and implementing the three methods
+    _create_widget(), _on_before_paint(), _on_before_selection() and sizeHint().
+    
+    Note! In order for this class to handle selection correctly, it needs to be 
+    attached to the view *after* the model has been attached. (This is to ensure that it 
+    is able to obtain the view's selection model correctly.)
     """
 
     def __init__(self, view):
@@ -49,11 +56,11 @@ class WidgetDelegate(QtGui.QStyledItemDelegate):
             self.__selection_model.selectionChanged.connect(self._on_publish_selection)
         
     ########################################################################################
-    # private methods
+    # 'private' methods that are not meant to be subclassed or called by a deriving class.
         
     def _on_publish_selection(self, selected, deselected):
         """
-        Signal triggered when someone changes the selection in the view
+        Signal triggered when someone changes the selection in the view.
         """
         # clean up        
         if self.__current_editor_index:
@@ -83,7 +90,6 @@ class WidgetDelegate(QtGui.QStyledItemDelegate):
         For the currently selected cell however, we need to be able to interact
         with the widget (e.g. click a button for example) and therefore we need
         to have a real widget for this. The widget  
-        
         """
         w = self._create_widget(parent_widget)
         self.__editors.append(w)
@@ -129,9 +135,10 @@ class WidgetDelegate(QtGui.QStyledItemDelegate):
     def _create_widget(self, parent):
         """
         This needs to be implemented by any deriving classes.
+        Should return a QWidget that will be used when grid cells are drawn.
         
-        Should return a QWidget that will be used when normal grid cells are drawn by the delegate.
-        Prior to drawing a grid cell, the _before_draw_widget method is called.
+        :param parent: QWidget to parent the widget to
+        :returns: QWidget that will be used to paint grid cells in the view. 
         """
         raise NotImplementedError
     
@@ -142,6 +149,14 @@ class WidgetDelegate(QtGui.QStyledItemDelegate):
         This is called just before a cell is painted. This method should configure values
         on the widget (such as labels, thumbnails etc) based on the data contained
         in the model index parameter which is being passed.
+        
+        :param widget: The QWidget (constructed in _create_widget()) which will 
+                       be used to paint the cell. 
+        :param model_index: QModelIndex object representing the data of the object that is 
+                            about to be drawn.
+        :param style_options: QStyleOptionViewItem object containing specifics about the 
+                              view related state of the cell.
+        
         """
         raise NotImplementedError
             
@@ -149,7 +164,16 @@ class WidgetDelegate(QtGui.QStyledItemDelegate):
         """
         This needs to be implemented by any deriving classes.
     
-        This method is being called every time an editor is being fired up.
+        This method is called just before a cell is selected. This method should 
+        configure values on the widget (such as labels, thumbnails etc) based on the 
+        data contained in the model index parameter which is being passed.
+        
+        :param widget: The QWidget (constructed in _create_widget()) which will 
+                       be used to paint the cell. 
+        :param model_index: QModelIndex object representing the data of the object that is 
+                            about to be drawn.
+        :param style_options: QStyleOptionViewItem object containing specifics about the 
+                              view related state of the cell.
         """
         raise NotImplementedError
             
