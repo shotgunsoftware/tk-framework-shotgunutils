@@ -8,31 +8,27 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-
 from tank.platform.qt import QtCore, QtGui
 
 # load resources
 from .ui import resources_rc
 
-class ResizeEventFilter(QtCore.QObject):
-    """
-    Event filter which emits a resized signal whenever
-    the monitored widget resizes
-    """
-    resized = QtCore.Signal()
-
-    def eventFilter(self,  obj,  event):
-        # peek at the message
-        if event.type() == QtCore.QEvent.Resize:
-            # re-broadcast any resize events
-            self.resized.emit()
-        # pass it on!
-        return False
-
-
 class OverlayWidget(QtGui.QWidget):
     """
-    Overlay widget that can be placed on top over any other widget.
+    This class is part of the internals of the Shotgun Utils framework and 
+    should not be used directly.
+    
+    Overlay widget that can be placed on top over any other widget. 
+    This is used by the Shotgun model to indicate when data is being loaded in;
+    Whenever data is fetched, the overlay widget is added on top of the specified
+    QWidget so that the model can gracefully indicate that data is being fetched.
+    
+    The caller does not need to worry about anything - all they need to do is 
+    to pass a widget to the model constructor and this widget will get the overlay
+    added on top. (This widget is typically, not does not have to be, the associated view).  
+
+    The overlay is also used by the model to report any errors that may occur as part 
+    of data management.
     """
     
     MODE_OFF = 0
@@ -41,8 +37,10 @@ class OverlayWidget(QtGui.QWidget):
     MODE_INFO_TEXT = 3
     MODE_INFO_PIXMAP = 4
     
-    
     def __init__(self, parent=None):
+        """
+        Constructor
+        """
         
         QtGui.QWidget.__init__(self, parent)
         
@@ -73,14 +71,15 @@ class OverlayWidget(QtGui.QWidget):
  
     def _on_parent_resized(self):
         """
-        When parent is resized, resize the overlay
+        Special slot hooked up to the event filter.
+        When associated widget is resized this slot is being called.
         """
+        # resize overlay
         self.resize(self._parent.size())
- 
     
     def on_animation(self):
         """
-        Spinner callback
+        Spinner async callback to help animate the progress spinner.
         """
         self._spin_angle += 1
         if self._spin_angle == 90:
@@ -89,7 +88,7 @@ class OverlayWidget(QtGui.QWidget):
  
     def paintEvent(self, event):
         """
-        Render the UI
+        Render the UI.
         """
         if self._mode == OverlayWidget.MODE_OFF:
             return
@@ -106,8 +105,8 @@ class OverlayWidget(QtGui.QWidget):
 
             # now draw different things depending on mode
             if self._mode == OverlayWidget.MODE_SPIN:
-                # show the spinner
                 
+                # show the spinner
                 painter.translate((painter.device().width() / 2) - 40, 
                                   (painter.device().height() / 2) - 40)
                 
@@ -200,4 +199,21 @@ class OverlayWidget(QtGui.QWidget):
         self._mode = OverlayWidget.MODE_OFF
         self.setVisible(False)
  
+        
+        
+class ResizeEventFilter(QtCore.QObject):
+    """
+    Event filter which emits a resized signal whenever
+    the monitored widget resizes. This is so that the overlay wrapper
+    class can be informed whenever the Widget gets a resize event.
+    """
+    resized = QtCore.Signal()
+
+    def eventFilter(self,  obj,  event):
+        # peek at the message
+        if event.type() == QtCore.QEvent.Resize:
+            # re-broadcast any resize events
+            self.resized.emit()
+        # pass it on!
+        return False
         
