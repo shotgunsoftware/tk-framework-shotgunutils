@@ -22,12 +22,26 @@ from tank.platform.qt import QtCore, QtGui
 
 # just so we can do some basic file validation
 FILE_MAGIC_NUMBER = 0xDEADBEEF # so we can validate file format correctness before loading
-FILE_VERSION = 10               # if we ever change the file format structure
+FILE_VERSION = 10              # if we ever change the file format structure
 
 
 class ShotgunModel(QtGui.QStandardItemModel):
     """
-    A Shotgun model which makes it easy to create Shotgun QT data sources.
+    A QT Model representing a Shotgun query.
+    
+    This class implements a standard QModel specialized to hold the contents
+    of a particular Shotgun query. It is cached and refreshes its data asynchronously.
+    
+    In order to use this class, you typically subclass it and implement certain key data
+    methods for setting up queries, customizing etc. Then you connect your class to 
+    a QView of some sort which will display the result. If you need to do manipulations
+    such as sorting or filtering on the data, connect a QProxyModel between your class
+    and the view.
+    
+    The model can either be a flat list or a tree. This is controlled by a grouping 
+    parameter which works just like the Shotgun grouping. For example, if you pull
+    in assets grouped by asset type, you get a tree of data with intermediate data
+    types for the asset types. The leaf nodes in this case would be assets.
     """
 
     SG_DATA_ROLE = QtCore.Qt.UserRole + 1
@@ -39,6 +53,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Constructor. This will create a model which can later be used to load
         and manage Shotgun data.
         
+        :param parent: Parent object.
         :param overlay_parent_widget: A QWidget object on top of which any progress
                                       overlays will be rendered.
         :param download_thumbs: Boolean to indicate if this model should attempt 
@@ -55,8 +70,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # and start its thread!
         self.__sg_data_retriever.start()
         
+        # set up our spinner UI handling
         self.__overlay = OverlayWidget(overlay_parent_widget)
         
+        # keep various references to all items that the model holds.
+        # some of these data structures are to keep the GC
+        # happy, others to hold alternative access methods to the data.
         self.__all_tree_items = []
         self.__entity_tree_data = {}
         self.__thumb_map = {}
@@ -85,6 +104,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         Returns a QStandardItem based on entity type and entity id
         Returns none if not found.
+        
+        :param entity_type: Shotgun entity type to look for
+        :param entity_id: Shotgun entity id to look for
+        :returns: QStandardItem or None if not found
         """
         if entity_type != self.__entity_type:
             return None
@@ -94,7 +117,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
          
     def get_filters(self, item):
         """
-        Returns a list of filters representing the current item
+        Returns a list of Shotgun filters representing the given item.
+        
+        :param item: One of the QStandardItem model items that is associated with this model.
+        :return: standard shotgun filter list to repreent that item
         """
         # prime filters with our base query
         filters = copy.deepcopy(self.__filters)
@@ -109,50 +135,29 @@ class ShotgunModel(QtGui.QStandardItemModel):
          
     def get_entity_type(self):
         """
-        Returns the Shotgun Entity type associated with this model
+        Returns the Shotgun Entity type associated with this model.
         """
         return self.__entity_type
          
-    def _reset_all_data(self):
-        """
-        Deletes all the contents of the model. 
-        Very similar to the clear() method, however it
-        seems clear does not work properly on pyside so 
-        we are avoiding that method.
-        """
-        # ask async data retriever to clear its queue
-        # note that there may still be requests actually running
-        # - these are not cancelled
-        self.__sg_data_retriever.clear()
-        # we are not looking for any data from the async processor
-        self.__current_work_id = 0
-        # model data in alt format
-        self.__entity_tree_data = {}
-        # thumbnail download lookup
-        self.__thumb_map = {}
-        # pyside will crash unless we actively hold a reference
-        # to all items that we create.
-        self.__all_tree_items = []
-
-        # remove all data in the underyling internal data storage
-        # note that we don't use clear() here since that causing
-        # crashing on nuke/pyside
-        self.invisibleRootItem().removeRows(0,self.rowCount())
-        
-        
 
     ########################################################################################
     # protected methods not meant to be subclassed but meant to be called by subclasses
     
     def _load_data(self, entity_type, filters, hierarchy, fields, order):
         """
-        Clears the model of any previous data and prepares for operation with 
-        a new set of shotgun query data. Nothing is retrieved from Shotgun at this point
-        but if cache data is available, this is loaded into the model.
+        This is the main method to use to configure the model. You basically
+        pass a specific find query to the model and it will start tracking
+        this particular set of filter and hierarchy parameters.
         
-        The separation between the _load_data and _refresh_data() which actually calls
-        out to Shotgun makes it possible to potentially run the model in offline mode.
+        Any existing data in contained in the model will be cleared.
         
+        This method will not call the Shotgun API. If cached data is available,
+        this will be immediately loaded (this operation is very fast even for 
+        substantial amounts of data). 
+        
+        If you want to refresh the data contained in the model (which you typically
+        want to!), call the _refresh_data() method.
+                
         :param entity_type: Shotgun entity type to download
         :param filters: List of Shotgun filters. Standard Shotgun syntax.
         :param hierarchy: List of grouping fields. These should be names of Shotgun 
@@ -161,7 +166,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                           model which is flat and where each item's default name is the
                           Shotgun name field. If you want to generate a tree where assets
                           are broken down by asset type, you could instead specify
-                          ["sg_asset_type", "code"]
+                          ["sg_asset_type", "code"].  
         :param fields:    Fields to retrieve from Shotgun (in addition to the ones specified
                           in the hierarchy parameter). Standard Shotgun API syntax. If you 
                           specify None for this parameter, Shotgun will not be called when
@@ -170,7 +175,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         
         # clear out old data
-        self._reset_all_data()
+        self.__reset_all_data()
         
         self.__overlay.hide()
         self.__entity_type = entity_type
@@ -222,6 +227,17 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Rebuilds the data in the model to ensure it is up to date.
         This call is asynchronous and will return instantly.
         The update will be applied whenever the data from Shotgun is returned.
+        
+        If the model is empty (no cached data), a spinner is shown. If cached
+        data is available, the update happens silently in the background.
+        
+        If data has been added, this will be injected into the existing structure.
+        In this case, the rest of the model is intact, meaning that also selections 
+        and other view related states are unaffected.
+        
+        If data has been modified or deleted, a full rebuild is issued, meaning that
+        all existing items from the model are removed. This does affect view related 
+        states such as selection.
         """
         
         if len(self.__entity_tree_data) == 0:
@@ -244,31 +260,50 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                                                            fields,
                                                                            self.__order)
     
-    
     def _show_overlay_pixmap(self, pixmap):
         """
-        Show an overlay status message in the form of a pixmap
+        Show an overlay status message in the form of a pixmap.
+        This is for example useful if a particular query doesn't return any results
+        
+        :param pixmap: QPixmap object containing graphic to show.
         """
         self.__overlay.show_message_pixmap(pixmap)        
 
     def _show_overlay_info_message(self, msg):
         """
-        Show an overlay status message
+        Show an overlay status message.
+        
+        :param msg: message to display
         """
         self.__overlay.show_message(msg)        
         
     def _show_overlay_error_message(self, msg):
         """
-        Show an overlay error message
+        Show an overlay error message.
+        
+        :param msg: error message to display
         """
         self.__overlay.show_error_message(msg)        
 
     def _request_thumbnail_download(self, item, field, url, entity_type, entity_id):
         """
-        Request that a thumbnail is downloaded for an item.
+        Request that a thumbnail is downloaded for an item. If a thumbnail is successfully
+        retrieved, either from disk (cached) or via shotgun, the method _populate_thumbnail()
+        will be called. If you want to control exactly how your shotgun thumbnail is 
+        to appear in the UI, you can subclass this method. For example, you can subclass
+        this method and perform image composition prior to the image being added to 
+        the item object.
+        
+        Note: This is an advanced method which you can use if you want to load thumbnail 
+        data other than the standard 'image' field. If that's what you need, simply make
+        sure that you set the download_thumbs parameter to true when you create the model
+        and standard thumbnails will be automatically downloaded. This method is either used
+        for linked thumb fields or if you want to download thumbnails for external model data
+        that doesn't come from Shotgun.
         
         :param item: QStandardItem which belongs to this model
-        :param field: Shotgun field where the thumbnail is stored
+        :param field: Shotgun field where the thumbnail is stored. This is typically 'image' but
+                      can also for example be 'sg_sequence.Sequence.image'.
         :param url: thumbnail url
         :param entity_type: Shotgun entity type
         :param entity_id: Shotgun entity id 
@@ -292,6 +327,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
         the construction of a QStandardItem and add additional metadata or make other changes
         that may be useful. Nothing needs to be returned.
         
+        This is typically used if you retrieve additional fields alongside the standard "name" field
+        and you want to put those into various custom data roles. These custom fields on the item
+        can later on be picked up by custom (delegate) rendering code in the view.
+        
         :param item: QStandardItem that is about to be added to the model. This has been primed
                      with the standard settings that the ShotgunModel handles.
         :param sg_data: Shotgun data dictionary that was received from Shotgun given the fields
@@ -301,37 +340,56 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
     def _populate_default_thumbnail(self, item):
         """
-        Called whenever an item needs to get a default thumbnail attached to a node.
-        When thumbnails are loaded, this will be called first, when an object is
-        either created from scratch or when it has been loaded from a cache, then later
-        on a call to _populate_thumbnail will follow where the subclassing implementation
-        can populate the real image.
+        Called whenever an item is originally born, either because a shotgun query returned it
+        or because it was loaded as part of a cache load from disk. This method will by default
+        set up all brand new fresh items with an empty thumbail.
+        
+        Later on, if the model was instantiated with the download_thumbs parameter set to True,
+        the standard 'image' field thumbnail will be automatically downloaded for all items (or
+        picked up from local cache if possible). When these real thumbnails arrive, the
+        _populate_thumbnail() method will be called.
+        
+        This method can be useful if you want to control both the visual state of an entity which
+        does not have a thumbnail in Shotgun and the state before a thumbnail has been downloaded.
+        
+        :param item: QStandardItem that is about to be added to the model. This has been primed
+                     with the standard settings that the ShotgunModel handles.        
         """
         # the default implementation ensures that the icon is cleared
         # this is because when the items are serialized to disk, they seem
         # to store a low res version of the icons, so if the icon isn't cleared
         # it usually shows up as a not-very-looking low res version of the real
         # thumbnail.
-        item.setIcon( QtGui.QIcon() )
+        item.setIcon(QtGui.QIcon())
 
 
     def _populate_thumbnail(self, item, field, path):
         """
-        Called whenever a thumbnail for an item has arrived on disk. In the case of 
-        an already cached thumbnail, this may be called very soon after data has been 
-        loaded, in cases when the thumbs are downloaded from Shotgun, it may happen later.
+        Called whenever the real thumbnail for an item exists on disk. The following 
+        execution sequence typically happens:
         
-        This method will be called only if the model has been instantiated with the 
-        download_thumbs flag set to be true. It will be called for items which are
-        associated with shotgun entities (in a tree data layout, this is typically 
-        leaf nodes).
+        - QStandardItem is created, either through a cache load from disk or 
+          from a payload coming from the Shogun API.
+        - After the item has been set up with its associated Shotgun data, 
+          _populate_default_thumbnail() is called to set up a default thumbnail.
+          This will provide an empty thumbnail by default but can be subclassed.
+        - The model will now start looking for the real thumbail.
+          - If the thumbnail is already cached on disk, _populate_thumbnai() is
+            called very soon.
+          - If there isn't a thumbnail associated, _populate_thumbnail() will not
+            be called.
+          - If there isn't a thumbnail cached, the model will asynchronously download
+            the thumbnail from Shotgun and then (after some time) call _populate_thumbnail().
+        
+        This method will be called for standard thumbnails if the model has been 
+        instantiated with the download_thumbs flag set to be true. It will be called for 
+        items which are associated with shotgun entities (in a tree data layout, this is typically 
+        leaf nodes). It will also be called once the data requested via _request_thumbnail_download()
+        arrives.
         
         This method makes it possible to control how the thumbnail is applied and associated
         with the item. The default implementation will simply set the thumbnail to be icon
         of the item, but this can be altered by subclassing this method.
-        
-        Any thumbnails requested via the _request_thumbnail_download() method will also 
-        resurface via this callback method.
         
         :param item: QStandardItem which is associated with the given thumbnail
         :param field: The Shotgun field which the thumbnail is associated with.
@@ -360,11 +418,39 @@ class ShotgunModel(QtGui.QStandardItemModel):
         to any shotgun data is added to the model. This makes it possible for deriving classes
         to add custom data to the model in a very flexible fashion. Such data will not be 
         cached by the ShotgunModel framework.
+        
+        :returns: list of QStandardItems
         """
         pass
 
     ########################################################################################
     # private methods 
+
+    def __reset_all_data(self):
+        """
+        Deletes all the contents of the model. 
+        Very similar to the clear() method, however it
+        seems clear does not work properly on pyside so 
+        we are avoiding that method.
+        """
+        # ask async data retriever to clear its queue
+        # note that there may still be requests actually running
+        # - these are not cancelled
+        self.__sg_data_retriever.clear()
+        # we are not looking for any data from the async processor
+        self.__current_work_id = 0
+        # model data in alt format
+        self.__entity_tree_data = {}
+        # thumbnail download lookup
+        self.__thumb_map = {}
+        # pyside will crash unless we actively hold a reference
+        # to all items that we create.
+        self.__all_tree_items = []
+
+        # remove all data in the underyling internal data storage
+        # note that we don't use clear() here since that causing
+        # crashing on nuke/pyside
+        self.invisibleRootItem().removeRows(0,self.rowCount())
 
     def __on_worker_failure(self, uid, msg):
         """
@@ -381,7 +467,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
             self.__overlay.show_error_message(full_msg)
             
         self.__app.log_warning(full_msg)
-
 
     def __on_worker_signal(self, uid, data):
         """
@@ -406,7 +491,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             
     def __on_sg_data_arrived(self, sg_data):
         """
-        Signaled whenever the worker completes something
+        Handle asynchronous shotgun data arrivin after a find request.
         """
         
         # QT is struggling to handle the special timezone class that the shotgun API returns.
@@ -529,8 +614,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 new_sg_data[x] = val
         return new_sg_data
                 
-    
-    
     def __sg_compare_data(self, a, b):
         """
         Compare two sg dicts:
@@ -692,7 +775,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Clears the tree and rebuilds it from the given shotgun data.
         Note that any selection and expansion states in the view will be lost.
         """
-        self._reset_all_data()
+        self.__reset_all_data()
         
         # get any external payload from deriving classes
         self._load_external_data()
@@ -838,7 +921,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
             
     def __save_to_disk(self, filename):
         """
-        Save the model to disk
+        Save the model to disk using QDataStream serialization.
+        This all happens on the C++ side and is very fast.
         """
         fh = QtCore.QFile(filename)
         fh.open(QtCore.QIODevice.WriteOnly);
