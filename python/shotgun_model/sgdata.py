@@ -23,7 +23,29 @@ from tank.platform.qt import QtCore, QtGui
 
 class ShotgunAsyncDataRetriever(QtCore.QThread):
     """
-    Background worker class
+    Note: This is part of the internals of the Shotgun Utils Framework and 
+    should not be called directly.
+    
+    Async worker class which is used by the ShotgunModel to retrieve data 
+    and thumbnails from Shotgun and from disk thumbnail cache.
+    
+    Tasks are queued up using the execute_find() and request_thumbnail() methods.
+    
+    Tasks are executed in the following priority order:
+    
+    - first any thumbnails that are already cached on disk are handled
+    - next, shotgun find() queries are handled
+    - lastly thumbnail downloads are handled  
+    
+    The thread will emit work_completed and work_failure signals
+    when tasks are completed (or fail).
+    
+    The clear() method will clear the current queue. The currently 
+    processing item will finish processing and may send out signals
+    even after a clear.
+    
+    Make sure you call the stop() method prior to destruction in order 
+    for the system to gracefully shut down.
     """    
     
     # async task types
@@ -39,13 +61,14 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         QtCore.QThread.__init__(self, parent)
         self._app = tank.platform.current_bundle()
         self._wait_condition = QtCore.QWaitCondition()
-        
         self._queue_mutex = QtCore.QMutex()
         
+        # queue data structures
         self._thumb_download_queue = []
         self._sg_find_queue = []
         self._thumb_check_queue = []
         
+        # indicates that we should keep processing queue items
         self._process_queue = True        
         
     ############################################################################################################
@@ -53,7 +76,7 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         
     def clear(self):
         """
-        Clear the queue
+        Clears the queue. Any currently processing item will complete without interruption.
         """
         self._queue_mutex.lock()
         try:
@@ -70,7 +93,8 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         
     def stop(self):
         """
-        Gracefully stop the thread. Will synchronounsly wait until queue has completed.
+        Gracefully stop the thread. Will synchronounsly wait until any potential
+        currently processing item is completing.
         """
         self._process_queue = False
         self._wait_condition.wakeAll()
@@ -78,7 +102,13 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         
     def execute_find(self, entity_type, filters, fields, order = None):    
         """
-        Requests that a shotgun find query is executed.
+        Adds a find query to the queue. 
+        
+        :param entity_type: Shotgun entity type
+        :param filters: List of find filters to pass to Shotgun find call
+        :param fields: List of fields to pass to Shotgun find call
+        :param order: List of order dicts to pass to Shotgun find call
+        :returns: A unique identifier representing this request 
         """
         uid = uuid.uuid4().hex
         
@@ -101,7 +131,15 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         
     def request_thumbnail(self, url, entity_type, entity_id, field):
         """
-        Requests a thumbnail. Returns a uid representing the async request. 
+        Adds a Shotgun thumbnail request to the queue. 
+        
+        :param url: The thumbnail url that is associated with this thumbnail
+        :param entity_type: Shotgun entity type with which the thumb is associated.
+        :param entity_id: Shotgun entity id with which the thumb is associated.
+        :param field: Thumbnail field. Normally 'image' but could also for example
+                      be a deep link field such as 'sg_sequence.Sequence.image'
+        
+        :returns: A unique identifier representing this request 
         """
         uid = uuid.uuid4().hex
 
@@ -127,7 +165,7 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
     
     def _get_thumbnail_path(self, url):
         """
-        Returns the location on disk suitable for a thumbnail given its metadata
+        Returns the location on disk suitable for a thumbnail given its url.
         """
 
         url_obj = urlparse.urlparse(url)
@@ -185,7 +223,9 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
     # main thread loop
     
     def run(self):
-
+        """
+        Main thread loop
+        """
         # keep running until thread is terminated
         while self._process_queue:
             
