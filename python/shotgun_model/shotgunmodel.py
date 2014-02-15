@@ -307,7 +307,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
         on a call to _populate_thumbnail will follow where the subclassing implementation
         can populate the real image.
         """
-        # the default implementation does nothing
+        # the default implementation ensures that the icon is cleared
+        # this is because when the items are serialized to disk, they seem
+        # to store a low res version of the icons, so if the icon isn't cleared
+        # it usually shows up as a not-very-looking low res version of the real
+        # thumbnail.
+        item.setIcon( QtGui.QIcon() )
 
 
     def _populate_thumbnail(self, item, field, path):

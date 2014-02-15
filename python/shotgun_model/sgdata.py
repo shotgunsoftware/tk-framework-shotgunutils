@@ -46,9 +46,7 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         self._sg_find_queue = []
         self._thumb_check_queue = []
         
-        self._process_queue = True
-        
-        self._not_found_thumb_path = os.path.join(self._app.disk_location, "resources", "thumb_not_found.png")
+        self._process_queue = True        
         
     ############################################################################################################
     # Public methods
@@ -270,8 +268,9 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
                     
                     if sg_data is None or sg_data.get(field) is None:
                         # no thumbnail! This is possible if the thumb has changed
-                        # while we were queueing it for download
-                        self.work_completed.emit(item_to_process["id"], {"thumb_path": self._not_found_thumb_path} )
+                        # while we were queueing it for download. In this case
+                        # simply don't do anything 
+                        pass
                     
                     else:
                         # download from sg
