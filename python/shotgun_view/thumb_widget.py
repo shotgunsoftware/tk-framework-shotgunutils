@@ -21,7 +21,11 @@ class ThumbWidget(QtGui.QWidget):
     This class is typically used in conjunction with a QT View and the 
     ShotgunDelegate class.     
     """
+    
     def __init__(self, parent):
+        """
+        Constructor
+        """
         QtGui.QWidget.__init__(self, parent)
 
         # make sure this widget isn't shown
@@ -34,7 +38,7 @@ class ThumbWidget(QtGui.QWidget):
         # set up an event filter to ensure that the thumbnails
         # are scaled in a square fashion.
         filter = ResizeEventFilter(self.ui.thumbnail)
-        filter.resized.connect(self._on_thumb_resized)
+        filter.resized.connect(self.__on_thumb_resized)
         self.ui.thumbnail.installEventFilter(filter)
         
         # set up action menu
@@ -45,7 +49,7 @@ class ThumbWidget(QtGui.QWidget):
         
     def set_actions(self, actions):
         """
-        Adds a list of QActions to the actions menu
+        Adds a list of QActions to the actions menu.
         """
         if len(actions) == 0:
             self.ui.button.setVisible(False)
@@ -54,19 +58,6 @@ class ThumbWidget(QtGui.QWidget):
             self._actions = actions
             for a in self._actions:
                 self._menu.addAction(a)
-    
-    def _on_thumb_resized(self):
-        """
-        Called whenever the thumbnail area is being resized,
-        making sure that the label scales with the right aspect ratio.
-        """
-        new_size = self.ui.thumbnail.size()
-
-        # Aspect ratio of thumbs: 512/400 = 1.28
-        calc_height = 0.78125 * (float)(new_size.width())
-        
-        if abs(calc_height - new_size.height()) > 2: 
-            self.ui.thumbnail.resize(new_size.width(), calc_height)
     
     def set_selected(self, selected):
         """
@@ -111,6 +102,18 @@ class ThumbWidget(QtGui.QWidget):
         # add another 50px for the height so the text can be rendered.
         return QtCore.QSize(scale_factor, (scale_factor*0.78125)+50)
         
+    def __on_thumb_resized(self):
+        """
+        Slot Called whenever the thumbnail area is being resized,
+        making sure that the label scales with the right aspect ratio.
+        """
+        new_size = self.ui.thumbnail.size()
+
+        # Aspect ratio of thumbs: 512/400 = 1.28
+        calc_height = 0.78125 * (float)(new_size.width())
+        
+        if abs(calc_height - new_size.height()) > 2: 
+            self.ui.thumbnail.resize(new_size.width(), calc_height)
 
 
 ##################################################################################################

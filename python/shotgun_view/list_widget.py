@@ -21,7 +21,11 @@ class ListWidget(QtGui.QWidget):
     This class is typically used in conjunction with a QT View and the 
     ShotgunDelegate class. 
     """
+    
     def __init__(self, parent):
+        """
+        Constructor
+        """
         QtGui.QWidget.__init__(self, parent)
 
         # make sure this widget isn't shown
@@ -39,7 +43,7 @@ class ListWidget(QtGui.QWidget):
         
     def set_actions(self, actions):
         """
-        Adds a list of QActions to the actions menu
+        Adds a list of QActions to add to the actions menu for this widget.
         """
         if len(actions) == 0:
             self.ui.button.setVisible(False)
