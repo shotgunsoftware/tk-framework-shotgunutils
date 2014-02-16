@@ -82,7 +82,7 @@ class ListWidget(QtGui.QWidget):
             
     def set_text(self, header, body):
         """
-        Populate three lines of text in the widget
+        Populate the lines of text in the widget
         """
         self.ui.header_label.setText(header)
         self.ui.body_label.setText(body)
