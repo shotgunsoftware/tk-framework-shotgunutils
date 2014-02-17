@@ -88,10 +88,6 @@
             <property name="text">
              <string>Actions</string>
             </property>
-            <property name="icon">
-             <iconset resource="resources.qrc">
-              <normaloff>:/res/down_arrow.png</normaloff>:/res/down_arrow.png</iconset>
-            </property>
             <property name="popupMode">
              <enum>QToolButton::InstantPopup</enum>
             </property>
