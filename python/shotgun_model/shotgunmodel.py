@@ -48,7 +48,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
     IS_SG_MODEL_ROLE = QtCore.Qt.UserRole + 2
     SG_ASSOCIATED_FIELD_ROLE = QtCore.Qt.UserRole + 3
 
-    def __init__(self, parent, overlay_parent_widget, download_thumbs):
+    def __init__(self, parent, overlay_parent_widget, download_thumbs=True, schema_generation=0):
         """
         Constructor. This will create a model which can later be used to load
         and manage Shotgun data.
@@ -58,6 +58,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                       overlays will be rendered.
         :param download_thumbs: Boolean to indicate if this model should attempt 
                                 to download and process thumbnails for the downloaded data.
+        :param schema_generation: Schema generation index. If you are changing the format 
+                                  of the data you are retrieving from Shotgun, and therefore
+                                  want to invalidate any cache files that may already exist
+                                  in the system, you can increment this integer.
         
         """
         QtGui.QStandardItemModel.__init__(self, parent)
@@ -67,6 +71,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__sg_data_retriever.work_completed.connect( self.__on_worker_signal)
         self.__sg_data_retriever.work_failure.connect( self.__on_worker_failure)
         self.__current_work_id = 0
+        self.__schema_generation = schema_generation
         # and start its thread!
         self.__sg_data_retriever.start()
         
@@ -930,7 +935,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
         # write a header
         out.writeInt64(FILE_MAGIC_NUMBER)
-        out.writeInt32(FILE_VERSION)
+        out.writeInt32( (FILE_VERSION + self.__schema_generation) )
 
         # tell which serialization dialect to use
         out.setVersion(QtCore.QDataStream.Qt_4_0)
@@ -971,7 +976,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             raise Exception("Invalid file magic number!")
         
         version = file_in.readInt32()
-        if version != FILE_VERSION:
+        if version != (FILE_VERSION + self.__schema_generation):
             raise Exception("Invalid file version!")
         
         # tell which deserialization dialect to use
