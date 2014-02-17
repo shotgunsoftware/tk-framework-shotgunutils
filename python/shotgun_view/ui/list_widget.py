@@ -11,7 +11,7 @@ from tank.platform.qt import QtCore, QtGui
 class Ui_ListWidget(object):
     def setupUi(self, ListWidget):
         ListWidget.setObjectName("ListWidget")
-        ListWidget.resize(395, 109)
+        ListWidget.resize(394, 91)
         self.horizontalLayout_3 = QtGui.QHBoxLayout(ListWidget)
         self.horizontalLayout_3.setSpacing(1)
         self.horizontalLayout_3.setContentsMargins(1, 1, 1, 1)
@@ -25,9 +25,10 @@ class Ui_ListWidget(object):
         self.horizontalLayout_2.setContentsMargins(1, 1, 1, 1)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.thumbnail = QtGui.QLabel(self.box)
-        self.thumbnail.setMinimumSize(QtCore.QSize(100, 100))
-        self.thumbnail.setMaximumSize(QtCore.QSize(10, 100))
+        self.thumbnail.setMinimumSize(QtCore.QSize(75, 75))
+        self.thumbnail.setMaximumSize(QtCore.QSize(75, 75))
         self.thumbnail.setText("")
+        self.thumbnail.setScaledContents(True)
         self.thumbnail.setAlignment(QtCore.Qt.AlignCenter)
         self.thumbnail.setObjectName("thumbnail")
         self.horizontalLayout_2.addWidget(self.thumbnail)
