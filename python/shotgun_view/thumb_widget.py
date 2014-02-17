@@ -90,7 +90,9 @@ class ThumbWidget(QtGui.QWidget):
         """
         Populate three lines of text in the widget
         """
-        self.ui.label.setText("<b>%s</b><br>%s<br>%s" % (line1, line2, line3))        
+        msg = "<b>%s</b><br>%s<br>%s" % (line1, line2, line3)
+        self.ui.label.setText(msg)    
+        self.setToolTip(msg)    
 
     @staticmethod
     def calculate_size(scale_factor):
