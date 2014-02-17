@@ -22,7 +22,7 @@ from tank.platform.qt import QtCore, QtGui
 
 # just so we can do some basic file validation
 FILE_MAGIC_NUMBER = 0xDEADBEEF # so we can validate file format correctness before loading
-FILE_VERSION = 11              # if we ever change the file format structure
+FILE_VERSION = 16              # if we ever change the file format structure
 
 
 class ShotgunModel(QtGui.QStandardItemModel):
@@ -688,7 +688,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         on_leaf_level = len(remaining_fields) == 0
 
         # get the item we need at this level. Create it if not found.
-        field_display_name = self.__sg_field_value_to_str(sg_item[field])
+        field_display_name = self.__generate_display_name(field, sg_item)
         found_item = None
         for row_index in range(root.rowCount()):
             child = root.child(row_index)
@@ -811,23 +811,23 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # there will be more than one sg record having asset type = vehicle.
         discrete_values = {}
         
-        for d in sg_data:
+        for sg_item in sg_data:
             
             # is this item matching the given constraints?
-            if self.__check_constraints(d, constraints):
+            if self.__check_constraints(sg_item, constraints):
                 # add this sg data dictionary to our list of matching results
-                filtered_results.append(d)
+                filtered_results.append(sg_item)
                 
                 # and store it in our unique dictionary
-                field_display_name = self.__sg_field_value_to_str(d[field])
+                field_display_name = self.__generate_display_name(field, sg_item)
                 # and associate the shotgun data so that we can find it later
                 
                 if on_leaf_level and field_display_name in discrete_values:
                     # if we are on the leaf level, we want to make sure all objects
                     # are displayed! handle duplicates by appending the sg id to the name.
-                    field_display_name = "%s (id %s)" % (field_display_name, d["id"])
+                    field_display_name = "%s (id %s)" % (field_display_name, sg_item["id"])
 
-                discrete_values[ field_display_name ] = d
+                discrete_values[ field_display_name ] = sg_item
                 
         # process values in alphabetical order, case insensitive
         for dv in sorted(discrete_values.keys(), cmp=lambda x,y: cmp(x.lower(), y.lower()) ):
@@ -908,17 +908,25 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 return False
         return True
             
-    def __sg_field_value_to_str(self, value):
+    def __generate_display_name(self, field, sg_data):
         """
-        Turns a shotgun value to a string. This method receives values
-        that are coming straight from the Shotgun API so they are 
-        string based and not unicode based.
+        Generates a name from a shotgun field.
+        For non-nested structures, this is typically just "code".
+        For nested structures it can either be something like sg_sequence 
+        or something like sg_asset_type.
+        
+        :params field: field name to generate name from
+        :params sg_data: sg data dictionary, straight from shotgun, no unicode, all UTF-8
+        :returns: name string  
         """
+        value = sg_data[field]
+        
         if isinstance(value, dict) and "name" in value:
-            # linked fields
-            return str(value["name"])
+            # std link field struct with id, type and name
+            return value["name"]
+        
         else:
-            # everything else
+            # everything else just cast to string
             return str(value)
             
     ########################################################################################
