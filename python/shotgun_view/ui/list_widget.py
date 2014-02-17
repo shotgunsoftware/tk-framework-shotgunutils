@@ -22,7 +22,7 @@ class Ui_ListWidget(object):
         self.box.setObjectName("box")
         self.horizontalLayout_2 = QtGui.QHBoxLayout(self.box)
         self.horizontalLayout_2.setSpacing(4)
-        self.horizontalLayout_2.setContentsMargins(4, 4, 1, 1)
+        self.horizontalLayout_2.setContentsMargins(1, 1, 1, 1)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.thumbnail = QtGui.QLabel(self.box)
         self.thumbnail.setMinimumSize(QtCore.QSize(100, 100))
