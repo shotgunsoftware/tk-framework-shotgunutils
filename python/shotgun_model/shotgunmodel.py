@@ -22,7 +22,7 @@ from tank.platform.qt import QtCore, QtGui
 
 # just so we can do some basic file validation
 FILE_MAGIC_NUMBER = 0xDEADBEEF # so we can validate file format correctness before loading
-FILE_VERSION = 10              # if we ever change the file format structure
+FILE_VERSION = 11              # if we ever change the file format structure
 
 
 class ShotgunModel(QtGui.QStandardItemModel):
@@ -824,8 +824,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
                 discrete_values[ field_display_name ] = d
                 
-            
-        for dv in sorted(discrete_values.keys()):
+        # process values in alphabetical order, case insensitive
+        for dv in sorted(discrete_values.keys(), cmp=lambda x,y: cmp(x.lower(), y.lower()) ):
             
             # construct tree view node object
             item = QtGui.QStandardItem(dv)
