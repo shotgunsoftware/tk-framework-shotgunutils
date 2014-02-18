@@ -93,5 +93,5 @@ class ListWidget(QtGui.QWidget):
         """
         Calculates and returns a suitable size for this widget.
         """        
-        return QtCore.QSize(200, 80)
+        return QtCore.QSize(200, 90)
 

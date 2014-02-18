@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>394</width>
-    <height>91</height>
+    <height>93</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,8 +32,17 @@
       <property name="spacing">
        <number>4</number>
       </property>
-      <property name="margin">
+      <property name="leftMargin">
        <number>1</number>
+      </property>
+      <property name="topMargin">
+       <number>2</number>
+      </property>
+      <property name="rightMargin">
+       <number>1</number>
+      </property>
+      <property name="bottomMargin">
+       <number>2</number>
       </property>
       <item>
        <widget class="QLabel" name="thumbnail">
