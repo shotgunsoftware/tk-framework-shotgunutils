@@ -86,12 +86,12 @@ class ThumbWidget(QtGui.QWidget):
         """
         self.ui.thumbnail.setPixmap(pixmap)
     
-    def set_text(self, line1, line2, line3):
+    def set_text(self, header, body):
         """
         Populate three lines of text in the widget
         """
-        msg = "<b>%s</b><br>%s<br>%s" % (line1, line2, line3)
-        self.ui.label.setText(msg)    
+        msg = "<b>%s</b><br>%s" % (header, body)
+        self.ui.label.setText(msg)
         self.setToolTip(msg)    
 
     @staticmethod
@@ -101,8 +101,8 @@ class ThumbWidget(QtGui.QWidget):
         in pixels.
         """        
         # the thumbnail proportions are 512x400
-        # add another 50px for the height so the text can be rendered.
-        return QtCore.QSize(scale_factor, (scale_factor*0.78125)+50)
+        # add another 34px for the height so the text can be rendered.
+        return QtCore.QSize(scale_factor, (scale_factor*0.78125)+34)
         
     def __on_thumb_resized(self):
         """

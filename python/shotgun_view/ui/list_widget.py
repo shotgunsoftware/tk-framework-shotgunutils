@@ -11,7 +11,7 @@ from tank.platform.qt import QtCore, QtGui
 class Ui_ListWidget(object):
     def setupUi(self, ListWidget):
         ListWidget.setObjectName("ListWidget")
-        ListWidget.resize(394, 101)
+        ListWidget.resize(394, 93)
         self.horizontalLayout_3 = QtGui.QHBoxLayout(ListWidget)
         self.horizontalLayout_3.setSpacing(1)
         self.horizontalLayout_3.setContentsMargins(1, 1, 1, 1)

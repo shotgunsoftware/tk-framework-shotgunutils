@@ -11,7 +11,7 @@ from tank.platform.qt import QtCore, QtGui
 class Ui_ThumbWidget(object):
     def setupUi(self, ThumbWidget):
         ThumbWidget.setObjectName("ThumbWidget")
-        ThumbWidget.resize(528, 466)
+        ThumbWidget.resize(230, 153)
         self.verticalLayout_2 = QtGui.QVBoxLayout(ThumbWidget)
         self.verticalLayout_2.setSpacing(1)
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
@@ -53,8 +53,7 @@ class Ui_ThumbWidget(object):
     def retranslateUi(self, ThumbWidget):
         ThumbWidget.setWindowTitle(QtGui.QApplication.translate("ThumbWidget", "Form", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("ThumbWidget", "TextLabel\n"
-"Foo\n"
-"Bar", None, QtGui.QApplication.UnicodeUTF8))
+"Foo", None, QtGui.QApplication.UnicodeUTF8))
         self.button.setText(QtGui.QApplication.translate("ThumbWidget", "Actions", None, QtGui.QApplication.UnicodeUTF8))
 
 from . import resources_rc
