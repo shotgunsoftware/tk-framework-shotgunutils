@@ -22,7 +22,7 @@ from tank.platform.qt import QtCore, QtGui
 
 # just so we can do some basic file validation
 FILE_MAGIC_NUMBER = 0xDEADBEEF # so we can validate file format correctness before loading
-FILE_VERSION = 16              # if we ever change the file format structure
+FILE_VERSION = 18              # if we ever change the file format structure
 
 
 class ShotgunModel(QtGui.QStandardItemModel):
@@ -216,6 +216,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__app.log_debug("-----------------------------------------------------")
         
         self._load_external_data()    
+        
+        loaded_cache_data = False
         if os.path.exists(self.__full_cache_path):
             # first see if we need to load in any overlay data from deriving classes
             self.__app.log_debug("Loading cached data %s..." % self.__full_cache_path)
@@ -223,9 +225,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 
                 self.__load_from_disk(self.__full_cache_path)
                 self.__app.log_debug("...loading complete!")
+                loaded_cache_data = True
             except Exception, e:
                 self.__app.log_debug("Couldn't load cache data from disk. Will proceed with "
-                                    "full SG load. Error reported: %s" % e)        
+                                    "full SG load. Error reported: %s" % e)
+                
+        return loaded_cache_data        
     
     def _refresh_data(self):
         """
