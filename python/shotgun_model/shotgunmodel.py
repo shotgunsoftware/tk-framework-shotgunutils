@@ -919,7 +919,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         :params sg_data: sg data dictionary, straight from shotgun, no unicode, all UTF-8
         :returns: name string  
         """
-        value = sg_data[field]
+        value = sg_data.get(field)
         
         if isinstance(value, dict) and "name" in value:
             # std link field struct with id, type and name

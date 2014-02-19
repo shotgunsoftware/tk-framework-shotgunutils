@@ -84,7 +84,7 @@ class ListWidget(QtGui.QWidget):
         """
         Populate the lines of text in the widget
         """
-        self.setToolTip("<b>%s</b><br>%s" % (header, body))        
+        self.setToolTip("%s<br>%s" % (header, body))        
         self.ui.header_label.setText(header)
         self.ui.body_label.setText(body)
 
