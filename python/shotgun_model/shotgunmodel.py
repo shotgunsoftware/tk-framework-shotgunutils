@@ -504,6 +504,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Handle asynchronous shotgun data arrivin after a find request.
         """
         
+        # pre-process data
+        sg_data = self._before_data_processing(sg_data)        
+        
         # QT is struggling to handle the special timezone class that the shotgun API returns.
         # in fact, on linux it is struggling to serialize any complex object via QDataStream.
         #
@@ -523,9 +526,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # make sure no messages are displayed
         self.__overlay.hide()
     
-        # pre-process
-        sg_data = self._before_data_processing(sg_data)
-    
         if len(self.__entity_tree_data) == 0:
             # we have an empty tree. Run recursive tree generation for performance.
             if len(sg_data) != 0:
@@ -542,7 +542,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
             ids_from_shotgun = set([ d["id"] for d in sg_data ])
             ids_in_tree = set(self.__entity_tree_data.keys())
             removed_ids = ids_in_tree.difference(ids_from_shotgun)
-            added_ids = ids_from_shotgun.difference(ids_in_tree)
 
             if len(removed_ids) > 0:
                 self.__app.log_debug("Detected deleted items %s. Rebuilding tree..." % removed_ids)
@@ -550,15 +549,17 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 self.__app.log_debug("...done!")
                 modifications_made = True
                 
-            elif len(added_ids) > 0:
-                # wedge in the new items
-                self.__app.log_debug("Detected added items. Adding them in-situ to tree...")
-                for d in sg_data:
-                    if d["id"] in added_ids:
-                        self.__app.log_debug("Adding %s to tree" % d )
-                        self.__add_sg_item_to_tree(d)
-                self.__app.log_debug("...done!")
-                modifications_made = True
+            else:                
+                added_ids = ids_from_shotgun.difference(ids_in_tree)                
+                if len(added_ids) > 0:
+                    # wedge in the new items
+                    self.__app.log_debug("Detected added items. Adding them in-situ to tree...")
+                    for d in sg_data:
+                        if d["id"] in added_ids:
+                            self.__app.log_debug("Adding %s to tree" % d )
+                            self.__add_sg_item_to_tree(d)
+                    self.__app.log_debug("...done!")
+                    modifications_made = True
 
             # check for modifications. At this point, the number of items in the tree and 
             # the sg data should match, except for any duplicate items in the tree which would 
