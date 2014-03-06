@@ -48,14 +48,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
     IS_SG_MODEL_ROLE = QtCore.Qt.UserRole + 2
     SG_ASSOCIATED_FIELD_ROLE = QtCore.Qt.UserRole + 3
 
-    def __init__(self, parent, overlay_parent_widget, download_thumbs=True, schema_generation=0):
+    def __init__(self, parent, download_thumbs=True, schema_generation=0):
         """
         Constructor. This will create a model which can later be used to load
         and manage Shotgun data.
         
         :param parent: Parent object.
-        :param overlay_parent_widget: A QWidget object on top of which any progress
-                                      overlays will be rendered.
         :param download_thumbs: Boolean to indicate if this model should attempt 
                                 to download and process thumbnails for the downloaded data.
         :param schema_generation: Schema generation index. If you are changing the format 
@@ -76,7 +74,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__sg_data_retriever.start()
         
         # set up our spinner UI handling
-        self.__overlay = OverlayWidget(overlay_parent_widget)
+        self.__overlay = None
         
         # keep various references to all items that the model holds.
         # some of these data structures are to keep the GC
@@ -92,6 +90,18 @@ class ShotgunModel(QtGui.QStandardItemModel):
     ########################################################################################
     # public methods
 
+    def set_overlay_parent(self, parent_widget):
+        """
+        If you specify this, a spinner will be popping up whenever
+        an empty dataset is being processed. The overlay is
+        also used to display messages.
+        
+        :param parent_widget: A QWidget object on top of which any progress
+                              overlays will be rendered.        
+        """
+        self.__overlay = OverlayWidget(parent_widget)
+        
+        
     def destroy(self):
         """
         Call this method prior to destroying this object.
@@ -182,7 +192,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # clear out old data
         self.__reset_all_data()
         
-        self.__overlay.hide()
+        if self.__overlay:
+            self.__overlay.hide()
         self.__entity_type = entity_type
         self.__filters = filters
         self.__fields = fields
@@ -252,7 +263,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
         if len(self.__entity_tree_data) == 0:
             # we are loading an empty tree
-            self.__overlay.start_spin()
+            if self.__overlay:
+                self.__overlay.start_spin()
         
         if self.__filters is None:
             # filters is None indicates that no data is desired.
@@ -277,7 +289,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
         :param pixmap: QPixmap object containing graphic to show.
         """
-        self.__overlay.show_message_pixmap(pixmap)        
+        if self.__overlay:
+            self.__overlay.show_message_pixmap(pixmap)
+        else:
+            self.__app.log_warning("Shotgun Model: Got call to _show_overlay_pixmap() "
+                                   "but no overlay parent set!")        
 
     def _show_overlay_info_message(self, msg):
         """
@@ -285,7 +301,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
         :param msg: message to display
         """
-        self.__overlay.show_message(msg)        
+        if self.__overlay:
+            self.__overlay.show_message(msg)
+        else:
+            self.__app.log_warning("Shotgun Model: Got call to _show_overlay_info_message() "
+                                   "but no overlay parent set!")        
         
     def _show_overlay_error_message(self, msg):
         """
@@ -293,7 +313,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
         :param msg: error message to display
         """
-        self.__overlay.show_error_message(msg)        
+        if self.__overlay:
+            self.__overlay.show_error_message(msg)
+        else:
+            self.__app.log_warning("Shotgun Model: Got call to _show_overlay_error_message() "
+                                   "but no overlay parent set!")        
 
     def _request_thumbnail_download(self, item, field, url, entity_type, entity_id):
         """
@@ -474,7 +498,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
         if len(self.__entity_tree_data) == 0:
             # no data laoded yet. So display error message
-            self.__overlay.show_error_message(full_msg)
+            if self.__overlay:
+                self.__overlay.show_error_message(full_msg)
             
         self.__app.log_warning(full_msg)
 
@@ -524,7 +549,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         modifications_made = False
         
         # make sure no messages are displayed
-        self.__overlay.hide()
+        if self.__overlay:
+            self.__overlay.hide()
     
         if len(self.__entity_tree_data) == 0:
             # we have an empty tree. Run recursive tree generation for performance.
