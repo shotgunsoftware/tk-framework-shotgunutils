@@ -226,6 +226,12 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         """
         Main thread loop
         """
+        
+        # first grab our own private shotgun connection. This is because
+        # the shotgun API isn't threadsafe, so running multiple models in parallel
+        # (common) may result in side effects if a single connection is shared
+        shotgun_api = tank.util.shotgun.create_sg_connection()
+        
         # keep running until thread is terminated
         while self._process_queue:
             
@@ -271,10 +277,10 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
                 
                 if item_type == ShotgunAsyncDataRetriever.SG_FIND_QUERY:
                     # get stuff from shotgun
-                    sg = self._app.shotgun.find(item_to_process["entity_type"],
-                                                  item_to_process["filters"],
-                                                  item_to_process["fields"],
-                                                  item_to_process["order"])
+                    sg = shotgun_api.find(item_to_process["entity_type"],
+                                          item_to_process["filters"],
+                                          item_to_process["fields"],
+                                          item_to_process["order"])
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], {"sg": sg } )
                 
@@ -302,9 +308,7 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
                     entity_type = item_to_process["entity_type"]
                     field = item_to_process["field"]
                     
-                    sg_data = self._app.shotgun.find_one(entity_type, 
-                                                         [["id", "is", entity_id]],
-                                                         [field])
+                    sg_data = shotgun_api.find_one(entity_type, [["id", "is", entity_id]], [field])
                     
                     if sg_data is None or sg_data.get(field) is None:
                         # no thumbnail! This is possible if the thumb has changed
