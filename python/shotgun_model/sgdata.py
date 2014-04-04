@@ -19,6 +19,9 @@ import os
 import urllib
 import shutil
 
+# timeout when connection fails
+CONNECTION_TIMEOUT_SECS = 20
+
 from tank.platform.qt import QtCore, QtGui
 
 class ShotgunAsyncDataRetriever(QtCore.QThread):
@@ -231,6 +234,9 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         # the shotgun API isn't threadsafe, so running multiple models in parallel
         # (common) may result in side effects if a single connection is shared
         shotgun_api = tank.util.shotgun.create_sg_connection()
+        
+        # set the maximum timeout for this connection for fluency
+        shotgun_api.config.timeout_secs = CONNECTION_TIMEOUT_SECS
         
         # keep running until thread is terminated
         while self._process_queue:
