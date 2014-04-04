@@ -90,6 +90,18 @@ class ShotgunModel(QtGui.QStandardItemModel):
     ########################################################################################
     # public methods
 
+    def set_shotgun_connecton(self, sg):
+        """
+        Specify the shotgun api instance this model should use to communicate
+        with Shotgun. If not specified, each model instance will instantiante its
+        own connection, via toolkit. The behaviour where each model has its own
+        connection is generally recommended for thread safety reasons since 
+        the Shotgun API isn't natively threadsafe.
+        
+        :param sg: Shotgun API instance
+        """
+        self.__sg_data_retriever.set_shotgun_connection(sg)
+
     def set_overlay_parent(self, parent_widget):
         """
         If you specify this, a spinner will be popping up whenever

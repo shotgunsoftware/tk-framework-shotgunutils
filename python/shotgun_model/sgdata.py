@@ -65,6 +65,7 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         self._app = tank.platform.current_bundle()
         self._wait_condition = QtCore.QWaitCondition()
         self._queue_mutex = QtCore.QMutex()
+        self.__sg = None
         
         # queue data structures
         self._thumb_download_queue = []
@@ -76,6 +77,18 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         
     ############################################################################################################
     # Public methods
+        
+    def set_shotgun_connecton(self, sg):
+        """
+        Specify the shotgun api instance this model should use to communicate
+        with Shotgun. If not specified, each model instance will instantiante its
+        own connection, via toolkit. The behaviour where each model has its own
+        connection is generally recommended for thread safety reasons since 
+        the Shotgun API isn't natively threadsafe.
+        
+        :param sg: Shotgun API instance
+        """
+        self.__sg = sg
         
     def clear(self):
         """
@@ -230,13 +243,14 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
         Main thread loop
         """
         
-        # first grab our own private shotgun connection. This is because
-        # the shotgun API isn't threadsafe, so running multiple models in parallel
-        # (common) may result in side effects if a single connection is shared
-        shotgun_api = tank.util.shotgun.create_sg_connection()
-        
-        # set the maximum timeout for this connection for fluency
-        shotgun_api.config.timeout_secs = CONNECTION_TIMEOUT_SECS
+        if self.__sg is None:
+            # create our own private shotgun connection. This is because
+            # the shotgun API isn't threadsafe, so running multiple models in parallel
+            # (common) may result in side effects if a single connection is shared
+            self.__sg = tank.util.shotgun.create_sg_connection()
+            
+            # set the maximum timeout for this connection for fluency
+            self.__sg.config.timeout_secs = CONNECTION_TIMEOUT_SECS
         
         # keep running until thread is terminated
         while self._process_queue:
@@ -283,7 +297,7 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
                 
                 if item_type == ShotgunAsyncDataRetriever.SG_FIND_QUERY:
                     # get stuff from shotgun
-                    sg = shotgun_api.find(item_to_process["entity_type"],
+                    sg = self.__sg.find(item_to_process["entity_type"],
                                           item_to_process["filters"],
                                           item_to_process["fields"],
                                           item_to_process["order"])
@@ -314,7 +328,7 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
                     entity_type = item_to_process["entity_type"]
                     field = item_to_process["field"]
                     
-                    sg_data = shotgun_api.find_one(entity_type, [["id", "is", entity_id]], [field])
+                    sg_data = self.__sg.find_one(entity_type, [["id", "is", entity_id]], [field])
                     
                     if sg_data is None or sg_data.get(field) is None:
                         # no thumbnail! This is possible if the thumb has changed
