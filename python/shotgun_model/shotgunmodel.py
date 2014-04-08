@@ -22,8 +22,11 @@ from tank.platform.qt import QtCore, QtGui
 
 # just so we can do some basic file validation
 FILE_MAGIC_NUMBER = 0xDEADBEEF # so we can validate file format correctness before loading
-FILE_VERSION = 18              # if we ever change the file format structure
+FILE_VERSION = 19              # if we ever change the file format structure
 
+
+ 
+ 
 
 class ShotgunModel(QtGui.QStandardItemModel):
     """
@@ -252,7 +255,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             except Exception, e:
                 self.__app.log_debug("Couldn't load cache data from disk. Will proceed with "
                                     "full SG load. Error reported: %s" % e)
-                
+        
         return loaded_cache_data        
     
     def _refresh_data(self):
@@ -366,7 +369,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
     ########################################################################################
     # methods to be implemented by subclasses    
-    
+        
     def _populate_item(self, item, sg_data):
         """
         Whenever an item is constructed, this methods is called. It allows subclasses to intercept
@@ -386,9 +389,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
     def _populate_default_thumbnail(self, item):
         """
-        Called whenever an item is originally born, either because a shotgun query returned it
-        or because it was loaded as part of a cache load from disk. This method will by default
-        set up all brand new fresh items with an empty thumbail.
+        Called whenever an item is constructed and needs to be associated with a default thumbnail.
+        In the current implementation, thumbnails are not cached in the same way as the rest of 
+        the model data, meaning that this method is executed each time an item is constructed, 
+        regardless of if it came from an asynchronous shotgun query or a cache fetch. 
         
         Later on, if the model was instantiated with the download_thumbs parameter set to True,
         the standard 'image' field thumbnail will be automatically downloaded for all items (or
@@ -401,13 +405,18 @@ class ShotgunModel(QtGui.QStandardItemModel):
         :param item: QStandardItem that is about to be added to the model. This has been primed
                      with the standard settings that the ShotgunModel handles.        
         """
-        # the default implementation ensures that the icon is cleared
-        # this is because when the items are serialized to disk, they seem
-        # to store a low res version of the icons, so if the icon isn't cleared
-        # it usually shows up as a not-very-looking low res version of the real
-        # thumbnail.
-        item.setIcon(QtGui.QIcon())
+        # the default implementation does nothing
 
+    
+    def _finalize_item(self, item):
+        """
+        Called whenever an item is fully constructed, either because a shotgun query returned it
+        or because it was loaded as part of a cache load from disk.
+        
+        :param item: QStandardItem that is about to be added to the model. This has been primed
+                     with the standard settings that the ShotgunModel handles.        
+        """
+        # the default implementation does nothing
 
     def _populate_thumbnail(self, item, field, path):
         """
@@ -417,7 +426,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
         - QStandardItem is created, either through a cache load from disk or 
           from a payload coming from the Shogun API.
         - After the item has been set up with its associated Shotgun data, 
-          _populate_default_thumbnail() is called to set up a default thumbnail.
+          _populate_default_thumbnail() is called, allowing client code to set
+          up a default thumbnail that will be shown while potential real thumbnail
+          data is being loaded.
           This will provide an empty thumbnail by default but can be subclassed.
         - The model will now start looking for the real thumbail.
           - If the thumbnail is already cached on disk, _populate_thumbnai() is
@@ -772,12 +783,14 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # all shotgun values to be proper unicode prior to setData
                 found_item.setData(self.__utf8_to_unicode(sg_item), ShotgunModel.SG_DATA_ROLE)
                 
-                
                 # set the default thumbnail
                 self._populate_default_thumbnail(found_item)
                 
                 # call out to class implementation to do its thing
                 self._populate_item(found_item, sg_item)
+
+                # run the finalizer
+                self._finalize_item(found_item)
                 
                 # request thumb
                 if self.__download_thumbs:
@@ -787,11 +800,15 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 self.__entity_tree_data[ sg_item["id"] ] = found_item
                 
             else:
+                
                 # set the default thumbnail
                 self._populate_default_thumbnail(found_item)
                 
                 # call out to class implementation to do its thing
                 self._populate_item(found_item, None)
+
+                # run the finalizer
+                self._finalize_item(found_item)
 
 
         if not on_leaf_level:
@@ -904,12 +921,15 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # but using somewhat strange rules, so properly convert
                 # values to unicode prior to insertion
                 item.setData(self.__utf8_to_unicode(sg_item), ShotgunModel.SG_DATA_ROLE)
-
+                
                 # set the default thumbnail
                 self._populate_default_thumbnail(item)
                 
                 # call out to class implementation to do its thing
                 self._populate_item(item, sg_item)                
+
+                # and run the finalizer
+                self._finalize_item(item)
                 
                 # request thumb
                 if self.__download_thumbs:
@@ -921,10 +941,15 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 
                 # not on leaf level yet
                 # set the default thumbnail
-                self._populate_default_thumbnail(item)
-                
+                self._populate_default_thumbnail(item)                
+                                
                 # call out to class implementation to do its thing
+                # because this is a leaf level node, pass None
+                # as the shotgun data
                 self._populate_item(item, None)
+
+                # and run the finalizer.
+                self._finalize_item(item)
                 
                 # now when we recurse down, we need to add our current constrain
                 # to the list of constraints. For this we need the raw sg value
@@ -1056,9 +1081,18 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # add the model item to our tree data dict keyed by id
                 self.__entity_tree_data[ sg_data["id"] ] = item            
 
+            # serialized items contain some sort of strange
+            # low-rez thumb data which we cannot use. Make
+            # sure that is all cleared.
+            item.setIcon(QtGui.QIcon())
+
             # serialized items do not contain a full high rez thumb, so 
             # re-create that. First, set the default thumbnail
             self._populate_default_thumbnail(item)
+
+            # run the finalize method so that subclasses
+            # can do any setup they need 
+            self._finalize_item(item)
 
             # request thumb
             if self.__download_thumbs:
