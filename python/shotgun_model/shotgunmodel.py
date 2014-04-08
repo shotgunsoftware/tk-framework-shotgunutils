@@ -73,6 +73,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__sg_data_retriever.work_failure.connect( self.__on_worker_failure)
         self.__current_work_id = 0
         self.__schema_generation = schema_generation
+        self.__full_cache_path = None
+        
         # and start its thread!
         self.__sg_data_retriever.start()
         
@@ -116,7 +118,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         self.__overlay = OverlayWidget(parent_widget)
         
-        
     def destroy(self):
         """
         Call this method prior to destroying this object.
@@ -150,7 +151,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Returns a list of Shotgun filters representing the given item.
         
         :param item: One of the QStandardItem model items that is associated with this model.
-        :return: standard shotgun filter list to repreent that item
+        :return: standard shotgun filter list to represent that item
         """
         # prime filters with our base query
         filters = copy.deepcopy(self.__filters)
@@ -166,9 +167,24 @@ class ShotgunModel(QtGui.QStandardItemModel):
     def get_entity_type(self):
         """
         Returns the Shotgun Entity type associated with this model.
+        
+        :returns: Shotgun entity type string (e.g. 'Shot', 'Asset' etc).
         """
         return self.__entity_type
          
+    def clear_caches(self):
+        """
+        Clear any caches associated with the current model and clears the model instance.        
+        """
+        # clear memory
+        self.__reset_all_data()
+        
+        if self.__full_cache_path and os.path.exists(self.__full_cache_path):
+            try:
+                os.remove(self.__full_cache_path)
+            except Exception, e:
+                self.__log_warning("clear_caches method could not remove cache file '%s' "
+                                   "from disk. Details: %s" % e)
 
     ########################################################################################
     # protected methods not meant to be subclassed but meant to be called by subclasses
@@ -231,30 +247,30 @@ class ShotgunModel(QtGui.QStandardItemModel):
         cache_filename = "tk_sgmodel_%s.sgcache" % m.hexdigest()
         self.__full_cache_path = os.path.join(tempfile.gettempdir(), cache_filename)
         
-        self.__app.log_debug("-----------------------------------------------------")
-        self.__app.log_debug("LOAD DATA + Model reset for %s" % self)
-        self.__app.log_debug("Entity type: %s" % self.__entity_type)
-        self.__app.log_debug("Cache path: %s" % self.__full_cache_path)
-        self.__app.log_debug("Filters: %s" % self.__filters)
-        self.__app.log_debug("Hierarchy: %s" % self.__hierarchy)
-        self.__app.log_debug("Extra Fields: %s" % self.__fields)
-        self.__app.log_debug("Order: %s" % self.__order)
-        self.__app.log_debug("-----------------------------------------------------")
+        self.__log_debug("-----------------------------------------------------")
+        self.__log_debug("LOAD DATA + Model reset for %s" % self)
+        self.__log_debug("Entity type: %s" % self.__entity_type)
+        self.__log_debug("Cache path: %s" % self.__full_cache_path)
+        self.__log_debug("Filters: %s" % self.__filters)
+        self.__log_debug("Hierarchy: %s" % self.__hierarchy)
+        self.__log_debug("Extra Fields: %s" % self.__fields)
+        self.__log_debug("Order: %s" % self.__order)
+        self.__log_debug("-----------------------------------------------------")
         
         self._load_external_data()    
         
         loaded_cache_data = False
         if os.path.exists(self.__full_cache_path):
             # first see if we need to load in any overlay data from deriving classes
-            self.__app.log_debug("Loading cached data %s..." % self.__full_cache_path)
+            self.__log_debug("Loading cached data %s..." % self.__full_cache_path)
             try:
                 
                 self.__load_from_disk(self.__full_cache_path)
-                self.__app.log_debug("...loading complete!")
+                self.__log_debug("...loading complete!")
                 loaded_cache_data = True
             except Exception, e:
-                self.__app.log_debug("Couldn't load cache data from disk. Will proceed with "
-                                    "full SG load. Error reported: %s" % e)
+                self.__log_debug("Couldn't load cache data from disk. Will proceed with "
+                                "full SG load. Error reported: %s" % e)
         
         return loaded_cache_data        
     
@@ -307,7 +323,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         if self.__overlay:
             self.__overlay.show_message_pixmap(pixmap)
         else:
-            self.__app.log_warning("Shotgun Model: Got call to _show_overlay_pixmap() "
+            self.__log_warning("Shotgun Model: Got call to _show_overlay_pixmap() "
                                    "but no overlay parent set!")        
 
     def _show_overlay_info_message(self, msg):
@@ -319,7 +335,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         if self.__overlay:
             self.__overlay.show_message(msg)
         else:
-            self.__app.log_warning("Shotgun Model: Got call to _show_overlay_info_message() "
+            self.__log_warning("Shotgun Model: Got call to _show_overlay_info_message() "
                                    "but no overlay parent set!")        
         
     def _show_overlay_error_message(self, msg):
@@ -331,7 +347,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         if self.__overlay:
             self.__overlay.show_error_message(msg)
         else:
-            self.__app.log_warning("Shotgun Model: Got call to _show_overlay_error_message() "
+            self.__log_warning("Shotgun Model: Got call to _show_overlay_error_message() "
                                    "but no overlay parent set!")        
 
     def _request_thumbnail_download(self, item, field, url, entity_type, entity_id):
@@ -483,6 +499,23 @@ class ShotgunModel(QtGui.QStandardItemModel):
     ########################################################################################
     # private methods 
 
+    def __log_debug(self, msg):
+        """
+        Convenience wrapper around debug logging
+        
+        :param msg: debug message
+        """
+        self.__app.log_debug("[Toolkit SG Model] %s" % msg)
+    
+    def __log_warning(self, msg):
+        """
+        Convenience wrapper around warning logging
+        
+        :param msg: debug message
+        """
+        self.__app.log_warning("[Toolkit SG Model] %s" % msg)
+
+
     def __reset_all_data(self):
         """
         Deletes all the contents of the model. 
@@ -524,7 +557,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             if self.__overlay:
                 self.__overlay.show_error_message(full_msg)
             
-        self.__app.log_warning(full_msg)
+        self.__log_warning(full_msg)
 
     def __on_worker_signal(self, uid, data):
         """
@@ -578,9 +611,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
         if len(self.__entity_tree_data) == 0:
             # we have an empty tree. Run recursive tree generation for performance.
             if len(sg_data) != 0:
-                self.__app.log_debug("No cached items in tree! Creating full tree from Shotgun data...")
+                self.__log_debug("No cached items in tree! Creating full tree from Shotgun data...")
                 self.__rebuild_whole_tree_from_sg_data(sg_data)
-                self.__app.log_debug("...done!")
+                self.__log_debug("...done!")
                 modifications_made = True
         
         else:
@@ -593,21 +626,21 @@ class ShotgunModel(QtGui.QStandardItemModel):
             removed_ids = ids_in_tree.difference(ids_from_shotgun)
 
             if len(removed_ids) > 0:
-                self.__app.log_debug("Detected deleted items %s. Rebuilding tree..." % removed_ids)
+                self.__log_debug("Detected deleted items %s. Rebuilding tree..." % removed_ids)
                 self.__rebuild_whole_tree_from_sg_data(sg_data)
-                self.__app.log_debug("...done!")
+                self.__log_debug("...done!")
                 modifications_made = True
                 
             else:                
                 added_ids = ids_from_shotgun.difference(ids_in_tree)                
                 if len(added_ids) > 0:
                     # wedge in the new items
-                    self.__app.log_debug("Detected added items. Adding them in-situ to tree...")
+                    self.__log_debug("Detected added items. Adding them in-situ to tree...")
                     for d in sg_data:
                         if d["id"] in added_ids:
-                            self.__app.log_debug("Adding %s to tree" % d )
+                            self.__log_debug("Adding %s to tree" % d )
                             self.__add_sg_item_to_tree(d)
-                    self.__app.log_debug("...done!")
+                    self.__log_debug("...done!")
                     modifications_made = True
 
             # check for modifications. At this point, the number of items in the tree and 
@@ -617,7 +650,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # Also note that we need to exclude any S3 urls from the comparison as these change
             # all the time
             #
-            self.__app.log_debug("Checking for modifications...")
+            self.__log_debug("Checking for modifications...")
             detected_changes = False
             for d in sg_data:
                 # if there are modifications of any kind, we just rebuild the tree at the moment
@@ -625,30 +658,30 @@ class ShotgunModel(QtGui.QStandardItemModel):
                     existing_sg_data = self.__entity_tree_data[ d["id"] ].data(ShotgunModel.SG_DATA_ROLE)
                     if not self.__sg_compare_data(d, existing_sg_data):                    
                         # shotgun data has changed for this item! Rebuild the tree
-                        self.__app.log_debug("SG data change: %s --> %s" % (existing_sg_data, d))
+                        self.__log_debug("SG data change: %s --> %s" % (existing_sg_data, d))
                         detected_changes = True
                 except KeyError, e:
-                    self.__app.log_warning("Shotgun item %s not appearing in tree - most likely because "
+                    self.__log_warning("Shotgun item %s not appearing in tree - most likely because "
                                           "there is another object in Shotgun with the same name." % d)
                       
             if detected_changes:
-                self.__app.log_debug("Detected modifications. Rebuilding tree...")
+                self.__log_debug("Detected modifications. Rebuilding tree...")
                 self.__rebuild_whole_tree_from_sg_data(sg_data)
-                self.__app.log_debug("...done!")
+                self.__log_debug("...done!")
                 modifications_made = True
             else:
-                self.__app.log_debug("...no modifications found.")
+                self.__log_debug("...no modifications found.")
         
         # now go through the tree and download all thumbs
         
         # last step - save our tree to disk for fast caching next time!
         if modifications_made:
-            self.__app.log_debug("Saving tree to disk %s..." % self.__full_cache_path)
+            self.__log_debug("Saving tree to disk %s..." % self.__full_cache_path)
             try:
                 self.__save_to_disk(self.__full_cache_path)
-                self.__app.log_debug("...saving complete!")            
+                self.__log_debug("...saving complete!")            
             except Exception, e:
-                self.__app.log_warning("Couldn't save cache data to disk: %s" % e)
+                self.__log_warning("Couldn't save cache data to disk: %s" % e)
         
         
     ########################################################################################
