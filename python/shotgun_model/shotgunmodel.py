@@ -24,10 +24,6 @@ from tank.platform.qt import QtCore, QtGui
 FILE_MAGIC_NUMBER = 0xDEADBEEF # so we can validate file format correctness before loading
 FILE_VERSION = 19              # if we ever change the file format structure
 
-
- 
- 
-
 class ShotgunModel(QtGui.QStandardItemModel):
     """
     A QT Model representing a Shotgun query.
@@ -189,7 +185,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
     ########################################################################################
     # protected methods not meant to be subclassed but meant to be called by subclasses
     
-    def _load_data(self, entity_type, filters, hierarchy, fields, order):
+    def _load_data(self, entity_type, filters, hierarchy, fields, order=None):
         """
         This is the main method to use to configure the model. You basically
         pass a specific find query to the model and it will start tracking
@@ -218,6 +214,14 @@ class ShotgunModel(QtGui.QStandardItemModel):
                           specify None for this parameter, Shotgun will not be called when
                           the _refresh_data() method is being executed.
         :param order:     Order clause for the Shotgun data. Standard Shotgun API syntax.
+                          Note that this is an advanced parameter which is meant to be used
+                          in subclassing only. The model itself will be ordered by its
+                          default display name, and if any other type of ordering is desirable,
+                          use for example a QProxyModel to handle this. However, knowing in which
+                          order results will arrive from Shotgun can be beneficial if you are doing
+                          grouping, deferred loading and aggregation of data as part of your
+                          subclassed implementation, typically via the _before_data_processing() method.
+                        
         """
         
         # clear out old data
@@ -228,7 +232,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__entity_type = entity_type
         self.__filters = filters
         self.__fields = fields
-        self.__order = order
+        self.__order = order or []
         self.__hierarchy = hierarchy
         
         # when we cache the data associated with this model, create
@@ -247,7 +251,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         cache_filename = "tk_sgmodel_%s.sgcache" % m.hexdigest()
         self.__full_cache_path = os.path.join(tempfile.gettempdir(), cache_filename)
         
-        self.__log_debug("-----------------------------------------------------")
         self.__log_debug("LOAD DATA + Model reset for %s" % self)
         self.__log_debug("Entity type: %s" % self.__entity_type)
         self.__log_debug("Cache path: %s" % self.__full_cache_path)
@@ -255,7 +258,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__log_debug("Hierarchy: %s" % self.__hierarchy)
         self.__log_debug("Extra Fields: %s" % self.__fields)
         self.__log_debug("Order: %s" % self.__order)
-        self.__log_debug("-----------------------------------------------------")
         
         self._load_external_data()    
         
@@ -752,8 +754,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
     def __add_sg_item_to_tree(self, sg_item):
         """
-        Add a single item to the tree.
-        This is a slow method.
+        Add a single item to the tree. This is a slow method.
         """
         root = self.invisibleRootItem()
         # now drill down recursively, create any missing nodes on the way
@@ -922,7 +923,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
                 discrete_values[ field_display_name ] = sg_item
                 
-        # process values in alphabetical order, case insensitive
+        # process values in alphabetical order by name, case insensitive
         for dv in sorted(discrete_values.keys(), cmp=lambda x,y: cmp(x.lower(), y.lower()) ):
             
             # construct tree view node object
@@ -1044,7 +1045,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
         # write a header
         out.writeInt64(FILE_MAGIC_NUMBER)
-        out.writeInt32( (FILE_VERSION + self.__schema_generation) )
+        out.writeInt32((FILE_VERSION + self.__schema_generation))
 
         # tell which serialization dialect to use
         out.setVersion(QtCore.QDataStream.Qt_4_0)
