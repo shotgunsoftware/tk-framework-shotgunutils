@@ -109,6 +109,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # set up our spinner UI handling
         self.__overlay = None
         self._is_in_spin_state = False
+
         
         # keep various references to all items that the model holds.
         # some of these data structures are to keep the GC
@@ -368,27 +369,30 @@ class ShotgunModel(QtGui.QStandardItemModel):
     def _show_overlay_pixmap(self, pixmap):
         """
         Show an overlay status message in the form of a pixmap.
-        This is for example useful if a particular query doesn't return any results
+        This is for example useful if a particular query doesn't return any results.
+        If an error message is already being shown, the pixmap will not 
+        replace the error message. 
         
         :param pixmap: QPixmap object containing graphic to show.
         """
         if self.__overlay:
             self.__overlay.show_message_pixmap(pixmap)
         else:
-            self.__log_warning("Shotgun Model: Got call to _show_overlay_pixmap() "
-                                   "but no overlay parent set!")        
+            self.__log_warning("Got call to _show_overlay_pixmap() but no overlay parent set!")        
 
     def _show_overlay_info_message(self, msg):
         """
         Show an overlay status message.
+        If an error is already displayed, 
+        this info message will not be shown.
         
         :param msg: message to display
+        :returns: True if the message was shown, False if not.
         """
         if self.__overlay:
             self.__overlay.show_message(msg)
         else:
-            self.__log_warning("Shotgun Model: Got call to _show_overlay_info_message() "
-                                   "but no overlay parent set!")        
+            self.__log_warning("Got call to _show_overlay_info_message() but no overlay parent set!")        
         
     def _show_overlay_error_message(self, msg):
         """
@@ -399,8 +403,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         if self.__overlay:
             self.__overlay.show_error_message(msg)
         else:
-            self.__log_warning("Shotgun Model: Got call to _show_overlay_error_message() "
-                                   "but no overlay parent set!")        
+            self.__log_warning("Got call to _show_overlay_error_message() but no overlay parent set!")        
 
     def _request_thumbnail_download(self, item, field, url, entity_type, entity_id):
         """

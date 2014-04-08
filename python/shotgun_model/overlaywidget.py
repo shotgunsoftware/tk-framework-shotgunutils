@@ -163,7 +163,9 @@ class OverlayWidget(QtGui.QWidget):
 
     def show_error_message(self, msg):
         """
-        Display an error message
+        Display an error message.
+        
+        :param msg: message to display
         """
         self._timer.stop()
         self.setVisible(True)
@@ -173,23 +175,40 @@ class OverlayWidget(QtGui.QWidget):
  
     def show_message(self, msg):
         """
-        Show an info message
+        Show an info message. If an error is being shown, 
+        the info message will not be replacing the error.
+        
+        :param msg: message to display
+        :returns: true if message was displayed, false otherwise
         """
-        self._timer.stop()
-        self.setVisible(True)
-        self._message = msg
-        self._mode = OverlayWidget.MODE_INFO_TEXT
-        self.repaint()
+        if self._mode == OverlayWidget.MODE_ERROR:
+            return False
+        else: 
+            self._timer.stop()
+            self.setVisible(True)
+            self._message = msg
+            self._mode = OverlayWidget.MODE_INFO_TEXT
+            self.repaint()
+            return True
         
     def show_message_pixmap(self, pixmap):
         """
-        Show an info message in the form of a pixmap
+        Show an info message in the form of a pixmap.
+        If an error is being shown, the info message 
+        will not be replacing the error.
+        
+        :param pixamp: image to display
+        :returns: true if pixmap was displayed, false otherwise        
         """
-        self._timer.stop()
-        self.setVisible(True)
-        self._message_pixmap = pixmap
-        self._mode = OverlayWidget.MODE_INFO_PIXMAP
-        self.repaint()
+        if self._mode == OverlayWidget.MODE_ERROR:
+            return False
+        else:         
+            self._timer.stop()
+            self.setVisible(True)
+            self._message_pixmap = pixmap
+            self._mode = OverlayWidget.MODE_INFO_PIXMAP
+            self.repaint()
+            return True
 
     def hide(self):
         """
