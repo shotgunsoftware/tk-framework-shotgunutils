@@ -185,7 +185,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
     ########################################################################################
     # protected methods not meant to be subclassed but meant to be called by subclasses
     
-    def _load_data(self, entity_type, filters, hierarchy, fields, order=None):
+    def _load_data(self, entity_type, filters, hierarchy, fields, order=None, seed=None):
         """
         This is the main method to use to configure the model. You basically
         pass a specific find query to the model and it will start tracking
@@ -221,6 +221,15 @@ class ShotgunModel(QtGui.QStandardItemModel):
                           order results will arrive from Shotgun can be beneficial if you are doing
                           grouping, deferred loading and aggregation of data as part of your
                           subclassed implementation, typically via the _before_data_processing() method.
+        :param seed:      Advanced parameter. With each shotgun query being cached on disk, the model
+                          generates a cache seed which it is using to store data on disk. Since the cache
+                          data on disk is a reflection of a particular shotgun query, this seed is typically
+                          generated from the various query and field parameters passed to this method. However,
+                          in some cases when you are doing advanced subclassing, for example when you are culling
+                          out data based on some external state, the model state does not solely depend on the
+                          shotgun query parameters. It may also depend on some external factors. In this case,
+                          the cache seed should also be influenced by those parameters and you can pass
+                          an external string via this parameter which will be added to the seed.
                         
         """
         
@@ -240,23 +249,25 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # parameters that will determine the contents that is loaded into the tree
         # note that we add the shotgun host name to support multiple sites being used
         # on a single machine
-        hash_base = "%s_%s_%s_%s_%s_%s" % (self.__app.shotgun.base_url, 
-                                           self.__entity_type, 
-                                           str(self.__filters), 
-                                           str(self.__fields),
-                                           str(self.__order),
-                                           str(self.__hierarchy))
+        hash_base = "%s_%s_%s_%s_%s_%s_%s" % (self.__app.shotgun.base_url, 
+                                              self.__entity_type, 
+                                              str(self.__filters), 
+                                              str(self.__fields),
+                                              str(self.__order),
+                                              str(seed),
+                                              str(self.__hierarchy))
         m = hashlib.md5()
         m.update(hash_base)
         cache_filename = "tk_sgmodel_%s.sgcache" % m.hexdigest()
         self.__full_cache_path = os.path.join(tempfile.gettempdir(), cache_filename)
         
-        self.__log_debug("LOAD DATA + Model reset for %s" % self)
+        self.__log_debug("")
+        self.__log_debug("Model Reset for %s" % self)
         self.__log_debug("Entity type: %s" % self.__entity_type)
         self.__log_debug("Cache path: %s" % self.__full_cache_path)
         self.__log_debug("Filters: %s" % self.__filters)
         self.__log_debug("Hierarchy: %s" % self.__hierarchy)
-        self.__log_debug("Extra Fields: %s" % self.__fields)
+        self.__log_debug("Fields: %s" % self.__fields)
         self.__log_debug("Order: %s" % self.__order)
         
         self._load_external_data()    
