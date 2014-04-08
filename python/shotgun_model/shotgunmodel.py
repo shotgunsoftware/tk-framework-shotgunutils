@@ -43,6 +43,38 @@ class ShotgunModel(QtGui.QStandardItemModel):
     types for the asset types. The leaf nodes in this case would be assets.
     """
 
+    # signal which gets emitted whenever the model has been updated with fresh 
+    # shotgun data. The boolean indicates that a change in the model data has
+    # taken place as part of this process. If the refresh fails for some reason,
+    # this signal may not be emitted.
+    #
+    # The synchronous data refresh cycle starts with a call to _refresh_data()
+    # and normally ends with either a data_refreshed or a data_refresh_fail 
+    # being emitted. The exception being that if you call _load_data() or clear
+    # the model in some other way, the signals may never be emitted.
+    data_refreshed = QtCore.Signal(bool)
+    
+    # signal which gets emitted in the case the refresh fails for some reason,
+    # typically due to the absence of an internet connection. This signal could
+    # for example be used to drive a "retry" button of some kind. The str
+    # parameter carries an error message with details about why the 
+    # refresh wasn't successful.
+    data_refresh_fail = QtCore.Signal(str)
+    
+    # signal that gets emitted whenever the model deems it appropriate to 
+    # indicate that data is being loaded. Note that this signal is not 
+    # emitted every time data is loaded from Shotgun, but only when there 
+    # is no cached data available to display. This signal can be useful if
+    # an implementation wants to set up a custom overlay system instead
+    # of or in addition to the built in one that is provided via 
+    # the set_overlay_parent() method.
+    progress_spinner_start = QtCore.Signal()
+    
+    # conversely, an end signal is being emitted every time a progress spinner
+    # should be deactivated. 
+    progress_spinner_end = QtCore.Signal()
+
+    # key roles which 
     SG_DATA_ROLE = QtCore.Qt.UserRole + 1
     IS_SG_MODEL_ROLE = QtCore.Qt.UserRole + 2
     SG_ASSOCIATED_FIELD_ROLE = QtCore.Qt.UserRole + 3
@@ -76,6 +108,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
         # set up our spinner UI handling
         self.__overlay = None
+        self._is_in_spin_state = False
         
         # keep various references to all items that the model holds.
         # some of these data structures are to keep the GC
@@ -307,8 +340,14 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
         if len(self.__entity_tree_data) == 0:
             # we are loading an empty tree
+            
             if self.__overlay:
+                # indicate in built in spin overlay
                 self.__overlay.start_spin()
+                
+            # and signal to any external listeners
+            self.progress_spinner_start.emit()
+            self._is_in_spin_state = True
         
         if self.__filters is None:
             # filters is None indicates that no data is desired.
@@ -552,7 +591,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # remove all data in the underyling internal data storage
         # note that we don't use clear() here since that causing
         # crashing on nuke/pyside
-        self.invisibleRootItem().removeRows(0,self.rowCount())
+        self.invisibleRootItem().removeRows(0, self.rowCount())
 
     def __on_worker_failure(self, uid, msg):
         """
@@ -562,13 +601,19 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # not our job. ignore
             return
         
+        if self._is_in_spin_state:
+            # we are spinning, so signal the spin to end
+            self._is_in_spin_state = False
+            self.progress_spinner_end.emit()        
+                
         full_msg = "Error retrieving data from Shotgun: %s" % msg
         
         if len(self.__entity_tree_data) == 0:
             # no data laoded yet. So display error message
             if self.__overlay:
                 self.__overlay.show_error_message(full_msg)
-            
+        
+        self.data_refresh_fail.emit(msg)            
         self.__log_warning(full_msg)
 
     def __on_worker_signal(self, uid, data):
@@ -577,8 +622,17 @@ class ShotgunModel(QtGui.QStandardItemModel):
         This method will dispatch the work to different methods
         depending on what async task has completed.
         """
+        
         if self.__current_work_id == uid:
             # our publish data has arrived from sg!
+
+            # send spin signal
+            if self._is_in_spin_state:
+                # we are spinning, so signal the spin to end
+                self._is_in_spin_state = False
+                self.progress_spinner_end.emit()        
+            
+            # process the data
             sg_data = data["sg"]
             self.__on_sg_data_arrived(sg_data)
         
@@ -595,8 +649,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
     def __on_sg_data_arrived(self, sg_data):
         """
         Handle asynchronous shotgun data arrivin after a find request.
-        """
-        
+        """        
         # pre-process data
         sg_data = self._before_data_processing(sg_data)        
         
@@ -684,8 +737,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
             else:
                 self.__log_debug("...no modifications found.")
         
-        # now go through the tree and download all thumbs
-        
         # last step - save our tree to disk for fast caching next time!
         if modifications_made:
             self.__log_debug("Saving tree to disk %s..." % self.__full_cache_path)
@@ -694,6 +745,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 self.__log_debug("...saving complete!")            
             except Exception, e:
                 self.__log_warning("Couldn't save cache data to disk: %s" % e)
+
+        # and emit completion signal
+        self.data_refreshed.emit(modifications_made)
         
         
     ########################################################################################
