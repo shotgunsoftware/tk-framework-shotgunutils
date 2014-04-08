@@ -95,13 +95,13 @@ class ShotgunModel(QtGui.QStandardItemModel):
     ########################################################################################
     # public methods
 
-    def set_shotgun_connecton(self, sg):
+    def set_shotgun_connection(self, sg):
         """
         Specify the shotgun api instance this model should use to communicate
-        with Shotgun. If not specified, each model instance will instantiante its
-        own connection, via toolkit. The behaviour where each model has its own
+        with Shotgun. If not specified, each model instance will instantiate its
+        own connection, via toolkit. The behavior where each model has its own
         connection is generally recommended for thread safety reasons since 
-        the Shotgun API isn't natively threadsafe.
+        the Shotgun API isn't natively thread-safe.
         
         :param sg: Shotgun API instance
         """
@@ -422,7 +422,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
                      with the standard settings that the ShotgunModel handles.        
         """
         # the default implementation does nothing
-
     
     def _finalize_item(self, item):
         """

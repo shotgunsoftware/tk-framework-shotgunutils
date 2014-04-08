@@ -9,3 +9,4 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 from .shotgunmodel import ShotgunModel
+from .simpleshotgunmodel import SimpleShotgunModel
