@@ -210,10 +210,13 @@ class OverlayWidget(QtGui.QWidget):
             self.repaint()
             return True
 
-    def hide(self):
+    def hide(self, hide_errors=True):
         """
         Hide the overlay
         """
+        if hide_errors == False and self._mode == OverlayWidget.MODE_ERROR:
+            # an error is displayed - leave it up.
+            return
         self._timer.stop()
         self._mode = OverlayWidget.MODE_OFF
         self.setVisible(False)

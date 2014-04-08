@@ -366,6 +366,15 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                                                            fields,
                                                                            self.__order)
     
+    def _hide_overlay_info(self):
+        """
+        Hides any overlay that is currently shown, except for
+        error messages.
+        """
+        if self.__overlay:
+            self.__overlay.hide(hide_errors=False)
+        
+        
     def _show_overlay_pixmap(self, pixmap):
         """
         Show an overlay status message in the form of a pixmap.
