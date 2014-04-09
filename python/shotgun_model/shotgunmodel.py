@@ -18,6 +18,8 @@ import tempfile
 from .overlaywidget import OverlayWidget
 from .sgdata import ShotgunAsyncDataRetriever
 
+from .util import get_sanitized_data, get_sg_data
+
 from tank.platform.qt import QtCore, QtGui
 
 
@@ -72,14 +74,14 @@ class ShotgunModel(QtGui.QStandardItemModel):
     # should be deactivated. 
     progress_spinner_end = QtCore.Signal()
 
-    # roles that can be used to access orthogonal data
+    # roles that can be used to access data
     SG_DATA_ROLE = QtCore.Qt.UserRole + 1
+    SG_ASSOCIATED_FIELD_ROLE = QtCore.Qt.UserRole + 3
     
     # internal constants - please do not access directly but instead use the helper
     # methods provided! We may change these constants without prior notice.
     # internal roles
     IS_SG_MODEL_ROLE = QtCore.Qt.UserRole + 2
-    SG_ASSOCIATED_FIELD_ROLE = QtCore.Qt.UserRole + 3
     # magic number for IO streams
     FILE_MAGIC_NUMBER = 0xDEADBEEF 
     # version of binary format
@@ -211,7 +213,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # now walk up the tree and get all fields
         p = item
         while p:
-            field_data = p.data(ShotgunModel.SG_ASSOCIATED_FIELD_ROLE) 
+            field_data = get_sanitized_data(p, ShotgunModel.SG_ASSOCIATED_FIELD_ROLE) 
             filters.append( [ field_data["name"], "is", field_data["value"] ] )
             p = p.parent()
         return filters  
@@ -754,7 +756,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             for d in sg_data:
                 # if there are modifications of any kind, we just rebuild the tree at the moment
                 try:
-                    existing_sg_data = self.__entity_tree_data[ d["id"] ].data(ShotgunModel.SG_DATA_ROLE)
+                    existing_sg_data = get_sg_data(self.__entity_tree_data[ d["id"] ])
                     if not self.__sg_compare_data(d, existing_sg_data):                    
                         # shotgun data has changed for this item! Rebuild the tree
                         self.__log_debug("SG data change: %s --> %s" % (existing_sg_data, d))
@@ -809,42 +811,20 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 
     def __sg_compare_data(self, a, b):
         """
-        Compare two sg dicts:
-        - unicode is turned into utf-8
-        - assumes same set of keys in a and b
-        - omits thumbnail fields because these change all the time (S3)
+        Compares two sg dicts, assumes the same set of keys in both.
+        Omits thumbnail fields because these change all the time (S3).
+        Both inputs are assumed to contain utf-8 encoded data.
         """
-        
-        def _to_utf8(val):
-            """
-            Convert sg val to string.
-            """
-            if isinstance(val, unicode):
-                # u"foo" --> "foo"
-                str_val = val.encode('UTF-8')
-            elif isinstance(val, dict):
-                # assume sg link dict - convert name to str
-                # {"id": 123, "name": u"foo"} ==> "foo"
-                str_val = _to_utf8(val["name"])
-            else:
-                # 1 ==> "1"
-                # "foo" ==> "foo"
-                str_val = str(val)
-            
-            return str_val
-            
         for k in a:
             
+            a_val = a.get(k)
+            b_val = b.get(k)
+            
+            # skip thumbnail fields in the comparison - these change all the time!
             # seem to have multiple url formats coming back from sg api so need to try to 
             # catchall time stamps and crypt keys because they keep changing all the time
-            if "image" in k or "amazonaws" in _to_utf8(a[k]) or "AccessKeyId" in _to_utf8(a[k]):
-                # skip thumbnail fields in the comparison - these 
-                # change all the time!
+            if isinstance(a_val, str) and ("image" in k or "amazonaws" in a_val or "AccessKeyId" in a_val):
                 continue
-            
-            # now convert field values to strings and then comapre
-            a_val = _to_utf8(a[k])
-            b_val = _to_utf8(b[k])
             
             if a_val != b_val:
                 return False
