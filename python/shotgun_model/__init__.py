@@ -10,3 +10,4 @@
 
 from .shotgunmodel import ShotgunModel
 from .simpleshotgunmodel import SimpleShotgunModel
+from .util import tk_safe_data

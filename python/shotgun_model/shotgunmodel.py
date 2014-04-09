@@ -20,9 +20,7 @@ from .sgdata import ShotgunAsyncDataRetriever
 
 from tank.platform.qt import QtCore, QtGui
 
-# just so we can do some basic file validation
-FILE_MAGIC_NUMBER = 0xDEADBEEF # so we can validate file format correctness before loading
-FILE_VERSION = 19              # if we ever change the file format structure
+
 
 class ShotgunModel(QtGui.QStandardItemModel):
     """
@@ -74,10 +72,19 @@ class ShotgunModel(QtGui.QStandardItemModel):
     # should be deactivated. 
     progress_spinner_end = QtCore.Signal()
 
-    # key roles which 
+    # roles that can be used to access orthogonal data
     SG_DATA_ROLE = QtCore.Qt.UserRole + 1
+    
+    # internal constants - please do not access directly but instead use the helper
+    # methods provided! We may change these constants without prior notice.
+    # internal roles
     IS_SG_MODEL_ROLE = QtCore.Qt.UserRole + 2
     SG_ASSOCIATED_FIELD_ROLE = QtCore.Qt.UserRole + 3
+    # magic number for IO streams
+    FILE_MAGIC_NUMBER = 0xDEADBEEF 
+    # version of binary format
+    FILE_VERSION = 21              
+
 
     def __init__(self, parent, download_thumbs=True, schema_generation=0):
         """
@@ -110,7 +117,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__overlay = None
         self._is_in_spin_state = False
 
-        
         # keep various references to all items that the model holds.
         # some of these data structures are to keep the GC
         # happy, others to hold alternative access methods to the data.
@@ -178,10 +184,26 @@ class ShotgunModel(QtGui.QStandardItemModel):
          
     def get_filters(self, item):
         """
-        Returns a list of Shotgun filters representing the given item.
+        Returns a list of Shotgun filters representing the given item. This is useful if
+        you are trying to determine how intermediate leaf nodes partition leaf node data.
+        
+        For example, if you have created a hierarchical model for a Shot listing:
+        
+        > hierarchy: [sg_sequence, sg_status, code]
+        
+        The Shotgun model will group the data by sequence, then by status, then the leaf
+        nodes will be the shot names. If you execute the get_filters() method on a sequence
+        level tree node, it may return 
+        
+        > [ ['sg_sequence', 'is', {'type': 'Sequence', 'id': 123, 'name': 'foo'}] ]
+        
+        If you execute the get_filters() on a status node in the tree, it may return
+        
+        > [ ['sg_sequence', 'is', {'type': 'Sequence', 'id': 123, 'name': 'foo'}],
+            ['sg_status', 'is', 'ip'] ]
         
         :param item: One of the QStandardItem model items that is associated with this model.
-        :return: standard shotgun filter list to represent that item
+        :returns: standard shotgun filter list to represent that item
         """
         # prime filters with our base query
         filters = copy.deepcopy(self.__filters)
@@ -1121,8 +1143,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         out = QtCore.QDataStream(fh)
         
         # write a header
-        out.writeInt64(FILE_MAGIC_NUMBER)
-        out.writeInt32((FILE_VERSION + self.__schema_generation))
+        out.writeInt64(self.FILE_MAGIC_NUMBER)
+        out.writeInt32((self.FILE_VERSION + self.__schema_generation))
 
         # tell which serialization dialect to use
         out.setVersion(QtCore.QDataStream.Qt_4_0)
@@ -1159,11 +1181,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
         file_in = QtCore.QDataStream(fh)
         
         magic = file_in.readInt64()
-        if magic != FILE_MAGIC_NUMBER:
+        if magic != self.FILE_MAGIC_NUMBER:
             raise Exception("Invalid file magic number!")
         
         version = file_in.readInt32()
-        if version != (FILE_VERSION + self.__schema_generation):
+        if version != (self.FILE_VERSION + self.__schema_generation):
             raise Exception("Invalid file version!")
         
         # tell which deserialization dialect to use
@@ -1232,3 +1254,4 @@ class ShotgunModel(QtGui.QStandardItemModel):
             curr_parent.appendRow(item)
             prev_node = item
             
+
