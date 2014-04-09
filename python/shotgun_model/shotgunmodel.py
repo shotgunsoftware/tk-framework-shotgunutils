@@ -1188,8 +1188,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # all leaf nodes have an sg id stored in their metadata
             # the role data accessible via item.data() contains the sg id for this item
             # if there is a sg id associated with this node
-            if item.data(ShotgunModel.SG_DATA_ROLE):
-                sg_data = item.data(ShotgunModel.SG_DATA_ROLE) 
+            sg_data = get_sg_data(item)
+            if sg_data:
                 # add the model item to our tree data dict keyed by id
                 self.__entity_tree_data[ sg_data["id"] ] = item            
 

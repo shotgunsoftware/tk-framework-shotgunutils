@@ -14,6 +14,7 @@ from tank.platform.qt import QtCore, QtGui
 # precalculated for performance
 HAS_QVARIANT = hasattr(QtCore, "QVariant")
 HAS_QSTRING = hasattr(QtCore, "QString")
+HAS_QBYTEARRAY = hasattr(QtCore, "QByteArray")
 
 def get_sg_data(item):
     """
@@ -62,48 +63,41 @@ def sanitize_qt(val):
     :param val: input object
     :returns: cleaned up data 
     """
-    
+
     # test things in order of probable occurrence for speed
     if val is None:
-        # optimisation
-        pass
+        return None
     
     elif isinstance(val, unicode):
-        # unicode object
-        val = val.encode("UTF-8")
-
+        return val.encode("UTF-8")
+    
     elif HAS_QSTRING and isinstance(val, QtCore.QString):
         # convert any QStrings to utf-8 encoded strings
-        val = val.toUtf8()
+        # note the cast to str because pyqt returns a QByteArray
+        return str(val.toUtf8())
     
+    elif HAS_QBYTEARRAY and isinstance(val, QtCore.QByteArray):
+        # convert byte arrays to strs
+        return str(val)
+
     elif HAS_QVARIANT and isinstance(val, QtCore.QVariant):
         # convert any QVariant to their python native equivalents
         val = val.toPyObject()
-        val = __unicode_to_utf8(val)    
-    
-    else:
-        # recursively go through the value and convert all 
-        # unicode objects into utf-8 encoded strings.
-        val = __unicode_to_utf8(val)
-    
-    return val
-
-
-def __unicode_to_utf8(val):
-    """
-    Recursive conversion of all unicode strings to utf-8      
-    """
-    if isinstance(val, unicode):
-        return val.encode("UTF-8")
+        # and then sanitize this
+        return sanitize_qt(val)    
     
     elif isinstance(val, list):
-        return [ __unicode_to_utf8(d) for d in val ]
+        return [ sanitize_qt(d) for d in val ]
     
     elif isinstance(val, dict):
         new_val = {}
         for (k,v) in val.iteritems():
-            new_val[k] = __unicode_to_utf8(v)
+            # both keys and values can be bad
+            safe_key = sanitize_qt(k)
+            safe_val = sanitize_qt(v)
+            new_val[safe_key] = safe_val
         return new_val
 
     else:
         return val        
+    
