@@ -9,11 +9,11 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
-from .shotgunmodel import ShotgunModel
+from .shotgunoverlaymodel import ShotgunOverlayModel
 
 from sgtk.platform.qt import QtCore, QtGui
 
-class SimpleShotgunModel(ShotgunModel):
+class SimpleShotgunModel(ShotgunOverlayModel):
     """
     Convenience wrapper around the Shotgun model for quick and easy access.
     
@@ -34,8 +34,7 @@ class SimpleShotgunModel(ShotgunModel):
         :param parent: QWidget which this model will be parented under. This widget will
                        also be used to paint a spinner and display error messages.
         """
-        ShotgunModel.__init__(self, parent, download_thumbs=True)
-        self.set_overlay_parent(parent)
+        ShotgunOverlayModel.__init__(self, parent, parent, download_thumbs=True)
         
     def load_data(self, entity_type, filters=None, fields=None):
         """

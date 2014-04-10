@@ -15,7 +15,6 @@ import hashlib
 import datetime
 import time
 import tempfile
-from .overlaywidget import OverlayWidget
 from .sgdata import ShotgunAsyncDataRetriever
 
 from .shotgunmodelitem import ShotgunStandardItem
@@ -62,19 +61,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
     # refresh wasn't successful.
     data_refresh_fail = QtCore.Signal(str)
     
-    # signal that gets emitted whenever the model deems it appropriate to 
-    # indicate that data is being loaded. Note that this signal is not 
-    # emitted every time data is loaded from Shotgun, but only when there 
-    # is no cached data available to display. This signal can be useful if
-    # an implementation wants to set up a custom overlay system instead
-    # of or in addition to the built in one that is provided via 
-    # the set_overlay_parent() method.
-    progress_spinner_start = QtCore.Signal()
-    
-    # conversely, an end signal is being emitted every time a progress spinner
-    # should be deactivated. 
-    progress_spinner_end = QtCore.Signal()
-
     # roles that can be used to access data
     SG_DATA_ROLE = QtCore.Qt.UserRole + 1
     SG_ASSOCIATED_FIELD_ROLE = QtCore.Qt.UserRole + 3
@@ -116,10 +102,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # and start its thread!
         self.__sg_data_retriever.start()
         
-        # set up our spinner UI handling
-        self.__overlay = None
-        self._is_in_spin_state = False
-
         # keep various references to all items that the model holds.
         # some of these data structures are to keep the GC
         # happy, others to hold alternative access methods to the data.
@@ -146,17 +128,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         self.__sg_data_retriever.set_shotgun_connection(sg)
 
-    def set_overlay_parent(self, parent_widget):
-        """
-        If you specify this, a spinner will be popping up whenever
-        an empty dataset is being processed. The overlay is
-        also used to display messages.
-        
-        :param parent_widget: A QWidget object on top of which any progress
-                              overlays will be rendered.        
-        """
-        self.__overlay = OverlayWidget(parent_widget)
-        
     def destroy(self):
         """
         Call this method prior to destroying this object.
@@ -214,7 +185,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # now walk up the tree and get all fields
         p = item
         while p:
-            field_data = get_sanitized_data(p, ShotgunModel.SG_ASSOCIATED_FIELD_ROLE) 
+            field_data = get_sanitized_data(p, self.SG_ASSOCIATED_FIELD_ROLE) 
             filters.append( [ field_data["name"], "is", field_data["value"] ] )
             p = p.parent()
         return filters  
@@ -295,8 +266,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # clear out old data
         self.__reset_all_data()
         
-        if self.__overlay:
-            self.__overlay.hide()
         self.__entity_type = entity_type
         self.__filters = filters
         self.__fields = fields
@@ -363,19 +332,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         If data has been modified or deleted, a full rebuild is issued, meaning that
         all existing items from the model are removed. This does affect view related 
         states such as selection.
-        """
-        
-        if len(self.__entity_tree_data) == 0:
-            # we are loading an empty tree
-            
-            if self.__overlay:
-                # indicate in built in spin overlay
-                self.__overlay.start_spin()
-                
-            # and signal to any external listeners
-            self.progress_spinner_start.emit()
-            self._is_in_spin_state = True
-        
+        """                
         if self.__filters is None:
             # filters is None indicates that no data is desired.
             # do not issue the sg request but pass straight to the callback
@@ -392,54 +349,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                                                            fields,
                                                                            self.__order)
     
-    def _hide_overlay_info(self):
-        """
-        Hides any overlay that is currently shown, except for
-        error messages.
-        """
-        if self.__overlay:
-            self.__overlay.hide(hide_errors=False)
-        
-        
-    def _show_overlay_pixmap(self, pixmap):
-        """
-        Show an overlay status message in the form of a pixmap.
-        This is for example useful if a particular query doesn't return any results.
-        If an error message is already being shown, the pixmap will not 
-        replace the error message. 
-        
-        :param pixmap: QPixmap object containing graphic to show.
-        """
-        if self.__overlay:
-            self.__overlay.show_message_pixmap(pixmap)
-        else:
-            self.__log_warning("Got call to _show_overlay_pixmap() but no overlay parent set!")        
-
-    def _show_overlay_info_message(self, msg):
-        """
-        Show an overlay status message.
-        If an error is already displayed, 
-        this info message will not be shown.
-        
-        :param msg: message to display
-        :returns: True if the message was shown, False if not.
-        """
-        if self.__overlay:
-            self.__overlay.show_message(msg)
-        else:
-            self.__log_warning("Got call to _show_overlay_info_message() but no overlay parent set!")        
-        
-    def _show_overlay_error_message(self, msg):
-        """
-        Show an overlay error message.
-        
-        :param msg: error message to display
-        """
-        if self.__overlay:
-            self.__overlay.show_error_message(msg)
-        else:
-            self.__log_warning("Got call to _show_overlay_error_message() but no overlay parent set!")        
-
+    
     def _request_thumbnail_download(self, item, field, url, entity_type, entity_id):
         """
         Request that a thumbnail is downloaded for an item. If a thumbnail is successfully
@@ -641,20 +551,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
         if self.__current_work_id != uid:
             # not our job. ignore
             return
-        
-        if self._is_in_spin_state:
-            # we are spinning, so signal the spin to end
-            self._is_in_spin_state = False
-            self.progress_spinner_end.emit()        
-                
+                        
         full_msg = "Error retrieving data from Shotgun: %s" % msg
-        
-        if len(self.__entity_tree_data) == 0:
-            # no data laoded yet. So display error message
-            if self.__overlay:
-                self.__overlay.show_error_message(full_msg)
-        
-        self.data_refresh_fail.emit(msg)            
+        self.data_refresh_fail.emit(full_msg)            
         self.__log_warning(full_msg)
 
     def __on_worker_signal(self, uid, data):
@@ -669,12 +568,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         if self.__current_work_id == uid:
             # our publish data has arrived from sg!
 
-            # send spin signal
-            if self._is_in_spin_state:
-                # we are spinning, so signal the spin to end
-                self._is_in_spin_state = False
-                self.progress_spinner_end.emit()        
-            
             # process the data
             sg_data = data["sg"]
             self.__on_sg_data_arrived(sg_data)
@@ -712,10 +605,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
         modifications_made = False
         
-        # make sure no messages are displayed
-        if self.__overlay:
-            self.__overlay.hide()
-    
         if len(self.__entity_tree_data) == 0:
             # we have an empty tree. Run recursive tree generation for performance.
             if len(sg_data) != 0:
@@ -869,7 +758,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
             if on_leaf_level:
                 # compare shotgun ids
-                sg_data = child.data(ShotgunModel.SG_DATA_ROLE)
+                sg_data = child.data(self.SG_DATA_ROLE)
                 if sg_data.get("id") == sg_item.get("id"):
                     found_item = child
                     break
@@ -883,7 +772,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # didn't find item! Create it!
             found_item = ShotgunStandardItem(field_display_name)
             # keep tabs of which items we are creating
-            found_item.setData(True, ShotgunModel.IS_SG_MODEL_ROLE)
+            found_item.setData(True, self.IS_SG_MODEL_ROLE)
             # keep a reference to this object to make GC happy
             # (pyside may crash otherwise)
             self.__all_tree_items.append(found_item)
@@ -892,7 +781,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
             # store the actual value we have
             found_item.setData({"name": field, "value": sg_item[field] }, 
-                               ShotgunModel.SG_ASSOCIATED_FIELD_ROLE)
+                               self.SG_ASSOCIATED_FIELD_ROLE)
         
             if on_leaf_level:                
                 # this is the leaf level!
@@ -900,7 +789,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # note: QT automatically changes everything to be unicode
                 # according to strange rules of its own, so force convert
                 # all shotgun values to be proper unicode prior to setData
-                found_item.setData(self.__utf8_to_unicode(sg_item), ShotgunModel.SG_DATA_ROLE)
+                found_item.setData(self.__utf8_to_unicode(sg_item), self.SG_DATA_ROLE)
                 
                 # set the default thumbnail
                 self._populate_default_thumbnail(found_item)
@@ -939,7 +828,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         Schedule a thumb download for an item
         """
-        sg_data = item.data(ShotgunModel.SG_DATA_ROLE)
+        sg_data = item.data(self.SG_DATA_ROLE)
         
         for field in sg_data.keys():
         
@@ -1015,7 +904,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # construct tree view node object
             item = ShotgunStandardItem(dv)
             # keep tabs of which items we are creating
-            item.setData(True, ShotgunModel.IS_SG_MODEL_ROLE)
+            item.setData(True, self.IS_SG_MODEL_ROLE)
             # keep a reference to this object to make GC happy
             # (pyside may crash otherwise)
             self.__all_tree_items.append(item)            
@@ -1029,7 +918,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             
             # store the actual field value we have for this item
             item.setData({"name": field, "value": sg_item[field] }, 
-                         ShotgunModel.SG_ASSOCIATED_FIELD_ROLE)
+                         self.SG_ASSOCIATED_FIELD_ROLE)
             
                         
             if on_leaf_level:
@@ -1039,7 +928,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # note - pyqt converts everything automatically to unicode,
                 # but using somewhat strange rules, so properly convert
                 # values to unicode prior to insertion
-                item.setData(self.__utf8_to_unicode(sg_item), ShotgunModel.SG_DATA_ROLE)
+                item.setData(self.__utf8_to_unicode(sg_item), self.SG_DATA_ROLE)
                 
                 # set the default thumbnail
                 self._populate_default_thumbnail(item)
@@ -1150,7 +1039,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             child = item.child(row)
             # only write shotgun data!
             # data from external sources is never serialized
-            if child.data(ShotgunModel.IS_SG_MODEL_ROLE):
+            if child.data(self.IS_SG_MODEL_ROLE):
                 child.write(stream)
                 stream.writeInt32(depth)
             

@@ -13,13 +13,10 @@ from tank.platform.qt import QtCore, QtGui
 # load resources
 from .ui import resources_rc
 
-class OverlayWidget(QtGui.QWidget):
+class ShotgunOverlayWidget(QtGui.QWidget):
     """
-    This class is part of the internals of the Shotgun Utils framework and 
-    should not be used directly.
-    
     Overlay widget that can be placed on top over any other widget. 
-    This is used by the Shotgun model to indicate when data is being loaded in;
+    This is used by the for example the Shotgun model to indicate when data is being loaded in;
     Whenever data is fetched, the overlay widget is added on top of the specified
     QWidget so that the model can gracefully indicate that data is being fetched.
     
@@ -58,16 +55,92 @@ class OverlayWidget(QtGui.QWidget):
         
         # turn off the widget
         self.setVisible(False)
-        self._mode = OverlayWidget.MODE_OFF
+        self._mode = self.MODE_OFF
         
         # setup spinner timer
         self._timer = QtCore.QTimer(self)
-        self._timer.timeout.connect(self.on_animation)
+        self._timer.timeout.connect(self._on_animation)
         self._spin_angle = 0
         
         self._message_pixmap = None
         self._message = None
         self._sg_icon = QtGui.QPixmap(":/tk_framework_shotgunutils.shotgun_model/sg_logo.png")
+ 
+        
+    ############################################################################################
+    # public interface
+    
+    def start_spin(self):
+        """
+        Turn on spinning
+        """
+        self._timer.start(40)
+        self.setVisible(True)
+        self._mode = self.MODE_SPIN
+
+    def show_error_message(self, msg):
+        """
+        Display an error message.
+        
+        :param msg: message to display
+        """
+        self._timer.stop()
+        self.setVisible(True)
+        self._message = msg
+        self._mode = self.MODE_ERROR
+        self.repaint()
+ 
+    def show_message(self, msg):
+        """
+        Show an info message. If an error is being shown, 
+        the info message will not be replacing the error.
+        
+        :param msg: message to display
+        :returns: true if message was displayed, false otherwise
+        """
+        if self._mode == self.MODE_ERROR:
+            return False
+        else: 
+            self._timer.stop()
+            self.setVisible(True)
+            self._message = msg
+            self._mode = self.MODE_INFO_TEXT
+            self.repaint()
+            return True
+        
+    def show_message_pixmap(self, pixmap):
+        """
+        Show an info message in the form of a pixmap.
+        If an error is being shown, the info message 
+        will not be replacing the error.
+        
+        :param pixamp: image to display
+        :returns: true if pixmap was displayed, false otherwise        
+        """
+        if self._mode == self.MODE_ERROR:
+            return False
+        else:         
+            self._timer.stop()
+            self.setVisible(True)
+            self._message_pixmap = pixmap
+            self._mode = self.MODE_INFO_PIXMAP
+            self.repaint()
+            return True
+
+    def hide(self, hide_errors=True):
+        """
+        Hide the overlay
+        """
+        if hide_errors == False and self._mode == self.MODE_ERROR:
+            # an error is displayed - leave it up.
+            return
+        self._timer.stop()
+        self._mode = self.MODE_OFF
+        self.setVisible(False)
+ 
+        
+    ############################################################################################
+    # internal methods
  
     def _on_parent_resized(self):
         """
@@ -77,7 +150,7 @@ class OverlayWidget(QtGui.QWidget):
         # resize overlay
         self.resize(self._parent.size())
     
-    def on_animation(self):
+    def _on_animation(self):
         """
         Spinner async callback to help animate the progress spinner.
         """
@@ -90,7 +163,7 @@ class OverlayWidget(QtGui.QWidget):
         """
         Render the UI.
         """
-        if self._mode == OverlayWidget.MODE_OFF:
+        if self._mode == self.MODE_OFF:
             return
         
         painter = QtGui.QPainter()
@@ -104,7 +177,7 @@ class OverlayWidget(QtGui.QWidget):
             painter.drawRect(0, 0, painter.device().width(), painter.device().height())
 
             # now draw different things depending on mode
-            if self._mode == OverlayWidget.MODE_SPIN:
+            if self._mode == self.MODE_SPIN:
                 
                 # show the spinner
                 painter.translate((painter.device().width() / 2) - 40, 
@@ -121,7 +194,7 @@ class OverlayWidget(QtGui.QWidget):
     
                 painter.drawArc(r, start_angle, span_angle)
             
-            elif self._mode == OverlayWidget.MODE_INFO_TEXT:
+            elif self._mode == self.MODE_INFO_TEXT:
                 # show text in the middle
                 pen = QtGui.QPen(QtGui.QColor("#888888"))
                 painter.setPen(pen)            
@@ -129,7 +202,7 @@ class OverlayWidget(QtGui.QWidget):
                 text_flags = QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter | QtCore.Qt.TextWordWrap
                 painter.drawText(text_rect, text_flags, self._message)            
                 
-            elif self._mode == OverlayWidget.MODE_ERROR:
+            elif self._mode == self.MODE_ERROR:
                 # show error text in the center
                 pen = QtGui.QPen(QtGui.QColor("#C8534A"))
                 painter.setPen(pen)            
@@ -137,7 +210,7 @@ class OverlayWidget(QtGui.QWidget):
                 text_flags = QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter | QtCore.Qt.TextWordWrap
                 painter.drawText(text_rect, text_flags, self._message)            
 
-            elif self._mode == OverlayWidget.MODE_INFO_PIXMAP:
+            elif self._mode == self.MODE_INFO_PIXMAP:
                 # draw image
                 painter.translate((painter.device().width() / 2) - (self._message_pixmap.width()/2), 
                                   (painter.device().height() / 2) - (self._message_pixmap.height()/2) )
@@ -150,77 +223,6 @@ class OverlayWidget(QtGui.QWidget):
         
         
         
-    ############################################################################################
-    # public interface
-    
-    def start_spin(self):
-        """
-        Turn on spinning
-        """
-        self._timer.start(40)
-        self.setVisible(True)
-        self._mode = OverlayWidget.MODE_SPIN
-
-    def show_error_message(self, msg):
-        """
-        Display an error message.
-        
-        :param msg: message to display
-        """
-        self._timer.stop()
-        self.setVisible(True)
-        self._message = msg
-        self._mode = OverlayWidget.MODE_ERROR
-        self.repaint()
- 
-    def show_message(self, msg):
-        """
-        Show an info message. If an error is being shown, 
-        the info message will not be replacing the error.
-        
-        :param msg: message to display
-        :returns: true if message was displayed, false otherwise
-        """
-        if self._mode == OverlayWidget.MODE_ERROR:
-            return False
-        else: 
-            self._timer.stop()
-            self.setVisible(True)
-            self._message = msg
-            self._mode = OverlayWidget.MODE_INFO_TEXT
-            self.repaint()
-            return True
-        
-    def show_message_pixmap(self, pixmap):
-        """
-        Show an info message in the form of a pixmap.
-        If an error is being shown, the info message 
-        will not be replacing the error.
-        
-        :param pixamp: image to display
-        :returns: true if pixmap was displayed, false otherwise        
-        """
-        if self._mode == OverlayWidget.MODE_ERROR:
-            return False
-        else:         
-            self._timer.stop()
-            self.setVisible(True)
-            self._message_pixmap = pixmap
-            self._mode = OverlayWidget.MODE_INFO_PIXMAP
-            self.repaint()
-            return True
-
-    def hide(self, hide_errors=True):
-        """
-        Hide the overlay
-        """
-        if hide_errors == False and self._mode == OverlayWidget.MODE_ERROR:
-            # an error is displayed - leave it up.
-            return
-        self._timer.stop()
-        self._mode = OverlayWidget.MODE_OFF
-        self.setVisible(False)
- 
         
         
 class ResizeEventFilter(QtCore.QObject):

@@ -8,6 +8,4 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-from . import shotgun_model
-from . import shotgun_view
-from . import overlay_widget
+from .overlaywidget import ShotgunOverlayWidget
