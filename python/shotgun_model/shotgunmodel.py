@@ -336,9 +336,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # first see if we need to load in any overlay data from deriving classes
             self.__log_debug("Loading cached data %s..." % self.__full_cache_path)
             try:
-                
-                self.__load_from_disk(self.__full_cache_path)
-                self.__log_debug("...loading complete!")
+                time_before = time.time()
+                num_items = self.__load_from_disk(self.__full_cache_path)
+                time_diff = (time.time() - time_before)
+                self.__log_debug("...loading complete! %s items loaded in %4fs" % (num_items, time_diff))
                 loaded_cache_data = True
             except Exception, e:
                 self.__log_debug("Couldn't load cache data from disk. Will proceed with "
@@ -1160,8 +1161,13 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
     def __load_from_disk(self, filename):
         """
-        Load a serialized model from disk
+        Load a serialized model from disk. 
+        
+        :returns: Number of items loaded
         """
+        
+        num_items_loaded = 0
+        
         fh = QtCore.QFile(filename)
         fh.open(QtCore.QIODevice.ReadOnly);
         file_in = QtCore.QDataStream(fh)
@@ -1185,6 +1191,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
             # read data
             item = ShotgunStandardItem()
+            num_items_loaded += 1
             # keep a reference to this object to make GC happy
             # (pyside may crash otherwise)
             self.__all_tree_items.append(item)
@@ -1239,5 +1246,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # and attach the node
             curr_parent.appendRow(item)
             prev_node = item
+        
+        return num_items_loaded
             
 
