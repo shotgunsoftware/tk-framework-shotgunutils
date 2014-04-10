@@ -19,7 +19,7 @@ from .overlaywidget import OverlayWidget
 from .sgdata import ShotgunAsyncDataRetriever
 
 from .shotgunmodelitem import ShotgunStandardItem
-from .util import get_sanitized_data, get_sg_data
+from .util import get_sanitized_data, get_sg_data, sanitize_qt
 
 from tank.platform.qt import QtCore, QtGui
 
@@ -634,6 +634,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         Asynchronous callback - the worker thread errored.
         """
+        uid = sanitize_qt(uid) # qstring on pyqt, str on pyside
+        msg = sanitize_qt(msg)
+        
         if self.__current_work_id != uid:
             # not our job. ignore
             return
@@ -659,6 +662,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         This method will dispatch the work to different methods
         depending on what async task has completed.
         """
+        uid = sanitize_qt(uid) # qstring on pyqt, str on pyside
+        data = sanitize_qt(data)
         
         if self.__current_work_id == uid:
             # our publish data has arrived from sg!
