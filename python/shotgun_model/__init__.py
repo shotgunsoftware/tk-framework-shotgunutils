@@ -10,4 +10,5 @@
 
 from .shotgunmodel import ShotgunModel
 from .simpleshotgunmodel import SimpleShotgunModel
+from .shotgunmodelitem import ShotgunStandardItem
 from .util import get_sg_data, get_sanitized_data, sanitize_qt

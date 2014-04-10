@@ -18,6 +18,7 @@ import tempfile
 from .overlaywidget import OverlayWidget
 from .sgdata import ShotgunAsyncDataRetriever
 
+from .shotgunmodelitem import ShotgunStandardItem
 from .util import get_sanitized_data, get_sg_data
 
 from tank.platform.qt import QtCore, QtGui
@@ -874,7 +875,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
         if found_item is None:
             # didn't find item! Create it!
-            found_item = QtGui.QStandardItem(field_display_name)
+            found_item = ShotgunStandardItem(field_display_name)
             # keep tabs of which items we are creating
             found_item.setData(True, ShotgunModel.IS_SG_MODEL_ROLE)
             # keep a reference to this object to make GC happy
@@ -1006,7 +1007,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         for dv in sorted(discrete_values.keys(), cmp=lambda x,y: cmp(x.lower(), y.lower()) ):
             
             # construct tree view node object
-            item = QtGui.QStandardItem(dv)
+            item = ShotgunStandardItem(dv)
             # keep tabs of which items we are creating
             item.setData(True, ShotgunModel.IS_SG_MODEL_ROLE)
             # keep a reference to this object to make GC happy
@@ -1178,7 +1179,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         while not file_in.atEnd():
         
             # read data
-            item = QtGui.QStandardItem()
+            item = ShotgunStandardItem()
             # keep a reference to this object to make GC happy
             # (pyside may crash otherwise)
             self.__all_tree_items.append(item)

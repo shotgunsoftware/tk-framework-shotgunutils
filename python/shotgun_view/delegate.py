@@ -126,7 +126,7 @@ class WidgetDelegate(QtGui.QStyledItemDelegate):
             # each element upon hover.
             self.__paint_widget.render(painter, 
                                       QtCore.QPoint(0,0), 
-                                      renderFlags=QtGui.QWidget.DrawChildren)
+                                      flags=QtGui.QWidget.DrawChildren)
             painter.restore()
         
     ########################################################################################
