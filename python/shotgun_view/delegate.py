@@ -11,6 +11,7 @@
 import tank
 from tank.platform.qt import QtCore, QtGui
 
+USING_PYQT = hasattr(QtCore, "QVariant")
 
 class WidgetDelegate(QtGui.QStyledItemDelegate):
     """
@@ -124,9 +125,21 @@ class WidgetDelegate(QtGui.QStyledItemDelegate):
             # note that we set the render flags NOT to render the background of the widget
             # this makes it consistent with the way the editor widget is mounted inside 
             # each element upon hover.
-            self.__paint_widget.render(painter, 
-                                      QtCore.QPoint(0,0), 
-                                      flags=QtGui.QWidget.DrawChildren)
+            
+            # WEIRD! It seems pyside and pyqt actually have different signatures for this method
+            if USING_PYQT:
+                # pyqt is using the flags parameter, which seems inconsistent with QT
+                # http://pyqt.sourceforge.net/Docs/PyQt4/qwidget.html#render            
+                self.__paint_widget.render(painter, 
+                                          QtCore.QPoint(0,0),
+                                          flags=QtGui.QWidget.DrawChildren)
+            else:
+                # pyside is using the renderFlags parameter which seems correct
+                self.__paint_widget.render(painter, 
+                                          QtCore.QPoint(0,0),
+                                          renderFlags=QtGui.QWidget.DrawChildren)
+                
+                
             painter.restore()
         
     ########################################################################################
