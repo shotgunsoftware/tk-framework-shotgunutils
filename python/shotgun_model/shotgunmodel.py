@@ -728,7 +728,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # note that there may be items 
             
             # check if anything has been deleted or added
-            ids_from_shotgun = set([ d["id"] for d in sg_data ])
+            ids_from_shotgun = set([ d.get("id") for d in sg_data ])
             ids_in_tree = set(self.__entity_tree_data.keys())
             removed_ids = ids_in_tree.difference(ids_from_shotgun)
 
@@ -744,7 +744,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                     # wedge in the new items
                     self.__log_debug("Detected added items. Adding them in-situ to tree...")
                     for d in sg_data:
-                        if d["id"] in added_ids:
+                        if d.get("id") in added_ids:
                             self.__log_debug("Adding %s to tree" % d )
                             self.__add_sg_item_to_tree(d)
                     self.__log_debug("...done!")
@@ -762,7 +762,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             for d in sg_data:
                 # if there are modifications of any kind, we just rebuild the tree at the moment
                 try:
-                    existing_sg_data = get_sg_data(self.__entity_tree_data[ d["id"] ])
+                    existing_sg_data = get_sg_data(self.__entity_tree_data[ d.get("id") ])
                     if not self.__sg_compare_data(d, existing_sg_data):                    
                         # shotgun data has changed for this item! Rebuild the tree
                         self.__log_debug("SG data change: %s --> %s" % (existing_sg_data, d))
@@ -915,7 +915,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                     self.__process_thumbnail_for_item(found_item)
                                 
                 # and also populate the id association in our lookup dict
-                self.__entity_tree_data[ sg_item["id"] ] = found_item
+                self.__entity_tree_data[ sg_item.get("id") ] = found_item
                 
             else:
                 
@@ -947,8 +947,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # get the thumbnail - store the unique id we get back from
                 # the data retrieve in a dict for fast lookup later
                 uid = self.__sg_data_retriever.request_thumbnail(sg_data[field], 
-                                                                 sg_data["type"], 
-                                                                 sg_data["id"],
+                                                                 sg_data.get("type"), 
+                                                                 sg_data.get("id"),
                                                                  field)
                 
                 self.__thumb_map[uid] = {"item": item, "field": field }
@@ -1004,7 +1004,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 if on_leaf_level and field_display_name in discrete_values:
                     # if we are on the leaf level, we want to make sure all objects
                     # are displayed! handle duplicates by appending the sg id to the name.
-                    field_display_name = "%s (id %s)" % (field_display_name, sg_item["id"])
+                    field_display_name = "%s (id %s)" % (field_display_name, sg_item.get("id"))
 
                 discrete_values[ field_display_name ] = sg_item
                 
@@ -1054,7 +1054,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                     self.__process_thumbnail_for_item(item)                
                 
                 # and also populate the id association in our lookup dict
-                self.__entity_tree_data[ sg_item["id"] ] = item      
+                self.__entity_tree_data[ sg_item.get("id") ] = item      
             else:
                 
                 # not on leaf level yet
@@ -1197,7 +1197,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             sg_data = get_sg_data(item)
             if sg_data:
                 # add the model item to our tree data dict keyed by id
-                self.__entity_tree_data[ sg_data["id"] ] = item            
+                self.__entity_tree_data[ sg_data.get("id") ] = item            
 
             # serialized items contain some sort of strange
             # low-rez thumb data which we cannot use. Make
