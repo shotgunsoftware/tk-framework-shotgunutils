@@ -998,9 +998,21 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         value = sg_data.get(field)
         
-        if isinstance(value, dict) and "name" in value:
-            # std link field struct with id, type and name
-            return value["name"]
+        if isinstance(value, dict) and "name" in value and "type" in value:
+            # This is a link field, so display it with type
+            # use the display name for the entity type
+            et_display_name = tank.util.get_entity_type_display_name(self.__app.tank, value["type"])
+            
+            if value["name"] is None:
+                # "Unnamed Sequence"
+                return "Unnamed %s" % et_display_name
+            else:
+                return "%s %s" % (et_display_name, value["name"])
+        
+        elif value is None:
+            # "Unnamed Sequence"
+            et_display_name = tank.util.get_entity_type_display_name(self.__app.tank, sg_data.get("type"))
+            return "Unnamed %s" % et_display_name
         
         else:
             # everything else just cast to string
