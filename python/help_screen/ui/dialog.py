@@ -46,6 +46,10 @@ class Ui_Dialog(object):
         self.verticalLayout_2 = QtGui.QVBoxLayout()
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.groupBox = QtGui.QGroupBox(Dialog)
+        self.groupBox.setStyleSheet("#groupBox {\n"
+"background-color: rgba(0,0,0,50);\n"
+"\n"
+"}")
         self.groupBox.setTitle("")
         self.groupBox.setObjectName("groupBox")
         self.verticalLayout = QtGui.QVBoxLayout(self.groupBox)

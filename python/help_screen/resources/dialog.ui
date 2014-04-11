@@ -66,6 +66,12 @@ background-image: url(:/tk_framework_shotgunutils.help_screen/left_arrow_pressed
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
       <widget class="QGroupBox" name="groupBox">
+       <property name="styleSheet">
+        <string notr="true">#groupBox {
+background-color: rgba(0,0,0,50);
+
+}</string>
+       </property>
        <property name="title">
         <string/>
        </property>
