@@ -33,7 +33,7 @@ background-image: url(:/tk_framework_shotgunutils.help_screen/bg.png);
       <enum>Qt::ClickFocus</enum>
      </property>
      <property name="toolTip">
-      <string>Click for App Details</string>
+      <string>Scroll to the previous slide</string>
      </property>
      <property name="styleSheet">
       <string notr="true">QToolButton{
@@ -128,7 +128,7 @@ background-image: url(:/tk_framework_shotgunutils.help_screen/left_arrow_pressed
       <enum>Qt::ClickFocus</enum>
      </property>
      <property name="toolTip">
-      <string>Click for App Details</string>
+      <string>Scroll to the next slide</string>
      </property>
      <property name="styleSheet">
       <string notr="true">QToolButton{

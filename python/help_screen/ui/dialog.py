@@ -98,9 +98,9 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "Form", None, QtGui.QApplication.UnicodeUTF8))
-        self.left_arrow.setToolTip(QtGui.QApplication.translate("Dialog", "Click for App Details", None, QtGui.QApplication.UnicodeUTF8))
+        self.left_arrow.setToolTip(QtGui.QApplication.translate("Dialog", "Scroll to the previous slide", None, QtGui.QApplication.UnicodeUTF8))
         self.view_documentation.setText(QtGui.QApplication.translate("Dialog", "Jump to Documentation", None, QtGui.QApplication.UnicodeUTF8))
         self.close.setText(QtGui.QApplication.translate("Dialog", "Close", None, QtGui.QApplication.UnicodeUTF8))
-        self.right_arrow.setToolTip(QtGui.QApplication.translate("Dialog", "Click for App Details", None, QtGui.QApplication.UnicodeUTF8))
+        self.right_arrow.setToolTip(QtGui.QApplication.translate("Dialog", "Scroll to the next slide", None, QtGui.QApplication.UnicodeUTF8))
 
 from . import resources_rc
