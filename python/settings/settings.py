@@ -9,8 +9,6 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
-import os
-import sys
 import urlparse
 import cPickle as pickle
 from sgtk.platform.qt import QtCore
@@ -19,9 +17,16 @@ from ..shotgun_model import sanitize_qt
 
 class UserSettings(object):
     """
-    Handles global settings per user
+    Handles settings per user. This class is a toolkit specific wrapper
+    around QSettings, making it easy to store and retrieve settings.
+    
+    Each setting is handled using a *Scope* which allows the client code
+    to determine the scale of the setting. Using the scope, you can define
+    global settings (which is the default), per project, per site, per
+    configuration and per app instance.
     """
-
+    
+    # scope constants
     SCOPE_GLOBAL = 0
     SCOPE_SITE = 1
     SCOPE_PROJECT = 2
@@ -30,8 +35,7 @@ class UserSettings(object):
 
     def __init__(self, bundle):
         """
-        Creates a settings manager. Using this manager you have easy access to
-        saved settings. 
+        Constructor
         
         :param bundle: app, engine or framework object to associate the settings with.
         """
@@ -87,24 +91,29 @@ class UserSettings(object):
         
         :param name: Name of the setting to store
         :param value: Value to store. Use simple types such as ints, strings, dicts etc.
+                      In the interest of cross pyside/pyqt compatibility, any QStrings or QVariants
+                      passed in via value will be converted to strs and native python types. Unicode
+                      strs will be converted to utf-8.
         :param scope: The scope for this settings value, as defined by the constants belonging to this class.
           
         """
         full_name = self.__resolve_settings_name(name, scope)
         self.__fw.log_debug("User Settings Manager: Storing %s" % full_name)
-        value_str = pickle.dumps(value)
+        value_str = pickle.dumps( sanitize_qt(value) )
         self.__settings.setValue(full_name, value_str)
     
     def retrieve(self, name, default=None, scope=SCOPE_GLOBAL):
         """
         Retrieves a setting for a particular app for the current login.
         
-        :param name: Name of the setting to store
+        :param name: Name of the setting to store.
         :param default: Default value to return if the setting is not stored.
-        :param scope: The scope associated with this setting
-        :returns: The stored value, None if no value is available  
+        :param scope: The scope associated with this setting.
+        :returns: The stored value, default if the value is not available  
         """
         full_name = self.__resolve_settings_name(name, scope)
+        
+        self.__fw.log_debug("User Settings Manager: Retrieving %s" % full_name)
         
         try:
             raw_value = sanitize_qt(self.__settings.value(full_name))
@@ -118,7 +127,6 @@ class UserSettings(object):
                                   "to default value. Error details: %s" % (full_name, e))
             resolved_val = default
         
-        self.__fw.log_debug("User Settings Manager: Retrieving %s" % full_name)
         return resolved_val
 
     ########################################################################################
