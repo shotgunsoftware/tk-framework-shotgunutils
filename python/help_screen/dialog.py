@@ -66,6 +66,10 @@ class Dialog(QtGui.QDialog):
         self._pages = []
         
         for p in pixmaps:
+            
+            if p.width() != 650 or p.height() != 400:
+                raise tank.TankError("Images must be 650x400px!")
+            
             page = QtGui.QWidget()
             self._pages.append(page)
             layout = QtGui.QVBoxLayout(page)
