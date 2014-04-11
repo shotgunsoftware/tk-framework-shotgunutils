@@ -11,7 +11,7 @@ from tank.platform.qt import QtCore, QtGui
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(802, 532)
+        Dialog.resize(784, 483)
         Dialog.setStyleSheet("#Dialog {\n"
 "background-image: url(:/tk_framework_shotgunutils.help_screen/bg.png); \n"
 "}\n"
@@ -49,17 +49,10 @@ class Ui_Dialog(object):
         self.groupBox.setTitle("")
         self.groupBox.setObjectName("groupBox")
         self.verticalLayout = QtGui.QVBoxLayout(self.groupBox)
+        self.verticalLayout.setContentsMargins(2, 2, 2, 2)
         self.verticalLayout.setObjectName("verticalLayout")
         self.stackedWidget = QtGui.QStackedWidget(self.groupBox)
-        self.stackedWidget.setMinimumSize(QtCore.QSize(650, 400))
-        self.stackedWidget.setMaximumSize(QtCore.QSize(650, 400))
         self.stackedWidget.setObjectName("stackedWidget")
-        self.page_1 = QtGui.QWidget()
-        self.page_1.setObjectName("page_1")
-        self.stackedWidget.addWidget(self.page_1)
-        self.page_2 = QtGui.QWidget()
-        self.page_2.setObjectName("page_2")
-        self.stackedWidget.addWidget(self.page_2)
         self.verticalLayout.addWidget(self.stackedWidget)
         self.verticalLayout_2.addWidget(self.groupBox)
         self.horizontalLayout = QtGui.QHBoxLayout()
@@ -100,7 +93,7 @@ class Ui_Dialog(object):
         self.horizontalLayout_2.addWidget(self.right_arrow)
 
         self.retranslateUi(Dialog)
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(-1)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
