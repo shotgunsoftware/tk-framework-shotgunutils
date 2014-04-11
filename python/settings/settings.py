@@ -27,11 +27,12 @@ class UserSettings(object):
     """
     
     # scope constants
-    SCOPE_GLOBAL = 0
-    SCOPE_SITE = 1
-    SCOPE_PROJECT = 2
-    SCOPE_CONFIG = 3
-    SCOPE_INSTANCE = 4
+    SCOPE_GLOBAL = 0        # one setting to rule them all!
+    SCOPE_SITE = 1          # one setting per site
+    SCOPE_PROJECT = 2       # one setting per project
+    SCOPE_CONFIG = 3        # one setting per pipeline config
+    SCOPE_INSTANCE = 4      # one setting per app instance
+    SCOPE_ENGINE = 5        # one setting per engine (name, not instance)
 
     def __init__(self, bundle):
         """
@@ -65,18 +66,21 @@ class UserSettings(object):
                                                    bundle.engine.environment["name"], 
                                                    bundle.engine.instance_name, 
                                                    bundle.instance_name)
+            self.__engine_key = bundle.engine.name
             
         elif isinstance(bundle, sgtk.platform.Engine):
             # based on the environment name & engine instance name
             self.__instance_key = "%s:%s:%s" % (self.__pipeline_config_key,
-                                                bundle.engine.environment["name"], 
+                                                bundle.environment["name"], 
                                                 bundle.instance_name)
+            self.__engine_key = bundle.name
             
         elif isinstance(bundle, sgtk.platform.Framework):
             # based on the environment name & framework name
             self.__instance_key = "%s:%s:%s" % (self.__pipeline_config_key,
                                                 bundle.engine.environment["name"], 
                                                 bundle.name)
+            self.__engine_key = bundle.engine.name
             
         else:
             raise TankError("Not sure how to handle bundle type %s. "
@@ -148,6 +152,8 @@ class UserSettings(object):
             return "%s:%s" % (self.__project_key, name)
         elif scope == self.SCOPE_CONFIG:
             return "%s:%s" % (self.__pipeline_config_key, name)
+        elif scope == self.SCOPE_ENGINE:
+            return "%s:%s" % (self.__engine_key, name)
         elif scope == self.SCOPE_INSTANCE:
             return "%s:%s" % (self.__instance_key, name)
         else:
