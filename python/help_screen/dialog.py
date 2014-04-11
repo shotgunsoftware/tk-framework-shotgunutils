@@ -63,9 +63,11 @@ class Dialog(QtGui.QDialog):
         
         # make GC happy
         self._widgets = []
+        self._pages = []
         
         for p in pixmaps:
             page = QtGui.QWidget()
+            self._pages.append(page)
             layout = QtGui.QVBoxLayout(page)
             layout.setContentsMargins(2, 2, 2, 2)
             label = QtGui.QLabel(page)
@@ -81,24 +83,77 @@ class Dialog(QtGui.QDialog):
         self.ui.stackedWidget.setCurrentIndex(0)
         self._num_images = len(pixmaps)
         
-        
     def _on_left_arrow_click(self):
         """
         User clicks the left arrow
         """
-        new_idx = self.ui.stackedWidget.currentIndex() - 1
-        if new_idx < 0:
-            new_idx = self._num_images-1
-        self.ui.stackedWidget.setCurrentIndex(new_idx)
+        start_index = self.ui.stackedWidget.currentIndex()
+        
+        prev_index = start_index-1
+        if prev_index < 0:
+            prev_index = self._num_images-1
+        
+        this_page = self._pages[start_index]
+        prev_page = self._pages[prev_index]
+        
+        # rest positions
+        prev_page.move(prev_page.x()-650, prev_page.y())
+        self.ui.stackedWidget.setCurrentIndex(prev_index)
+        this_page.show()
+        this_page.raise_()       
+        
+        self.anim = QtCore.QPropertyAnimation(this_page, "pos")
+        self.anim.setDuration(600)
+        self.anim.setStartValue(QtCore.QPoint(this_page.x(), this_page.y()))
+        self.anim.setEndValue(QtCore.QPoint(this_page.x()+650, this_page.y()))
+        self.anim.setEasingCurve(QtCore.QEasingCurve.OutCubic)
+
+        self.anim2 = QtCore.QPropertyAnimation(prev_page, "pos")
+        self.anim2.setDuration(600)
+        self.anim2.setStartValue(QtCore.QPoint(prev_page.x()-650, prev_page.y()))
+        self.anim2.setEndValue(QtCore.QPoint(prev_page.x(), prev_page.y()))
+        self.anim2.setEasingCurve(QtCore.QEasingCurve.OutCubic)
+
+        self.grp = QtCore.QParallelAnimationGroup()
+        self.grp.addAnimation(self.anim)
+        self.grp.addAnimation(self.anim2)
+        self.grp.start()
+        
+        
         
     def _on_right_arrow_click(self):
         """
         User clicks the left arrow
         """
-        new_idx = self.ui.stackedWidget.currentIndex() + 1
-        if new_idx == self._num_images:
-            new_idx = 0
-        self.ui.stackedWidget.setCurrentIndex(new_idx)
+        start_index = self.ui.stackedWidget.currentIndex()
+        
+        next_index = (start_index+1) % self._num_images
+        
+        this_page = self._pages[start_index]
+        next_page = self._pages[next_index]
+        
+        # rest positions
+        next_page.move(next_page.x()+650, next_page.y())
+        self.ui.stackedWidget.setCurrentIndex(next_index)
+        this_page.show()
+        this_page.raise_()       
+        
+        self.anim = QtCore.QPropertyAnimation(this_page, "pos")
+        self.anim.setDuration(600)
+        self.anim.setStartValue(QtCore.QPoint(this_page.x(), this_page.y()))
+        self.anim.setEndValue(QtCore.QPoint(this_page.x()-650, this_page.y()))
+        self.anim.setEasingCurve(QtCore.QEasingCurve.OutCubic)
+
+        self.anim2 = QtCore.QPropertyAnimation(next_page, "pos")
+        self.anim2.setDuration(600)
+        self.anim2.setStartValue(QtCore.QPoint(next_page.x()+650, next_page.y()))
+        self.anim2.setEndValue(QtCore.QPoint(next_page.x(), next_page.y()))
+        self.anim2.setEasingCurve(QtCore.QEasingCurve.OutCubic)
+
+        self.grp = QtCore.QParallelAnimationGroup()
+        self.grp.addAnimation(self.anim)
+        self.grp.addAnimation(self.anim2)
+        self.grp.start()
         
     def _on_doc(self):
         """
