@@ -102,6 +102,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # and start its thread!
         self.__sg_data_retriever.start()
         
+        # is the model set up with a query?
+        self.__has_query = False
+        
+        # flag to indicate a full refresh
+        self._request_full_refresh = False
+        
         # keep various references to all items that the model holds.
         # some of these data structures are to keep the GC
         # happy, others to hold alternative access methods to the data.
@@ -198,19 +204,27 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         return self.__entity_type
          
-    def clear_caches(self):
+    def hard_refresh(self):
         """
-        Clear any caches associated with the current model and clears the model instance.        
+        Clears any caches on disk, then refreshes the data.        
         """
-        # clear memory
-        self.__reset_all_data()
+        if not self.__has_query:
+            # no query in this model yet
+            return
         
+        # when data arrives, force full rebuild
+        self._request_full_refresh = True
+        
+        # delete cache file
         if self.__full_cache_path and os.path.exists(self.__full_cache_path):
             try:
                 os.remove(self.__full_cache_path)
+                self.__log_debug("Removed cache file '%s' from disk." % self.__full_cache_path)
             except Exception, e:
                 self.__log_warning("clear_caches method could not remove cache file '%s' "
                                    "from disk. Details: %s" % e)
+        # refresh
+        self._refresh_data()
 
     ########################################################################################
     # protected methods not meant to be subclassed but meant to be called by subclasses
@@ -266,6 +280,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # clear out old data
         self.__reset_all_data()
         
+        self.__has_query = True
         self.__entity_type = entity_type
         self.__filters = filters
         self.__fields = fields
@@ -605,13 +620,13 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
         modifications_made = False
         
-        if len(self.__entity_tree_data) == 0:
+        if len(self.__entity_tree_data) == 0 or self._request_full_refresh:
             # we have an empty tree. Run recursive tree generation for performance.
-            if len(sg_data) != 0:
-                self.__log_debug("No cached items in tree! Creating full tree from Shotgun data...")
-                self.__rebuild_whole_tree_from_sg_data(sg_data)
-                self.__log_debug("...done!")
-                modifications_made = True
+            self._request_full_refresh = False # reset flag for next request
+            self.__log_debug("No cached items in tree! Creating full tree from Shotgun data...")
+            self.__rebuild_whole_tree_from_sg_data(sg_data)
+            self.__log_debug("...done!")
+            modifications_made = True
         
         else:
             # go through and see if there are any changes we should apply to the tree.
