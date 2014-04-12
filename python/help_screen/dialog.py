@@ -53,7 +53,7 @@ class Dialog(QtGui.QDialog):
         self.ui.setupUi(self)
         
         if self._bundle.documentation_url is None:
-            self.ui.view_documentation.setVisible(False)
+            self.ui.view_documentation.setEnabled(False)
         
         self.ui.view_documentation.clicked.connect(self._on_doc)
         self.ui.close.clicked.connect(self.close)
