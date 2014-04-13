@@ -621,12 +621,15 @@ class ShotgunModel(QtGui.QStandardItemModel):
         modifications_made = False
         
         if len(self.__entity_tree_data) == 0 or self._request_full_refresh:
-            # we have an empty tree. Run recursive tree generation for performance.
-            self._request_full_refresh = False # reset flag for next request
-            self.__log_debug("No cached items in tree! Creating full tree from Shotgun data...")
-            self.__rebuild_whole_tree_from_sg_data(sg_data)
-            self.__log_debug("...done!")
-            modifications_made = True
+            
+            if len(sg_data) != 0:
+                # we have an empty tree and incoming sg data. 
+                # Run the full recursive tree generation for performance.
+                self._request_full_refresh = False # reset flag for next request
+                self.__log_debug("No cached items in tree! Creating full tree from Shotgun data...")
+                self.__rebuild_whole_tree_from_sg_data(sg_data)
+                self.__log_debug("...done!")
+                modifications_made = True
         
         else:
             # go through and see if there are any changes we should apply to the tree.
