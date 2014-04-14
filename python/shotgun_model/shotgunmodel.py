@@ -43,6 +43,16 @@ class ShotgunModel(QtGui.QStandardItemModel):
     types for the asset types. The leaf nodes in this case would be assets.
     """
 
+    # signal which gets emitted whenever the model's sg query is changed.
+    # when the query changes, the contents of the model is cleared and the 
+    # loading of new data is initiated.
+    query_changed = QtCore.Signal()
+
+    # signal which gets emitted whenever the model loads cache data.
+    # this typically follows shortly after a query changed signal, if
+    # cache data is available.
+    cache_loaded = QtCore.Signal()
+
     # signal which gets emitted whenever the model has been updated with fresh 
     # shotgun data. The boolean indicates that a change in the model data has
     # taken place as part of this process. If the refresh fails for some reason,
@@ -276,6 +286,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
                           an external string via this parameter which will be added to the seed.
                         
         """
+        # we are changing the query
+        self.query_changed.emit()        
         
         # clear out old data
         self.__reset_all_data()
@@ -325,6 +337,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 time_diff = (time.time() - time_before)
                 self.__log_debug("...loading complete! %s items loaded in %4fs" % (num_items, time_diff))
                 loaded_cache_data = True
+                self.cache_loaded.emit()
             except Exception, e:
                 self.__log_debug("Couldn't load cache data from disk. Will proceed with "
                                 "full SG load. Error reported: %s" % e)
