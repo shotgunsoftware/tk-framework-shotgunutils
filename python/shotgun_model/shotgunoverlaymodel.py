@@ -16,6 +16,8 @@ from tank.platform.qt import QtCore, QtGui
 
 class ShotgunOverlayModel(ShotgunModel):
     """
+    Convenience wrapper around the ShotgunModel which adds
+    spinner and error reporting overlay functionality. 
     """
     
     # signal that gets emitted whenever the model deems it appropriate to 
@@ -128,8 +130,8 @@ class ShotgunOverlayModel(ShotgunModel):
         Callback when async data has arrived successfully
         """
         self._cache_loaded = True
-        self.__overlay.hide(hide_errors=True)
         if self._is_in_spin_state:
+            self.__overlay.hide(hide_errors=True)
             # we are spinning, so signal the spin to end
             self._is_in_spin_state = False
             self.progress_spinner_end.emit()        
