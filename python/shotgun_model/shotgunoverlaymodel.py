@@ -51,6 +51,7 @@ class ShotgunOverlayModel(ShotgunModel):
         # set up our spinner UI handling
         self.__overlay = ShotgunOverlayWidget(overlay_widget)
         self._is_in_spin_state = False
+        self._cache_loaded = False
         
         # set up some model signals etc.
         self.data_refreshed.connect(self.__on_data_refreshed)
@@ -66,14 +67,15 @@ class ShotgunOverlayModel(ShotgunModel):
         # reset overlay
         self.__overlay.hide(hide_errors=True)
         # call base class
-        return ShotgunModel._load_data(self, entity_type, filters, hierarchy, fields, order, seed)        
+        self._cache_loaded = ShotgunModel._load_data(self, entity_type, filters, hierarchy, fields, order, seed)
+        return self._cache_loaded        
     
     def _refresh_data(self):
         """
         Overridden from ShotgunModel.
         """
-        if self.rowCount() == 0:
-            # we are doing asynchronous loading into an empty model.            
+        if not self._cache_loaded:
+            # we are doing asynchronous loading into an uncached model.            
             # start spinning
             self.__overlay.start_spin()    
             # signal to any external listeners
@@ -125,6 +127,7 @@ class ShotgunOverlayModel(ShotgunModel):
         """
         Callback when async data has arrived successfully
         """
+        self._cache_loaded = True
         self.__overlay.hide(hide_errors=True)
         if self._is_in_spin_state:
             # we are spinning, so signal the spin to end

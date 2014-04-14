@@ -600,7 +600,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
     def __on_sg_data_arrived(self, sg_data):
         """
         Handle asynchronous shotgun data arrivin after a find request.
-        """        
+        """
+        
+        self.__log_debug("--> Shotgun data arrived. (%s records)" % len(sg_data))
+        
         # pre-process data
         sg_data = self._before_data_processing(sg_data)        
         
@@ -629,6 +632,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 self.__log_debug("No cached items in tree! Creating full tree from Shotgun data...")
                 self.__rebuild_whole_tree_from_sg_data(sg_data)
                 self.__log_debug("...done!")
+                modifications_made = True
+            else:
+                # no data coming in from shotgun, so no need to rebuild the tree
+                # however stil set the modifications flag (we went from an undefined 
+                # tree to an empty tree, to trigger a zero-item cache to be saved
                 modifications_made = True
         
         else:
