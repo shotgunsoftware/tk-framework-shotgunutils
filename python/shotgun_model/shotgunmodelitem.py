@@ -27,6 +27,8 @@ class ShotgunStandardItem(QtGui.QStandardItem):
     def get_sg_data(self):
         """
         Retrieves the shotgun data associated with this item.
+        Only leaf nodes have shotgun data associated with them.
+        On intermediate nodes, None will be returned.
         
         :returns: Shotgun data or None if no data was associated        
         """
