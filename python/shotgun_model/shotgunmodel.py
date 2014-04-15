@@ -1049,9 +1049,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 return "%s %s" % (et_display_name, value["name"])
         
         elif value is None:
-            # "Unnamed Sequence"
+            # this is an empty link field, undefined enum or leaf node which has no value set
             et_display_name = tank.util.get_entity_type_display_name(self.__app.tank, sg_data.get("type"))
-            return "Unnamed %s" % et_display_name
+            return "Unnamed"
         
         else:
             # everything else just cast to string
