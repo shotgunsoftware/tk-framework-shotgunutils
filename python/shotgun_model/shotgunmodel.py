@@ -154,8 +154,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__sg_data_retriever.work_failure.disconnect( self.__on_worker_failure)
         # gracefully stop thread
         self.__sg_data_retriever.stop()
+        # clear all internal memory storage
+        self.__reset_all_data()
         # finally totally deallocate it just to make GC happy
         self.__sg_data_retriever = None
+                
     
     def item_from_entity(self, entity_type, entity_id):
         """
@@ -325,12 +328,14 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__log_debug("Fields: %s" % self.__fields)
         self.__log_debug("Order: %s" % self.__order)
         
-        self._load_external_data()    
+        self.__log_debug("First population pass: Calling _load_external_data()")
+        self._load_external_data()
+        self.__log_debug("External data population done.")
         
         loaded_cache_data = False
         if os.path.exists(self.__full_cache_path):
             # first see if we need to load in any overlay data from deriving classes
-            self.__log_debug("Loading cached data %s..." % self.__full_cache_path)
+            self.__log_debug("Now loading cached data %s..." % self.__full_cache_path)
             try:
                 time_before = time.time()
                 num_items = self.__load_from_disk(self.__full_cache_path)
@@ -566,8 +571,31 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         # remove all data in the underyling internal data storage
         # note that we don't use clear() here since that causing
-        # crashing on nuke/pyside
-        self.invisibleRootItem().removeRows(0, self.rowCount())
+        # crashing on nuke/pyside. Also note that we need to do 
+        # in a depth-first manner to ensure that there are no
+        # cyclic parent/child dependency cycles, which will cause
+        # a crash in some versions of shiboken 
+        # (see https://bugreports.qt-project.org/browse/PYSIDE-158 )
+        #self.beginRemoveRows(self.invisibleRootItem().index(), 0, self.invisibleRootItem().rowCount())
+        self.__do_depth_first_tree_deletion(self.invisibleRootItem())
+        #self.endRemoveRows()
+    
+    def __do_depth_first_tree_deletion(self, node):
+        """
+        Depth first interation and deletion of all child nodes
+        
+        :param node: QStandardItem tree node
+        """
+        
+        # cleanup children
+        for idx in xrange(node.rowCount()):
+            child_node = node.child(idx)
+            self.__do_depth_first_tree_deletion(child_node)
+        
+        # delete of children
+        for idx in range(node.rowCount())[::-1]:
+            node.removeRow(idx)
+
 
     def __on_worker_failure(self, uid, msg):
         """
