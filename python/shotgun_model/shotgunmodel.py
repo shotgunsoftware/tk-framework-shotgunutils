@@ -425,6 +425,14 @@ class ShotgunModel(QtGui.QStandardItemModel):
         the construction of a QStandardItem and add additional metadata or make other changes
         that may be useful. Nothing needs to be returned.
         
+        This method is called before the item is added into the model tree. At the point when
+        the item is added into the tree, various signals will fire, informing views and proxy
+        models that a new item has been added. This methods allows a subclassing object to 
+        add custom data prior to this.
+        
+        Note that when an item is fetched from the cache, this method is *not* called, it will
+        only be called when shotgun data initially arrives from a Shotgun API query.
+        
         This is typically used if you retrieve additional fields alongside the standard "name" field
         and you want to put those into various custom data roles. These custom fields on the item
         can later on be picked up by custom (delegate) rendering code in the view.
@@ -576,9 +584,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # cyclic parent/child dependency cycles, which will cause
         # a crash in some versions of shiboken 
         # (see https://bugreports.qt-project.org/browse/PYSIDE-158 )
-        #self.beginRemoveRows(self.invisibleRootItem().index(), 0, self.invisibleRootItem().rowCount())
         self.__do_depth_first_tree_deletion(self.invisibleRootItem())
-        #self.endRemoveRows()
     
     def __do_depth_first_tree_deletion(self, node):
         """
@@ -836,21 +842,21 @@ class ShotgunModel(QtGui.QStandardItemModel):
                     break
         
         if found_item is None:
-            # didn't find item! Create it!
+            
+            # didn't find item! So let's create it!
             found_item = ShotgunStandardItem(field_display_name)
+            
             # keep tabs of which items we are creating
             found_item.setData(True, self.IS_SG_MODEL_ROLE)
+            
             # keep a reference to this object to make GC happy
             # (pyside may crash otherwise)
             self.__all_tree_items.append(found_item)
-            # and add to tree
-            root.appendRow(found_item)
 
             # store the actual value we have
-            found_item.setData({"name": field, "value": sg_item[field] }, 
-                               self.SG_ASSOCIATED_FIELD_ROLE)
-        
-            if on_leaf_level:                
+            found_item.setData({"name": field, "value": sg_item[field] }, self.SG_ASSOCIATED_FIELD_ROLE)
+
+            if on_leaf_level:      
                 # this is the leaf level!
                 # attach the shotgun data so that we can access it later
                 # note: QT automatically changes everything to be unicode
@@ -858,32 +864,29 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # all shotgun values to be proper unicode prior to setData
                 found_item.setData(self.__utf8_to_unicode(sg_item), self.SG_DATA_ROLE)
                 
-                # set the default thumbnail
-                self._populate_default_thumbnail(found_item)
-                
-                # call out to class implementation to do its thing
-                self._populate_item(found_item, sg_item)
-
-                # run the finalizer
-                self._finalize_item(found_item)
-                
-                # request thumb
-                if self.__download_thumbs:
-                    self.__process_thumbnail_for_item(found_item)
-                                
                 # and also populate the id association in our lookup dict
                 self.__entity_tree_data[ sg_item.get("id") ] = found_item
                 
+            # now we got the object set up. Now start calling custom methods:
+            
+            # set up default thumb
+            self._populate_default_thumbnail(found_item)
+        
+            # run the populate item method (only runs at construction, not on cache restore)
+            if on_leaf_level:      
+                self._populate_item(found_item, sg_item)
             else:
-                
-                # set the default thumbnail
-                self._populate_default_thumbnail(found_item)
-                
-                # call out to class implementation to do its thing
                 self._populate_item(found_item, None)
 
-                # run the finalizer
-                self._finalize_item(found_item)
+            # run the finalizer (always runs on construction, even via cache)
+            self._finalize_item(found_item)
+                            
+            # add it to the tree. At this point QT will fire off various signals to inform views etc.
+            root.appendRow(found_item)
+
+            # request thumb
+            if self.__download_thumbs:
+                self.__process_thumbnail_for_item(found_item)
 
 
         if not on_leaf_level:
@@ -896,6 +899,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Schedule a thumb download for an item
         """
         sg_data = item.data(self.SG_DATA_ROLE)
+        
+        if sg_data is None:
+            return
         
         for field in sg_data.keys():
         
@@ -970,12 +976,13 @@ class ShotgunModel(QtGui.QStandardItemModel):
             
             # construct tree view node object
             item = ShotgunStandardItem(dv)
+            
             # keep tabs of which items we are creating
             item.setData(True, self.IS_SG_MODEL_ROLE)
+
             # keep a reference to this object to make GC happy
             # (pyside may crash otherwise)
             self.__all_tree_items.append(item)            
-            root.appendRow(item)
             
             # get the full sg data dict that corresponds to this folder item
             # note that this item may only partially match the sg data
@@ -984,12 +991,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
             sg_item = discrete_values[dv]
             
             # store the actual field value we have for this item
-            item.setData({"name": field, "value": sg_item[field] }, 
-                         self.SG_ASSOCIATED_FIELD_ROLE)
+            item.setData({"name": field, "value": sg_item[field] }, self.SG_ASSOCIATED_FIELD_ROLE)
             
-                        
             if on_leaf_level:
-                
                 # this is the leaf level
                 # attach the shotgun data so that we can access it later
                 # note - pyqt converts everything automatically to unicode,
@@ -997,35 +1001,31 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # values to unicode prior to insertion
                 item.setData(self.__utf8_to_unicode(sg_item), self.SG_DATA_ROLE)
                 
-                # set the default thumbnail
-                self._populate_default_thumbnail(item)
-                
-                # call out to class implementation to do its thing
-                self._populate_item(item, sg_item)                
-
-                # and run the finalizer
-                self._finalize_item(item)
-                
-                # request thumb
-                if self.__download_thumbs:
-                    self.__process_thumbnail_for_item(item)                
-                
                 # and also populate the id association in our lookup dict
                 self.__entity_tree_data[ sg_item.get("id") ] = item      
-            else:
-                
-                # not on leaf level yet
-                # set the default thumbnail
-                self._populate_default_thumbnail(item)                
-                                
-                # call out to class implementation to do its thing
-                # because this is a leaf level node, pass None
-                # as the shotgun data
-                self._populate_item(item, None)
 
-                # and run the finalizer.
-                self._finalize_item(item)
-                
+            # now we got the object set up. Now start calling custom methods:
+
+            # set the default thumbnail
+            self._populate_default_thumbnail(item)
+            
+            # run the populate item method (only runs at construction, not on cache restore)
+            if on_leaf_level:      
+                self._populate_item(item, sg_item)
+            else:
+                self._populate_item(item, None)
+            
+            # and run the finalizer (always runs on construction, even via cache)
+            self._finalize_item(item)
+
+            # add it to the tree. At this point QT will fire off various signals to inform views etc.
+            root.appendRow(item)
+
+            # request thumb
+            if self.__download_thumbs:
+                self.__process_thumbnail_for_item(item)                
+            
+            if not on_leaf_level:
                 # now when we recurse down, we need to add our current constrain
                 # to the list of constraints. For this we need the raw sg value
                 # and now the display name that we used when we constructed the
@@ -1187,10 +1187,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # can do any setup they need 
             self._finalize_item(item)
 
-            # request thumb
-            if self.__download_thumbs:
-                self.__process_thumbnail_for_item(item)
-                    
             if node_depth == curr_depth + 1:
                 # this new node is a child of the previous node
                 curr_parent = prev_node
@@ -1213,6 +1209,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
             # and attach the node
             curr_parent.appendRow(item)
+
+            # request thumb
+            if self.__download_thumbs:
+                self.__process_thumbnail_for_item(item)
+            
             prev_node = item
         
         return num_items_loaded
