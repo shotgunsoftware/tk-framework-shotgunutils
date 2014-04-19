@@ -156,8 +156,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__sg_data_retriever.stop()
         # clear all internal memory storage
         self.__reset_all_data()
-        # finally totally deallocate it just to make GC happy
-        self.__sg_data_retriever = None
                 
     
     def item_from_entity(self, entity_type, entity_id):
