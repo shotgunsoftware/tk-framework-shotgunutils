@@ -23,6 +23,11 @@ def show_help_screen(parent, bundle, pixmaps):
     """
     gui = Dialog(parent, bundle, pixmaps)    
     gui.show()
+    # attach the object to the main parent object - this is
+    # to help older versions of PySide which get confused
+    # when a PySide object handle is lost but the 
+    # underlying QT object persists.
+    parent.__help_screen = gui
     # center on top of parent window
     gui.move(gui.parent().window().frameGeometry().center() - gui.window().rect().center())
     gui.repaint()
