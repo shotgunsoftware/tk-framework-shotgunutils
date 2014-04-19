@@ -66,6 +66,12 @@ class Dialog(QtGui.QDialog):
         self.ui.left_arrow.clicked.connect(self._on_left_arrow_click)
         self.ui.right_arrow.clicked.connect(self._on_right_arrow_click)
         
+        # we start at index zero so disable the left arrow
+        self.ui.left_arrow.setVisible(False)
+        if len(pixmaps) == 1:
+            # only one image. So disable the right arrow aswell
+            self.ui.right_arrow.setVisible(False)
+        
         # make GC happy
         self._widgets = []
         self._pages = []
@@ -99,9 +105,15 @@ class Dialog(QtGui.QDialog):
         start_index = self.ui.stackedWidget.currentIndex()
         
         prev_index = start_index-1
-        if prev_index < 0:
-            prev_index = self._num_images-1
         
+        if prev_index == 0:
+            # we arrived at the first slide! Hide left arrow
+            self.ui.left_arrow.setVisible(False)
+            self.ui.right_arrow.setVisible(True)
+        else:
+            self.ui.left_arrow.setVisible(True)
+            self.ui.right_arrow.setVisible(True)
+                
         this_page = self._pages[start_index]
         prev_page = self._pages[prev_index]
         
@@ -135,8 +147,16 @@ class Dialog(QtGui.QDialog):
         User clicks the left arrow
         """
         start_index = self.ui.stackedWidget.currentIndex()
+        next_index = start_index + 1
         
-        next_index = (start_index+1) % self._num_images
+        if next_index == (self._num_images - 1):
+            # we arrived at the last slide! Hide right arrow
+            self.ui.right_arrow.setVisible(False)
+            self.ui.left_arrow.setVisible(True)
+        else:
+            self.ui.right_arrow.setVisible(True)
+            self.ui.left_arrow.setVisible(True)
+    
         
         this_page = self._pages[start_index]
         next_page = self._pages[next_index]

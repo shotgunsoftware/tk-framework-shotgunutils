@@ -19,12 +19,18 @@ class Ui_Dialog(object):
 "")
         self.horizontalLayout_2 = QtGui.QHBoxLayout(Dialog)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.verticalLayout_3 = QtGui.QVBoxLayout()
+        self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.label = QtGui.QLabel(Dialog)
+        self.label.setMinimumSize(QtCore.QSize(34, 0))
+        self.label.setMaximumSize(QtCore.QSize(34, 16777215))
+        self.label.setText("")
+        self.label.setObjectName("label")
+        self.verticalLayout_3.addWidget(self.label)
         self.left_arrow = QtGui.QToolButton(Dialog)
         self.left_arrow.setMinimumSize(QtCore.QSize(34, 34))
         self.left_arrow.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.left_arrow.setStyleSheet("QToolButton{\n"
-"width: 12px;\n"
-"height: 20px;\n"
 "background-image: url(:/tk_framework_shotgunutils.help_screen/left_arrow.png);\n"
 "border: none;\n"
 "background-color: none;\n"
@@ -42,7 +48,14 @@ class Ui_Dialog(object):
         self.left_arrow.setText("")
         self.left_arrow.setAutoRaise(True)
         self.left_arrow.setObjectName("left_arrow")
-        self.horizontalLayout_2.addWidget(self.left_arrow)
+        self.verticalLayout_3.addWidget(self.left_arrow)
+        self.label_2 = QtGui.QLabel(Dialog)
+        self.label_2.setMinimumSize(QtCore.QSize(34, 0))
+        self.label_2.setMaximumSize(QtCore.QSize(34, 16777215))
+        self.label_2.setText("")
+        self.label_2.setObjectName("label_2")
+        self.verticalLayout_3.addWidget(self.label_2)
+        self.horizontalLayout_2.addLayout(self.verticalLayout_3)
         self.verticalLayout_2 = QtGui.QVBoxLayout()
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.groupBox = QtGui.QGroupBox(Dialog)
@@ -71,12 +84,18 @@ class Ui_Dialog(object):
         self.horizontalLayout.addWidget(self.close)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.horizontalLayout_2.addLayout(self.verticalLayout_2)
+        self.verticalLayout_4 = QtGui.QVBoxLayout()
+        self.verticalLayout_4.setObjectName("verticalLayout_4")
+        self.label_3 = QtGui.QLabel(Dialog)
+        self.label_3.setMinimumSize(QtCore.QSize(34, 0))
+        self.label_3.setMaximumSize(QtCore.QSize(34, 16777215))
+        self.label_3.setText("")
+        self.label_3.setObjectName("label_3")
+        self.verticalLayout_4.addWidget(self.label_3)
         self.right_arrow = QtGui.QToolButton(Dialog)
         self.right_arrow.setMinimumSize(QtCore.QSize(34, 34))
         self.right_arrow.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.right_arrow.setStyleSheet("QToolButton{\n"
-"width: 12px;\n"
-"height: 20px;\n"
 "background-image: url(:/tk_framework_shotgunutils.help_screen/right_arrow.png);\n"
 "border: none;\n"
 "background-color: none;\n"
@@ -94,7 +113,14 @@ class Ui_Dialog(object):
         self.right_arrow.setText("")
         self.right_arrow.setAutoRaise(True)
         self.right_arrow.setObjectName("right_arrow")
-        self.horizontalLayout_2.addWidget(self.right_arrow)
+        self.verticalLayout_4.addWidget(self.right_arrow)
+        self.label_4 = QtGui.QLabel(Dialog)
+        self.label_4.setMinimumSize(QtCore.QSize(34, 0))
+        self.label_4.setMaximumSize(QtCore.QSize(34, 16777215))
+        self.label_4.setText("")
+        self.label_4.setObjectName("label_4")
+        self.verticalLayout_4.addWidget(self.label_4)
+        self.horizontalLayout_2.addLayout(self.verticalLayout_4)
 
         self.retranslateUi(Dialog)
         self.stackedWidget.setCurrentIndex(-1)

@@ -22,23 +22,42 @@ background-image: url(:/tk_framework_shotgunutils.help_screen/bg.png);
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
-    <widget class="QToolButton" name="left_arrow">
-     <property name="minimumSize">
-      <size>
-       <width>34</width>
-       <height>34</height>
-      </size>
-     </property>
-     <property name="focusPolicy">
-      <enum>Qt::ClickFocus</enum>
-     </property>
-     <property name="toolTip">
-      <string>Scroll to the previous slide</string>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">QToolButton{
-width: 12px;
-height: 20px;
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="minimumSize">
+        <size>
+         <width>34</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>34</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="left_arrow">
+       <property name="minimumSize">
+        <size>
+         <width>34</width>
+         <height>34</height>
+        </size>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>Scroll to the previous slide</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QToolButton{
 background-image: url(:/tk_framework_shotgunutils.help_screen/left_arrow.png);
 border: none;
 background-color: none;
@@ -53,14 +72,35 @@ QToolButton:Pressed {
 background-image: url(:/tk_framework_shotgunutils.help_screen/left_arrow_pressed.png);
 }
 </string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="autoRaise">
-      <bool>true</bool>
-     </property>
-    </widget>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="minimumSize">
+        <size>
+         <width>34</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>34</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -123,23 +163,42 @@ background-color: rgba(0,0,0,50);
     </layout>
    </item>
    <item>
-    <widget class="QToolButton" name="right_arrow">
-     <property name="minimumSize">
-      <size>
-       <width>34</width>
-       <height>34</height>
-      </size>
-     </property>
-     <property name="focusPolicy">
-      <enum>Qt::ClickFocus</enum>
-     </property>
-     <property name="toolTip">
-      <string>Scroll to the next slide</string>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">QToolButton{
-width: 12px;
-height: 20px;
+    <layout class="QVBoxLayout" name="verticalLayout_4">
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="minimumSize">
+        <size>
+         <width>34</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>34</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="right_arrow">
+       <property name="minimumSize">
+        <size>
+         <width>34</width>
+         <height>34</height>
+        </size>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>Scroll to the next slide</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QToolButton{
 background-image: url(:/tk_framework_shotgunutils.help_screen/right_arrow.png);
 border: none;
 background-color: none;
@@ -154,14 +213,35 @@ QToolButton:Pressed {
 background-image: url(:/tk_framework_shotgunutils.help_screen/right_arrow_pressed.png);
 }
 </string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="autoRaise">
-      <bool>true</bool>
-     </property>
-    </widget>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="minimumSize">
+        <size>
+         <width>34</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>34</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
