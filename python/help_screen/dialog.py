@@ -8,6 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+import sys
 import tank
 
 from tank.platform.qt import QtCore, QtGui
@@ -21,7 +22,8 @@ def show_help_screen(parent, bundle, pixmaps):
     :param bundle: Bundle object to associate with (app, engine, framework)
     :param pixmaps: List of QPixmap objects, all 650x400 px    
     """
-    gui = Dialog(parent, bundle, pixmaps)    
+    gui = Dialog(parent, bundle, pixmaps)
+    gui.setWindowTitle("Toolkit Help")    
     gui.show()
     # attach the object to the main parent object - this is
     # to help older versions of PySide which get confused
@@ -49,7 +51,13 @@ class Dialog(QtGui.QDialog):
         :param bundle: Bundle object to associate with (app, engine, framework)
         :param pixmaps: List of QPixmap objects, all 650x400 px        
         """
-        QtGui.QDialog.__init__(self, parent, QtCore.Qt.SplashScreen | QtCore.Qt.WindowStaysOnTopHint)
+        
+        # it seems some versions of linux are having issues with the splash screen mode,
+        # so disable this
+        if "linux" in sys.platform:
+            QtGui.QDialog.__init__(self, parent, QtCore.Qt.WindowStaysOnTopHint)
+        else: 
+            QtGui.QDialog.__init__(self, parent, QtCore.Qt.SplashScreen | QtCore.Qt.WindowStaysOnTopHint)
         
         self._bundle = bundle
 
