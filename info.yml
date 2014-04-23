@@ -8,19 +8,17 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-# Metadata defining the behaviour and requirements for this framework
+# Metadata defining the behavior and requirements for this framework
 
 # expected fields in the configuration file for this engine
 configuration:
 
-
 # the Shotgun fields that this engine needs in order to operate correctly
 requires_shotgun_fields:
-        
 
 # More verbose description of this item 
 display_name: "Shotgun Tools Framework"
-description: "Collection of QT widgets, models and helpers to make it easy to access Shotgun data."
+description: "A Collection of QT objects and utilities to simplify app development and Shotgun connectivity."
 
 # Required minimum versions for this item to run
 requires_shotgun_version:
