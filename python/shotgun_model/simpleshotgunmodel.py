@@ -52,6 +52,6 @@ class SimpleShotgunModel(ShotgunOverlayModel):
         filters = filters or []
         fields = fields or ["code"]
         hierarchy = fields[0]
-        ShotgunModel._load_data(self, entity_type, filters, hierarchy, fields)
+        ShotgunOverlayModel._load_data(self, entity_type, filters, hierarchy, fields)
         self._refresh_data()
         
