@@ -286,6 +286,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                           the cache seed should also be influenced by those parameters and you can pass
                           an external string via this parameter which will be added to the seed.
                         
+        :returns:         True if cached data was loaded, False if not.
         """
         # we are changing the query
         self.query_changed.emit()        
@@ -419,7 +420,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
     def _populate_item(self, item, sg_data):
         """
-        Whenever an item is constructed, this methods is called. It allows subclasses to intercept
+        Whenever an item is constructed, this method is called. It allows subclasses to intercept
         the construction of a QStandardItem and add additional metadata or make other changes
         that may be useful. Nothing needs to be returned.
         
@@ -431,7 +432,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Note that when an item is fetched from the cache, this method is *not* called, it will
         only be called when shotgun data initially arrives from a Shotgun API query.
         
-        This is typically used if you retrieve additional fields alongside the standard "name" field
+        This is typically subclassed if you retrieve additional fields alongside the standard "name" field
         and you want to put those into various custom data roles. These custom fields on the item
         can later on be picked up by custom (delegate) rendering code in the view.
         
@@ -449,13 +450,14 @@ class ShotgunModel(QtGui.QStandardItemModel):
         the model data, meaning that this method is executed each time an item is constructed, 
         regardless of if it came from an asynchronous shotgun query or a cache fetch. 
         
-        Later on, if the model was instantiated with the download_thumbs parameter set to True,
-        the standard 'image' field thumbnail will be automatically downloaded for all items (or
-        picked up from local cache if possible). When these real thumbnails arrive, the
-        _populate_thumbnail() method will be called.
+        The purpose of this method is that you can subclass it if you want to ensure that items
+        have an associated thumbnail directly when they are first created. 
         
-        This method can be useful if you want to control both the visual state of an entity which
-        does not have a thumbnail in Shotgun and the state before a thumbnail has been downloaded.
+        Later on in the data load cycle, if the model was instantiated with the 
+        `download_thumbs` parameter set to True,
+        the standard Shotgun `image` field thumbnail will be automatically downloaded for all items (or
+        picked up from local cache if possible). When these real thumbnails arrive, the
+        `_populate_thumbnail()` method will be called.
         
         :param item: QStandardItem that is about to be added to the model. This has been primed
                      with the standard settings that the ShotgunModel handles.        
@@ -483,7 +485,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
           _populate_default_thumbnail() is called, allowing client code to set
           up a default thumbnail that will be shown while potential real thumbnail
           data is being loaded.
-          This will provide an empty thumbnail by default but can be subclassed.
         - The model will now start looking for the real thumbail.
           - If the thumbnail is already cached on disk, _populate_thumbnai() is
             called very soon.
