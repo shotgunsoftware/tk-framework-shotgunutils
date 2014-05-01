@@ -103,8 +103,12 @@ class UserSettings(object):
         """
         full_name = self.__resolve_settings_name(name, scope)
         self.__fw.log_debug("User Settings Manager: Storing %s" % full_name)
-        value_str = pickle.dumps( sanitize_qt(value) )
-        self.__settings.setValue(full_name, value_str)
+        try:
+            value_str = pickle.dumps( sanitize_qt(value) )
+            self.__settings.setValue(full_name, value_str)
+        except Exception, e:
+            self.__fw.log_warning("Error storing user setting '%s'. Error details: %s" % (full_name, e))
+        
     
     def retrieve(self, name, default=None, scope=SCOPE_GLOBAL):
         """
