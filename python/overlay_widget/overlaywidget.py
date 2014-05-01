@@ -22,10 +22,9 @@ class ShotgunOverlayWidget(QtGui.QWidget):
     
     The caller does not need to worry about anything - all they need to do is 
     to pass a widget to the model constructor and this widget will get the overlay
-    added on top. (This widget is typically, not does not have to be, the associated view).  
+    added on top.   
 
-    The overlay is also used by the model to report any errors that may occur as part 
-    of data management.
+    The overlay can also used by the calling code to report errors and display info.
     """
     
     MODE_OFF = 0
@@ -129,7 +128,9 @@ class ShotgunOverlayWidget(QtGui.QWidget):
 
     def hide(self, hide_errors=True):
         """
-        Hide the overlay
+        Hide the overlay.
+        
+        :param hide_errors: if set to False, errors are not hidden.
         """
         if hide_errors == False and self._mode == self.MODE_ERROR:
             # an error is displayed - leave it up.

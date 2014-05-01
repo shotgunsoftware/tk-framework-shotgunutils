@@ -36,11 +36,7 @@ def show_help_screen(parent, bundle, pixmaps):
 
 class Dialog(QtGui.QDialog):
     """
-    Simple list widget which hosts a square thumbnail, header text
-    and body text. It has a fixed size.
-    
-    This class is typically used in conjunction with a QT View and the 
-    ShotgunDelegate class. 
+    Help screen dialog.
     """
     
     def __init__(self, parent, bundle, pixmaps):
@@ -152,7 +148,7 @@ class Dialog(QtGui.QDialog):
         
     def _on_right_arrow_click(self):
         """
-        User clicks the left arrow
+        User clicks the right arrow
         """
         start_index = self.ui.stackedWidget.currentIndex()
         next_index = start_index + 1
