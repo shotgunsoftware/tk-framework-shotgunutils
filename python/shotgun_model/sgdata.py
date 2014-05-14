@@ -78,7 +78,7 @@ class ShotgunAsyncDataRetriever(QtCore.QThread):
     ############################################################################################################
     # Public methods
         
-    def set_shotgun_connecton(self, sg):
+    def set_shotgun_connection(self, sg):
         """
         Specify the shotgun api instance this model should use to communicate
         with Shotgun. If not specified, each model instance will instantiante its
