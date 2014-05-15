@@ -53,7 +53,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
     # cache data is available.
     cache_loaded = QtCore.Signal()
 
-    # signal which gets emitted whenever the model starts to refresh it's
+    # signal which gets emitted whenever the model starts to refresh its
     # shotgun data. This is emitted from _refresh_data().  Useful signal if
     # you want to present a loading indicator of some kind.
     data_refreshing = QtCore.Signal()
