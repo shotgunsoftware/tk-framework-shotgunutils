@@ -132,7 +132,8 @@ class WidgetDelegate(QtGui.QStyledItemDelegate):
                 # http://pyqt.sourceforge.net/Docs/PyQt4/qwidget.html#render            
                 self.__paint_widget.render(painter, 
                                           QtCore.QPoint(0,0),
-                                          flags=QtGui.QWidget.DrawChildren)
+                                          QtGui.QRegion(),
+                                          QtGui.QWidget.DrawChildren)
             else:
                 # pyside is using the renderFlags parameter which seems correct
                 self.__paint_widget.render(painter, 
