@@ -83,7 +83,7 @@ class Dialog(QtGui.QDialog):
         for p in pixmaps:
             
             if p.width() != 650 or p.height() != 400:
-                raise tank.TankError("Images must be 650x400px!")
+                raise tank.TankError("Image not found or image resolution not 650x400px!")
             
             page = QtGui.QWidget()
             self._pages.append(page)
