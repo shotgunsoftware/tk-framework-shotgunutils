@@ -10,7 +10,7 @@
 
 import sgtk
 
-class WidgetFramework(sgtk.platform.Framework):
+class ShotgunUtilsFramework(sgtk.platform.Framework):
     
     ##########################################################################################
     # init and destroy
