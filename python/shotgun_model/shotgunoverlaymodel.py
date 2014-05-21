@@ -9,9 +9,9 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import tank
-from ..overlay_widget import ShotgunOverlayWidget
 from .shotgunmodel import ShotgunModel
 from tank.platform.qt import QtCore, QtGui
+overlay_module = tank.platform.import_framework("tk-framework-qtwidgets", "overlay_widget") 
 
 
 class ShotgunOverlayModel(ShotgunModel):
@@ -51,7 +51,7 @@ class ShotgunOverlayModel(ShotgunModel):
         ShotgunModel.__init__(self, parent, download_thumbs, schema_generation)
         
         # set up our spinner UI handling
-        self.__overlay = ShotgunOverlayWidget(overlay_widget)
+        self.__overlay = overlay_module.ShotgunOverlayWidget(overlay_widget)
         self._is_in_spin_state = False
         self._cache_loaded = False
         
