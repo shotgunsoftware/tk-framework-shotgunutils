@@ -667,11 +667,18 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # QT is struggling to handle the special timezone class that the shotgun API returns.
         # in fact, on linux it is struggling to serialize any complex object via QDataStream.
         #
-        # Convert time stamps to unix time. Note that we lose any time zone qualifications by
-        # by doing this - it is the the receiver's resposibility to handle this data correctly.
-        # generally speaking, local timezone objects are returned by shotgun by default and
-        # this is how toolkit also initializes any shotgun connection it is making.
-
+        # Convert time stamps to unix time. Unix time is a number representing the timestamp
+        # in the number of seconds since 1 Jan 1970 in the UTC timezone. So a unix timestamp
+        # is universal across time zones and DST changes.
+        #
+        # When you are pulling data from the shotgun model and want to convert this unix timestamp
+        # to a *local* timezone object, which is typically what you want when you are 
+        # displaying a value on screen, use the following code:
+        # >>> local_datetime = datetime.fromtimestamp(unix_time)
+        #
+        # furthermore, if you want to turn that into a nicely formatted string:
+        # >>> local_datetime.strftime('%Y-%m-%d %H:%M')
+        #
         for idx in range(len(sg_data)):
             for k in sg_data[idx]:
                 if isinstance(sg_data[idx][k], datetime.datetime):
