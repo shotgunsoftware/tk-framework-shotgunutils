@@ -101,6 +101,54 @@ class ShotgunDataRetriever(QtCore.QThread):
     ############################################################################################################
     # Public methods
         
+    @staticmethod
+    def download_thumbnail(url, bundle):
+        """
+        Convenience and compatibility method for quick and easy synchrnous thumbnail download.
+        
+        This will manage a shotgun thumbnail url into the standard thumbnail 
+        location - if it already exists in the cache, a path to it will be returned
+        instantly. If not, it will be downloaded from Shotgun, placed in the standard
+        cache location on disk and its path will be returned.
+        
+        This is a helper method meant to make it easy to port over synchronous legacy 
+        code - for an UX wise better solution, we recommend using the thumbnail retrieval
+        that runs in a background thread.
+        
+        Bcause Shotgun thumbnail urls have an expiry time, make sure to only
+        pass urls to this method that have been very recently retrieved via a Shotgun find call.
+        
+        :param url: The thumbnail url string that is associated with this thumbnail. This is 
+                    the field value as returned by a Shotgun query.
+        :param bundle: App, Framework or Engine object requesting the download.
+        
+        :returns: A path to the thumbnail on disk.
+        """
+        
+        path_to_cached_thumb = ShotgunDataRetriever._get_thumbnail_path(url, bundle)
+        
+        if not os.path.exists(path_to_cached_thumb):
+            
+            # create folders on disk
+            bundle.ensure_folder_exists(os.path.dirname(path_to_cached_thumb))
+            
+            # download using standard core method. This will ensure that 
+            # proxy and connection settings as set in the SG API are used
+            tank.util.download_url(bundle.shotgun, url, path_to_cached_thumb)
+            
+            # modify the permissions of the file so it's writeable by others
+            old_umask = os.umask(0)
+            try:
+                os.chmod(path_to_cached_thumb, 0666)
+            finally:
+                os.umask(old_umask)
+        
+        return path_to_cached_thumb
+        
+                        
+                        
+        
+        
     def set_shotgun_connection(self, sg):
         """
         Specify the shotgun api instance this model should use to communicate
@@ -190,8 +238,8 @@ class ShotgunDataRetriever(QtCore.QThread):
         Adds a Shotgun thumbnail request to the queue. 
         
         If a cached version of the thumbnail exists, this will be returned.
-        If not, the Shotgun will be downloaded from Shotgun.
-        
+        If not, the Shotgun will be downloaded from Shotgun. 
+                
         :param url: The thumbnail url string that is associated with this thumbnail. This is 
                     the field value as returned by a Shotgun query.
         :param entity_type: Shotgun entity type with which the thumb is associated.
@@ -226,7 +274,8 @@ class ShotgunDataRetriever(QtCore.QThread):
     ############################################################################################################
     # Internal methods
     
-    def _get_thumbnail_path(self, url):
+    @staticmethod
+    def _get_thumbnail_path(url, bundle):
         """
         Returns the location on disk suitable for a thumbnail given its url.
         """
@@ -269,7 +318,7 @@ class ShotgunDataRetriever(QtCore.QThread):
                 new_chunks.append(folder)
 
         # establish the root path        
-        cache_path_items = [self._bundle.cache_location, "thumbnails"]        
+        cache_path_items = [bundle.cache_location, "thumbnails"]        
         # append the folders
         cache_path_items.extend(new_chunks)
         # and append the file name
@@ -356,7 +405,7 @@ class ShotgunDataRetriever(QtCore.QThread):
                     # check if a thumbnail exists on disk. If not, fall back onto
                     # a thumbnail download from shotgun/s3
                     url = item_to_process["url"]
-                    path_to_cached_thumb = self._get_thumbnail_path(url)
+                    path_to_cached_thumb = self._get_thumbnail_path(url, self._bundle)
                     if os.path.exists(path_to_cached_thumb):
                         # thumbnail already here! yay!
                         self.work_completed.emit(item_to_process["id"], "find", {"thumb_path": path_to_cached_thumb} )
@@ -386,7 +435,7 @@ class ShotgunDataRetriever(QtCore.QThread):
                     else:
                         # download from sg
                         url = sg_data[field]
-                        path_to_cached_thumb = self._get_thumbnail_path(url)
+                        path_to_cached_thumb = self._get_thumbnail_path(url, self._bundle)
                         self._bundle.ensure_folder_exists(os.path.dirname(path_to_cached_thumb))
                         tank.util.download_url(self._bundle.shotgun, url, path_to_cached_thumb)
                         # modify the permissions of the file so it's writeable by others
