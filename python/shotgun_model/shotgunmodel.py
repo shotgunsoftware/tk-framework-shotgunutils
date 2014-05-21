@@ -86,7 +86,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
     # magic number for IO streams
     FILE_MAGIC_NUMBER = 0xDEADBEEF
     # version of binary format
-    FILE_VERSION = 22
+    FILE_VERSION = 21
 
 
     def __init__(self, parent, download_thumbs=True, schema_generation=0):
@@ -668,17 +668,15 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # in fact, on linux it is struggling to serialize any complex object via QDataStream.
         #
         # Convert time stamps to unix time. Note that we lose any time zone qualifications by
-        # by doing this, so we convert the time stamp to a UTC unixtime to ensure that the values
-        # are the same regardless of your current time zone or daylight savings setting. If
-        # we were caching the time stamps using local timezones, weird things would happen
-        # if you took your caches with you when travelling (e.g. on a laptop) or when DST 
-        # kicked in.
+        # by doing this - it is the the receiver's resposibility to handle this data correctly.
+        # generally speaking, local timezone objects are returned by shotgun by default and
+        # this is how toolkit also initializes any shotgun connection it is making.
 
         for idx in range(len(sg_data)):
             for k in sg_data[idx]:
                 if isinstance(sg_data[idx][k], datetime.datetime):
-                    # convert to unix timestamp, utc time zone
-                    sg_data[idx][k] = time.mktime(sg_data[idx][k].utctimetuple())
+                    # convert to unix timestamp, local time zone
+                    sg_data[idx][k] = time.mktime(sg_data[idx][k].timetuple())
 
         modifications_made = False
 
