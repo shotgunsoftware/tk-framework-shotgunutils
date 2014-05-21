@@ -105,14 +105,12 @@ class ShotgunDataRetriever(QtCore.QThread):
     def download_thumbnail(url, bundle):
         """
         Convenience and compatibility method for quick and easy synchrnous thumbnail download.
-        
-        This will manage a shotgun thumbnail url into the standard thumbnail 
-        location - if it already exists in the cache, a path to it will be returned
-        instantly. If not, it will be downloaded from Shotgun, placed in the standard
-        cache location on disk and its path will be returned.
+        This will retrieve a shotgun thumbnail given a url - if it already exists in the cache, 
+        a path to it will be returned instantly. If not, it will be downloaded from Shotgun, 
+        placed in the standard cache location on disk and its path will be returned.
         
         This is a helper method meant to make it easy to port over synchronous legacy 
-        code - for an UX wise better solution, we recommend using the thumbnail retrieval
+        code - for a better solution, we recommend using the thumbnail retrieval
         that runs in a background thread.
         
         Bcause Shotgun thumbnail urls have an expiry time, make sure to only
