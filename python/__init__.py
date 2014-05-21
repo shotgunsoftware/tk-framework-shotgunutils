@@ -9,8 +9,5 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 from . import shotgun_model
-from . import shotgun_view
 from . import shotgun_data
-from . import overlay_widget
 from . import settings
-from . import help_screen
