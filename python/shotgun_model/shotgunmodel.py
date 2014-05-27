@@ -134,7 +134,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         self.__download_thumbs = download_thumbs
 
-        
+
 
     ########################################################################################
     # public methods
@@ -672,7 +672,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # is universal across time zones and DST changes.
         #
         # When you are pulling data from the shotgun model and want to convert this unix timestamp
-        # to a *local* timezone object, which is typically what you want when you are 
+        # to a *local* timezone object, which is typically what you want when you are
         # displaying a value on screen, use the following code:
         # >>> local_datetime = datetime.fromtimestamp(unix_time)
         #
@@ -1096,7 +1096,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         elif value is None:
             # this is an empty link field, undefined enum or leaf node which has no value set
             et_display_name = tank.util.get_entity_type_display_name(self.__bundle.tank, sg_data.get("type"))
-            return "Unnamed"
+            return "Unnamed %s" % et_display_name
 
         else:
             # everything else just cast to string
