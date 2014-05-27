@@ -134,7 +134,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         self.__download_thumbs = download_thumbs
 
-        
+
 
     ########################################################################################
     # public methods
@@ -672,7 +672,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # is universal across time zones and DST changes.
         #
         # When you are pulling data from the shotgun model and want to convert this unix timestamp
-        # to a *local* timezone object, which is typically what you want when you are 
+        # to a *local* timezone object, which is typically what you want when you are
         # displaying a value on screen, use the following code:
         # >>> local_datetime = datetime.fromtimestamp(unix_time)
         #
@@ -939,6 +939,16 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Clears the tree and rebuilds it from the given shotgun data.
         Note that any selection and expansion states in the view will be lost.
         """
+
+        # Call the standard QStandardItemModel beginResetModel method to notify
+        # any proxies downstream that we are resetting the model.
+        self.beginResetModel()
+        # Block all signals so downstream objects don't get blitzed with
+        # unnecessary signals when we recursively delete all the existing rows.
+        self.blockSignals(True)
+
+        # Now call the internal reset all data method.  A custom method is
+        # used due to bugs with PySide.
         self.__reset_all_data()
 
         # get any external payload from deriving classes
@@ -947,6 +957,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # and add the shotgun data
         root = self.invisibleRootItem()
         self.__populate_complete_tree_r(data, root, self.__hierarchy, {})
+
+        # Turn our signals back on as we have effectively reset the model at
+        # this point and finally call the QStandardItemModel's endResetModel
+        # method.
+        self.blockSignals(False)
+        self.endResetModel()
 
     def __populate_complete_tree_r(self, sg_data, root, hierarchy, constraints):
         """
