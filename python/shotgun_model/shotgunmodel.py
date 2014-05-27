@@ -134,10 +134,16 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         self.__download_thumbs = download_thumbs
 
-        
 
     ########################################################################################
     # public methods
+
+    @property
+    def entity_ids(self):
+        """
+        Returns a list of entity ids that are part of this model.
+        """
+        return self.__entity_tree_data.keys()
 
     def set_shotgun_connection(self, sg):
         """
@@ -179,6 +185,20 @@ class ShotgunModel(QtGui.QStandardItemModel):
         if entity_id not in self.__entity_tree_data:
             return None
         return self.__entity_tree_data[entity_id]
+
+    def index_from_entity(self, entity_type, entity_id):
+        """
+        Returns a QModelIndex based on entity type and entity id
+        Returns none if not found.
+
+        :param entity_type: Shotgun entity type to look for
+        :param entity_id: Shotgun entity id to look for
+        :returns: QModelIndex or None if not found
+        """
+        item = self.item_from_entity(entity_type, entity_id)
+        if not item:
+            return None
+        return self.indexFromItem(item)
 
     def get_filters(self, item):
         """
@@ -672,7 +692,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # is universal across time zones and DST changes.
         #
         # When you are pulling data from the shotgun model and want to convert this unix timestamp
-        # to a *local* timezone object, which is typically what you want when you are 
+        # to a *local* timezone object, which is typically what you want when you are
         # displaying a value on screen, use the following code:
         # >>> local_datetime = datetime.fromtimestamp(unix_time)
         #
