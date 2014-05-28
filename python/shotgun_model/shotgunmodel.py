@@ -134,7 +134,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         self.__download_thumbs = download_thumbs
 
-        
+
 
     ########################################################################################
     # public methods
@@ -161,8 +161,13 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__sg_data_retriever.work_failure.disconnect( self.__on_worker_failure)
         # gracefully stop thread
         self.__sg_data_retriever.stop()
+
+        # block all signals before we reset the data otherwise downstream
+        # proxy objects could cause crashes.
+        self.blockSignals(True)
         # clear all internal memory storage
         self.__reset_all_data()
+        self.blockSignals(False)
 
 
     def item_from_entity(self, entity_type, entity_id):
@@ -672,7 +677,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # is universal across time zones and DST changes.
         #
         # When you are pulling data from the shotgun model and want to convert this unix timestamp
-        # to a *local* timezone object, which is typically what you want when you are 
+        # to a *local* timezone object, which is typically what you want when you are
         # displaying a value on screen, use the following code:
         # >>> local_datetime = datetime.fromtimestamp(unix_time)
         #
