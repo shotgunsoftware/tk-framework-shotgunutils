@@ -105,10 +105,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         QtGui.QStandardItemModel.__init__(self, parent)
 
-        self.__bundle = tank.platform.current_bundle()
+        self._bundle = tank.platform.current_bundle()
 
         # set up data fetcher
-        shotgun_data = self.__bundle.import_module("shotgun_data")
+        shotgun_data = self._bundle.import_module("shotgun_data")
         self.__sg_data_retriever = shotgun_data.ShotgunDataRetriever(self)
         self.__sg_data_retriever.work_completed.connect( self.__on_worker_signal)
         self.__sg_data_retriever.work_failure.connect( self.__on_worker_failure)
@@ -134,7 +134,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         self.__download_thumbs = download_thumbs
 
-        
+
 
     ########################################################################################
     # public methods
@@ -313,7 +313,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # parameters that will determine the contents that is loaded into the tree
         # note that we add the shotgun host name to support multiple sites being used
         # on a single machine
-        hash_base = "%s_%s_%s_%s_%s_%s_%s" % (self.__bundle.shotgun.base_url,
+        hash_base = "%s_%s_%s_%s_%s_%s_%s" % (self._bundle.shotgun.base_url,
                                               self.__entity_type,
                                               str(self.__filters),
                                               str(self.__fields),
@@ -555,7 +555,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         :param msg: debug message
         """
-        self.__bundle.log_debug("[Toolkit SG Model] %s" % msg)
+        self._bundle.log_debug("[Toolkit SG Model] %s" % msg)
 
     def __log_warning(self, msg):
         """
@@ -563,7 +563,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         :param msg: debug message
         """
-        self.__bundle.log_warning("[Toolkit SG Model] %s" % msg)
+        self._bundle.log_warning("[Toolkit SG Model] %s" % msg)
 
 
     def __reset_all_data(self):
@@ -672,7 +672,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # is universal across time zones and DST changes.
         #
         # When you are pulling data from the shotgun model and want to convert this unix timestamp
-        # to a *local* timezone object, which is typically what you want when you are 
+        # to a *local* timezone object, which is typically what you want when you are
         # displaying a value on screen, use the following code:
         # >>> local_datetime = datetime.fromtimestamp(unix_time)
         #
@@ -1085,7 +1085,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         if isinstance(value, dict) and "name" in value and "type" in value:
             # This is a link field, so display it with type
             # use the display name for the entity type
-            et_display_name = tank.util.get_entity_type_display_name(self.__bundle.tank, value["type"])
+            et_display_name = tank.util.get_entity_type_display_name(self._bundle.tank, value["type"])
 
             if value["name"] is None:
                 # "Unnamed Sequence"
@@ -1095,7 +1095,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         elif value is None:
             # this is an empty link field, undefined enum or leaf node which has no value set
-            et_display_name = tank.util.get_entity_type_display_name(self.__bundle.tank, sg_data.get("type"))
+            et_display_name = tank.util.get_entity_type_display_name(self._bundle.tank, sg_data.get("type"))
             return "Unnamed"
 
         else:
