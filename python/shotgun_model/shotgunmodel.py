@@ -12,6 +12,7 @@ import tank
 import copy
 import os
 import hashlib
+import urlparse
 import datetime
 import time
 import tempfile
@@ -806,13 +807,24 @@ class ShotgunModel(QtGui.QStandardItemModel):
             a_val = a.get(k)
             b_val = b.get(k)
 
-            # skip thumbnail fields in the comparison - these change all the time!
-            # seem to have multiple url formats coming back from sg api so need to try to
-            # catchall time stamps and crypt keys because they keep changing all the time
+            # handle thumbnail fields as a special case
+            # thumbnail urls are (typically, there seem to be several standards!)
+            # on the form:
+            # https://sg-media-usor-01.s3.amazonaws.com/xxx/yyy/filename.ext?lots_of_authentication_headers
+            #
+            # the query string changes all the times, so when we check if an item is out of date, omit it.
             if isinstance(a_val, str) and ("image" in k or "amazonaws" in a_val or "AccessKeyId" in a_val):
-                continue
+                # attempt to parse values are urls and eliminate the querystring
+                # compare hostname + path only
+                url_obj_a = urlparse.urlparse(a_val)
+                url_obj_b = urlparse.urlparse(b_val)
+                compare_str_a = "%s/%s" % (url_obj_a.netloc, url_obj_a.path)
+                compare_str_b = "%s/%s" % (url_obj_b.netloc, url_obj_b.path)
+                if compare_str_a != compare_str_b:
+                    # url has changed
+                    return False
 
-            if a_val != b_val:
+            elif a_val != b_val:
                 return False
 
         return True
