@@ -1105,6 +1105,22 @@ class ShotgunModel(QtGui.QStandardItemModel):
             else:
                 return "%s %s" % (et_display_name, value["name"])
 
+        elif isinstance(value, list):
+            # this is a list of some sort. Loop over all elements and extrat a comma separated list.
+            formatted_values = []
+            if len(value) == 0:
+                # no items in list
+                formatted_values.append("No Value")
+            for v in value:
+                if isinstance(v, dict) and "name" in v and "type" in v:
+                    # This is a link field
+                    if v.get("name"):
+                        formatted_values.append(v.get("name"))
+                else:
+                    formatted_values.append(str(v))
+
+            return ", ".join(formatted_values)
+
         elif value is None:
             # this is an empty link field, undefined enum or leaf node which has no value set
             et_display_name = tank.util.get_entity_type_display_name(self.__bundle.tank, sg_data.get("type"))
