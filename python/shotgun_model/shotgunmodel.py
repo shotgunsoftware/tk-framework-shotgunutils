@@ -1139,19 +1139,23 @@ class ShotgunModel(QtGui.QStandardItemModel):
         This all happens on the C++ side and is very fast.
         """
         fh = QtCore.QFile(filename)
-        fh.open(QtCore.QIODevice.WriteOnly);
-        out = QtCore.QDataStream(fh)
-
-        # write a header
-        out.writeInt64(self.FILE_MAGIC_NUMBER)
-        out.writeInt32((self.FILE_VERSION + self.__schema_generation))
-
-        # tell which serialization dialect to use
-        out.setVersion(QtCore.QDataStream.Qt_4_0)
-
-        root = self.invisibleRootItem()
-
-        self.__save_to_disk_r(out, root, 0)
+        fh.open(QtCore.QIODevice.WriteOnly)
+        try:
+            out = QtCore.QDataStream(fh)
+    
+            # write a header
+            out.writeInt64(self.FILE_MAGIC_NUMBER)
+            out.writeInt32((self.FILE_VERSION + self.__schema_generation))
+    
+            # tell which serialization dialect to use
+            out.setVersion(QtCore.QDataStream.Qt_4_0)
+    
+            root = self.invisibleRootItem()
+    
+            self.__save_to_disk_r(out, root, 0)
+        
+        finally:
+            fh.close()
 
     def __save_to_disk_r(self, stream, item, depth):
         """
