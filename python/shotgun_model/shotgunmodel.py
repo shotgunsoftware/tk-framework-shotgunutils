@@ -843,6 +843,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         Add a shotgun item to the tree. Create intermediate nodes if neccessary.
         """
+        self.__log_debug("v2 Add add. Hierarchy: %s" % hierarchy)
         # get the next field to display in tree view
         field = hierarchy[0]
 
@@ -861,9 +862,21 @@ class ShotgunModel(QtGui.QStandardItemModel):
             if on_leaf_level:
                 # compare shotgun ids
                 sg_data = child.data(self.SG_DATA_ROLE)
-                if sg_data.get("id") == sg_item.get("id"):
-                    found_item = child
-                    break
+                
+                # #25231 some clients reporting some child items don't have this data attached
+                # this is either because of a bug which we don't yet fully understand or beacuse
+                # of model data injected into the tree which does not have this property set
+                # so double check that the data actually is present.
+                if sg_data is None:
+                    self.__log_warning("Found cached leaf node in tree with a missing SG_DATA_ROLE. Please report "
+                                       "to support on toolkitsupport@shotgunsoftware.com. If possible, please "
+                                       "make a copy of the file '%s' and attach that with the support request. "
+                                       "Affected Node name: '%s'. " % (self.__full_cache_path, child.text()))
+                else:
+                    if sg_data.get("id") == sg_item.get("id"):
+                        found_item = child
+                        break
+                
             else:
                 # not on leaf level. Just compare names
                 if str(child.text()) == field_display_name:
