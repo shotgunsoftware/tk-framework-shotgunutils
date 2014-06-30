@@ -843,7 +843,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         Add a shotgun item to the tree. Create intermediate nodes if neccessary.
         """
-        self.__log_debug("v2 Add add. Hierarchy: %s" % hierarchy)
         # get the next field to display in tree view
         field = hierarchy[0]
 
