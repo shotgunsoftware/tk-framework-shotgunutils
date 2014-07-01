@@ -778,23 +778,28 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
     def __utf8_to_unicode(self, sg_data):
         """
-        Converts all strings values in this sg dictionary to unicode:
+        Converts all string values in this sg dictionary to unicode:
 
         in:  {"a":"aaa", "b": 123, "c": {"x":"y", "z":"aa"}, "d": [ {"x":"y", "z":"aa"} ] }
         out: {'a': u'aaa', 'c': {'x': u'y', 'z': u'aa'}, 'b': 123, 'd': [{'x': u'y', 'z': u'aa'}]}
         """
-        new_sg_data = {}
-        for x in sg_data:
-            val = sg_data[x]
-            if isinstance(val, list):
-                new_sg_data[x] = [ self.__utf8_to_unicode(d) for d in val ]
-            elif isinstance(val, dict):
-                new_sg_data[x] = self.__utf8_to_unicode(val)
-            elif isinstance(val, str):
-                new_sg_data[x] = val.decode("UTF-8")
-            else:
-                new_sg_data[x] = val
-        return new_sg_data
+        
+        if isinstance(sg_data, list):
+            return [ self.__utf8_to_unicode(d) for d in sg_data ]
+        
+        elif isinstance(sg_data, dict):
+            new_sg_data = {}
+            for (k,v) in sg_data.iteritems():
+                # go through dictionary and convert each value separately
+                new_sg_data[k] = self.__utf8_to_unicode(v)
+            return new_sg_data
+        
+        elif isinstance(sg_data, str):
+            return sg_data.decode("UTF-8")
+            
+        # for everything else, just pass through
+        return sg_data
+        
 
     def __sg_compare_data(self, a, b):
         """
