@@ -264,7 +264,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         want to!), call the _refresh_data() method.
 
         :param entity_type: Shotgun entity type to download
-        :param filters: List of Shotgun filters. Standard Shotgun syntax.
+        :param filters:   List of Shotgun filters. Standard Shotgun syntax. Passing None instead of a list of
+                          filters indicates that no shotgun data should be retrieved and no API calls will be made.
         :param hierarchy: List of grouping fields. These should be names of Shotgun
                           fields. If you for example want to create a list of items,
                           the value ["code"] will be suitable. This will generate a data
