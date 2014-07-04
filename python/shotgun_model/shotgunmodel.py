@@ -241,7 +241,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 self.__log_debug("Removed cache file '%s' from disk." % self.__full_cache_path)
             except Exception, e:
                 self.__log_warning("clear_caches method could not remove cache file '%s' "
-                                   "from disk. Details: %s" % e)
+                                   "from disk. Details: %s" % (self.__full_cache_path, e))
         # refresh
         self._refresh_data()
 
