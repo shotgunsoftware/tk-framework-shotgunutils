@@ -819,7 +819,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # https://sg-media-usor-01.s3.amazonaws.com/xxx/yyy/filename.ext?lots_of_authentication_headers
             #
             # the query string changes all the times, so when we check if an item is out of date, omit it.
-            if isinstance(a_val, str) and ("image" in k or "amazonaws" in a_val or "AccessKeyId" in a_val):
+            if isinstance(a_val, str) and isinstance(b_val, str) and \
+               ("image" in k or "amazonaws" in a_val or "AccessKeyId" in a_val):
                 # attempt to parse values are urls and eliminate the querystring
                 # compare hostname + path only
                 url_obj_a = urlparse.urlparse(a_val)
