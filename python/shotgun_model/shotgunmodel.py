@@ -849,7 +849,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             if on_leaf_level:
                 # compare shotgun ids
                 sg_data = child.data(self.SG_DATA_ROLE)
-                if sg_data.get("id") == sg_item.get("id"):
+                if sg_data and sg_data.get("id") == sg_item.get("id"):
                     found_item = child
                     break
             else:
