@@ -456,6 +456,29 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         # default implementation does nothing
 
+    def _get_additional_columns(self, item):
+        """
+        Called when an item is about to be inserted into the model, to get additional items
+        to be included in the same row as the specified item. This provides an opportunity
+        for subclasses to create one or more additional columns for each item in the model.
+
+        Note that this method is always called before inserting an item, even when loading
+        from the cache. Any data that is expensive to compute or query should be added
+        to the ShotgunStandardItem in _populate_item, since column data is not cached.
+        Also note that item population methods (_populate_item, _populate_thumbnail, etc)
+        will not be called on the return columns.
+
+        This method should return a list of QStandardItems, one for each additional column.
+        The original ShotgunStandardItem is always the first item in each row and should
+        NOT be included in the returned list. Any empty value returned by this method
+        is guaranteed to be treated as an empty list (i.e. you may return None).
+
+        This method is called after _finalize_item.
+
+        :param item: QStandardItem that is about to be added to the model.
+        """
+        return []
+
     def _populate_default_thumbnail(self, item):
         """
         Called whenever an item is constructed and needs to be associated with a default thumbnail.
@@ -929,8 +952,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # run the finalizer (always runs on construction, even via cache)
             self._finalize_item(found_item)
 
+            # get a complete row containing all columns for the current item.
+            row = self.__get_columns(found_item)
+
             # add it to the tree. At this point QT will fire off various signals to inform views etc.
-            root.appendRow(found_item)
+            root.appendRow(row)
 
             # request thumb
             if self.__download_thumbs:
@@ -940,6 +966,19 @@ class ShotgunModel(QtGui.QStandardItemModel):
         if not on_leaf_level:
             # there are more levels that we should recurse down into
             self.__add_sg_item_to_tree_r(sg_item, found_item, remaining_fields)
+
+
+    def __get_columns(self, item):
+        """
+        Returns a row (list of QStandardItems) given an initial QStandardItem.
+        """
+        # the first item in the row is always the standard shotgun model item,
+        # but subclasses may provide additional columns to be appended.
+        row = [item]
+        additional_columns = self._get_additional_columns(item)
+        if additional_columns:
+            row += additional_columns
+        return row
 
 
     def __process_thumbnail_for_item(self, item):
@@ -1066,8 +1105,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # and run the finalizer (always runs on construction, even via cache)
             self._finalize_item(item)
 
+            # get a complete row containing all columns for the current item.
+            row = self.__get_columns(item)
+
             # add it to the tree. At this point QT will fire off various signals to inform views etc.
-            root.appendRow(item)
+            root.appendRow(row)
 
             # request thumb
             if self.__download_thumbs:
@@ -1275,8 +1317,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
                         # we reached the root. special case
                         curr_parent = self.invisibleRootItem()
 
+            # get a complete row containing all columns for the current item.
+            row = self.__get_columns(item)
+
             # and attach the node
-            curr_parent.appendRow(item)
+            curr_parent.appendRow(row)
 
             # request thumb
             if self.__download_thumbs:
