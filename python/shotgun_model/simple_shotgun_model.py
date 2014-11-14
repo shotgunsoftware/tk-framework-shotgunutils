@@ -9,7 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
-from .shotgunoverlaymodel import ShotgunOverlayModel
+from .shotgun_overlay_model import ShotgunOverlayModel
 
 from sgtk.platform.qt import QtCore, QtGui
 
