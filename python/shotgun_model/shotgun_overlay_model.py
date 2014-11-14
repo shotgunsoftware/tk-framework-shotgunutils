@@ -9,7 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import tank
-from .shotgunmodel import ShotgunModel
+from .shotgun_model import ShotgunModel
 from tank.platform.qt import QtCore, QtGui
 overlay_module = tank.platform.import_framework("tk-framework-qtwidgets", "overlay_widget") 
 

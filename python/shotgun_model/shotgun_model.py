@@ -17,7 +17,7 @@ import urlparse
 import datetime
 import time
 
-from .shotgunmodelitem import ShotgunStandardItem
+from .shotgun_standard_item import ShotgunStandardItem
 from .util import get_sanitized_data, get_sg_data, sanitize_qt
 
 from tank.platform.qt import QtCore, QtGui
