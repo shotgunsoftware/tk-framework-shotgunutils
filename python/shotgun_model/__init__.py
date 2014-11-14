@@ -8,8 +8,8 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-from .shotgunmodel import ShotgunModel
-from .shotgunoverlaymodel import ShotgunOverlayModel
-from .simpleshotgunmodel import SimpleShotgunModel
-from .shotgunmodelitem import ShotgunStandardItem
+from .shotgun_model import ShotgunModel
+from .shotgun_overlay_model import ShotgunOverlayModel
+from .simple_shotgun_model import SimpleShotgunModel
+from .shotgun_standard_item import ShotgunStandardItem
 from .util import get_sg_data, get_sanitized_data, sanitize_qt
