@@ -27,7 +27,7 @@ def get_sg_data(item):
     :param item: QStandardItem or QModelIndex or similar
     :returns: Shotgun data or None if no data was associated
     """
-    from .shotgunmodel import ShotgunModel
+    from .shotgun_model import ShotgunModel
     return get_sanitized_data(item, ShotgunModel.SG_DATA_ROLE)
 
 def get_sanitized_data(item, role):
