@@ -251,6 +251,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # refresh
         self._refresh_data()
 
+    def is_data_cached(self):
+        """
+        """
+        return self.__full_cache_path and os.path.exists(self.__full_cache_path)
+
     ########################################################################################
     # methods overridden from the base class.
 
