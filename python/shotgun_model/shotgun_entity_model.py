@@ -21,32 +21,28 @@ class ShotgunEntityModel(ShotgunModel):
     on the left hand side.
     """
     
+    # list of shotgun entities that this model recognises (has icons for) 
+    _SG_ENTITIES = ["Shot", "Asset", "EventLogEntry", "Group", "HumanUser", "Note",
+                    "Project", "Sequence", "Task", "Ticket", "Version"]
+    
     def __init__(self, entity_type, filters, hierarchy, download_thumbs=False, schema_generation=0, parent=None):
         """
-        Constructor
+        Construction
         """
         ## folder icon
         self._default_icon = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Folder.png"))    
 
         # shotgun entity icons
         self._entity_icons = {}
-        self._entity_icons["Shot"] = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Shot_dark.png"))
-        self._entity_icons["Asset"] = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Asset_dark.png"))
-        self._entity_icons["EventLogEntry"] = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_EventLogEntry_dark.png"))
-        self._entity_icons["Group"] = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Group_dark.png"))
-        self._entity_icons["HumanUser"] = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_HumanUser_dark.png"))
-        self._entity_icons["Note"] = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Note_dark.png"))
-        self._entity_icons["Project"] = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Project_dark.png"))
-        self._entity_icons["Sequence"] = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Sequence_dark.png"))
-        self._entity_icons["Task"] = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Task_dark.png"))
-        self._entity_icons["Ticket"] = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Ticket_dark.png"))
-        self._entity_icons["Version"] = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Version_dark.png"))
+        for ent in ShotgunEntityModel._SG_ENTITIES:
+            self._entity_icons[ent] = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_%s_dark.png" % ent))    
 
         ShotgunModel.__init__(self, 
-                                     parent = parent,  
-                                     download_thumbs = download_thumbs,
-                                     schema_generation = schema_generation)
+                              parent = parent,
+                              download_thumbs = download_thumbs,
+                              schema_generation = schema_generation)
         
+        # load the data from the cache:
         fields=["image", "sg_status_list", "description"]
         self._load_data(entity_type, filters, hierarchy, fields)
     
