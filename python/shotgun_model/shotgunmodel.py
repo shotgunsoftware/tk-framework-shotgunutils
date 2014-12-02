@@ -311,29 +311,33 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__hierarchy = hierarchy
 
         # when we cache the data associated with this model, create
-        # the file name based on the md5 hash of the filter and other
-        # parameters that will determine the contents that is loaded into the tree
-        # note that we add the shotgun host name to support multiple sites being used
-        # on a single machine
+        # the file name and path based on several parameters.
+        # the path will be on the form CACHE_LOCATION/cached_sg_queries/EntityType/params_hash/filter_hash
+        #
+        # params_hash is an md5 hash representing all parameters going into a particular  
+        # query setup and filters_hash is an md5 hash of the filter conditions.
+        #
+        # the reason these are split up is because the params tend to be constant for a single
+        # applications where the filters keep varying.
+
+        # now hash up the rest of the parameters and make that the filename
+        params_hash = hashlib.md5()
+        params_hash.update(str(self.__fields))
+        params_hash.update(str(self.__order))
+        params_hash.update(str(seed))
+        params_hash.update(str(self.__hierarchy))
+
+        # now hash up the rest of the parameters and make that the filename
+        filter_hash = hashlib.md5()
+        filter_hash.update(str(self.__filters))
         
         # organize files on disk based on entity type and then filter hash
-        root_path = os.path.join(self.__bundle.cache_location, 
-                                 "cached_sg_queries", 
-                                 self.__entity_type,
-                                 hashlib.md5(str(self.__filters)).hexdigest()
-                                 )
+        self.__full_cache_path = os.path.join(self.__bundle.cache_location, 
+                                              "cached_sg_queries", 
+                                              self.__entity_type,
+                                              params_hash.hexdigest(),
+                                              "%s.sgdata" % filter_hash.hexdigest())
         
-        
-        # now hash up the rest of the parameters and make that the filename
-        filename_hash = hashlib.md5()
-        filename_hash.update(str(self.__fields))
-        filename_hash.update(str(self.__order))
-        filename_hash.update(str(seed))
-        filename_hash.update(str(self.__hierarchy))
-        cache_filename = "%s.sgdata" % filename_hash.hexdigest()
-        
-        self.__full_cache_path = os.path.join(root_path, cache_filename)
-
         self.__log_debug("")
         self.__log_debug("Model Reset for %s" % self)
         self.__log_debug("Entity type: %s" % self.__entity_type)
