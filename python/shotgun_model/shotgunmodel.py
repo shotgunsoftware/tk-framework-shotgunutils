@@ -315,17 +315,24 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # parameters that will determine the contents that is loaded into the tree
         # note that we add the shotgun host name to support multiple sites being used
         # on a single machine
-        hash_base = "%s_%s_%s_%s_%s_%s_%s" % (self.__bundle.shotgun.base_url,
-                                              self.__entity_type,
-                                              str(self.__filters),
-                                              str(self.__fields),
-                                              str(self.__order),
-                                              str(seed),
-                                              str(self.__hierarchy))
-        m = hashlib.md5()
-        m.update(hash_base)
-        cache_filename = "tk_sgmodel_%s.sgcache" % m.hexdigest()
-        self.__full_cache_path = os.path.join(tempfile.gettempdir(), cache_filename)
+        
+        # organize files on disk based on entity type and then filter hash
+        root_path = os.path.join(self.__bundle.cache_location, 
+                                 "cached_sg_queries", 
+                                 self.__entity_type,
+                                 hashlib.md5(str(self.__filters)).hexdigest()
+                                 )
+        
+        
+        # now hash up the rest of the parameters and make that the filename
+        filename_hash = hashlib.md5()
+        filename_hash.update(str(self.__fields))
+        filename_hash.update(str(self.__order))
+        filename_hash.update(str(seed))
+        filename_hash.update(str(self.__hierarchy))
+        cache_filename = "%s.sgdata" % filename_hash.hexdigest()
+        
+        self.__full_cache_path = os.path.join(root_path, cache_filename)
 
         self.__log_debug("")
         self.__log_debug("Model Reset for %s" % self)
@@ -1157,24 +1164,49 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Save the model to disk using QDataStream serialization.
         This all happens on the C++ side and is very fast.
         """
-        fh = QtCore.QFile(filename)
-        fh.open(QtCore.QIODevice.WriteOnly)
+        
+        old_umask = os.umask(0)
         try:
-            out = QtCore.QDataStream(fh)
-    
-            # write a header
-            out.writeInt64(self.FILE_MAGIC_NUMBER)
-            out.writeInt32((self.FILE_VERSION + self.__schema_generation))
-    
-            # tell which serialization dialect to use
-            out.setVersion(QtCore.QDataStream.Qt_4_0)
-    
-            root = self.invisibleRootItem()
-    
-            self.__save_to_disk_r(out, root, 0)
+            
+            # try to create the cache folder with as open permissions as possible
+            cache_dir = os.path.dirname(filename)
+            if not os.path.exists(cache_dir):
+                os.makedirs(cache_dir, 0777)
+            
+            # write cache file
+            fh = QtCore.QFile(filename)
+            fh.open(QtCore.QIODevice.WriteOnly)
+            try:
+                out = QtCore.QDataStream(fh)
+        
+                # write a header
+                out.writeInt64(self.FILE_MAGIC_NUMBER)
+                out.writeInt32((self.FILE_VERSION + self.__schema_generation))
+        
+                # todo: if it turns out that there are ongoing issues with
+                # md5 cache collisions, we could write the actual query parameters
+                # to the header of the cache file here and compare that against the
+                # desired query info just to be confident we are getting a correct cache...
+        
+                # tell which serialization dialect to use
+                out.setVersion(QtCore.QDataStream.Qt_4_0)
+        
+                root = self.invisibleRootItem()
+        
+                self.__save_to_disk_r(out, root, 0)
+            
+            finally:
+                fh.close()
+
+            # and ensure the cache file has got open permissions
+            os.chmod(filename, 0666)
+        
+        except Exception, e:
+            self.__log_warning("Could not write cache file '%s' to disk: %s" % (filename, e))
         
         finally:
-            fh.close()
+            os.umask(old_umask)
+        
 
     def __save_to_disk_r(self, stream, item, depth):
         """
