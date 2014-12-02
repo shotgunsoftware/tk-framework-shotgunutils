@@ -317,8 +317,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # params_hash is an md5 hash representing all parameters going into a particular  
         # query setup and filters_hash is an md5 hash of the filter conditions.
         #
-        # the reason these are split up is because the params tend to be constant for a single
-        # applications where the filters keep varying.
+        # the reason these are split up is because the params tend to be constant and
+        # the filters keep varying depending on user input.
 
         # now hash up the rest of the parameters and make that the filename
         params_hash = hashlib.md5()
