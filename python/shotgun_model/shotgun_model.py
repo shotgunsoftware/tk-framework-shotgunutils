@@ -90,7 +90,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
     FILE_VERSION = 21
 
 
-    def __init__(self, parent, download_thumbs=True, schema_generation=0):
+    def __init__(self, parent, download_thumbs=True, schema_generation=0, asynchronous=True):
         """
         Constructor. This will create a model which can later be used to load
         and manage Shotgun data.
@@ -108,17 +108,23 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         self.__bundle = tank.platform.current_bundle()
 
-        # set up data fetcher
-        shotgun_data = self.__bundle.import_module("shotgun_data")
-        self.__sg_data_retriever = shotgun_data.ShotgunDataRetriever(self)
-        self.__sg_data_retriever.work_completed.connect( self.__on_worker_signal)
-        self.__sg_data_retriever.work_failure.connect( self.__on_worker_failure)
-        self.__current_work_id = 0
         self.__schema_generation = schema_generation
         self.__full_cache_path = None
 
-        # and start its thread!
-        self.__sg_data_retriever.start()
+        # set up data fetcher
+        shotgun_data = self.__bundle.import_module("shotgun_data")
+        
+        self._use_asynchronous_data_retrieval = asynchronous
+        if self._use_asynchronous_data_retrieval:
+            self.__sg_data_retriever = shotgun_data.ShotgunDataRetriever(self)
+            self.__sg_data_retriever.work_completed.connect( self.__on_worker_signal)
+            self.__sg_data_retriever.work_failure.connect( self.__on_worker_failure)
+            self.__current_work_id = 0
+
+            # and start its thread!
+            self.__sg_data_retriever.start()
+        else:
+            self.__sg_data_retriever = shotgun_data.SynchrounousShotgunDataRetriever()
 
         # is the model set up with a query?
         self.__has_query = False
@@ -157,11 +163,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Call this method prior to destroying this object.
         This will ensure all worker threads etc are stopped.
         """
-        # first disconnect our worker completely
-        self.__sg_data_retriever.work_completed.disconnect( self.__on_worker_signal)
-        self.__sg_data_retriever.work_failure.disconnect( self.__on_worker_failure)
-        # gracefully stop thread
-        self.__sg_data_retriever.stop()
+        if self._use_asynchronous_data_retrieval:
+            # first disconnect our worker completely
+            self.__sg_data_retriever.work_completed.disconnect( self.__on_worker_signal)
+            self.__sg_data_retriever.work_failure.disconnect( self.__on_worker_failure)
+            # gracefully stop thread
+            self.__sg_data_retriever.stop()
         # clear all internal memory storage
         self.__reset_all_data()
 
@@ -362,7 +369,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         return loaded_cache_data
 
-    def _refresh_data(self):
+    def _refresh_data(self, wait_for_completion=False):
         """
         Rebuilds the data in the model to ensure it is up to date.
         This call is asynchronous and will return instantly.
@@ -394,10 +401,14 @@ class ShotgunModel(QtGui.QStandardItemModel):
             else:
                 fields = list(set(self.__hierarchy + self.__fields))
 
-            self.__current_work_id = self.__sg_data_retriever.execute_find(self.__entity_type,
-                                                                           self.__filters,
-                                                                           fields,
-                                                                           self.__order)
+            res = self.__sg_data_retriever.execute_find(self.__entity_type,
+                                                        self.__filters,
+                                                        fields,
+                                                        self.__order)
+            if self._use_asynchronous_data_retrieval:
+                self.__current_work_id = res
+            else:
+                self.__on_sg_data_arrived(res)
 
 
     def _request_thumbnail_download(self, item, field, url, entity_type, entity_id):
@@ -427,11 +438,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # nothing to download. bad input. gracefully ignore this request.
             return
 
-        uid = self.__sg_data_retriever.request_thumbnail(url, entity_type, entity_id, field)
-
-        # keep tabs of this and call out later
-        self.__thumb_map[uid] = {"item": item, "field": field }
-
+        res = self.__sg_data_retriever.request_thumbnail(url, entity_type, entity_id, field)
+        if self._use_asynchronous_data_retrieval:
+            # keep tabs of this and call out later
+            self.__thumb_map[res] = {"item": item, "field": field }
+        else:            
+            self._populate_thumbnail(item, field, res)
 
     ########################################################################################
     # methods to be implemented by subclasses
@@ -580,12 +592,14 @@ class ShotgunModel(QtGui.QStandardItemModel):
         seems clear does not work properly on pyside so
         we are avoiding that method.
         """
-        # ask async data retriever to clear its queue
-        # note that there may still be requests actually running
-        # - these are not cancelled
-        self.__sg_data_retriever.clear()
-        # we are not looking for any data from the async processor
-        self.__current_work_id = 0
+        if self._use_asynchronous_data_retrieval:
+            # ask async data retriever to clear its queue
+            # note that there may still be requests actually running
+            # - these are not cancelled
+            self.__sg_data_retriever.clear()
+            # we are not looking for any data from the async processor
+            self.__current_work_id = 0
+
         # model data in alt format
         self.__entity_tree_data = {}
         # thumbnail download lookup
@@ -646,12 +660,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         if self.__current_work_id == uid:
             # our publish data has arrived from sg!
-
             # process the data
             sg_data = data["sg"]
             self.__on_sg_data_arrived(sg_data)
 
         elif uid in self.__thumb_map:
+            
             # a thumbnail is now present on disk!
             thumbnail_path = data["thumb_path"]
 
@@ -962,12 +976,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # we have a thumb we are supposed to download!
                 # get the thumbnail - store the unique id we get back from
                 # the data retrieve in a dict for fast lookup later
-                uid = self.__sg_data_retriever.request_thumbnail(sg_data[field],
-                                                                 sg_data.get("type"),
-                                                                 sg_data.get("id"),
-                                                                 field)
-
-                self.__thumb_map[uid] = {"item": item, "field": field }
+                self._request_thumbnail_download(item, field, sg_data[field], sg_data.get("type"), sg_data.get("id"))                
 
 
     def __rebuild_whole_tree_from_sg_data(self, data):
