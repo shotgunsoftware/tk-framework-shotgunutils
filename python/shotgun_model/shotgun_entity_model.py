@@ -9,7 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
-from sgtk.platform.qt import QtGui
+from sgtk.platform.qt import QtGui, QtCore
 
 from .shotgun_model import ShotgunModel
 from .util import get_sg_data, get_sanitized_data
@@ -35,7 +35,9 @@ class ShotgunEntityModel(ShotgunModel):
         # shotgun entity icons
         self._entity_icons = {}
         for ent in ShotgunEntityModel._SG_ENTITIES:
-            self._entity_icons[ent] = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_%s_dark.png" % ent))    
+            ent_icon_path = ":/tk-framework-shotgunutils/icon_%s_dark.png" % ent
+            if QtCore.QFile.exists(ent_icon_path): 
+                self._entity_icons[ent] = QtGui.QIcon(QtGui.QPixmap(ent_icon_path))    
 
         ShotgunModel.__init__(self, 
                               parent = parent,
@@ -45,6 +47,38 @@ class ShotgunEntityModel(ShotgunModel):
         # load the data from the cache:
         fields=["image", "sg_status_list", "description"]
         self._load_data(entity_type, filters, hierarchy, fields)
+    
+    def get_entities(self, item):
+        """
+        Get entities for the current item by traversing up the tree
+        and pulling entity information from each item if possible
+
+        :param item:    The item to find entities for
+        :returns:       A list of entities in the order they were found starting
+                        from the specified item.
+        """
+        entities = []
+        current_item = item
+        
+        # first, if this is a leaf item then it will represent an entity:
+        sg_data = current_item.get_sg_data()
+        if sg_data:
+            entities.append(sg_data)
+            current_item = current_item.parent()
+            
+        # now walk up the tree and look for an entity in the fields of the 
+        # parent items:
+        while current_item:
+            field_data = get_sanitized_data(current_item, self.SG_ASSOCIATED_FIELD_ROLE)
+            field_value = field_data.get("value")
+            if (field_value 
+                and isinstance(field_value, dict) 
+                and "id" in field_value 
+                and "type" in field_value):
+                entities.append(field_value)
+            current_item = current_item.parent()
+            
+        return entities
     
     def async_refresh(self):
         """
@@ -90,7 +124,6 @@ class ShotgunEntityModel(ShotgunModel):
         # for all items where we didn't find the icon, fall back onto the default
         if not found_icon:
             item.setIcon(self._default_icon)
-                
 
         
         
