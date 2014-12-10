@@ -981,6 +981,16 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Clears the tree and rebuilds it from the given shotgun data.
         Note that any selection and expansion states in the view will be lost.
         """
+
+        # Call the standard QStandardItemModel beginResetModel method to notify
+        # any proxies downstream that we are resetting the model.
+        self.beginResetModel()
+        # Block all signals so downstream objects don't get blitzed with
+        # unnecessary signals when we recursively delete all the existing rows.
+        self.blockSignals(True)
+
+        # Now call the internal reset all data method.  A custom method is
+        # used due to bugs with PySide.
         self.__reset_all_data()
 
         # get any external payload from deriving classes
@@ -989,6 +999,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # and add the shotgun data
         root = self.invisibleRootItem()
         self.__populate_complete_tree_r(data, root, self.__hierarchy, {})
+
+        # Turn our signals back on as we have effectively reset the model at
+        # this point and finally call the QStandardItemModel's endResetModel
+        # method.
+        self.blockSignals(False)
+        self.endResetModel()
 
     def __populate_complete_tree_r(self, sg_data, root, hierarchy, constraints):
         """
