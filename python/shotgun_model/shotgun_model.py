@@ -451,7 +451,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         return loaded_cache_data
 
-    def _refresh_data(self, wait_for_completion=False):
+    def _refresh_data(self):
         """
         Rebuilds the data in the model to ensure it is up to date.
         This call is asynchronous and will return instantly.
@@ -1185,7 +1185,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # "Unnamed Sequence"
                 return "Unnamed %s" % et_display_name
             else:
-                return "%s %s" % (et_display_name, value["name"])
+                return value["name"]
+                #return "%s %s" % (et_display_name, value["name"])
 
         elif isinstance(value, list):
             # this is a list of some sort. Loop over all elements and extrat a comma separated list.
