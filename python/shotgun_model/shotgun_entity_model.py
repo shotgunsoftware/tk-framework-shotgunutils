@@ -22,8 +22,26 @@ class ShotgunEntityModel(ShotgunModel):
     """
     
     # list of shotgun entities that this model recognises (has icons for) 
-    _SG_ENTITIES = ["Shot", "Asset", "EventLogEntry", "Group", "HumanUser", "Note",
-                    "Project", "Sequence", "Task", "Ticket", "Version"]
+    _SG_ENTITY_TYPES = ["Shot", "Asset", "EventLogEntry", "Group", "HumanUser", "Note",
+                        "Project", "Sequence", "Task", "Ticket", "Version"]
+    _SG_ENTITY_ICONS = None
+    _SG_STEP_COLOURS = {}
+    _SG_STEP_SWATCH_ICONS = {}
+    
+    @staticmethod
+    def get_entity_icon(entity_type):
+        """
+        """
+        # return the stock icon for the entity type:
+        if ShotgunEntityModel._SG_ENTITY_ICONS == None:
+            # populate icons list the first time it's requested:
+            ShotgunEntityModel._SG_ENTITY_ICONS = {}
+            for et in ShotgunEntityModel._SG_ENTITY_TYPES:
+                icon_path = ":/tk-framework-shotgunutils/icon_%s_dark.png" % et
+                if QtCore.QFile.exists(icon_path): 
+                    ShotgunEntityModel._SG_ENTITY_ICONS[et] = QtGui.QIcon(QtGui.QPixmap(icon_path))
+        icon = ShotgunEntityModel._SG_ENTITY_ICONS.get(entity_type)
+        return icon
     
     def __init__(self, entity_type, filters, hierarchy, download_thumbs=False, schema_generation=0, parent=None):
         """
@@ -31,13 +49,6 @@ class ShotgunEntityModel(ShotgunModel):
         """
         ## folder icon
         self._default_icon = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Folder.png"))    
-
-        # shotgun entity icons
-        self._entity_icons = {}
-        for ent in ShotgunEntityModel._SG_ENTITIES:
-            ent_icon_path = ":/tk-framework-shotgunutils/icon_%s_dark.png" % ent
-            if QtCore.QFile.exists(ent_icon_path): 
-                self._entity_icons[ent] = QtGui.QIcon(QtGui.QPixmap(ent_icon_path))    
 
         ShotgunModel.__init__(self, 
                               parent = parent,
@@ -80,6 +91,23 @@ class ShotgunEntityModel(ShotgunModel):
             
         return entities
     
+    def get_entity(self, item):
+        """
+        """
+        sg_data = item.get_sg_data()
+        if sg_data:
+            return sg_data
+        
+        field_data = get_sanitized_data(item, self.SG_ASSOCIATED_FIELD_ROLE)
+        field_value = field_data.get("value")
+        if (field_value 
+            and isinstance(field_value, dict) 
+            and "id" in field_value 
+            and "type" in field_value):
+            return field_value
+        
+        return None
+    
     def async_refresh(self):
         """
         Trigger an asynchronous refresh of the model
@@ -109,22 +137,70 @@ class ShotgunEntityModel(ShotgunModel):
         
         if isinstance(field_value, dict) and "name" in field_value and "type" in field_value:
             # this is an intermediate node which is an entity type link
-            if field_value.get("type") in self._entity_icons:
+            entity_icon = self._get_default_thumbnail(field_value)
+            if entity_icon:
                 # use sg icon!
-                item.setIcon(self._entity_icons[ field_value.get("type") ])
+                item.setIcon(entity_icon)
                 found_icon = True
         
         elif sg_data:
-            # this is a leaf node!  
-            if sg_data.get("type") in self._entity_icons:
+            # this is a leaf node!
+            entity_icon = self._get_default_thumbnail(sg_data)
+            if entity_icon:
                 # use sg icon!
-                item.setIcon(self._entity_icons[ sg_data.get("type") ])
+                item.setIcon(entity_icon)
                 found_icon = True
         
         # for all items where we didn't find the icon, fall back onto the default
         if not found_icon:
             item.setIcon(self._default_icon)
 
+    def _get_default_thumbnail(self, sg_entity):
+        """
+        """
+        if sg_entity.get("type") == "Step":
+            # special case handling for steps to return a colour swatch:
+            step_id = sg_entity.get("id")
+            if step_id != None:
+                # get the colour from the cache:
+                if step_id not in ShotgunEntityModel._SG_STEP_COLOURS:
+                    ShotgunEntityModel._SG_STEP_COLOURS[step_id] = None
+                    # refresh cache:
+                    bundle = sgtk.platform.current_bundle()
+                    try:
+                        sg_steps = bundle.shotgun.find("Step", [], ["color"])
+                        for sg_step in sg_steps:
+                            colour = None
+                            try:
+                                colour = tuple([int(c) for c in sg_step.get("color").split(",")])
+                            except:
+                                pass
+                            ShotgunEntityModel._SG_STEP_COLOURS[sg_step["id"]] = colour  
+                    except:
+                        pass
+                colour = ShotgunEntityModel._SG_STEP_COLOURS[step_id]
+
+                if colour and isinstance(colour, tuple) and len(colour) == 3:
+                    # get the icon for this colour from the cache:
+                    if colour not in ShotgunEntityModel._SG_STEP_SWATCH_ICONS:
+                        # build icon and add to cache:
+                        pm = QtGui.QPixmap(16, 16)
+                        pm.fill(QtCore.Qt.transparent)
+                        painter = QtGui.QPainter(pm)
+                        try:
+                            painter.setBrush(QtGui.QBrush(QtGui.QColor(colour[0], colour[1], colour[2])))
+                            painter.setPen(QtCore.Qt.black)
+                            painter.drawRect(2, 2, 12, 12)
+                        finally:
+                            painter.end()
+                        ShotgunEntityModel._SG_STEP_SWATCH_ICONS[colour] = QtGui.QIcon(pm)
+                        
+                    # return the icon:    
+                    return ShotgunEntityModel._SG_STEP_SWATCH_ICONS[colour]
+        
+        # just return the entity icon:
+        return ShotgunEntityModel.get_entity_icon(sg_entity.get("type"))
+        
         
         
         
