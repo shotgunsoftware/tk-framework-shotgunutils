@@ -56,7 +56,7 @@ class ShotgunEntityModel(ShotgunModel):
                               schema_generation = schema_generation)
         
         # load the data from the cache:
-        fields=["image", "sg_status_list", "description"]
+        fields=["image", "sg_status_list", "description", "task_assignees"]
         self._load_data(entity_type, filters, hierarchy, fields)
     
     def get_entities(self, item):
