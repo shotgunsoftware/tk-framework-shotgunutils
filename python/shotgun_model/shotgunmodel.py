@@ -15,7 +15,6 @@ import hashlib
 import urlparse
 import datetime
 import time
-import tempfile
 
 from .shotgunmodelitem import ShotgunStandardItem
 from .util import get_sanitized_data, get_sg_data, sanitize_qt
@@ -135,8 +134,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         self.__download_thumbs = download_thumbs
 
-
-
     ########################################################################################
     # public methods
 
@@ -163,7 +160,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # gracefully stop thread
         self.__sg_data_retriever.stop()
         # clear all internal memory storage
-        self.__reset_all_data()
+        self.clear()
 
 
     def item_from_entity(self, entity_type, entity_id):
@@ -246,6 +243,64 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self._refresh_data()
 
     ########################################################################################
+    # methods overridden from the base class.
+
+    def clear(self):
+        """
+        Re-implements QStandardItemModel::clear()
+        
+        From the QT documentation:
+        Removes all items (including header items) from the model and 
+        sets the number of rows and columns to zero.
+        """
+        # note! We are reimplementing this explicitly because the default implementation
+        # results in memory issues - similar to reset(), scenarios where objects are constructed
+        # in python (e.g. qstandarditems) and then handed over to a model and then subsequently 
+        # cleared and deallocated by QT itself (on the C++ side) often results in dangling pointers
+        # across the pyside/QT boundary, ultimately resulting in crashes or instability.
+        
+        # first, ask async data retriever to clear its queue of queries and thumb downloads
+        # note that there may still be requests actually running
+        # - these are not cancelled
+        self.__sg_data_retriever.clear()
+        # we are not looking for any data from the async processor
+        self.__current_work_id = 0
+        # model data in alt format
+        self.__entity_tree_data = {}
+        # thumbnail download lookup
+        self.__thumb_map = {}
+        # pyside will crash unless we actively hold a reference
+        # to all items that we create.
+        self.__all_tree_items = []
+
+        # lastly, remove all data in the underlying internal data storage
+        # note that we don't cannot clear() here since that causing
+        # crashing in various environments. Also note that we need to do
+        # in a depth-first manner to ensure that there are no
+        # cyclic parent/child dependency cycles, which will cause
+        # a crash in some versions of shiboken
+        # (see https://bugreports.qt-project.org/browse/PYSIDE-158 )
+        self.__do_depth_first_tree_deletion(self.invisibleRootItem())        
+
+    def reset(self):
+        """
+        Reimplements QAbstractItemModel:reset() by 'sealing it' so that
+        it cannot be executed by calling code easily. This is because the reset method
+        often results in crashes and instability because of how PySide/QT manages memory.
+        
+        For more information, see the clear() method.
+        """
+        raise NotImplementedError("The QAbstractItemModel::reset method has been explicitly been disabled "
+                                  "because memory is not correctly freed up across C++/Python when "
+                                  "executed, sometimes resulting in runtime instability. For an "
+                                  "semi-equivalent method, use clear(), however keep in mind that "
+                                  "this method will not emit the standard before/after reset signals. "
+                                  "It is possible that this method may be implemented in later versions "
+                                  "of the framework. For more information, please "
+                                  "email toolkitsupport@shotgunsoftware.com." )
+
+
+    ########################################################################################
     # protected methods not meant to be subclassed but meant to be called by subclasses
 
     def _load_data(self, entity_type, filters, hierarchy, fields, order=None, seed=None):
@@ -301,7 +356,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.query_changed.emit()
 
         # clear out old data
-        self.__reset_all_data()
+        self.clear()
 
         self.__has_query = True
         self.__entity_type = entity_type
@@ -577,37 +632,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         :param msg: debug message
         """
         self.__bundle.log_warning("[Toolkit SG Model] %s" % msg)
-
-
-    def __reset_all_data(self):
-        """
-        Deletes all the contents of the model.
-        Very similar to the clear() method, however it
-        seems clear does not work properly on pyside so
-        we are avoiding that method.
-        """
-        # ask async data retriever to clear its queue
-        # note that there may still be requests actually running
-        # - these are not cancelled
-        self.__sg_data_retriever.clear()
-        # we are not looking for any data from the async processor
-        self.__current_work_id = 0
-        # model data in alt format
-        self.__entity_tree_data = {}
-        # thumbnail download lookup
-        self.__thumb_map = {}
-        # pyside will crash unless we actively hold a reference
-        # to all items that we create.
-        self.__all_tree_items = []
-
-        # remove all data in the underyling internal data storage
-        # note that we don't use clear() here since that causing
-        # crashing on nuke/pyside. Also note that we need to do
-        # in a depth-first manner to ensure that there are no
-        # cyclic parent/child dependency cycles, which will cause
-        # a crash in some versions of shiboken
-        # (see https://bugreports.qt-project.org/browse/PYSIDE-158 )
-        self.__do_depth_first_tree_deletion(self.invisibleRootItem())
 
     def __do_depth_first_tree_deletion(self, node):
         """
@@ -981,7 +1005,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Clears the tree and rebuilds it from the given shotgun data.
         Note that any selection and expansion states in the view will be lost.
         """
-        self.__reset_all_data()
+        self.clear()
 
         # get any external payload from deriving classes
         self._load_external_data()
