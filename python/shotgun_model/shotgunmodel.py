@@ -11,6 +11,7 @@
 import tank
 import copy
 import os
+import sys
 import hashlib
 import urlparse
 import datetime
@@ -394,6 +395,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                               self.__entity_type,
                                               params_hash.hexdigest(),
                                               filter_hash.hexdigest())
+        
+        if sys.platform == "win32" and len(self.__full_cache_path) > 250:
+            self.__log_warning("Cache file path may be affected by windows MAX_PATH limitation.")
         
         self.__log_debug("")
         self.__log_debug("Model Reset for %s" % self)
