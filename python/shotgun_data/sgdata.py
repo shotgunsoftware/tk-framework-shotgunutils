@@ -11,6 +11,7 @@
 import os
 import tank
 import uuid
+import hashlib
 import urlparse
 
 
@@ -277,58 +278,29 @@ class ShotgunDataRetriever(QtCore.QThread):
         :param url: Path to a thumbnail
         :returns: Path as a string.
         """
-        
-        # there are at least three url forms that shotgun uses:
-        # 1. Legacy, non-s3 storage. Example:
-        #    https://wintermute.shotgunstudio.com/thumbs/1/2/3.jpeg
-        #
-        # 2. Transitory path where a thumbnail resides after it has been uploaded to Shotgun
-        #    but before it has been transferred into its final S3 location:
-        #    https://wintermute.shotgunstudio.com/thumbnail/api_image/150
-        #
-        # 3. S3 location:
-        #    https://sg-media-usor-01.s3.amazonaws.com/8e0fcc4970d6545bc0d1889d927692d6976642e3/5a07a2cb8868351e8724c78fb82541b8c4145bfb/IMG_20140528_100545_t.jpg
-        #
-        #    this url is on the form https://sg-media-usor-01.s3.amazonaws.com/AAA/BBB/filename.jpg
-        #    where AAA is a site specific guid and BBB is just a guid.
-        #    
-        #    For this case, we need to be smart about it so we create an even structure
-        #    and don't exceed the windows 260 char limit        
-
+        # hash the path portion of the thumbnail url
         url_obj = urlparse.urlparse(url)
-        url_path = url_obj.path
-        path_chunks = url_path.split("/")[1:] # skip initial blank item caused by slash
+        url_hash = hashlib.md5()
+        url_hash.update(str(url_obj.path))
+        hash_str = url_hash.hexdigest()
 
-        # path_chunks: [ thumbs", "1", "2", "2.jpg"]
-        # path_chunks: [u'', u'thumbnail', u'api_image', u'150']
-        # path_chunks: [u'9902b5f5f336fae2fb248e8a8748fcd9aedd822e',  per-site guid
-        #               u'be4236b8f198ae84df2366920e7ee327cc0a567e',  per-file guid
-        #               u'render_0400_t.jpg']
-
-        if "amazonaws" in url and len(path_chunks) > 1:
-            # for this url, all we really need is the per-file guid
-            # since this is universally unique
-            s3_guid = path_chunks[1]
-            # Now turn this guid into a tree structure. For a discussion about sensible
-            # sharding methodology, see 
-            # http://stackoverflow.com/questions/13841931/using-guids-as-folder-names-splitting-up
-            #
-            # From the guid, generate paths on the form C1C2/C3C4/full_guid.jpeg
-            # for a million evenly distributed items, this means ~15 items per folder
-            first_folder = str(s3_guid[0:2])
-            second_folder = str(s3_guid[2:4])
-            file_name = "%s.jpeg" % s3_guid
-            path_chunks = [first_folder, second_folder, file_name]
+        # Now turn this hash into a tree structure. For a discussion about sensible
+        # sharding methodology, see 
+        # http://stackoverflow.com/questions/13841931/using-guids-as-folder-names-splitting-up
+        #
+        # From the hash, generate paths on the form C1C2/C3C4/full_hash.jpeg
+        # for a million evenly distributed items, this means ~15 items per folder
+        first_folder = str(hash_str[0:2])
+        second_folder = str(hash_str[2:4])
+        file_name = "%s.jpeg" % hash_str
+        path_chunks = [first_folder, second_folder, file_name]
 
         # establish the root path
-        cache_path_items = [bundle.cache_location, "thumbnails"]
+        cache_path_items = [bundle.cache_location, "thumbs"]
         # append the folders
         cache_path_items.extend(path_chunks)
         # join up the path
         path_to_cached_thumb = os.path.join(*cache_path_items)
-        # all sg thumbs are jpegs - ensure we have that extension
-        if not path_to_cached_thumb.endswith(".jpeg"):
-            path_to_cached_thumb += ".jpeg"
 
         return path_to_cached_thumb
 
