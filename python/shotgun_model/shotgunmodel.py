@@ -387,11 +387,13 @@ class ShotgunModel(QtGui.QStandardItemModel):
         filter_hash.update(str(self.__filters))
         
         # organize files on disk based on entity type and then filter hash
+        # keep extension names etc short in order to stay away from MAX_PATH
+        # on windows.
         self.__full_cache_path = os.path.join(self.__bundle.cache_location, 
-                                              "cached_sg_queries", 
+                                              "sg", 
                                               self.__entity_type,
                                               params_hash.hexdigest(),
-                                              "%s.sgdata" % filter_hash.hexdigest())
+                                              filter_hash.hexdigest())
         
         self.__log_debug("")
         self.__log_debug("Model Reset for %s" % self)
