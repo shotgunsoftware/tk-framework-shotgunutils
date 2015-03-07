@@ -11,6 +11,7 @@
 import os
 import tank
 import uuid
+import hashlib
 import urlparse
 
 
@@ -272,53 +273,32 @@ class ShotgunDataRetriever(QtCore.QThread):
     def _get_thumbnail_path(url, bundle):
         """
         Returns the location on disk suitable for a thumbnail given its url.
+        
+        :param bundle: App, Engine or Framework instance
+        :param url: Path to a thumbnail
+        :returns: Path as a string.
         """
-
+        # hash the path portion of the thumbnail url
         url_obj = urlparse.urlparse(url)
-        url_path = url_obj.path
-        path_chunks = url_path.split("/")
+        url_hash = hashlib.md5()
+        url_hash.update(str(url_obj.path))
+        hash_str = url_hash.hexdigest()
 
-        CHUNK_LEN = 16
-
-        # post process the path
-        # old (pre-S3) style result:
-        # path_chunks: [ "", "thumbs", "1", "2", "2.jpg"]
-
-        # s3 result, form 1:
-        # path_chunks: [u'',
-        #               u'9902b5f5f336fae2fb248e8a8748fcd9aedd822e',
-        #               u'be4236b8f198ae84df2366920e7ee327cc0a567e',
-        #               u'render_0400_t.jpg']
-
-        # s3 result, form 2:
-        # path_chunks: [u'', u'thumbnail', u'api_image', u'150']
-
-        def _to_chunks(s):
-            #split the string 'abcdefghxx' into ['abcdefgh', 'xx']
-            chunks = []
-            for start in range(0, len(s), CHUNK_LEN):
-                chunks.append( s[start:start+CHUNK_LEN] )
-            return chunks
-
-        new_chunks = []
-        for folder in path_chunks[:-1]: # skip the file name
-            if folder == "":
-                continue
-            if len(folder) > CHUNK_LEN:
-                # long url path segment like 9902b5f5f336fae2fb248e8a8748fcd9aedd822e
-                # split it into chunks for 4
-                new_chunks.extend( _to_chunks(folder) )
-            else:
-                new_chunks.append(folder)
+        # Now turn this hash into a tree structure. For a discussion about sensible
+        # sharding methodology, see 
+        # http://stackoverflow.com/questions/13841931/using-guids-as-folder-names-splitting-up
+        #
+        # From the hash, generate paths on the form C1C2/C3C4/full_hash.jpeg
+        # for a million evenly distributed items, this means ~15 items per folder
+        first_folder = str(hash_str[0:2])
+        second_folder = str(hash_str[2:4])
+        file_name = "%s.jpeg" % hash_str
+        path_chunks = [first_folder, second_folder, file_name]
 
         # establish the root path
-        cache_path_items = [bundle.cache_location, "thumbnails"]
+        cache_path_items = [bundle.cache_location, "thumbs"]
         # append the folders
-        cache_path_items.extend(new_chunks)
-        # and append the file name
-        # all sg thumbs are jpegs so append extension too - some url forms don't have this.
-        cache_path_items.append("%s.jpeg" % path_chunks[-1])
-
+        cache_path_items.extend(path_chunks)
         # join up the path
         path_to_cached_thumb = os.path.join(*cache_path_items)
 
