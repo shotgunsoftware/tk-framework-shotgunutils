@@ -290,9 +290,9 @@ class ShotgunDataRetriever(QtCore.QThread):
         #
         # From the hash, generate paths on the form C1C2/C3C4/full_hash.jpeg
         # for a million evenly distributed items, this means ~15 items per folder
-        first_folder = str(hash_str[0:2])
-        second_folder = str(hash_str[2:4])
-        file_name = "%s.jpeg" % hash_str
+        first_folder = hash_str[0:2]
+        second_folder = hash_str[2:4]
+        file_name = "%s.jpeg" % hash_str[4:]
         path_chunks = [first_folder, second_folder, file_name]
 
         # establish the root path
