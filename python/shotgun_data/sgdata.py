@@ -11,6 +11,7 @@
 import os
 import tank
 import uuid
+import shutil
 import hashlib
 import urlparse
 
@@ -270,6 +271,73 @@ class ShotgunDataRetriever(QtCore.QThread):
     # Internal methods
 
     @staticmethod
+    def _get_thumbnail_path_old(url, bundle):
+        """
+        March 2015 - Previous implementation of thumbnail caching logic.
+        This has now been replaced by a new, improved sharding algorithm.
+        In the interest of disk management, keep this method around so that
+        the new logic can attempt to over files over into the new scheme 
+        if at all possible.
+        
+        :param bundle: App, Engine or Framework instance
+        :param url: Path to a thumbnail
+        :returns: Path as a string.        
+        """
+
+        url_obj = urlparse.urlparse(url)
+        url_path = url_obj.path
+        path_chunks = url_path.split("/")
+
+        CHUNK_LEN = 16
+
+        # post process the path
+        # old (pre-S3) style result:
+        # path_chunks: [ "", "thumbs", "1", "2", "2.jpg"]
+
+        # s3 result, form 1:
+        # path_chunks: [u'',
+        #               u'9902b5f5f336fae2fb248e8a8748fcd9aedd822e',
+        #               u'be4236b8f198ae84df2366920e7ee327cc0a567e',
+        #               u'render_0400_t.jpg']
+
+        # s3 result, form 2:
+        # path_chunks: [u'', u'thumbnail', u'api_image', u'150']
+
+        def _to_chunks(s):
+            #split the string 'abcdefghxx' into ['abcdefgh', 'xx']
+            chunks = []
+            for start in range(0, len(s), CHUNK_LEN):
+                chunks.append( s[start:start+CHUNK_LEN] )
+            return chunks
+
+        new_chunks = []
+        for folder in path_chunks[:-1]: # skip the file name
+            if folder == "":
+                continue
+            if len(folder) > CHUNK_LEN:
+                # long url path segment like 9902b5f5f336fae2fb248e8a8748fcd9aedd822e
+                # split it into chunks for 4
+                new_chunks.extend( _to_chunks(folder) )
+            else:
+                new_chunks.append(folder)
+
+        # establish the root path
+        cache_path_items = [bundle.cache_location, "thumbnails"]
+        # append the folders
+        cache_path_items.extend(new_chunks)
+        # and append the file name
+        # all sg thumbs are jpegs so append extension too - some url forms don't have this.
+        cache_path_items.append("%s.jpeg" % path_chunks[-1])
+
+        # join up the path
+        path_to_cached_thumb = os.path.join(*cache_path_items)
+
+        return path_to_cached_thumb
+
+
+
+
+    @staticmethod
     def _get_thumbnail_path(url, bundle):
         """
         Returns the location on disk suitable for a thumbnail given its url.
@@ -278,6 +346,7 @@ class ShotgunDataRetriever(QtCore.QThread):
         :param url: Path to a thumbnail
         :returns: Path as a string.
         """
+
         # hash the path portion of the thumbnail url
         url_obj = urlparse.urlparse(url)
         url_hash = hashlib.md5()
@@ -288,7 +357,8 @@ class ShotgunDataRetriever(QtCore.QThread):
         # sharding methodology, see 
         # http://stackoverflow.com/questions/13841931/using-guids-as-folder-names-splitting-up
         #
-        # From the hash, generate paths on the form C1C2/C3C4/full_hash.jpeg
+        # From the hash, generate paths on the form C1C2/C3C4/rest_of_hash.jpeg
+        # (where C1 is the first character of the hash.)
         # for a million evenly distributed items, this means ~15 items per folder
         first_folder = hash_str[0:2]
         second_folder = hash_str[2:4]
@@ -302,6 +372,28 @@ class ShotgunDataRetriever(QtCore.QThread):
         # join up the path
         path_to_cached_thumb = os.path.join(*cache_path_items)
 
+        # perform a simple migration to check if the old path still exists. In that case, 
+        # try to move it across to the new path. This is to help transition from the previous
+        # thumb caching structures and should be removed at some point in the future in order
+        # to avoid I/O operations. 
+        #
+        # NOTE! This check means that the _get_thumbnail_path() isn't 
+        # just calculating a path for a thumbnail but may have the side effect that it will
+        # move files around. 
+        old_path = ShotgunDataRetriever._get_thumbnail_path_old(url, bundle)
+        if os.path.exists(old_path):
+            # move the file across
+            try:
+                old_umask = os.umask(0)
+                try:
+                    bundle.ensure_folder_exists(os.path.dirname(path_to_cached_thumb))
+                    shutil.move(old_path, path_to_cached_thumb)
+                finally:
+                    os.umask(old_umask)
+            except:
+                # ignore any errors in the transfer
+                pass
+            
         return path_to_cached_thumb
 
 
