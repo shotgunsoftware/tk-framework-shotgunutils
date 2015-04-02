@@ -43,10 +43,16 @@ class ShotgunEntityModel(ShotgunModel):
         icon = ShotgunEntityModel._SG_ENTITY_ICONS.get(entity_type)
         return icon
     
-    def __init__(self, entity_type, filters, hierarchy, download_thumbs=False, schema_generation=0, parent=None):
+    def __init__(self, entity_type, filters, hierarchy, download_thumbs=False, 
+                 schema_generation=0, parent=None, fields=None):
         """
         Construction
         """
+        # make sure fields is valid:
+        fields = fields or []
+        # for backwards compatibility, make sure certain fields are added:
+        fields = list(set(fields + ["image", "sg_status_list", "description"]))
+        
         ## folder icon
         self._default_icon = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Folder.png"))    
 
@@ -56,7 +62,6 @@ class ShotgunEntityModel(ShotgunModel):
                               schema_generation = schema_generation)
         
         # load the data from the cache:
-        fields=["image", "sg_status_list", "description", "task_assignees"]
         self._load_data(entity_type, filters, hierarchy, fields)
     
     def get_entities(self, item):
