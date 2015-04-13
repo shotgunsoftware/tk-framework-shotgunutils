@@ -160,8 +160,16 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__sg_data_retriever.work_failure.disconnect( self.__on_worker_failure)
         # gracefully stop thread
         self.__sg_data_retriever.stop()
-        # clear all internal memory storage
-        self.clear()
+
+        # block all signals before we clear the model otherwise downstream
+        # proxy objects could cause crashes.
+        signals_blocked = self.blockSignals(True)
+        try:
+            # clear all internal memory storage
+            self.clear()
+        finally:
+            # reset the stage of signal blocking:
+            self.blockSignals(signals_blocked)
 
 
     def item_from_entity(self, entity_type, entity_id):
