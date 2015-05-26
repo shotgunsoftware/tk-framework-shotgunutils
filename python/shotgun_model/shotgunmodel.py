@@ -909,7 +909,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         on_leaf_level = len(remaining_fields) == 0
 
         # get the item we need at this level. Create it if not found.
-        field_display_name = self.__generate_display_name(field, sg_item)
+        field_display_name = self._generate_display_name(field, sg_item)
         found_item = None
         for row_index in range(root.rowCount()):
             child = root.child(row_index)
@@ -1058,7 +1058,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 filtered_results.append(sg_item)
 
                 # and store it in our unique dictionary
-                field_display_name = self.__generate_display_name(field, sg_item)
+                field_display_name = self._generate_display_name(field, sg_item)
                 # and associate the shotgun data so that we can find it later
 
                 if on_leaf_level and field_display_name in discrete_values:
@@ -1149,7 +1149,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 return False
         return True
 
-    def __generate_display_name(self, field, sg_data):
+    def _generate_display_name(self, field, sg_data):
         """
         Generates a name from a shotgun field.
         For non-nested structures, this is typically just "code".
