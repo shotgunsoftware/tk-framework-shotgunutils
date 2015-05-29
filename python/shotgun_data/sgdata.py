@@ -404,16 +404,6 @@ class ShotgunDataRetriever(QtCore.QThread):
         """
         Main thread loop
         """
-
-        if self.__sg is None:
-            # create our own private shotgun connection. This is because
-            # the shotgun API isn't threadsafe, so running multiple models in parallel
-            # (common) may result in side effects if a single connection is shared
-            self.__sg = tank.util.shotgun.create_sg_connection()
-
-            # set the maximum timeout for this connection for fluency
-            self.__sg.config.timeout_secs = CONNECTION_TIMEOUT_SECS
-
         # keep running until thread is terminated
         while self._process_queue:
 
@@ -451,6 +441,30 @@ class ShotgunDataRetriever(QtCore.QThread):
 
             finally:
                 self._queue_mutex.unlock()
+
+            # Initialize the connection at the very last moment, otherwise we might enter a race
+            # condition with clients wanting to set the connection.
+            #
+            # The problem arises when:
+            # User instantiates the SgDataRetriever
+            # Launches the thread.
+            # Set's the connection.
+            #
+            # Since the thread also sets the connection, there's a race condition.
+            #
+            # This way of using the SgDataRetriever is kinda eroneous. The user
+            # should probably create the retriever, set the connection and then
+            # launch the thread. However, existing code is sometimes hit by this
+            # race condition because the class is being used the wrong way so it's
+            # safer to just update this class for now.
+            if self.__sg is None:
+                # create our own private shotgun connection. This is because
+                # the shotgun API isn't threadsafe, so running multiple models in parallel
+                # (common) may result in side effects if a single connection is shared
+                self.__sg = tank.util.shotgun.create_sg_connection()
+
+                # set the maximum timeout for this connection for fluency
+                self.__sg.config.timeout_secs = CONNECTION_TIMEOUT_SECS
 
             # Step 2. Process next item and send signals.
             try:
