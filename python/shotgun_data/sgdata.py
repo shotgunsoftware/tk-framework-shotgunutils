@@ -555,10 +555,7 @@ class ShotgunDataRetriever(QtCore.QThread):
                         finally:
                             os.umask(old_umask)
 
-                        # load the thumbnail into memory
-                        img = QtGui.QImage(path_to_cached_thumb)
-
-                        self.work_completed.emit(item_to_process["id"], "find", {"thumb_path": path_to_cached_thumb, "image": img} )
+                        self.work_completed.emit(item_to_process["id"], "find", {"thumb_path": path_to_cached_thumb} )
 
 
                 else:
