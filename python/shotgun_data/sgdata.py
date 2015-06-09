@@ -75,7 +75,7 @@ class ShotgunDataRetriever(QtCore.QThread):
     work_failure = QtCore.Signal(str, str)
 
     # async task types
-    _THUMB_CHECK, _SG_FIND_QUERY, _THUMB_DOWNLOAD = range(3)
+    _THUMB_CHECK, _SG_FIND_QUERY, _THUMB_DOWNLOAD, _SCHEMA_DOWNLOAD = range(4)
 
 
     def __init__(self, parent=None):
@@ -90,7 +90,7 @@ class ShotgunDataRetriever(QtCore.QThread):
 
         # queue data structures
         self._thumb_download_queue = []
-        self._sg_find_queue = []
+        self._sg_requests_queue = []
         self._thumb_check_queue = []
 
         # indicates that we should keep processing queue items
@@ -171,11 +171,11 @@ class ShotgunDataRetriever(QtCore.QThread):
         try:
             self._bundle.log_debug("%s: Clearing queue. Discarded items: SG api requests: [%s] Thumb checks: [%s] "
                                    "Thumb downloads: [%s]" % (self,
-                                                              len(self._sg_find_queue),
+                                                              len(self._sg_requests_queue),
                                                               len(self._thumb_check_queue),
                                                               len(self._thumb_download_queue) ))
             self._thumb_download_queue = []
-            self._sg_find_queue = []
+            self._sg_requests_queue = []
             self._thumb_check_queue = []
         finally:
             self._queue_mutex.unlock()
@@ -193,6 +193,34 @@ class ShotgunDataRetriever(QtCore.QThread):
         self._wait_condition.wakeAll()
         self.wait()
         self._bundle.log_debug("%s: Stopped." % self)
+
+    def get_schema(self, project_id=None):
+        """
+        Execute the schema_read method asynchronously
+        
+        :param project_id: If specified, the schema listing returned will
+                           be constrained by the schema settings for 
+                           the given project.
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.
+        """
+        uid = uuid.uuid4().hex
+
+        work = {"id": uid, "action": "get_schema", "project_id": project_id}
+        
+        self._queue_mutex.lock()
+        try:
+            self._sg_requests_queue.append(work)
+        finally:
+            self._queue_mutex.unlock()
+
+        # wake up execution loop!
+        self._wait_condition.wakeAll()
+
+        return uid
+        
 
     def execute_find(self, entity_type, filters, fields, order = None):
         """
@@ -213,13 +241,14 @@ class ShotgunDataRetriever(QtCore.QThread):
         uid = uuid.uuid4().hex
 
         work = {"id": uid,
+                "action": "execute_find",
                 "entity_type": entity_type,
                 "filters": filters,
                 "fields": fields,
                 "order": order }
         self._queue_mutex.lock()
         try:
-            self._sg_find_queue.append(work)
+            self._sg_requests_queue.append(work)
         finally:
             self._queue_mutex.unlock()
 
@@ -421,10 +450,14 @@ class ShotgunDataRetriever(QtCore.QThread):
                     item_to_process = self._thumb_check_queue.pop(0)
                     item_type = ShotgunDataRetriever._THUMB_CHECK
 
-                elif len(self._sg_find_queue) > 0:
-                    item_to_process = self._sg_find_queue.pop(0)
-                    item_type = ShotgunDataRetriever._SG_FIND_QUERY
-
+                elif len(self._sg_requests_queue) > 0:
+                    item_to_process = self._sg_requests_queue.pop(0)
+                    if item_to_process["action"] == "execute_find":
+                        item_type = ShotgunDataRetriever._SG_FIND_QUERY
+                    
+                    elif item_to_process["action"] == "get_schema":
+                        item_type = ShotgunDataRetriever._SCHEMA_DOWNLOAD
+                        
                 elif len(self._thumb_download_queue) > 0:
                     item_to_process = self._thumb_download_queue.pop(0)
                     item_type = ShotgunDataRetriever._THUMB_DOWNLOAD
@@ -480,6 +513,17 @@ class ShotgunDataRetriever(QtCore.QThread):
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], "find", {"sg": sg } )
 
+                elif item_type == ShotgunDataRetriever._SCHEMA_DOWNLOAD:
+                    
+                    if item_to_process["project_id"]:
+                        project = {"type": "Project", "id": item_to_process["project_id"]}
+                    else:
+                        project = None
+                    sg = self.__sg.schema_read(project)
+
+                    # need to wrap it in a dict not to confuse pyqt's signals and type system
+                    self.work_completed.emit(item_to_process["id"], "get_schema", {"sg": sg } )
+                    
 
                 elif item_type == ShotgunDataRetriever._THUMB_CHECK:
                     # check if a thumbnail exists on disk. If not, fall back onto
