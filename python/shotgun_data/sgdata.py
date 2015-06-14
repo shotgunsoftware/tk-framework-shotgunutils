@@ -54,7 +54,7 @@ class ShotgunDataRetriever(QtCore.QThread):
     #
     # - request_type is a string denoting the type of request
     #   this event is associated with. It can be either "find"
-    #   or "thumbnail"
+    #   "update", "create", "delete" "schema" or "thumbnail"
     #
     # - data_dict is a dictionary containing the payload
     #   of the request. It will be different depending on
@@ -75,7 +75,14 @@ class ShotgunDataRetriever(QtCore.QThread):
     work_failure = QtCore.Signal(str, str)
 
     # async task types
-    _THUMB_CHECK, _SG_FIND_QUERY, _THUMB_DOWNLOAD, _SCHEMA_DOWNLOAD = range(4)
+    (_THUMB_CHECK, 
+     _SG_FIND_QUERY, 
+     _SG_UPDATE_QUERY,
+     _SG_CREATE_QUERY,
+     _SG_DELETE_QUERY, 
+     _EXECUTE_METHOD, 
+     _THUMB_DOWNLOAD, 
+     _SCHEMA_DOWNLOAD)= range(8)
 
 
     def __init__(self, parent=None):
@@ -196,7 +203,7 @@ class ShotgunDataRetriever(QtCore.QThread):
 
     def get_schema(self, project_id=None):
         """
-        Execute the schema_read method asynchronously
+        Execute the schema_read and schema_entity_read methods asynchronously
         
         :param project_id: If specified, the schema listing returned will
                            be constrained by the schema settings for 
@@ -221,31 +228,25 @@ class ShotgunDataRetriever(QtCore.QThread):
 
         return uid
         
-
-    def execute_find(self, entity_type, filters, fields, order = None):
+        
+    def __execute_sg_call(self, action_type, sg_args, sg_kwargs):
         """
-        Adds a find query to the queue.
-
+        Adds a shotgun query to the queue.
+        
         The query will be queued up and once processed, either a
         work_completed or work_failure signal will be emitted.
 
-        :param entity_type: Shotgun entity type
-        :param filters: List of find filters to pass to Shotgun find call
-        :param fields: List of fields to pass to Shotgun find call
-        :param order: List of order dicts to pass to Shotgun find call
         :returns: A unique identifier representing this request. This
                   identifier is also part of the payload sent via the
                   work_completed and work_failure signals, making it
-                  possible to match them up.
+                  possible to match them up.        
         """
         uid = uuid.uuid4().hex
-
         work = {"id": uid,
-                "action": "execute_find",
-                "entity_type": entity_type,
-                "filters": filters,
-                "fields": fields,
-                "order": order }
+                "action": action_type,
+                "args": sg_args,
+                "kwargs": sg_kwargs }
+        
         self._queue_mutex.lock()
         try:
             self._sg_requests_queue.append(work)
@@ -256,7 +257,106 @@ class ShotgunDataRetriever(QtCore.QThread):
         self._wait_condition.wakeAll()
 
         return uid
+        
+    def execute_find(self, *args, **kwargs):
+        """
+        Adds a find query to the queue.
 
+        The query will be queued up and once processed, either a
+        work_completed or work_failure signal will be emitted.
+
+        This method takes the same parameters as the Shotgun find() call.
+
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.
+        """
+        return self.__execute_sg_call("execute_find", args, kwargs)
+
+    def execute_update(self, *args, **kwargs):
+        """
+        Adds an update query to the queue.
+        
+        The query will be queued up and once processed, either a
+        work_completed or work_failure signal will be emitted.
+
+        This method takes the same parameters as the Shotgun update() call.
+        
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.        
+        """
+        return self.__execute_sg_call("execute_update", args, kwargs)
+    
+    def execute_create(self, *args, **kwargs):
+        """
+        Adds an create query to the queue.
+        
+        The query will be queued up and once processed, either a
+        work_completed or work_failure signal will be emitted.
+
+        This method takes the same parameters as the Shotgun create() call.
+        
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.        
+        """
+        return self.__execute_sg_call("execute_create", args, kwargs)    
+
+    def execute_delete(self, *args, **kwargs):
+        """
+        Adds an delete query to the queue.
+        
+        The query will be queued up and once processed, either a
+        work_completed or work_failure signal will be emitted.
+
+        This method takes the same parameters as the Shotgun delete() call.
+        
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.        
+        """
+        return self.__execute_sg_call("execute_delete", args, kwargs)    
+
+    def execute_method(self, method, data):
+        """
+        Adds the generic execution of a method to the queue.
+        
+        The specified method will be called on the form
+        
+        > method(sg, data) 
+        
+        Where sg is a shotgun API instance. Data is typically
+        a dictionary with specific data that the method needs.
+                
+        The query will be queued up and once processed, either a
+        work_completed or work_failure signal will be emitted.
+
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.        
+        """
+        uid = uuid.uuid4().hex
+        work = {"id": uid,
+                "action": "execute_method",
+                "method": method,
+                "data": data }
+        
+        self._queue_mutex.lock()
+        try:
+            self._sg_requests_queue.append(work)
+        finally:
+            self._queue_mutex.unlock()
+
+        # wake up execution loop!
+        self._wait_condition.wakeAll()
+
+        return uid
 
     def request_thumbnail(self, url, entity_type, entity_id, field):
         """
@@ -458,6 +558,18 @@ class ShotgunDataRetriever(QtCore.QThread):
                     elif item_to_process["action"] == "get_schema":
                         item_type = ShotgunDataRetriever._SCHEMA_DOWNLOAD
                         
+                    elif item_to_process["action"] == "execute_update":
+                        item_type = ShotgunDataRetriever._SG_UPDATE_QUERY
+
+                    elif item_to_process["action"] == "execute_create":
+                        item_type = ShotgunDataRetriever._SG_CREATE_QUERY
+                        
+                    elif item_to_process["action"] == "execute_delete":
+                        item_type = ShotgunDataRetriever._SG_DELETE_QUERY
+
+                    elif item_to_process["action"] == "execute_method":
+                        item_type = ShotgunDataRetriever._EXECUTE_METHOD
+
                 elif len(self._thumb_download_queue) > 0:
                     item_to_process = self._thumb_download_queue.pop(0)
                     item_type = ShotgunDataRetriever._THUMB_DOWNLOAD
@@ -506,12 +618,33 @@ class ShotgunDataRetriever(QtCore.QThread):
 
                 if item_type == ShotgunDataRetriever._SG_FIND_QUERY:
                     # get stuff from shotgun
-                    sg = self.__sg.find(item_to_process["entity_type"],
-                                          item_to_process["filters"],
-                                          item_to_process["fields"],
-                                          item_to_process["order"])
+                    sg = self.__sg.find(*item_to_process["args"], **item_to_process["kwargs"])
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], "find", {"sg": sg } )
+
+                elif item_type == ShotgunDataRetriever._SG_UPDATE_QUERY:
+                    # update stuff in shotgun
+                    sg = self.__sg.update(*item_to_process["args"], **item_to_process["kwargs"])
+                    # need to wrap it in a dict not to confuse pyqt's signals and type system
+                    self.work_completed.emit(item_to_process["id"], "update", {"sg": sg } )
+
+                elif item_type == ShotgunDataRetriever._SG_CREATE_QUERY:
+                    # create stuff in shotgun
+                    sg = self.__sg.create(*item_to_process["args"], **item_to_process["kwargs"])
+                    # need to wrap it in a dict not to confuse pyqt's signals and type system
+                    self.work_completed.emit(item_to_process["id"], "create", {"sg": sg } )
+
+                elif item_type == ShotgunDataRetriever._SG_DELETE_QUERY:
+                    # delete stuff in shotgun
+                    sg = self.__sg.delete(*item_to_process["args"], **item_to_process["kwargs"])
+                    # need to wrap it in a dict not to confuse pyqt's signals and type system
+                    self.work_completed.emit(item_to_process["id"], "delete", {"sg": sg } )
+
+                elif item_type == ShotgunDataRetriever._EXECUTE_METHOD:
+                    # run method
+                    ret_val = item_to_process["method"](self.__sg, item_to_process["data"])
+                    # need to wrap it in a dict not to confuse pyqt's signals and type system
+                    self.work_completed.emit(item_to_process["id"], "method", {"return_value": ret_val } )
 
                 elif item_type == ShotgunDataRetriever._SCHEMA_DOWNLOAD:
                     
@@ -519,10 +652,17 @@ class ShotgunDataRetriever(QtCore.QThread):
                         project = {"type": "Project", "id": item_to_process["project_id"]}
                     else:
                         project = None
-                    sg = self.__sg.schema_read(project)
+                    
+                    # read in details about all fields
+                    sg_field_schema = self.__sg.schema_read(project)
+                    
+                    # and read in details about all entity types
+                    sg_type_schema = self.__sg.schema_entity_read(project)
 
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
-                    self.work_completed.emit(item_to_process["id"], "get_schema", {"sg": sg } )
+                    self.work_completed.emit(item_to_process["id"], 
+                                             "schema", 
+                                             {"fields": sg_field_schema, "types": sg_type_schema } )
                     
 
                 elif item_type == ShotgunDataRetriever._THUMB_CHECK:
@@ -532,7 +672,7 @@ class ShotgunDataRetriever(QtCore.QThread):
                     path_to_cached_thumb = self._get_thumbnail_path(url, self._bundle)
                     if os.path.exists(path_to_cached_thumb):
                         # thumbnail already here! yay!
-                        self.work_completed.emit(item_to_process["id"], "find", {"thumb_path": path_to_cached_thumb} )
+                        self.work_completed.emit(item_to_process["id"], "thumb", {"thumb_path": path_to_cached_thumb} )
                     else:
                         # no thumb here. Stick the data into the thumb download queue to request download
                         self._queue_mutex.lock()
@@ -569,7 +709,7 @@ class ShotgunDataRetriever(QtCore.QThread):
                         finally:
                             os.umask(old_umask)
 
-                        self.work_completed.emit(item_to_process["id"], "find", {"thumb_path": path_to_cached_thumb} )
+                        self.work_completed.emit(item_to_process["id"], "thumb", {"thumb_path": path_to_cached_thumb} )
 
 
                 else:
