@@ -236,6 +236,11 @@ class ShotgunDataRetriever(QtCore.QThread):
         The query will be queued up and once processed, either a
         work_completed or work_failure signal will be emitted.
 
+        :param action_type: Action type string to identify the operation.
+        :param sg_args: *args passed to the method that should be forwarded
+                        on to the actual execution.
+        :param sg_kwargs: **kwargs passed to the method that should be
+                          forwarded on to the actual execution.
         :returns: A unique identifier representing this request. This
                   identifier is also part of the payload sent via the
                   work_completed and work_failure signals, making it
@@ -336,6 +341,8 @@ class ShotgunDataRetriever(QtCore.QThread):
         The query will be queued up and once processed, either a
         work_completed or work_failure signal will be emitted.
 
+        :param method: pointer to a method that should be executed.
+        :param data: dictionary of data to pass to the method.
         :returns: A unique identifier representing this request. This
                   identifier is also part of the payload sent via the
                   work_completed and work_failure signals, making it
