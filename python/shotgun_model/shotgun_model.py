@@ -117,8 +117,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self._use_asynchronous_data_retrieval = asynchronous
         if self._use_asynchronous_data_retrieval:
             self.__sg_data_retriever = shotgun_data.ShotgunDataRetriever(self)
-            self.__sg_data_retriever.work_completed.connect( self.__on_worker_signal)
-            self.__sg_data_retriever.work_failure.connect( self.__on_worker_failure)
+            self.__sg_data_retriever.work_completed.connect( self.__on_data_retriever_work_completed)
+            self.__sg_data_retriever.work_failure.connect( self.__on_data_retriever_work_failure)
             self.__current_work_id = 0
 
             # and start its thread!
@@ -171,8 +171,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         if self._use_asynchronous_data_retrieval:
             # first disconnect our worker completely
-            self.__sg_data_retriever.work_completed.disconnect( self.__on_worker_signal)
-            self.__sg_data_retriever.work_failure.disconnect( self.__on_worker_failure)
+            self.__sg_data_retriever.work_completed.disconnect( self.__on_data_retriever_work_completed)
+            self.__sg_data_retriever.work_failure.disconnect( self.__on_data_retriever_work_failure)
             # gracefully stop thread
             self.__sg_data_retriever.stop()
 
@@ -705,9 +705,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
             node.removeRow(idx)
 
 
-    def __on_worker_failure(self, uid, msg):
+    def __on_data_retriever_work_failure(self, uid, msg):
         """
-        Asynchronous callback - the worker thread errored.
+        Asynchronous callback - the data retriever failed to do some work
         """
         uid = sanitize_qt(uid) # qstring on pyqt, str on pyside
         msg = sanitize_qt(msg)
@@ -720,9 +720,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.data_refresh_fail.emit(full_msg)
         self.__log_warning(full_msg)
 
-    def __on_worker_signal(self, uid, request_type, data):
+    def __on_data_retriever_work_completed(self, uid, request_type, data):
         """
-        Signaled whenever the worker completes something.
+        Signaled whenever the data retriever completes some work.
         This method will dispatch the work to different methods
         depending on what async task has completed.
         """
