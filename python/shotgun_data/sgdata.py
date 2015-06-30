@@ -365,7 +365,7 @@ class ShotgunDataRetriever(QtCore.QThread):
 
         return uid
 
-    def request_thumbnail(self, url, entity_type, entity_id, field):
+    def request_thumbnail(self, url, entity_type, entity_id, field, load_image=False):
         """
         Adds a Shotgun thumbnail request to the queue.
 
@@ -378,6 +378,8 @@ class ShotgunDataRetriever(QtCore.QThread):
         :param entity_id: Shotgun entity id with which the thumb is associated.
         :param field: Thumbnail field. Normally 'image' but could also for example
                       be a deep link field such as 'sg_sequence.Sequence.image'
+        :param load_image: If set to True, the return data structure will contain
+                           a QImage object with the image data loaded.
 
         :returns: A unique identifier representing this request. This
                   identifier is also part of the payload sent via the
@@ -390,7 +392,8 @@ class ShotgunDataRetriever(QtCore.QThread):
                 "url": url,
                 "field": field,
                 "entity_type": entity_type,
-                "entity_id": entity_id }
+                "entity_id": entity_id,
+                "load_image": load_image }
         self._queue_mutex.lock()
         try:
             self._thumb_check_queue.append(work)
@@ -553,11 +556,7 @@ class ShotgunDataRetriever(QtCore.QThread):
             self._queue_mutex.lock()
             try:
 
-                if len(self._thumb_check_queue) > 0:
-                    item_to_process = self._thumb_check_queue.pop(0)
-                    item_type = ShotgunDataRetriever._THUMB_CHECK
-
-                elif len(self._sg_requests_queue) > 0:
+                if len(self._sg_requests_queue) > 0:
                     item_to_process = self._sg_requests_queue.pop(0)
                     if item_to_process["action"] == "execute_find":
                         item_type = ShotgunDataRetriever._SG_FIND_QUERY
@@ -576,6 +575,11 @@ class ShotgunDataRetriever(QtCore.QThread):
 
                     elif item_to_process["action"] == "execute_method":
                         item_type = ShotgunDataRetriever._EXECUTE_METHOD
+
+                elif len(self._thumb_check_queue) > 0:
+                    item_to_process = self._thumb_check_queue.pop(0)
+                    item_type = ShotgunDataRetriever._THUMB_CHECK
+
 
                 elif len(self._thumb_download_queue) > 0:
                     item_to_process = self._thumb_download_queue.pop(0)
@@ -679,7 +683,14 @@ class ShotgunDataRetriever(QtCore.QThread):
                     path_to_cached_thumb = self._get_thumbnail_path(url, self._bundle)
                     if os.path.exists(path_to_cached_thumb):
                         # thumbnail already here! yay!
-                        self.work_completed.emit(item_to_process["id"], "thumb", {"thumb_path": path_to_cached_thumb} )
+                        if item_to_process["load_image"]:
+                            image = QtGui.QImage()
+                            image.load(path_to_cached_thumb)
+                        else:
+                            image = None
+                        self.work_completed.emit(item_to_process["id"], 
+                                                 "thumb", 
+                                                 {"thumb_path": path_to_cached_thumb, "image": image} )
                     else:
                         # no thumb here. Stick the data into the thumb download queue to request download
                         self._queue_mutex.lock()
@@ -693,7 +704,7 @@ class ShotgunDataRetriever(QtCore.QThread):
                     # has most likely expired, so need to re-fetch it via a sg find
                     entity_id = item_to_process["entity_id"]
                     entity_type = item_to_process["entity_type"]
-                    field = item_to_process["field"]
+                    field = item_to_process["field"]                    
 
                     sg_data = self.__sg.find_one(entity_type, [["id", "is", entity_id]], [field])
 
@@ -716,7 +727,15 @@ class ShotgunDataRetriever(QtCore.QThread):
                         finally:
                             os.umask(old_umask)
 
-                        self.work_completed.emit(item_to_process["id"], "thumb", {"thumb_path": path_to_cached_thumb} )
+                        if item_to_process["load_image"]:
+                            image = QtGui.QImage()
+                            image.load(path_to_cached_thumb)
+                        else:
+                            image = None
+                        
+                        self.work_completed.emit(item_to_process["id"], 
+                                                 "thumb", 
+                                                 {"thumb_path": path_to_cached_thumb, "image": image} )
 
 
                 else:

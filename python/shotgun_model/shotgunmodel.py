@@ -90,7 +90,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
     FILE_VERSION = 21
 
 
-    def __init__(self, parent, download_thumbs=True, schema_generation=0):
+    def __init__(self, parent, download_thumbs=True, schema_generation=0, bg_thumbs=False):
         """
         Constructor. This will create a model which can later be used to load
         and manage Shotgun data.
@@ -102,6 +102,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                   of the data you are retrieving from Shotgun, and therefore
                                   want to invalidate any cache files that may already exist
                                   in the system, you can increment this integer.
+        :param bg_thumbs: If set to True, thumbnails will be loaded in the background.
 
         """
         QtGui.QStandardItemModel.__init__(self, parent)
@@ -116,6 +117,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__current_work_id = 0
         self.__schema_generation = schema_generation
         self.__full_cache_path = None
+        
 
         # and start its thread!
         self.__sg_data_retriever.start()
@@ -134,7 +136,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__thumb_map = {}
 
         self.__download_thumbs = download_thumbs
-
+        self.__bg_thumbs = bg_thumbs
 
     ########################################################################################
     # public methods
@@ -524,7 +526,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # nothing to download. bad input. gracefully ignore this request.
             return
 
-        uid = self.__sg_data_retriever.request_thumbnail(url, entity_type, entity_id, field)
+        uid = self.__sg_data_retriever.request_thumbnail(url, 
+                                                         entity_type, 
+                                                         entity_id, 
+                                                         field, 
+                                                         self.__bg_thumbs)
 
         # keep tabs of this and call out later
         self.__thumb_map[uid] = {"item": item, "field": field }
@@ -626,6 +632,25 @@ class ShotgunModel(QtGui.QStandardItemModel):
         thumb = QtGui.QPixmap(path)
         item.setIcon(thumb)
 
+    def _populate_thumbnail_image(self, item, field, image, path):
+        """
+        Similar to _populate_thumbnail() but this method is called instead
+        when the bg_thumbs parameter has been set to true. In this case, no
+        loading of thumbnail data from disk is necessary - this has already been
+        carried out async and is passed in the form of a QImage object.
+    
+        For further details, see _populate_thumbnail()
+        
+        :param item: QStandardItem which is associated with the given thumbnail
+        :param field: The Shotgun field which the thumbnail is associated with.
+        :param image: QImage object with the thumbnail loaded
+        :param path: A path on disk to the thumbnail. This is a file in jpeg format.
+        """
+        # the default implementation sets the icon
+        thumb = QtGui.QPixmap.fromImage(image)
+        item.setIcon(thumb)
+
+    
     def _before_data_processing(self, sg_data_list):
         """
         Called just after data has been retrieved from Shotgun but before any processing
@@ -720,16 +745,27 @@ class ShotgunModel(QtGui.QStandardItemModel):
         elif uid in self.__thumb_map:
             # a thumbnail is now present on disk!
             thumbnail_path = data["thumb_path"]
+            thumbnail = data["image"]
+            
 
             item = self.__thumb_map[uid]["item"]
             sg_field = self.__thumb_map[uid]["field"]
 
             # call our deriving class implementation
-            self._populate_thumbnail(item, sg_field, thumbnail_path)
+            if self.__bg_thumbs:
+                # worker thread already loaded the thumbnail in as a QImage.
+                # call a separate method.
+                self._populate_thumbnail_image(item, sg_field, thumbnail, thumbnail_path)
+                
+            else:
+                # worker thread only ensured that the image exists
+                # call method to populate it
+                self._populate_thumbnail(item, sg_field, thumbnail_path)
+            
 
     def __on_sg_data_arrived(self, sg_data):
         """
-        Handle asynchronous shotgun data arrivin after a find request.
+        Handle asynchronous shotgun data arriving after a find request.
         """
 
         self.__log_debug("--> Shotgun data arrived. (%s records)" % len(sg_data))
@@ -1031,7 +1067,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 uid = self.__sg_data_retriever.request_thumbnail(sg_data[field],
                                                                  sg_data.get("type"),
                                                                  sg_data.get("id"),
-                                                                 field)
+                                                                 field,
+                                                                 self.__bg_thumbs)
 
                 self.__thumb_map[uid] = {"item": item, "field": field }
 

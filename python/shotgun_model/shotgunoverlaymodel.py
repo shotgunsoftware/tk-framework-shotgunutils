@@ -33,7 +33,7 @@ class ShotgunOverlayModel(ShotgunModel):
     # should be deactivated. 
     progress_spinner_end = QtCore.Signal()
 
-    def __init__(self, parent, overlay_widget, download_thumbs=True, schema_generation=0):
+    def __init__(self, parent, overlay_widget, download_thumbs=True, schema_generation=0, bg_thumbs=False):
         """
         Constructor. This will create a model which can later be used to load
         and manage Shotgun data.
@@ -46,9 +46,10 @@ class ShotgunOverlayModel(ShotgunModel):
                                   of the data you are retrieving from Shotgun, and therefore
                                   want to invalidate any cache files that may already exist
                                   in the system, you can increment this integer.
+        :param bg_thumbs: If set to True, thumbnails will be loaded in the background.
         
         """
-        ShotgunModel.__init__(self, parent, download_thumbs, schema_generation)
+        ShotgunModel.__init__(self, parent, download_thumbs, schema_generation, bg_thumbs)
         
         # set up our spinner UI handling
         self.__overlay = overlay_module.ShotgunOverlayWidget(overlay_widget)
