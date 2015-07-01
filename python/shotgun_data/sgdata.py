@@ -719,7 +719,7 @@ class ShotgunDataRetriever(QtCore.QThread):
                         url = sg_data[field]
                         path_to_cached_thumb = self._get_thumbnail_path(url, self._bundle)
                         self._bundle.ensure_folder_exists(os.path.dirname(path_to_cached_thumb))
-                        tank.util.download_url(self._bundle.shotgun, url, path_to_cached_thumb)
+                        tank.util.download_url(self.__sg, url, path_to_cached_thumb)
                         # modify the permissions of the file so it's writeable by others
                         old_umask = os.umask(0)
                         try:
