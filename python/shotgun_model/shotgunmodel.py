@@ -720,6 +720,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         if self.__current_work_id != uid:
             # not our job. ignore
+            self.__log_debug("Retrieved error from data worker: %s" % msg)
             return
 
         full_msg = "Error retrieving data from Shotgun: %s" % msg
