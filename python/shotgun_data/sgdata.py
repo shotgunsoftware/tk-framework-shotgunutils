@@ -15,7 +15,7 @@ import shutil
 import hashlib
 import urlparse
 
-
+from tank import TankError
 
 # timeout when connection fails
 CONNECTION_TIMEOUT_SECS = 20
@@ -563,7 +563,6 @@ class ShotgunDataRetriever(QtCore.QThread):
                     
                     elif item_to_process["action"] == "get_schema":
                         item_type = ShotgunDataRetriever._SCHEMA_DOWNLOAD
-                        
                     elif item_to_process["action"] == "execute_update":
                         item_type = ShotgunDataRetriever._SG_UPDATE_QUERY
 
@@ -701,32 +700,50 @@ class ShotgunDataRetriever(QtCore.QThread):
 
                 elif item_type == ShotgunDataRetriever._THUMB_DOWNLOAD:
                     # download the actual thumbnail. Because of S3, the url
-                    # has most likely expired, so need to re-fetch it via a sg find
+                    # may have expired - in that case fall back, get a fresh url
+                    # from shotgun and try again
                     entity_id = item_to_process["entity_id"]
                     entity_type = item_to_process["entity_type"]
-                    field = item_to_process["field"]                    
+                    field = item_to_process["field"]
+                    url = item_to_process["url"]
 
-                    sg_data = self.__sg.find_one(entity_type, [["id", "is", entity_id]], [field])
-
-                    if sg_data is None or sg_data.get(field) is None:
-                        # no thumbnail! This is possible if the thumb has changed
-                        # while we were queueing it for download. In this case
-                        # simply don't do anything
-                        pass
-
-                    else:
-                        # download from sg
-                        url = sg_data[field]
+                    
+                    
+                    # first try to download based on the path we have 
+                    try:
                         path_to_cached_thumb = self._get_thumbnail_path(url, self._bundle)
-                        self._bundle.ensure_folder_exists(os.path.dirname(path_to_cached_thumb))
                         tank.util.download_url(self.__sg, url, path_to_cached_thumb)
+                    except TankError, e:
+                        # Note: Unfortunately, the download_url will re-cast 
+                        # all exceptions into tankerrors.
+                        
+                        # get a fresh url from shotgun and try again
+                        sg_data = self.__sg.find_one(entity_type, [["id", "is", entity_id]], [field])
+
+                        if sg_data is None or sg_data.get(field) is None:
+                            # no thumbnail! This is possible if the thumb has changed
+                            # while we were queueing it for download. In this case
+                            # simply don't do anything
+                            path_to_cached_thumb = None
+    
+                        else:
+                            # download from sg
+                            url = sg_data[field]
+                            path_to_cached_thumb = self._get_thumbnail_path(url, self._bundle)
+                            tank.util.download_url(self.__sg, url, path_to_cached_thumb)
+                    
+                    if path_to_cached_thumb:
+                        # now we have a thumbnail on disk, either via the direct
+                        # download, or via the url-fresh-then-download approach
+                        # the file is downloaded with user-only permissions
                         # modify the permissions of the file so it's writeable by others
                         old_umask = os.umask(0)
                         try:
                             os.chmod(path_to_cached_thumb, 0666)
                         finally:
                             os.umask(old_umask)
-
+    
+                        # see if the worker thread should also load in the image
                         if item_to_process["load_image"]:
                             image = QtGui.QImage()
                             image.load(path_to_cached_thumb)
@@ -735,7 +752,8 @@ class ShotgunDataRetriever(QtCore.QThread):
                         
                         self.work_completed.emit(item_to_process["id"], 
                                                  "thumb", 
-                                                 {"thumb_path": path_to_cached_thumb, "image": image} )
+                                                 {"thumb_path": path_to_cached_thumb, 
+                                                  "image": image} )
 
 
                 else:
