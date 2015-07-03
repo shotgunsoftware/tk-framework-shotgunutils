@@ -706,33 +706,33 @@ class ShotgunDataRetriever(QtCore.QThread):
                     entity_type = item_to_process["entity_type"]
                     field = item_to_process["field"]
                     url = item_to_process["url"]
-
+                    path_to_cached_thumb = self._get_thumbnail_path(url, self._bundle)
+                    self._bundle.ensure_folder_exists(os.path.dirname(path_to_cached_thumb))
                     
+                    download_completed = False
                     
                     # first try to download based on the path we have 
                     try:
-                        path_to_cached_thumb = self._get_thumbnail_path(url, self._bundle)
                         tank.util.download_url(self.__sg, url, path_to_cached_thumb)
+                        download_completed = True
                     except TankError, e:
                         # Note: Unfortunately, the download_url will re-cast 
                         # all exceptions into tankerrors.
-                        
                         # get a fresh url from shotgun and try again
                         sg_data = self.__sg.find_one(entity_type, [["id", "is", entity_id]], [field])
 
                         if sg_data is None or sg_data.get(field) is None:
                             # no thumbnail! This is possible if the thumb has changed
-                            # while we were queueing it for download. In this case
-                            # simply don't do anything
-                            path_to_cached_thumb = None
+                            # while we were queueing it for download. 
+                            download_completed = False
     
                         else:
                             # download from sg
                             url = sg_data[field]
-                            path_to_cached_thumb = self._get_thumbnail_path(url, self._bundle)
                             tank.util.download_url(self.__sg, url, path_to_cached_thumb)
+                            download_completed = True
                     
-                    if path_to_cached_thumb:
+                    if download_completed:
                         # now we have a thumbnail on disk, either via the direct
                         # download, or via the url-fresh-then-download approach
                         # the file is downloaded with user-only permissions
@@ -754,7 +754,6 @@ class ShotgunDataRetriever(QtCore.QThread):
                                                  "thumb", 
                                                  {"thumb_path": path_to_cached_thumb, 
                                                   "image": image} )
-
 
                 else:
                     raise Exception("Unknown task type!")
