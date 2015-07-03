@@ -625,8 +625,32 @@ class ShotgunDataRetriever(QtCore.QThread):
             try:
 
                 # process the item:
+                
+                # start with thumbnail I/O checks since they are the fastest to execute
+                if item_type == ShotgunDataRetriever._THUMB_CHECK:
+                    # check if a thumbnail exists on disk. If not, fall back onto
+                    # a thumbnail download from shotgun/s3
+                    url = item_to_process["url"]
+                    path_to_cached_thumb = self._get_thumbnail_path(url, self._bundle)
+                    if os.path.exists(path_to_cached_thumb):
+                        # thumbnail already here! yay!
+                        if item_to_process["load_image"]:
+                            image = QtGui.QImage()
+                            image.load(path_to_cached_thumb)
+                        else:
+                            image = None
+                        self.work_completed.emit(item_to_process["id"], 
+                                                 "thumb", 
+                                                 {"thumb_path": path_to_cached_thumb, "image": image} )
+                    else:
+                        # no thumb here. Stick the data into the thumb download queue to request download
+                        self._queue_mutex.lock()
+                        try:
+                            self._thumb_download_queue.append(item_to_process)
+                        finally:
+                            self._queue_mutex.unlock()
 
-                if item_type == ShotgunDataRetriever._SG_FIND_QUERY:
+                elif item_type == ShotgunDataRetriever._SG_FIND_QUERY:
                     # get stuff from shotgun
                     sg = self.__sg.find(*item_to_process["args"], **item_to_process["kwargs"])
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
@@ -674,29 +698,6 @@ class ShotgunDataRetriever(QtCore.QThread):
                                              "schema", 
                                              {"fields": sg_field_schema, "types": sg_type_schema } )
                     
-
-                elif item_type == ShotgunDataRetriever._THUMB_CHECK:
-                    # check if a thumbnail exists on disk. If not, fall back onto
-                    # a thumbnail download from shotgun/s3
-                    url = item_to_process["url"]
-                    path_to_cached_thumb = self._get_thumbnail_path(url, self._bundle)
-                    if os.path.exists(path_to_cached_thumb):
-                        # thumbnail already here! yay!
-                        if item_to_process["load_image"]:
-                            image = QtGui.QImage()
-                            image.load(path_to_cached_thumb)
-                        else:
-                            image = None
-                        self.work_completed.emit(item_to_process["id"], 
-                                                 "thumb", 
-                                                 {"thumb_path": path_to_cached_thumb, "image": image} )
-                    else:
-                        # no thumb here. Stick the data into the thumb download queue to request download
-                        self._queue_mutex.lock()
-                        try:
-                            self._thumb_download_queue.append(item_to_process)
-                        finally:
-                            self._queue_mutex.unlock()
 
                 elif item_type == ShotgunDataRetriever._THUMB_DOWNLOAD:
                     # download the actual thumbnail. Because of S3, the url
