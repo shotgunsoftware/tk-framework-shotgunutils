@@ -736,6 +736,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         uid = sanitize_qt(uid) # qstring on pyqt, str on pyside
         data = sanitize_qt(data)
 
+        self.__log_debug("Received worker payload of type %s" % request_type)
+        
         if self.__current_work_id == uid:
             # our publish data has arrived from sg!
 
