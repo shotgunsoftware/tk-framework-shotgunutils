@@ -535,6 +535,23 @@ class ShotgunDataRetriever(QtCore.QThread):
             
         return path_to_cached_thumb
 
+    def __ensure_sg_connection_initialized(self):
+        """
+        Populates self.__sg unless it has already been set.
+        
+        This allows for a workflow when the sg connection is 
+        created just in time before a sg operation, allowing
+        maximum speed for cache I/O tasks running in the data
+        fetcher (like grabbing cached thumbnails from disk). 
+        """
+        if self.__sg is None:
+            # create our own private shotgun connection. This is because
+            # the shotgun API isn't threadsafe, so running multiple models in parallel
+            # (common) may result in side effects if a single connection is shared
+            self.__sg = tank.util.shotgun.create_sg_connection()
+            # set the maximum timeout for this connection for fluency
+            self.__sg.config.timeout_secs = CONNECTION_TIMEOUT_SECS
+
 
     ############################################################################################
     # main thread loop
@@ -596,30 +613,6 @@ class ShotgunDataRetriever(QtCore.QThread):
             finally:
                 self._queue_mutex.unlock()
 
-            # Initialize the connection at the very last moment, otherwise we might enter a race
-            # condition with clients wanting to set the connection.
-            #
-            # The problem arises when:
-            # User instantiates the SgDataRetriever
-            # Launches the thread.
-            # Set's the connection.
-            #
-            # Since the thread also sets the connection, there's a race condition.
-            #
-            # This way of using the SgDataRetriever is kinda eroneous. The user
-            # should probably create the retriever, set the connection and then
-            # launch the thread. However, existing code is sometimes hit by this
-            # race condition because the class is being used the wrong way so it's
-            # safer to just update this class for now.
-            if self.__sg is None:
-                # create our own private shotgun connection. This is because
-                # the shotgun API isn't threadsafe, so running multiple models in parallel
-                # (common) may result in side effects if a single connection is shared
-                self.__sg = tank.util.shotgun.create_sg_connection()
-
-                # set the maximum timeout for this connection for fluency
-                self.__sg.config.timeout_secs = CONNECTION_TIMEOUT_SECS
-
             # Step 2. Process next item and send signals.
             try:
 
@@ -649,30 +642,35 @@ class ShotgunDataRetriever(QtCore.QThread):
 
                 elif item_type == ShotgunDataRetriever._SG_FIND_QUERY:
                     # get stuff from shotgun
+                    self.__ensure_sg_connection_initialized()
                     sg = self.__sg.find(*item_to_process["args"], **item_to_process["kwargs"])
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], "find", {"sg": sg } )
 
                 elif item_type == ShotgunDataRetriever._SG_UPDATE_QUERY:
                     # update stuff in shotgun
+                    self.__ensure_sg_connection_initialized()
                     sg = self.__sg.update(*item_to_process["args"], **item_to_process["kwargs"])
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], "update", {"sg": sg } )
 
                 elif item_type == ShotgunDataRetriever._SG_CREATE_QUERY:
                     # create stuff in shotgun
+                    self.__ensure_sg_connection_initialized()
                     sg = self.__sg.create(*item_to_process["args"], **item_to_process["kwargs"])
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], "create", {"sg": sg } )
 
                 elif item_type == ShotgunDataRetriever._SG_DELETE_QUERY:
                     # delete stuff in shotgun
+                    self.__ensure_sg_connection_initialized()
                     sg = self.__sg.delete(*item_to_process["args"], **item_to_process["kwargs"])
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], "delete", {"sg": sg } )
 
                 elif item_type == ShotgunDataRetriever._EXECUTE_METHOD:
                     # run method
+                    self.__ensure_sg_connection_initialized()
                     ret_val = item_to_process["method"](self.__sg, item_to_process["data"])
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], "method", {"return_value": ret_val } )
@@ -685,6 +683,7 @@ class ShotgunDataRetriever(QtCore.QThread):
                         project = None
                     
                     # read in details about all fields
+                    self.__ensure_sg_connection_initialized()
                     sg_field_schema = self.__sg.schema_read(project)
                     
                     # and read in details about all entity types
@@ -712,6 +711,7 @@ class ShotgunDataRetriever(QtCore.QThread):
                     if not os.path.exists(path_to_cached_thumb):
 
                         # first try to download based on the path we have
+                        self.__ensure_sg_connection_initialized()
                         try:
                             tank.util.download_url(self.__sg, url, path_to_cached_thumb)
                         except TankError, e:
