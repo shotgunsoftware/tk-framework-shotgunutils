@@ -556,7 +556,11 @@ class ShotgunDataRetriever(QtCore.QThread):
             self._queue_mutex.lock()
             try:
 
-                if len(self._sg_requests_queue) > 0:
+                if len(self._thumb_check_queue) > 0:
+                    item_to_process = self._thumb_check_queue.pop(0)
+                    item_type = ShotgunDataRetriever._THUMB_CHECK
+
+                elif len(self._sg_requests_queue) > 0:
                     item_to_process = self._sg_requests_queue.pop(0)
                     if item_to_process["action"] == "execute_find":
                         item_type = ShotgunDataRetriever._SG_FIND_QUERY
@@ -574,11 +578,6 @@ class ShotgunDataRetriever(QtCore.QThread):
 
                     elif item_to_process["action"] == "execute_method":
                         item_type = ShotgunDataRetriever._EXECUTE_METHOD
-
-                elif len(self._thumb_check_queue) > 0:
-                    item_to_process = self._thumb_check_queue.pop(0)
-                    item_type = ShotgunDataRetriever._THUMB_CHECK
-
 
                 elif len(self._thumb_download_queue) > 0:
                     item_to_process = self._thumb_download_queue.pop(0)
@@ -625,8 +624,6 @@ class ShotgunDataRetriever(QtCore.QThread):
             try:
 
                 # process the item:
-                
-                # start with thumbnail I/O checks since they are the fastest to execute
                 if item_type == ShotgunDataRetriever._THUMB_CHECK:
                     # check if a thumbnail exists on disk. If not, fall back onto
                     # a thumbnail download from shotgun/s3
