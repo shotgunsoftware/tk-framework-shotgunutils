@@ -748,20 +748,23 @@ class ShotgunModel(QtGui.QStandardItemModel):
             thumbnail_path = data["thumb_path"]
             thumbnail = data["image"]
             
+            # if the requested thumbnail has since dissapeared on the server,
+            # path and image will be None. In this case, skip processing
+            if thumbnail_path:
 
-            item = self.__thumb_map[uid]["item"]
-            sg_field = self.__thumb_map[uid]["field"]
-
-            # call our deriving class implementation
-            if self.__bg_thumbs:
-                # worker thread already loaded the thumbnail in as a QImage.
-                # call a separate method.
-                self._populate_thumbnail_image(item, sg_field, thumbnail, thumbnail_path)
-                
-            else:
-                # worker thread only ensured that the image exists
-                # call method to populate it
-                self._populate_thumbnail(item, sg_field, thumbnail_path)
+                item = self.__thumb_map[uid]["item"]
+                sg_field = self.__thumb_map[uid]["field"]
+    
+                # call our deriving class implementation
+                if self.__bg_thumbs:
+                    # worker thread already loaded the thumbnail in as a QImage.
+                    # call a separate method.
+                    self._populate_thumbnail_image(item, sg_field, thumbnail, thumbnail_path)
+                    
+                else:
+                    # worker thread only ensured that the image exists
+                    # call method to populate it
+                    self._populate_thumbnail(item, sg_field, thumbnail_path)
             
 
     def __on_sg_data_arrived(self, sg_data):

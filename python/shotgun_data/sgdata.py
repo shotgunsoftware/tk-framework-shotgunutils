@@ -709,51 +709,53 @@ class ShotgunDataRetriever(QtCore.QThread):
                     path_to_cached_thumb = self._get_thumbnail_path(url, self._bundle)
                     self._bundle.ensure_folder_exists(os.path.dirname(path_to_cached_thumb))
                     
-                    download_completed = False
-                    
-                    # first try to download based on the path we have 
-                    try:
-                        tank.util.download_url(self.__sg, url, path_to_cached_thumb)
-                        download_completed = True
-                    except TankError, e:
-                        # Note: Unfortunately, the download_url will re-cast 
-                        # all exceptions into tankerrors.
-                        # get a fresh url from shotgun and try again
-                        sg_data = self.__sg.find_one(entity_type, [["id", "is", entity_id]], [field])
+                    # first of all, there may be a case where another process has alrady downloaded
+                    # the thumbnail for us, so make sure that we aren't doing any extra work :)
+                    if not os.path.exists(path_to_cached_thumb):
 
-                        if sg_data is None or sg_data.get(field) is None:
-                            # no thumbnail! This is possible if the thumb has changed
-                            # while we were queueing it for download. 
-                            download_completed = False
-    
-                        else:
-                            # download from sg
-                            url = sg_data[field]
-                            tank.util.download_url(self.__sg, url, path_to_cached_thumb)
-                            download_completed = True
-                    
-                    if download_completed:
-                        # now we have a thumbnail on disk, either via the direct
-                        # download, or via the url-fresh-then-download approach
-                        # the file is downloaded with user-only permissions
-                        # modify the permissions of the file so it's writeable by others
-                        old_umask = os.umask(0)
+                        # first try to download based on the path we have
                         try:
-                            os.chmod(path_to_cached_thumb, 0666)
-                        finally:
-                            os.umask(old_umask)
+                            tank.util.download_url(self.__sg, url, path_to_cached_thumb)
+                        except TankError, e:
+                            # Note: Unfortunately, the download_url will re-cast 
+                            # all exceptions into tankerrors.
+                            # get a fresh url from shotgun and try again
+                            sg_data = self.__sg.find_one(entity_type, [["id", "is", entity_id]], [field])
     
-                        # see if the worker thread should also load in the image
-                        if item_to_process["load_image"]:
-                            image = QtGui.QImage()
-                            image.load(path_to_cached_thumb)
-                        else:
-                            image = None
+                            if sg_data is None or sg_data.get(field) is None:
+                                # no thumbnail! This is possible if the thumb has changed
+                                # while we were queueing it for download.
+                                # indicate the fact that the thumbnail no longer exists on the server
+                                # by setting the path to None
+                                path_to_cached_thumb = None
+        
+                            else:
+                                # download from sg
+                                url = sg_data[field]
+                                tank.util.download_url(self.__sg, url, path_to_cached_thumb)
                         
-                        self.work_completed.emit(item_to_process["id"], 
-                                                 "thumb", 
-                                                 {"thumb_path": path_to_cached_thumb, 
-                                                  "image": image} )
+                        if path_to_cached_thumb:
+                            # now we have a thumbnail on disk, either via the direct
+                            # download, or via the url-fresh-then-download approach
+                            # the file is downloaded with user-only permissions
+                            # modify the permissions of the file so it's writeable by others
+                            old_umask = os.umask(0)
+                            try:
+                                os.chmod(path_to_cached_thumb, 0666)
+                            finally:
+                                os.umask(old_umask)
+    
+                    # finally, see if the worker thread should also load in the image
+                    if path_to_cached_thumb and item_to_process["load_image"]:
+                        image = QtGui.QImage()
+                        image.load(path_to_cached_thumb)
+                    else:
+                        image = None
+                    
+                    self.work_completed.emit(item_to_process["id"], 
+                                             "thumb", 
+                                             {"thumb_path": path_to_cached_thumb, 
+                                              "image": image} )
 
                 else:
                     raise Exception("Unknown task type!")
