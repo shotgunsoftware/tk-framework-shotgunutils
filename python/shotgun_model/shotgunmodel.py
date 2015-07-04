@@ -921,31 +921,47 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Omits thumbnail fields because these change all the time (S3).
         Both inputs are assumed to contain utf-8 encoded data.
         """
-        for k in a:
+        # handle file attachment data as a special case. If the attachment has been uploaded, 
+        # it will contain an amazon url.
+        #  
+        # example:
+        # {'name': 'review_2015-05-13_16-53.mov',
+        #  'url': 'https://....',
+        #  'content_type': 'video/quicktime', 
+        #  'type': 'Attachment', 
+        #  'id': 24919,
+        #  'link_type': 'upload'}
+        #
+        if isinstance(a, dict) and isinstance(b, dict):
+            # keep it simple here. if both values are dicts, iterate
+            # over each of the keys and compare them separately
+            # S3 string equality will be automatically handled by
+            # the logic above. 
+            for a_key in a.keys():
+                if not self.__sg_compare_data(a.get(a_key), b.get(a_key)):
+                    return False            
 
-            a_val = a.get(k)
-            b_val = b.get(k)
-
-            # handle thumbnail fields as a special case
-            # thumbnail urls are (typically, there seem to be several standards!)
-            # on the form:
-            # https://sg-media-usor-01.s3.amazonaws.com/xxx/yyy/filename.ext?lots_of_authentication_headers
-            #
-            # the query string changes all the times, so when we check if an item is out of date, omit it.
-            if isinstance(a_val, str) and isinstance(b_val, str) and \
-               ("image" in k or "amazonaws" in a_val or "AccessKeyId" in a_val):
-                # attempt to parse values are urls and eliminate the querystring
-                # compare hostname + path only
-                url_obj_a = urlparse.urlparse(a_val)
-                url_obj_b = urlparse.urlparse(b_val)
-                compare_str_a = "%s/%s" % (url_obj_a.netloc, url_obj_a.path)
-                compare_str_b = "%s/%s" % (url_obj_b.netloc, url_obj_b.path)
-                if compare_str_a != compare_str_b:
-                    # url has changed
-                    return False
-
-            elif a_val != b_val:
+        # handle thumbnail fields as a special case
+        # thumbnail urls are (typically, there seem to be several standards!)
+        # on the form:
+        # https://sg-media-usor-01.s3.amazonaws.com/xxx/yyy/filename.ext?lots_of_authentication_headers
+        #
+        # the query string changes all the times, so when we check if an item is out of date, omit it.
+        elif isinstance(a, str) and isinstance(b, str) and \
+           a.startswith("http") and b.startswith("http") and \
+           ("amazonaws" in a or "AccessKeyId" in a):
+            # attempt to parse values are urls and eliminate the querystring
+            # compare hostname + path only
+            url_obj_a = urlparse.urlparse(a)
+            url_obj_b = urlparse.urlparse(b)
+            compare_str_a = "%s/%s" % (url_obj_a.netloc, url_obj_a.path)
+            compare_str_b = "%s/%s" % (url_obj_b.netloc, url_obj_b.path)
+            if compare_str_a != compare_str_b:
+                # url has changed
                 return False
+
+        elif a != b:
+            return False
 
         return True
 
