@@ -90,7 +90,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
     FILE_VERSION = 21
 
 
-    def __init__(self, parent, download_thumbs=True, schema_generation=0, bg_thumbs=False):
+    def __init__(self, parent, download_thumbs=True, schema_generation=0, bg_load_thumbs=False):
         """
         Constructor. This will create a model which can later be used to load
         and manage Shotgun data.
@@ -102,7 +102,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                   of the data you are retrieving from Shotgun, and therefore
                                   want to invalidate any cache files that may already exist
                                   in the system, you can increment this integer.
-        :param bg_thumbs: If set to True, thumbnails will be loaded in the background.
+        :param bg_load_thumbs: If set to True, thumbnails will be loaded in the background.
 
         """
         QtGui.QStandardItemModel.__init__(self, parent)
@@ -136,7 +136,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__thumb_map = {}
 
         self.__download_thumbs = download_thumbs
-        self.__bg_thumbs = bg_thumbs
+        self.__bg_load_thumbs = bg_load_thumbs
 
     ########################################################################################
     # public methods
@@ -530,7 +530,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                                          entity_type, 
                                                          entity_id, 
                                                          field, 
-                                                         self.__bg_thumbs)
+                                                         self.__bg_load_thumbs)
 
         # keep tabs of this and call out later
         self.__thumb_map[uid] = {"item": item, "field": field }
@@ -635,7 +635,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
     def _populate_thumbnail_image(self, item, field, image, path):
         """
         Similar to _populate_thumbnail() but this method is called instead
-        when the bg_thumbs parameter has been set to true. In this case, no
+        when the bg_load_thumbs parameter has been set to true. In this case, no
         loading of thumbnail data from disk is necessary - this has already been
         carried out async and is passed in the form of a QImage object.
     
@@ -758,7 +758,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 sg_field = self.__thumb_map[uid]["field"]
     
                 # call our deriving class implementation
-                if self.__bg_thumbs:
+                if self.__bg_load_thumbs:
                     # worker thread already loaded the thumbnail in as a QImage.
                     # call a separate method.
                     self._populate_thumbnail_image(item, sg_field, thumbnail, thumbnail_path)
@@ -1090,7 +1090,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                                                  sg_data.get("type"),
                                                                  sg_data.get("id"),
                                                                  field,
-                                                                 self.__bg_thumbs)
+                                                                 self.__bg_load_thumbs)
 
                 self.__thumb_map[uid] = {"item": item, "field": field }
 
