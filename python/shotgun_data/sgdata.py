@@ -15,7 +15,7 @@ import shutil
 import hashlib
 import urlparse
 
-
+from tank import TankError
 
 # timeout when connection fails
 CONNECTION_TIMEOUT_SECS = 20
@@ -93,7 +93,7 @@ class ShotgunDataRetriever(QtCore.QThread):
         self._bundle = tank.platform.current_bundle()
         self._wait_condition = QtCore.QWaitCondition()
         self._queue_mutex = QtCore.QMutex()
-        self.__sg = None
+        self.__sg = None # Note: don't use directly - instead call __get_sg_connection()!
 
         # queue data structures
         self._thumb_download_queue = []
@@ -102,6 +102,27 @@ class ShotgunDataRetriever(QtCore.QThread):
 
         # indicates that we should keep processing queue items
         self._process_queue = True
+
+
+    def __get_sg_connection(self):
+        """
+        Returns a shotgun connection object. Initializes one 
+        if one doesn't exist already.
+        
+        Do not call self.__sg directly - instead use this 
+        method when you want to retrieve a Shotgun connection
+        
+        :returns: A fully initialized Shotgun connection
+        """
+        if self.__sg is None:
+            # create our own private shotgun connection. This is because
+            # the shotgun API isn't threadsafe, so running multiple models in parallel
+            # (common) may result in side effects if a single connection is shared
+            self.__sg = tank.util.shotgun.create_sg_connection()
+            # set the maximum timeout for this connection for fluency
+            self.__sg.config.timeout_secs = CONNECTION_TIMEOUT_SECS
+        
+        return self.__sg
 
     ############################################################################################################
     # Public methods
@@ -365,7 +386,7 @@ class ShotgunDataRetriever(QtCore.QThread):
 
         return uid
 
-    def request_thumbnail(self, url, entity_type, entity_id, field):
+    def request_thumbnail(self, url, entity_type, entity_id, field, load_image=False):
         """
         Adds a Shotgun thumbnail request to the queue.
 
@@ -378,6 +399,8 @@ class ShotgunDataRetriever(QtCore.QThread):
         :param entity_id: Shotgun entity id with which the thumb is associated.
         :param field: Thumbnail field. Normally 'image' but could also for example
                       be a deep link field such as 'sg_sequence.Sequence.image'
+        :param load_image: If set to True, the return data structure will contain
+                           a QImage object with the image data loaded.
 
         :returns: A unique identifier representing this request. This
                   identifier is also part of the payload sent via the
@@ -390,7 +413,8 @@ class ShotgunDataRetriever(QtCore.QThread):
                 "url": url,
                 "field": field,
                 "entity_type": entity_type,
-                "entity_id": entity_id }
+                "entity_id": entity_id,
+                "load_image": load_image }
         self._queue_mutex.lock()
         try:
             self._thumb_check_queue.append(work)
@@ -532,7 +556,6 @@ class ShotgunDataRetriever(QtCore.QThread):
             
         return path_to_cached_thumb
 
-
     ############################################################################################
     # main thread loop
 
@@ -564,7 +587,6 @@ class ShotgunDataRetriever(QtCore.QThread):
                     
                     elif item_to_process["action"] == "get_schema":
                         item_type = ShotgunDataRetriever._SCHEMA_DOWNLOAD
-                        
                     elif item_to_process["action"] == "execute_update":
                         item_type = ShotgunDataRetriever._SG_UPDATE_QUERY
 
@@ -594,38 +616,36 @@ class ShotgunDataRetriever(QtCore.QThread):
             finally:
                 self._queue_mutex.unlock()
 
-            # Initialize the connection at the very last moment, otherwise we might enter a race
-            # condition with clients wanting to set the connection.
-            #
-            # The problem arises when:
-            # User instantiates the SgDataRetriever
-            # Launches the thread.
-            # Set's the connection.
-            #
-            # Since the thread also sets the connection, there's a race condition.
-            #
-            # This way of using the SgDataRetriever is kinda eroneous. The user
-            # should probably create the retriever, set the connection and then
-            # launch the thread. However, existing code is sometimes hit by this
-            # race condition because the class is being used the wrong way so it's
-            # safer to just update this class for now.
-            if self.__sg is None:
-                # create our own private shotgun connection. This is because
-                # the shotgun API isn't threadsafe, so running multiple models in parallel
-                # (common) may result in side effects if a single connection is shared
-                self.__sg = tank.util.shotgun.create_sg_connection()
-
-                # set the maximum timeout for this connection for fluency
-                self.__sg.config.timeout_secs = CONNECTION_TIMEOUT_SECS
-
             # Step 2. Process next item and send signals.
             try:
 
                 # process the item:
+                if item_type == ShotgunDataRetriever._THUMB_CHECK:
+                    # check if a thumbnail exists on disk. If not, fall back onto
+                    # a thumbnail download from shotgun/s3
+                    url = item_to_process["url"]
+                    path_to_cached_thumb = self._get_thumbnail_path(url, self._bundle)
+                    if os.path.exists(path_to_cached_thumb):
+                        # thumbnail already here! yay!
+                        if item_to_process["load_image"]:
+                            image = QtGui.QImage()
+                            image.load(path_to_cached_thumb)
+                        else:
+                            image = None
+                        self.work_completed.emit(item_to_process["id"], 
+                                                 "thumb", 
+                                                 {"thumb_path": path_to_cached_thumb, "image": image} )
+                    else:
+                        # no thumb here. Stick the data into the thumb download queue to request download
+                        self._queue_mutex.lock()
+                        try:
+                            self._thumb_download_queue.append(item_to_process)
+                        finally:
+                            self._queue_mutex.unlock()
 
-                if item_type == ShotgunDataRetriever._SG_FIND_QUERY:
+                elif item_type == ShotgunDataRetriever._SG_FIND_QUERY:
                     # get stuff from shotgun
-                    sg = self.__sg.find(*item_to_process["args"], **item_to_process["kwargs"])
+                    sg = self.__get_sg_connection().find(*item_to_process["args"], **item_to_process["kwargs"])
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], "find", {"sg": sg } )
 
@@ -637,19 +657,19 @@ class ShotgunDataRetriever(QtCore.QThread):
 
                 elif item_type == ShotgunDataRetriever._SG_CREATE_QUERY:
                     # create stuff in shotgun
-                    sg = self.__sg.create(*item_to_process["args"], **item_to_process["kwargs"])
+                    sg = self.__get_sg_connection().create(*item_to_process["args"], **item_to_process["kwargs"])
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], "create", {"sg": sg } )
 
                 elif item_type == ShotgunDataRetriever._SG_DELETE_QUERY:
                     # delete stuff in shotgun
-                    sg = self.__sg.delete(*item_to_process["args"], **item_to_process["kwargs"])
+                    sg = self.__get_sg_connection().delete(*item_to_process["args"], **item_to_process["kwargs"])
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], "delete", {"sg": sg } )
 
                 elif item_type == ShotgunDataRetriever._EXECUTE_METHOD:
                     # run method
-                    ret_val = item_to_process["method"](self.__sg, item_to_process["data"])
+                    ret_val = item_to_process["method"](self.__get_sg_connection(), item_to_process["data"])
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], "method", {"return_value": ret_val } )
 
@@ -661,10 +681,10 @@ class ShotgunDataRetriever(QtCore.QThread):
                         project = None
                     
                     # read in details about all fields
-                    sg_field_schema = self.__sg.schema_read(project)
+                    sg_field_schema = self.__get_sg_connection().schema_read(project)
                     
                     # and read in details about all entity types
-                    sg_type_schema = self.__sg.schema_entity_read(project)
+                    sg_type_schema = self.__get_sg_connection().schema_entity_read(project)
 
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], 
@@ -672,52 +692,64 @@ class ShotgunDataRetriever(QtCore.QThread):
                                              {"fields": sg_field_schema, "types": sg_type_schema } )
                     
 
-                elif item_type == ShotgunDataRetriever._THUMB_CHECK:
-                    # check if a thumbnail exists on disk. If not, fall back onto
-                    # a thumbnail download from shotgun/s3
-                    url = item_to_process["url"]
-                    path_to_cached_thumb = self._get_thumbnail_path(url, self._bundle)
-                    if os.path.exists(path_to_cached_thumb):
-                        # thumbnail already here! yay!
-                        self.work_completed.emit(item_to_process["id"], "thumb", {"thumb_path": path_to_cached_thumb} )
-                    else:
-                        # no thumb here. Stick the data into the thumb download queue to request download
-                        self._queue_mutex.lock()
-                        try:
-                            self._thumb_download_queue.append(item_to_process)
-                        finally:
-                            self._queue_mutex.unlock()
-
                 elif item_type == ShotgunDataRetriever._THUMB_DOWNLOAD:
                     # download the actual thumbnail. Because of S3, the url
-                    # has most likely expired, so need to re-fetch it via a sg find
+                    # may have expired - in that case fall back, get a fresh url
+                    # from shotgun and try again
                     entity_id = item_to_process["entity_id"]
                     entity_type = item_to_process["entity_type"]
                     field = item_to_process["field"]
+                    url = item_to_process["url"]
+                    path_to_cached_thumb = self._get_thumbnail_path(url, self._bundle)
+                    self._bundle.ensure_folder_exists(os.path.dirname(path_to_cached_thumb))
+                    
+                    # first of all, there may be a case where another process has alrady downloaded
+                    # the thumbnail for us, so make sure that we aren't doing any extra work :)
+                    if not os.path.exists(path_to_cached_thumb):
 
-                    sg_data = self.__sg.find_one(entity_type, [["id", "is", entity_id]], [field])
-
-                    if sg_data is None or sg_data.get(field) is None:
-                        # no thumbnail! This is possible if the thumb has changed
-                        # while we were queueing it for download. In this case
-                        # simply don't do anything
-                        pass
-
-                    else:
-                        # download from sg
-                        url = sg_data[field]
-                        path_to_cached_thumb = self._get_thumbnail_path(url, self._bundle)
-                        self._bundle.ensure_folder_exists(os.path.dirname(path_to_cached_thumb))
-                        tank.util.download_url(self._bundle.shotgun, url, path_to_cached_thumb)
-                        # modify the permissions of the file so it's writeable by others
-                        old_umask = os.umask(0)
+                        # first try to download based on the path we have
                         try:
-                            os.chmod(path_to_cached_thumb, 0666)
-                        finally:
-                            os.umask(old_umask)
-
-                        self.work_completed.emit(item_to_process["id"], "thumb", {"thumb_path": path_to_cached_thumb} )
-
+                            tank.util.download_url(self.__get_sg_connection(), url, path_to_cached_thumb)
+                        except TankError, e:
+                            # Note: Unfortunately, the download_url will re-cast 
+                            # all exceptions into tankerrors.
+                            # get a fresh url from shotgun and try again
+                            sg_data = self.__get_sg_connection().find_one(entity_type, [["id", "is", entity_id]], [field])
+    
+                            if sg_data is None or sg_data.get(field) is None:
+                                # no thumbnail! This is possible if the thumb has changed
+                                # while we were queueing it for download.
+                                # indicate the fact that the thumbnail no longer exists on the server
+                                # by setting the path to None
+                                path_to_cached_thumb = None
+        
+                            else:
+                                # download from sg
+                                url = sg_data[field]
+                                tank.util.download_url(self.__get_sg_connection(), url, path_to_cached_thumb)
+                        
+                        if path_to_cached_thumb:
+                            # now we have a thumbnail on disk, either via the direct
+                            # download, or via the url-fresh-then-download approach
+                            # the file is downloaded with user-only permissions
+                            # modify the permissions of the file so it's writeable by others
+                            old_umask = os.umask(0)
+                            try:
+                                os.chmod(path_to_cached_thumb, 0666)
+                            finally:
+                                os.umask(old_umask)
+    
+                    # finally, see if the worker thread should also load in the image
+                    if path_to_cached_thumb and item_to_process["load_image"]:
+                        image = QtGui.QImage()
+                        image.load(path_to_cached_thumb)
+                    else:
+                        image = None
+                    
+                    self.work_completed.emit(item_to_process["id"], 
+                                             "thumb", 
+                                             {"thumb_path": path_to_cached_thumb, 
+                                              "image": image} )
 
                 else:
                     raise Exception("Unknown task type!")
