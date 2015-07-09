@@ -93,7 +93,7 @@ class ShotgunDataRetriever(QtCore.QThread):
         self._bundle = tank.platform.current_bundle()
         self._wait_condition = QtCore.QWaitCondition()
         self._queue_mutex = QtCore.QMutex()
-        self.__sg = None
+        self.__sg = None # Note: don't use directly - instead call __get_sg_connection()!
 
         # queue data structures
         self._thumb_download_queue = []
@@ -102,6 +102,27 @@ class ShotgunDataRetriever(QtCore.QThread):
 
         # indicates that we should keep processing queue items
         self._process_queue = True
+
+
+    def __get_sg_connection(self):
+        """
+        Returns a shotgun connection object. Initializes one 
+        if one doesn't exist already.
+        
+        Do not call self.__sg directly - instead use this 
+        method when you want to retrieve a Shotgun connection
+        
+        :returns: A fully initialized Shotgun connection
+        """
+        if self.__sg is None:
+            # create our own private shotgun connection. This is because
+            # the shotgun API isn't threadsafe, so running multiple models in parallel
+            # (common) may result in side effects if a single connection is shared
+            self.__sg = tank.util.shotgun.create_sg_connection()
+            # set the maximum timeout for this connection for fluency
+            self.__sg.config.timeout_secs = CONNECTION_TIMEOUT_SECS
+        
+        return self.__sg
 
     ############################################################################################################
     # Public methods
@@ -535,24 +556,6 @@ class ShotgunDataRetriever(QtCore.QThread):
             
         return path_to_cached_thumb
 
-    def __ensure_sg_connection_initialized(self):
-        """
-        Populates self.__sg unless it has already been set.
-        
-        This allows for a workflow when the sg connection is 
-        created just in time before a sg operation, allowing
-        maximum speed for cache I/O tasks running in the data
-        fetcher (like grabbing cached thumbnails from disk). 
-        """
-        if self.__sg is None:
-            # create our own private shotgun connection. This is because
-            # the shotgun API isn't threadsafe, so running multiple models in parallel
-            # (common) may result in side effects if a single connection is shared
-            self.__sg = tank.util.shotgun.create_sg_connection()
-            # set the maximum timeout for this connection for fluency
-            self.__sg.config.timeout_secs = CONNECTION_TIMEOUT_SECS
-
-
     ############################################################################################
     # main thread loop
 
@@ -642,36 +645,31 @@ class ShotgunDataRetriever(QtCore.QThread):
 
                 elif item_type == ShotgunDataRetriever._SG_FIND_QUERY:
                     # get stuff from shotgun
-                    self.__ensure_sg_connection_initialized()
-                    sg = self.__sg.find(*item_to_process["args"], **item_to_process["kwargs"])
+                    sg = self.__get_sg_connection().find(*item_to_process["args"], **item_to_process["kwargs"])
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], "find", {"sg": sg } )
 
                 elif item_type == ShotgunDataRetriever._SG_UPDATE_QUERY:
                     # update stuff in shotgun
-                    self.__ensure_sg_connection_initialized()
                     sg = self.__sg.update(*item_to_process["args"], **item_to_process["kwargs"])
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], "update", {"sg": sg } )
 
                 elif item_type == ShotgunDataRetriever._SG_CREATE_QUERY:
                     # create stuff in shotgun
-                    self.__ensure_sg_connection_initialized()
-                    sg = self.__sg.create(*item_to_process["args"], **item_to_process["kwargs"])
+                    sg = self.__get_sg_connection().create(*item_to_process["args"], **item_to_process["kwargs"])
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], "create", {"sg": sg } )
 
                 elif item_type == ShotgunDataRetriever._SG_DELETE_QUERY:
                     # delete stuff in shotgun
-                    self.__ensure_sg_connection_initialized()
-                    sg = self.__sg.delete(*item_to_process["args"], **item_to_process["kwargs"])
+                    sg = self.__get_sg_connection().delete(*item_to_process["args"], **item_to_process["kwargs"])
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], "delete", {"sg": sg } )
 
                 elif item_type == ShotgunDataRetriever._EXECUTE_METHOD:
                     # run method
-                    self.__ensure_sg_connection_initialized()
-                    ret_val = item_to_process["method"](self.__sg, item_to_process["data"])
+                    ret_val = item_to_process["method"](self.__get_sg_connection(), item_to_process["data"])
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], "method", {"return_value": ret_val } )
 
@@ -683,11 +681,10 @@ class ShotgunDataRetriever(QtCore.QThread):
                         project = None
                     
                     # read in details about all fields
-                    self.__ensure_sg_connection_initialized()
-                    sg_field_schema = self.__sg.schema_read(project)
+                    sg_field_schema = self.__get_sg_connection().schema_read(project)
                     
                     # and read in details about all entity types
-                    sg_type_schema = self.__sg.schema_entity_read(project)
+                    sg_type_schema = self.__get_sg_connection().schema_entity_read(project)
 
                     # need to wrap it in a dict not to confuse pyqt's signals and type system
                     self.work_completed.emit(item_to_process["id"], 
@@ -711,14 +708,13 @@ class ShotgunDataRetriever(QtCore.QThread):
                     if not os.path.exists(path_to_cached_thumb):
 
                         # first try to download based on the path we have
-                        self.__ensure_sg_connection_initialized()
                         try:
-                            tank.util.download_url(self.__sg, url, path_to_cached_thumb)
+                            tank.util.download_url(self.__get_sg_connection(), url, path_to_cached_thumb)
                         except TankError, e:
                             # Note: Unfortunately, the download_url will re-cast 
                             # all exceptions into tankerrors.
                             # get a fresh url from shotgun and try again
-                            sg_data = self.__sg.find_one(entity_type, [["id", "is", entity_id]], [field])
+                            sg_data = self.__get_sg_connection().find_one(entity_type, [["id", "is", entity_id]], [field])
     
                             if sg_data is None or sg_data.get(field) is None:
                                 # no thumbnail! This is possible if the thumb has changed
@@ -730,7 +726,7 @@ class ShotgunDataRetriever(QtCore.QThread):
                             else:
                                 # download from sg
                                 url = sg_data[field]
-                                tank.util.download_url(self.__sg, url, path_to_cached_thumb)
+                                tank.util.download_url(self.__get_sg_connection(), url, path_to_cached_thumb)
                         
                         if path_to_cached_thumb:
                             # now we have a thumbnail on disk, either via the direct
