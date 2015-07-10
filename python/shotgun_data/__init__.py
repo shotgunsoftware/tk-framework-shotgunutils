@@ -8,6 +8,6 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-# (AD) - temp remapping of names for shotgun data retrievers!
-from .shotgun_data_retriever import ShotgunDataRetriever as SynchrounousShotgunDataRetriever
-from .async_shotgun_data_retriever import AsyncShotgunDataRetriever as ShotgunDataRetriever
+#from .sgdata import ShotgunDataRetriever
+from .shotgun_data_retriever import ShotgunDataRetriever
+from .background_task_manager import BackgroundTaskManager

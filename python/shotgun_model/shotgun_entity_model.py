@@ -20,50 +20,60 @@ class ShotgunEntityModel(ShotgunModel):
     This model represents the data which is displayed inside one of the treeview tabs
     on the left hand side.
     """
-    
-    # list of shotgun entities that this model recognises (has icons for) 
-    _SG_ENTITY_TYPES = ["Shot", "Asset", "EventLogEntry", "Group", "HumanUser", "Note",
-                        "Project", "Sequence", "Task", "Ticket", "Version"]
-    _SG_ENTITY_ICONS = None
+
+    # global cache of step colours - avoids querying from Shotgun multiple times!
     _SG_STEP_COLOURS = {}
-    _SG_STEP_SWATCH_ICONS = {}
-    
-    @staticmethod
-    def get_entity_icon(entity_type):
-        """
-        """
-        # return the stock icon for the entity type:
-        if ShotgunEntityModel._SG_ENTITY_ICONS == None:
-            # populate icons list the first time it's requested:
-            ShotgunEntityModel._SG_ENTITY_ICONS = {}
-            for et in ShotgunEntityModel._SG_ENTITY_TYPES:
-                icon_path = ":/tk-framework-shotgunutils/icon_%s_dark.png" % et
-                if QtCore.QFile.exists(icon_path): 
-                    ShotgunEntityModel._SG_ENTITY_ICONS[et] = QtGui.QIcon(QtGui.QPixmap(icon_path))
-        icon = ShotgunEntityModel._SG_ENTITY_ICONS.get(entity_type)
-        return icon
-    
-    def __init__(self, entity_type, filters, hierarchy, download_thumbs=False, 
-                 schema_generation=0, parent=None, fields=None):
+
+    def __init__(self, entity_type, filters, hierarchy, fields, parent, 
+                 download_thumbs=False, schema_generation=0, bg_task_manager=None):
         """
         Construction
         """
+        self._entity_icons = {}
+        self._step_swatch_icons = {}
+        
         # make sure fields is valid:
         fields = fields or []
         # for backwards compatibility, make sure certain fields are added:
         fields = list(set(fields + ["image", "sg_status_list", "description"]))
         
         ## folder icon
-        self._default_icon = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Folder.png"))    
+        self._default_icon = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Folder.png"))
 
         ShotgunModel.__init__(self, 
                               parent = parent,
                               download_thumbs = download_thumbs,
-                              schema_generation = schema_generation)
-        
+                              schema_generation = schema_generation,
+                              bg_task_manager = bg_task_manager)
+
         # load the data from the cache:
         self._load_data(entity_type, filters, hierarchy, fields)
-    
+
+    def destroy(self):
+        """
+        """
+        ShotgunModel.destroy(self)
+        self._entity_icons = {}
+        self._step_swatch_icons = {}
+        self._default_icon = None
+
+    def get_entity_icon(self, entity_type):
+        """
+        """
+        icon = None
+        if entity_type in self._entity_icons:
+            # we've previously asked for the icon
+            icon = self._entity_icons[entity_type]
+        else:
+            # see if we have the icon in the resources:
+            icon_path = ":/tk-framework-shotgunutils/icon_%s_dark.png" % entity_type
+            if QtCore.QFile.exists(icon_path): 
+                # create the new icon from this resource:
+                icon = QtGui.QIcon(QtGui.QPixmap(icon_path))
+            self._entity_icons[entity_type] = icon
+
+        return QtGui.QIcon(icon) if icon else None
+
     def get_entities(self, item):
         """
         Get entities for the current item by traversing up the tree
@@ -117,7 +127,8 @@ class ShotgunEntityModel(ShotgunModel):
         """
         Trigger an asynchronous refresh of the model
         """
-        self._refresh_data()        
+        print "Starting refresh..."
+        self._refresh_data()
     
     def _populate_default_thumbnail(self, item):
         """
@@ -145,7 +156,7 @@ class ShotgunEntityModel(ShotgunModel):
             entity_icon = self._get_default_thumbnail(field_value)
             if entity_icon:
                 # use sg icon!
-                item.setIcon(entity_icon)
+                item.setIcon(QtGui.QIcon(entity_icon))
                 found_icon = True
         
         elif sg_data:
@@ -153,12 +164,12 @@ class ShotgunEntityModel(ShotgunModel):
             entity_icon = self._get_default_thumbnail(sg_data)
             if entity_icon:
                 # use sg icon!
-                item.setIcon(entity_icon)
+                item.setIcon(QtGui.QIcon(entity_icon))
                 found_icon = True
         
         # for all items where we didn't find the icon, fall back onto the default
         if not found_icon:
-            item.setIcon(self._default_icon)
+            item.setIcon(QtGui.QIcon(self._default_icon))
 
     def _get_default_thumbnail(self, sg_entity):
         """
@@ -187,7 +198,7 @@ class ShotgunEntityModel(ShotgunModel):
 
                 if colour and isinstance(colour, tuple) and len(colour) == 3:
                     # get the icon for this colour from the cache:
-                    if colour not in ShotgunEntityModel._SG_STEP_SWATCH_ICONS:
+                    if colour not in self._step_swatch_icons:
                         # build icon and add to cache:
                         pm = QtGui.QPixmap(16, 16)
                         pm.fill(QtCore.Qt.transparent)
@@ -198,13 +209,13 @@ class ShotgunEntityModel(ShotgunModel):
                             painter.drawRect(2, 2, 12, 12)
                         finally:
                             painter.end()
-                        ShotgunEntityModel._SG_STEP_SWATCH_ICONS[colour] = QtGui.QIcon(pm)
+                        self._step_swatch_icons[colour] = QtGui.QIcon(pm)
                         
-                    # return the icon:    
-                    return ShotgunEntityModel._SG_STEP_SWATCH_ICONS[colour]
+                    # return the icon:
+                    return QtGui.QIcon(self._step_swatch_icons[colour])
         
         # just return the entity icon:
-        return ShotgunEntityModel.get_entity_icon(sg_entity.get("type"))
+        return self.get_entity_icon(sg_entity.get("type"))
         
         
         
