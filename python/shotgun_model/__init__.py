@@ -12,4 +12,4 @@ from .shotgunmodel import ShotgunModel
 from .shotgunoverlaymodel import ShotgunOverlayModel
 from .simpleshotgunmodel import SimpleShotgunModel
 from .shotgunmodelitem import ShotgunStandardItem
-from .util import get_sg_data, get_sanitized_data, sanitize_qt
+from .util import get_sg_data, get_sanitized_data, sanitize_qt, sanitize_for_qt_model

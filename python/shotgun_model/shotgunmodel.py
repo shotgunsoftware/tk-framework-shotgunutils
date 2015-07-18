@@ -18,7 +18,7 @@ import datetime
 import time
 
 from .shotgunmodelitem import ShotgunStandardItem
-from .util import get_sanitized_data, get_sg_data, sanitize_qt
+from .util import get_sanitized_data, get_sg_data, sanitize_qt, sanitize_for_qt_model
 
 from tank.platform.qt import QtCore, QtGui
 
@@ -890,31 +890,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
     ########################################################################################
     # shotgun data processing and tree building
 
-    def __utf8_to_unicode(self, sg_data):
-        """
-        Converts all string values in this sg dictionary to unicode:
-
-        in:  {"a":"aaa", "b": 123, "c": {"x":"y", "z":"aa"}, "d": [ {"x":"y", "z":"aa"} ] }
-        out: {'a': u'aaa', 'c': {'x': u'y', 'z': u'aa'}, 'b': 123, 'd': [{'x': u'y', 'z': u'aa'}]}
-        """
-        
-        if isinstance(sg_data, list):
-            return [ self.__utf8_to_unicode(d) for d in sg_data ]
-        
-        elif isinstance(sg_data, dict):
-            new_sg_data = {}
-            for (k,v) in sg_data.iteritems():
-                # go through dictionary and convert each value separately
-                new_sg_data[k] = self.__utf8_to_unicode(v)
-            return new_sg_data
-        
-        elif isinstance(sg_data, str):
-            return sg_data.decode("UTF-8")
-            
-        # for everything else, just pass through
-        return sg_data
-        
-
     def __sg_compare_data(self, a, b):
         """
         Compares two sg dicts, assumes the same set of keys in both.
@@ -1039,7 +1014,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # note: QT automatically changes everything to be unicode
                 # according to strange rules of its own, so force convert
                 # all shotgun values to be proper unicode prior to setData
-                found_item.setData(self.__utf8_to_unicode(sg_item), self.SG_DATA_ROLE)
+                found_item.setData(sanitize_for_qt_model(sg_item), self.SG_DATA_ROLE)
 
                 # and also populate the id association in our lookup dict
                 self.__entity_tree_data[ sg_item.get("id") ] = found_item
@@ -1177,7 +1152,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # note - pyqt converts everything automatically to unicode,
                 # but using somewhat strange rules, so properly convert
                 # values to unicode prior to insertion
-                item.setData(self.__utf8_to_unicode(sg_item), self.SG_DATA_ROLE)
+                item.setData(sanitize_for_qt_model(sg_item), self.SG_DATA_ROLE)
 
                 # and also populate the id association in our lookup dict
                 self.__entity_tree_data[ sg_item.get("id") ] = item
