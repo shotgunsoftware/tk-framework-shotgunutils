@@ -127,7 +127,6 @@ class ShotgunEntityModel(ShotgunModel):
         """
         Trigger an asynchronous refresh of the model
         """
-        print "Starting refresh..."
         self._refresh_data()
     
     def _populate_default_thumbnail(self, item):

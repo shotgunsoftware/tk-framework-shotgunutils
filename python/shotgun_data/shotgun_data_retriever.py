@@ -197,7 +197,7 @@ class ShotgunDataRetriever(QtCore.QObject):
     _SG_CONNECTION_TIMEOUT_SECS = 20
 
     # default individual task priorities
-    _DOWNLOAD_THUMB_PRIORITY, _SG_FIND_PRIORITY, _CHECK_THUMB_PRIORITY = range(3)
+    _DOWNLOAD_THUMB_PRIORITY, _SG_FIND_PRIORITY, _CHECK_THUMB_PRIORITY = (10,20,30)
 
     # ------------------------------------------------------------------------------------------------
     # Signals
@@ -357,10 +357,10 @@ class ShotgunDataRetriever(QtCore.QObject):
     # ------------------------------------------------------------------------------------------------
     # Background task management and methods
 
-    def _task_execute_find(self, shotgun_connection, entity_type, filters, fields, order):
+    def _task_execute_find(self, entity_type, filters, fields, order):
         """
         """
-        sg_res = self._sg_find(shotgun_connection, entity_type, filters, fields, order)
+        sg_res = self._sg_find(entity_type, filters, fields, order)
         return {"action":"find", "sg_result":sg_res}
 
     def _task_check_thumbnail(self, url):
@@ -396,7 +396,7 @@ class ShotgunDataRetriever(QtCore.QObject):
     # ------------------------------------------------------------------------------------------------
     # Main implementation
 
-    def _sg_find(self, sg, entity_type, filters, fields, order):
+    def _sg_find(self, entity_type, filters, fields, order):
         """
         Execute a Shotgun find query for the specified entity type using the specified 
         filters, fields and order.
@@ -417,7 +417,8 @@ class ShotgunDataRetriever(QtCore.QObject):
         #                                                            filters, 
         #                                                            fields, 
         #                                                            order)
-        #res = self.shotgun_connection.find(entity_type, filters, fields, order)
+        res = self.shotgun_connection.find(entity_type, filters, fields, order)
+        """
         s = ""
         for tick in range(20):
             time.sleep(0.01)
@@ -426,7 +427,7 @@ class ShotgunDataRetriever(QtCore.QObject):
                 s = "%s%d" % (s, i)
         time.sleep(1)
         res = dict((i, c) for i, c in enumerate(s))
-        
+        """
         #res = sg.find(entity_type, filters, fields, order)
         #res = self.shotgun_connection.find_dummy(entity_type, filters, fields, order)
         #res = sg.find_dummy(entity_type, filters, fields, order)

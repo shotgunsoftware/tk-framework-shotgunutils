@@ -129,7 +129,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         # set up data fetcher
         self.__sg_data_retriever = ShotgunDataRetriever(parent=self, bg_task_manager=bg_task_manager)
-        print "SG DATA RETRIEVER: %s" % self.__sg_data_retriever
         self.__sg_data_retriever.work_completed.connect(self._on_data_retriever_work_completed)
         self.__sg_data_retriever.work_failure.connect(self._on_data_retriever_work_failure)
         self.__current_work_id = 0
@@ -744,8 +743,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # process the data
             self.__current_work_id = None
             sg_data = data["sg"]
-            print "Found %d shotgun entries" % len(sg_data)
-            #self.__on_sg_data_arrived(sg_data) # TODO - UNCOMMENT!!!!
+            #print "Found %d shotgun entries" % len(sg_data)
+            self.__on_sg_data_arrived(sg_data) # TODO - UNCOMMENT!!!!
 
         elif uid in self.__thumb_map:
             
