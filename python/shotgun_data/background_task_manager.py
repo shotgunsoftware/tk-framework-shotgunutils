@@ -26,37 +26,21 @@ def on_destroyed(name):
     #fw = sgtk.platform.current_bundle()
     #fw.log_debug("%s destroyed" % name)
 
-class Threaded(object):
-    def __init__(self):
-        self._lock = threading.Lock()
-
-    @staticmethod
-    def exclusive(func):
-        """
-        function decorator to ensure exclusive access to the function
-
-        :param func:    The function to wrap
-        :returns:       The return value from func
-        """
-        def wrapper(self, *args, **kwargs):
-            """
-            Decorator inner function - executes the function within a lock.
-            :returns:    The return value from func
-            """
-            self._lock.acquire()
-            try:
-                return func(self, *args, **kwargs)
-            finally:
-                self._lock.release()
-        return wrapper
-
-class _BackgroundTask(Threaded):
+class _BackgroundTask(object):
     """
+    Container class for a single task.
     """
     def __init__(self, task_id, func, group, priority, *args, **kwargs):
         """
+        Construction.
+
+        :param task_id:     The unique id for this task
+        :param func:        Function to execute to perform the task
+        :param group:       The group that this task belongs to
+        :param priority:    The priority this task should be run with
+        :param args:        Additional arguments that should be passed to func
+        :param kwargs:      Additional named arguments that should be passed to func
         """
-        Threaded.__init__(self)
         self._uid = task_id
 
         self._func = func
@@ -66,66 +50,79 @@ class _BackgroundTask(Threaded):
         self._group = group
         self._priority = priority
 
-        self._result = None
-
     def __repr__(self):
+        """
+        Create a string representation of this instance
+        :returns:   A string representation of this instance
+        """
         return "[%d, G:%s, P:%s] %s" % (self._uid, self._group, self._priority, self._func.__name__)
 
     @property
     def uid(self):
+        """
+        :returns:   The unique id of this task
+        """
         return self._uid
 
     @property
     def group(self):
+        """
+        :returns:   The group this task belongs to
+        """
         return self._group
 
     @property
     def priority(self):
+        """
+        :returns:   The priority for this task
+        """
         return self._priority
 
-    @Threaded.exclusive
-    def _get_result(self):
-        return self._result
-    @Threaded.exclusive
-    def _set_result(self, res):
-        self._result = res
-    result = property(_get_result, _set_result)
-
-    @Threaded.exclusive
     def append_upstream_result(self, result):
         """
+        Append the result from an upstream task to this tasks kwargs.
+
+        :param result:  A dictionary containing the result from an upstream task
         """
         if result and isinstance(result, dict):
             self._kwargs = dict(self._kwargs.items() + result.items())
 
-    @Threaded.exclusive
     def run(self):
         """
-        """
-        self._result = self._func(*self._args, **self._kwargs)
-        return self._result
+        Perform this task
 
-class _WorkerThread_OLD(QtCore.QThread):
+        :returns:   The result of performing the task
+        """
+        return self._func(*self._args, **self._kwargs)
+
+class _WorkerThreadA(QtCore.QThread):
     """
+    Asynchrounous worker thread that can run tasks in a separate thread.  This implementation
+    implements a custom run method that loops over tasks until asked to quit.
     """
-    _SGTK_IMPLEMENTS_QTHREAD_CRASH_FIX_=True
-    
+    # Signal emitted when a task has completed successfully
     task_completed = QtCore.Signal(object, object)# task, result
+    # Signal emitted when a task has failed
     task_failed = QtCore.Signal(object, object, object)# task, message, stacktrace
-    
+
     def __init__(self, parent=None):
         """
+        Construction
+
+        :param parent:  The parent QObject for this thread
         """
         QtCore.QThread.__init__(self, parent)
 
         self._task = None
         self._process_tasks = True
-
         self._mutex = QtCore.QMutex()
         self._wait_condition = QtCore.QWaitCondition()
 
     def run_task(self, task):
         """
+        Run the specified task
+
+        :param task:    The task to run
         """
         self._mutex.lock()
         try:
@@ -136,6 +133,7 @@ class _WorkerThread_OLD(QtCore.QThread):
 
     def shut_down(self):
         """
+        Shut down the thread and wait for it to exit before returning
         """
         self._mutex.lock()
         try:
@@ -147,6 +145,7 @@ class _WorkerThread_OLD(QtCore.QThread):
 
     def run(self):
         """
+        The main thread run function.  Loops over tasks until asked to exit.
         """
         while True:
             # get the next task to process:
@@ -169,6 +168,7 @@ class _WorkerThread_OLD(QtCore.QThread):
             # run the task:
             try:
                 result = task_to_process.run()
+
                 self._mutex.lock()
                 try:
                     if not self._process_tasks:
@@ -179,32 +179,40 @@ class _WorkerThread_OLD(QtCore.QThread):
                     self._mutex.unlock()
             except Exception, e:
                 # something went wrong so emit failed signal:
-                tb = traceback.format_exc()
                 self._mutex.lock()
                 try:
                     if not self._process_tasks:
                         break
+                    tb = traceback.format_exc()
                     # emit failed signal (non-blocking):
                     self.task_failed.emit(task_to_process, str(e), tb)
                 finally:
                     self._mutex.unlock()
 
-class _WorkerThread(QtCore.QThread):
+class _WorkerThreadB(QtCore.QThread):
     """
+    Asynchrounous worker thread that can run tasks in a separate thread.  This implementation
+    uses a separate worker object that exists in the new thread and then uses signals to
+    communicate back and forth.
     """
     class _Worker(QtCore.QObject):
         """
+        Thread worker that just does work when requested.
         """
+        # Signal emitted when a task has completed successfully
         task_completed = QtCore.Signal(object, object)# task, result
+        # Signal emitted when a task has failed
         task_failed = QtCore.Signal(object, object, object)# task, message, stacktrace
 
         def __init__(self):
             """
+            Construction
             """
             QtCore.QObject.__init__(self, None)
 
         def do_task(self, task):
             """
+            Run a single task.
             """
             try:
                 # run the task:
@@ -216,25 +224,27 @@ class _WorkerThread(QtCore.QThread):
                 tb = traceback.format_exc()
                 self.task_failed.emit(task, str(e), tb)
 
-    # Indicates that this worker class has been fixed to stop 
-    # gc of QThread from resulting in a crash.  This happens 
-    # when the mutex object had been gc'd but the thread is 
-    # still trying to acces it - the fix is to wait for the 
-    # thread to terminate before returning from 'stop()'
-    _SGTK_IMPLEMENTS_QTHREAD_CRASH_FIX_=True
-
-    work = QtCore.Signal(object)
+    # Signal used to tell the worker that a task should be run
+    work = QtCore.Signal(object)# task
+    # Signal emitted when a task has completed successfully
     task_completed = QtCore.Signal(object, object)# task, result
+    # Signal emitted when a task has failed
     task_failed = QtCore.Signal(object, object, object)# task, message, stacktrace
 
     def __init__(self, parent=None):
         """
+        Construction
+
+        :param parent:  The parent QObject for this thread
         """
         QtCore.QThread.__init__(self, parent)
 
-        self._worker = _WorkerThread._Worker()
+        # create the worker instance:
+        self._worker = _WorkerThreadB._Worker()
         monitor_lifetime(self._worker)
 
+        # move the worker to the thread and then connect up the signals 
+        # that are used to communicate with it: 
         self._worker.moveToThread(self)
         self.work.connect(self._worker.do_task)
         self._worker.task_failed.connect(self.task_failed)
@@ -242,11 +252,16 @@ class _WorkerThread(QtCore.QThread):
 
     def run_task(self, task):
         """
+        Run the specified task
+
+        :param task:    The task to run
         """
+        # signal the worker to run the task
         self.work.emit(task)
 
     def shut_down(self):
         """
+        Shut down the thread and wait for it to exit before returning
         """
         self.quit()
         self.wait()
@@ -257,6 +272,9 @@ class _WorkerThread(QtCore.QThread):
 
     def run(self):
         """
+        Normally we wouldn't need to override the run method as by default it just runs the event
+        loop for the thread but due to a but in Qt pre-4.8 we have to do some extra stuff to make
+        sure everything gets cleaned up properly!
         """
         # run the event loop:
         self.exec_()
@@ -296,8 +314,6 @@ class BackgroundTaskManager(QtCore.QObject):
         self._all_threads = []
         self._available_threads = []
         self._running_tasks = {}
-        self._dead_tasks = {}
-        self._all_tasks = []
 
         # various task look-up maps:
         self._tasks_by_id = {}
@@ -387,7 +403,6 @@ class BackgroundTaskManager(QtCore.QObject):
             #thread.stop(wait_for_completion = True)
         self._log("Background task manager shut down successfully!")
         self._all_threads = []
-        self._all_tasks = []
 
     def add_task(self, func, priority=None, group=None, upstream_task_ids=None, **kwargs):
         """
@@ -398,7 +413,6 @@ class BackgroundTaskManager(QtCore.QObject):
         task_id = self._next_task_id
         self._next_task_id += 1
         new_task = _BackgroundTask(task_id, func, group, priority, **kwargs)
-        self._all_tasks.append(new_task)
 
         # add the task to the pending queue:
         self._pending_tasks_by_priority.setdefault(priority, []).append(new_task)
@@ -520,8 +534,9 @@ class BackgroundTaskManager(QtCore.QObject):
             # no available threads left!
             return None
 
-        # create the thread with a worker and hook up it's signals:
-        thread = _WorkerThread(self)
+        # create a new worker thread:
+        #thread = _WorkerThreadA(self)  # overriden run-method
+        thread = _WorkerThreadB(self)   # separate thread-specific worker object
         monitor_lifetime(thread)
         thread.task_failed.connect(self._on_task_failed)
         thread.task_completed.connect(self._on_task_completed)
@@ -695,7 +710,6 @@ class BackgroundTaskManager(QtCore.QObject):
 
         # fist remove from the running tasks - this will stop any signals being handled for this task
         if task.uid in self._running_tasks:
-            #self._dead_tasks[task.uid] = task
             del self._running_tasks[task.uid]
 
         # find and remove the task from the pending queue:
