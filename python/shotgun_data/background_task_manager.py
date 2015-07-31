@@ -20,7 +20,8 @@ from sgtk.platform.qt import QtCore
 from sgtk import TankError
 
 def monitor_lifetime(obj):
-    obj.destroyed.connect(lambda: on_destroyed(type(obj).__name__))
+    obj_name = type(obj).__name__
+    obj.destroyed.connect(lambda: on_destroyed(obj_name))
 def on_destroyed(name):
     pass
     #fw = sgtk.platform.current_bundle()
@@ -534,9 +535,10 @@ class BackgroundTaskManager(QtCore.QObject):
             # no available threads left!
             return None
 
-        # create a new worker thread:
-        #thread = _WorkerThreadA(self)  # overriden run-method
-        thread = _WorkerThreadB(self)   # separate thread-specific worker object
+        # create a new worker thread - note, _WorkerThreadB doesn't behave correctly
+        # in PyQt :(
+        thread = _WorkerThreadA(self)  # overriden run-method
+        #thread = _WorkerThreadB(self)   # separate thread-specific worker object
         monitor_lifetime(thread)
         thread.task_failed.connect(self._on_task_failed)
         thread.task_completed.connect(self._on_task_completed)
@@ -618,7 +620,7 @@ class BackgroundTaskManager(QtCore.QObject):
 
         # and run the task
         thread.run_task(task_to_process)
-        
+
         return True
 
     def _on_task_completed(self, task, result):
