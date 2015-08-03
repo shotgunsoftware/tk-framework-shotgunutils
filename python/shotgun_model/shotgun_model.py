@@ -17,12 +17,11 @@ import urlparse
 import datetime
 import time
 
-from .shotgunmodelitem import ShotgunStandardItem
-from .util import get_sanitized_data, get_sg_data, sanitize_qt, sanitize_for_qt_model
-
 from tank.platform.qt import QtCore, QtGui
 
-
+from .shotgun_standard_item import ShotgunStandardItem
+from .util import get_sanitized_data, get_sg_data, sanitize_qt, sanitize_for_qt_model
+from ..shotgun_data import ShotgunDataRetriever
 
 class ShotgunModel(QtGui.QStandardItemModel):
     """
@@ -90,37 +89,29 @@ class ShotgunModel(QtGui.QStandardItemModel):
     FILE_VERSION = 21
 
 
-    def __init__(self, parent, download_thumbs=True, schema_generation=0, bg_load_thumbs=False):
+    def __init__(self, parent, download_thumbs=True, schema_generation=0, bg_load_thumbs=False, bg_task_manager=None):
         """
         Constructor. This will create a model which can later be used to load
         and manage Shotgun data.
 
-        :param parent: Parent object.
-        :param download_thumbs: Boolean to indicate if this model should attempt
-                                to download and process thumbnails for the downloaded data.
-        :param schema_generation: Schema generation index. If you are changing the format
-                                  of the data you are retrieving from Shotgun, and therefore
-                                  want to invalidate any cache files that may already exist
-                                  in the system, you can increment this integer.
-        :param bg_load_thumbs: If set to True, thumbnails will be loaded in the background.
+        :param parent:              Parent object.
+        :param download_thumbs:     Boolean to indicate if this model should attempt
+                                    to download and process thumbnails for the downloaded data.
+        :param schema_generation:   Schema generation index. If you are changing the format
+                                    of the data you are retrieving from Shotgun, and therefore
+                                    want to invalidate any cache files that may already exist
+                                    in the system, you can increment this integer.
+        :param bg_load_thumbs:      If set to True, thumbnails will be loaded in the background.
+        :param bg_task_manager:     Background task manager to use for any asynchronous work.  If
+                                    this is None then a task manager will be created as needed.
 
         """
         QtGui.QStandardItemModel.__init__(self, parent)
 
         self._bundle = tank.platform.current_bundle()
 
-        # set up data fetcher
-        shotgun_data = self._bundle.import_module("shotgun_data")
-        self.__sg_data_retriever = shotgun_data.ShotgunDataRetriever(self)
-        self.__sg_data_retriever.work_completed.connect( self.__on_worker_signal)
-        self.__sg_data_retriever.work_failure.connect( self.__on_worker_failure)
-        self.__current_work_id = 0
         self.__schema_generation = schema_generation
         self.__full_cache_path = None
-        
-
-        # and start its thread!
-        self.__sg_data_retriever.start()
 
         # is the model set up with a query?
         self.__has_query = False
@@ -133,10 +124,18 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # happy, others to hold alternative access methods to the data.
         self.__all_tree_items = []
         self.__entity_tree_data = {}
-        self.__thumb_map = {}
 
+        # keep track of info for thumbnail download/load
         self.__download_thumbs = download_thumbs
         self.__bg_load_thumbs = bg_load_thumbs
+        self.__thumb_map = {}
+
+        # set up data retriever and start work:
+        self.__sg_data_retriever = ShotgunDataRetriever(parent=self, bg_task_manager=bg_task_manager)
+        self.__sg_data_retriever.work_completed.connect(self._on_data_retriever_work_completed)
+        self.__sg_data_retriever.work_failure.connect(self._on_data_retriever_work_failure)
+        self.__current_work_id = None
+        self.__sg_data_retriever.start()
 
     ########################################################################################
     # public methods
@@ -150,26 +149,30 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
     def set_shotgun_connection(self, sg):
         """
-        Specify the shotgun api instance this model should use to communicate
-        with Shotgun. If not specified, each model instance will instantiate its
-        own connection, via toolkit. The behavior where each model has its own
-        connection is generally recommended for thread safety reasons since
-        the Shotgun API isn't natively thread-safe.
+        ** Deprecated **
 
-        :param sg: Shotgun API instance
+        Shotgun connections are only reentrant, not thread-safe so a single instance of
+        a connection should only ever be used by a single thread.  Because of this and a
+        change to the ShotgunDataRetriever to allow it to use a BackgroundTaskManager for
+        all it's asyncronous work, it is no longer safe to specify the Shotgun connection
+        for the model using this method as the work may be done on an arbitrary worker
+        thread.
+
+        Instead, the BackgroundTaskManager is not responsible for providing a Shotgun
+        connection for a thread to use if needed.
         """
-        self.__sg_data_retriever.set_shotgun_connection(sg)
+        self.__log_warning("ShotgunModel.set_shotgun_connection() has been deprecated.")
 
     def destroy(self):
         """
         Call this method prior to destroying this object.
         This will ensure all worker threads etc are stopped.
         """
-        # first disconnect our worker completely
-        self.__sg_data_retriever.work_completed.disconnect( self.__on_worker_signal)
-        self.__sg_data_retriever.work_failure.disconnect( self.__on_worker_failure)
-        # gracefully stop thread
+        self.__current_work_id = None
+        self.__thumb_map = {}
+        # gracefully stop the data retriever:
         self.__sg_data_retriever.stop()
+        self.__sg_data_retriever = None
 
         # block all signals before we clear the model otherwise downstream
         # proxy objects could cause crashes.
@@ -180,7 +183,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         finally:
             # reset the stage of signal blocking:
             self.blockSignals(signals_blocked)
-
 
     def item_from_entity(self, entity_type, entity_id):
         """
@@ -281,7 +283,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
     def clear(self):
         """
         Re-implements QStandardItemModel::clear()
-        
+
         From the QT documentation:
         Removes all items (including header items) from the model and 
         sets the number of rows and columns to zero.
@@ -291,17 +293,21 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # in python (e.g. qstandarditems) and then handed over to a model and then subsequently 
         # cleared and deallocated by QT itself (on the C++ side) often results in dangling pointers
         # across the pyside/QT boundary, ultimately resulting in crashes or instability.
-        
-        # first, ask async data retriever to clear its queue of queries and thumb downloads
+
+        # clear thumbnail download lookup so we don't process any more results:
+        self.__thumb_map = {}
+
+        # we are not looking for any data from the async processor
+        self.__current_work_id = None
+
+        # ask async data retriever to clear its queue of queries and thumb downloads
         # note that there may still be requests actually running
         # - these are not cancelled
-        self.__sg_data_retriever.clear()
-        # we are not looking for any data from the async processor
-        self.__current_work_id = 0
+        if self.__sg_data_retriever:
+            self.__sg_data_retriever.clear()
+
         # model data in alt format
         self.__entity_tree_data = {}
-        # thumbnail download lookup
-        self.__thumb_map = {}
         # pyside will crash unless we actively hold a reference
         # to all items that we create.
         self.__all_tree_items = []
@@ -313,7 +319,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # cyclic parent/child dependency cycles, which will cause
         # a crash in some versions of shiboken
         # (see https://bugreports.qt-project.org/browse/PYSIDE-158 )
-        self.__do_depth_first_tree_deletion(self.invisibleRootItem())        
+        self.__do_depth_first_tree_deletion(self.invisibleRootItem())
 
     def reset(self):
         """
@@ -478,6 +484,13 @@ class ShotgunModel(QtGui.QStandardItemModel):
         all existing items from the model are removed. This does affect view related
         states such as selection.
         """
+        if not self.__sg_data_retriever:
+            raise TankError("Data retriever is not available!")
+
+        # stop any current work:
+        self.__current_work_id = None
+        self.__thumb_map = {}
+        self.__sg_data_retriever.clear()
 
         # emit that the data is refreshing.
         self.data_refreshing.emit()
@@ -526,6 +539,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # nothing to download. bad input. gracefully ignore this request.
             return
 
+        if not self.__sg_data_retriever:
+            raise TankError("Data retriever is not available!")
+
         uid = self.__sg_data_retriever.request_thumbnail(url, 
                                                          entity_type, 
                                                          entity_id, 
@@ -534,7 +550,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         # keep tabs of this and call out later
         self.__thumb_map[uid] = {"item": item, "field": field }
-
 
     ########################################################################################
     # methods to be implemented by subclasses
@@ -638,9 +653,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
         when the bg_load_thumbs parameter has been set to true. In this case, no
         loading of thumbnail data from disk is necessary - this has already been
         carried out async and is passed in the form of a QImage object.
-    
+
         For further details, see _populate_thumbnail()
-        
+
         :param item: QStandardItem which is associated with the given thumbnail
         :param field: The Shotgun field which the thumbnail is associated with.
         :param image: QImage object with the thumbnail loaded
@@ -650,7 +665,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         thumb = QtGui.QPixmap.fromImage(image)
         item.setIcon(thumb)
 
-    
     def _before_data_processing(self, sg_data_list):
         """
         Called just after data has been retrieved from Shotgun but before any processing
@@ -711,9 +725,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
             node.removeRow(idx)
 
 
-    def __on_worker_failure(self, uid, msg):
+    def _on_data_retriever_work_failure(self, uid, msg):
         """
-        Asynchronous callback - the worker thread errored.
+        Asynchronous callback - the data retriever failed to do some work
+
+        :param uid: The unique id of the work that failed
+        :param msg: The error message returned for the failure
         """
         uid = sanitize_qt(uid) # qstring on pyqt, str on pyside
         msg = sanitize_qt(msg)
@@ -722,52 +739,56 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # not our job. ignore
             self.__log_debug("Retrieved error from data worker: %s" % msg)
             return
+        self.__current_work_id = None
 
         full_msg = "Error retrieving data from Shotgun: %s" % msg
         self.data_refresh_fail.emit(full_msg)
         self.__log_warning(full_msg)
 
-    def __on_worker_signal(self, uid, request_type, data):
+    def _on_data_retriever_work_completed(self, uid, request_type, data):
         """
-        Signaled whenever the worker completes something.
+        Signaled whenever the data retriever completes some work.
         This method will dispatch the work to different methods
         depending on what async task has completed.
+
+        :param uid:             The unique id of the work that completed
+        :param request_type:    Type of work completed
+        :param data:            Result of the work
         """
         uid = sanitize_qt(uid) # qstring on pyqt, str on pyside
         data = sanitize_qt(data)
 
         self.__log_debug("Received worker payload of type %s" % request_type)
-        
+
         if self.__current_work_id == uid:
             # our publish data has arrived from sg!
-
             # process the data
+            self.__current_work_id = None
             sg_data = data["sg"]
             self.__on_sg_data_arrived(sg_data)
 
         elif uid in self.__thumb_map:
             # a thumbnail is now present on disk!
+            thumb_info = self.__thumb_map[uid]
+            del self.__thumb_map[uid]
             thumbnail_path = data["thumb_path"]
             thumbnail = data["image"]
-            
+
             # if the requested thumbnail has since dissapeared on the server,
             # path and image will be None. In this case, skip processing
             if thumbnail_path:
+                item = thumb_info["item"]
+                sg_field = thumb_info["field"]
 
-                item = self.__thumb_map[uid]["item"]
-                sg_field = self.__thumb_map[uid]["field"]
-    
                 # call our deriving class implementation
                 if self.__bg_load_thumbs:
                     # worker thread already loaded the thumbnail in as a QImage.
                     # call a separate method.
                     self._populate_thumbnail_image(item, sg_field, thumbnail, thumbnail_path)
-                    
                 else:
                     # worker thread only ensured that the image exists
                     # call method to populate it
                     self._populate_thumbnail(item, sg_field, thumbnail_path)
-            
 
     def __on_sg_data_arrived(self, sg_data):
         """
@@ -914,7 +935,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # the logic above. 
             for a_key in a.keys():
                 if not self.__sg_compare_data(a.get(a_key), b.get(a_key)):
-                    return False            
+                    return False
 
         # handle thumbnail fields as a special case
         # thumbnail urls are (typically, there seem to be several standards!)
@@ -1061,13 +1082,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # we have a thumb we are supposed to download!
                 # get the thumbnail - store the unique id we get back from
                 # the data retrieve in a dict for fast lookup later
-                uid = self.__sg_data_retriever.request_thumbnail(sg_data[field],
-                                                                 sg_data.get("type"),
-                                                                 sg_data.get("id"),
-                                                                 field,
-                                                                 self.__bg_load_thumbs)
-
-                self.__thumb_map[uid] = {"item": item, "field": field }
+                self._request_thumbnail_download(item,
+                                                 field,
+                                                 sg_data[field],
+                                                 sg_data.get("type"),
+                                                 sg_data.get("id"))
 
 
     def __rebuild_whole_tree_from_sg_data(self, data):
@@ -1262,49 +1281,45 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Save the model to disk using QDataStream serialization.
         This all happens on the C++ side and is very fast.
         """
-        
         old_umask = os.umask(0)
         try:
-            
             # try to create the cache folder with as open permissions as possible
             cache_dir = os.path.dirname(filename)
             if not os.path.exists(cache_dir):
                 os.makedirs(cache_dir, 0777)
-            
+
             # write cache file
             fh = QtCore.QFile(filename)
             fh.open(QtCore.QIODevice.WriteOnly)
             try:
-                out = QtCore.QDataStream(fh)
-        
+                out_stream = QtCore.QDataStream(fh)
+
                 # write a header
-                out.writeInt64(self.FILE_MAGIC_NUMBER)
-                out.writeInt32((self.FILE_VERSION + self.__schema_generation))
-        
+                out_stream.writeInt64(self.FILE_MAGIC_NUMBER)
+                out_stream.writeInt32((self.FILE_VERSION + self.__schema_generation))
+
                 # todo: if it turns out that there are ongoing issues with
                 # md5 cache collisions, we could write the actual query parameters
                 # to the header of the cache file here and compare that against the
                 # desired query info just to be confident we are getting a correct cache...
-        
+
                 # tell which serialization dialect to use
-                out.setVersion(QtCore.QDataStream.Qt_4_0)
-        
+                out_stream.setVersion(QtCore.QDataStream.Qt_4_0)
+
                 root = self.invisibleRootItem()
-        
-                self.__save_to_disk_r(out, root, 0)
-            
+                self.__save_to_disk_r(out_stream, root, 0)
+
             finally:
                 fh.close()
 
             # and ensure the cache file has got open permissions
             os.chmod(filename, 0666)
-        
+
         except Exception, e:
             self.__log_warning("Could not write cache file '%s' to disk: %s" % (filename, e))
-        
+
         finally:
             os.umask(old_umask)
-        
 
     def __save_to_disk_r(self, stream, item, depth):
         """
@@ -1331,89 +1346,88 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         :returns: Number of items loaded
         """
-
         num_items_loaded = 0
 
         fh = QtCore.QFile(filename)
-        fh.open(QtCore.QIODevice.ReadOnly);
-        file_in = QtCore.QDataStream(fh)
+        fh.open(QtCore.QIODevice.ReadOnly)
+        try:
+            in_stream = QtCore.QDataStream(fh)
 
-        magic = file_in.readInt64()
-        if magic != self.FILE_MAGIC_NUMBER:
-            raise Exception("Invalid file magic number!")
+            magic = in_stream.readInt64()
+            if magic != self.FILE_MAGIC_NUMBER:
+                raise Exception("Invalid file magic number!")
 
-        version = file_in.readInt32()
-        if version != (self.FILE_VERSION + self.__schema_generation):
-            raise Exception("Invalid file version!")
+            version = in_stream.readInt32()
+            if version != (self.FILE_VERSION + self.__schema_generation):
+                raise Exception("Invalid file version!")
 
-        # tell which deserialization dialect to use
-        file_in.setVersion(QtCore.QDataStream.Qt_4_0)
+            # tell which deserialization dialect to use
+            in_stream.setVersion(QtCore.QDataStream.Qt_4_0)
 
-        curr_parent = self.invisibleRootItem()
-        prev_node = None
-        curr_depth = 0
+            curr_parent = self.invisibleRootItem()
+            prev_node = None
+            curr_depth = 0
 
-        while not file_in.atEnd():
+            while not in_stream.atEnd():
+                # read data
+                item = ShotgunStandardItem()
+                num_items_loaded += 1
+                # keep a reference to this object to make GC happy
+                # (pyside may crash otherwise)
+                self.__all_tree_items.append(item)
+                item.read(in_stream)
+                node_depth = in_stream.readInt32()
 
-            # read data
-            item = ShotgunStandardItem()
-            num_items_loaded += 1
-            # keep a reference to this object to make GC happy
-            # (pyside may crash otherwise)
-            self.__all_tree_items.append(item)
-            item.read(file_in)
-            node_depth = file_in.readInt32()
+                # all leaf nodes have an sg id stored in their metadata
+                # the role data accessible via item.data() contains the sg id for this item
+                # if there is a sg id associated with this node
+                sg_data = get_sg_data(item)
+                if sg_data:
+                    # add the model item to our tree data dict keyed by id
+                    self.__entity_tree_data[ sg_data.get("id") ] = item
 
-            # all leaf nodes have an sg id stored in their metadata
-            # the role data accessible via item.data() contains the sg id for this item
-            # if there is a sg id associated with this node
-            sg_data = get_sg_data(item)
-            if sg_data:
-                # add the model item to our tree data dict keyed by id
-                self.__entity_tree_data[ sg_data.get("id") ] = item
+                # serialized items contain some sort of strange
+                # low-rez thumb data which we cannot use. Make
+                # sure that is all cleared.
+                item.setIcon(QtGui.QIcon())
 
-            # serialized items contain some sort of strange
-            # low-rez thumb data which we cannot use. Make
-            # sure that is all cleared.
-            item.setIcon(QtGui.QIcon())
+                # serialized items do not contain a full high rez thumb, so
+                # re-create that. First, set the default thumbnail
+                self._populate_default_thumbnail(item)
 
-            # serialized items do not contain a full high rez thumb, so
-            # re-create that. First, set the default thumbnail
-            self._populate_default_thumbnail(item)
+                # run the finalize method so that subclasses
+                # can do any setup they need
+                self._finalize_item(item)
 
-            # run the finalize method so that subclasses
-            # can do any setup they need
-            self._finalize_item(item)
+                if node_depth == curr_depth + 1:
+                    # this new node is a child of the previous node
+                    curr_parent = prev_node
+                    if prev_node is None:
+                        raise Exception("File integrity issues!")
+                    curr_depth = node_depth
 
-            if node_depth == curr_depth + 1:
-                # this new node is a child of the previous node
-                curr_parent = prev_node
-                if prev_node is None:
+                elif node_depth > curr_depth + 1:
+                    # something's wrong!
                     raise Exception("File integrity issues!")
-                curr_depth = node_depth
 
-            elif node_depth > curr_depth + 1:
-                # something's wrong!
-                raise Exception("File integrity issues!")
+                elif node_depth < curr_depth:
+                    # we are going back up to parent level
+                    while curr_depth > node_depth:
+                        curr_depth = curr_depth -1
+                        curr_parent = curr_parent.parent()
+                        if curr_parent is None:
+                            # we reached the root. special case
+                            curr_parent = self.invisibleRootItem()
 
-            elif node_depth < curr_depth:
-                # we are going back up to parent level
-                while curr_depth > node_depth:
-                    curr_depth = curr_depth -1
-                    curr_parent = curr_parent.parent()
-                    if curr_parent is None:
-                        # we reached the root. special case
-                        curr_parent = self.invisibleRootItem()
+                # and attach the node
+                curr_parent.appendRow(item)
 
-            # and attach the node
-            curr_parent.appendRow(item)
+                # request thumb
+                if self.__download_thumbs:
+                    self.__process_thumbnail_for_item(item)
 
-            # request thumb
-            if self.__download_thumbs:
-                self.__process_thumbnail_for_item(item)
-
-            prev_node = item
+                prev_node = item
+        finally:
+            fh.close()
 
         return num_items_loaded
-
-
