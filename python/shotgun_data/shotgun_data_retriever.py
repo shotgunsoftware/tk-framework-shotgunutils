@@ -11,10 +11,6 @@
 import os
 import urlparse
 import hashlib
-import threading
-import time
-import random
-import copy
 
 import sgtk
 from sgtk.platform.qt import QtCore
@@ -193,11 +189,15 @@ class ShotgunDataRetriever(QtCore.QObject):
     
         return path_to_cached_thumb
 
-    ## timeout when Shotgun connection fails
-    _SG_CONNECTION_TIMEOUT_SECS = 20
-
     # default individual task priorities
-    _DOWNLOAD_THUMB_PRIORITY, _SG_FIND_PRIORITY, _CHECK_THUMB_PRIORITY = (10,20,30)
+    _DOWNLOAD_SCHEMA_PRIORITY = 10
+    _DOWNLOAD_THUMB_PRIORITY = 20
+    _EXECUTE_METHOD_PRIORITY = 30
+    _SG_DELETE_PRIORITY = 40
+    _SG_CREATE_PRIORITY = 50
+    _SG_UPDATE_PRIORITY = 60
+    _SG_FIND_PRIORITY = 70
+    _CHECK_THUMB_PRIORITY = 80
 
     # ------------------------------------------------------------------------------------------------
     # Signals
@@ -235,9 +235,6 @@ class ShotgunDataRetriever(QtCore.QObject):
         QtCore.QObject.__init__(self, parent)
         self._bundle = sgtk.platform.current_bundle()
 
-        # thread local storage for the thread-specific shotgun connection:
-        self._threadlocal_storage = threading.local()
-
         # set up the background task manager:
         self._task_manager = bg_task_manager or BackgroundTaskManager(parent=self, max_threads=1)
         self._owns_task_manager = (bg_task_manager is None)
@@ -245,36 +242,34 @@ class ShotgunDataRetriever(QtCore.QObject):
         self._task_manager.task_completed.connect(self._on_task_completed)
         self._task_manager.task_failed.connect(self._on_task_failed)
 
+        self._thumb_task_id_map = {}
+
     # ------------------------------------------------------------------------------------------------
     # Public interface
 
     @property
-    def shotgun_connection(self):
+    def _shotgun_connection(self):
         """
-        Get a Shotgun connection to use.  Creates a new Shotgun connection if the
-        instance doesn't already have one.
-        
+        Returns the Shotgun connection currently being used.
+
         :returns:    The Shotgun connection for this instance
         """
         return self._task_manager.shotgun_connection
-        #if not hasattr(self._threadlocal_storage, "shotgun"):
-        #    print "Creating another shotgun connection..!"
-        #    
-        #    # create our own private shotgun connection. This is because
-        #    # the shotgun API isn't threadsafe, so running multiple models in parallel
-        #    # (common) may result in side effects if a single connection is shared
-        #    self._threadlocal_storage.shotgun = sgtk.util.shotgun.create_sg_connection()
-        #
-        #    # set the maximum timeout for this connection for fluency
-        #    self._threadlocal_storage.shotgun.config.timeout_secs = ShotgunDataRetriever._SG_CONNECTION_TIMEOUT_SECS
-        #
-        #return self._threadlocal_storage.shotgun
 
     def set_shotgun_connection(self):
         """
-        This has now been deprecated as it may not be thread-safe!
+        ** Deprecated **
+
+        Shotgun connections are only reentrant, not thread-safe so a single instance of
+        a connection should only ever be used by a single thread.  Because of this and a
+        change to the ShotgunDataRetriever to allow it to use a BackgroundTaskManager for
+        all it's asyncronous work, it is no longer safe to specify the Shotgun connection
+        for using this method as the work may be done on an arbitrary worker thread.
+
+        Instead, the BackgroundTaskManager is now responsible for providing a Shotgun
+        connection for a thread to use if needed.
         """
-        pass
+        self.__log_warning("ShotgunDataRetriever.set_shotgun_connection() has been deprecated.")
 
     def start(self):
         """
@@ -302,11 +297,6 @@ class ShotgunDataRetriever(QtCore.QObject):
             self._task_manager.task_failed.disconnect(self._on_task_failed)
             self._task_manager = None
 
-    def stop_work(self, uid):
-        """
-        """
-        self._task_manager.stop_task(int(uid))
-
     def clear(self):
         """
         Clear the retriever thread job queue
@@ -316,166 +306,400 @@ class ShotgunDataRetriever(QtCore.QObject):
         # stop any tasks running in the task group:
         self._task_manager.stop_task_group(self._bg_tasks_group)
 
-    def execute_find(self, entity_type, filters, fields, order = None):
+    def get_schema(self, project_id=None):
         """
-        Overriden base class method.  Executes a Shotgun find query asyncronously
+        Execute the schema_read and schema_entity_read methods asynchronously
+
+        :param project_id:  If specified, the schema listing returned will
+                            be constrained by the schema settings for 
+                            the given project.
+        :returns:           A unique task id representing this request.
+        """
+        if not self._task_manager:
+            return
+        task_id = self._task_manager.add_task(self._task_get_schema,
+                                              priority = ShotgunDataRetriever._DOWNLOAD_SCHEMA_PRIORITY,
+                                              group = self._bg_tasks_group,
+                                              project_id = project_id)
+        return str(task_id)
+
+    def execute_find(self, *args, **kwargs):
+        """
+        Executes a Shotgun find query asyncronously.
+
+        This method takes the same parameters as the Shotgun find() call.
+
+        :param *args:       args to be passed to the Shotgun find() call
+        :param **kwargs:    Named parameters to be passed to the Shotgun find() call
+        :returns:           A unique task id representing this request. 
         """
         if not self._task_manager:
             return
         task_id = self._task_manager.add_task(self._task_execute_find,
-                                           priority = ShotgunDataRetriever._SG_FIND_PRIORITY,
-                                           group = self._bg_tasks_group,
-                                           entity_type=entity_type, 
-                                           filters=filters, 
-                                           fields=fields, 
-                                           order=order)
+                                              priority = ShotgunDataRetriever._SG_FIND_PRIORITY,
+                                              group = self._bg_tasks_group,
+                                              *args, **kwargs)
         return str(task_id)
 
-    def request_thumbnail(self, url, entity_type, entity_id, field):
+    def execute_update(self, *args, **kwargs):
         """
-        Overriden base class method.  Downloads a thumbnail form Shotgun asyncronously
-        or returns the cached thumbnail if found.
+        Execute a Shotgun update call asyncronously
+
+        This method takes the same parameters as the Shotgun update() call.
+
+        :param *args:       args to be passed to the Shotgun update() call
+        :param **kwargs:    Named parameters to be passed to the Shotgun update() call
+        :returns:           A unique task id representing this request.
         """
         if not self._task_manager:
             return
-        check_task_id = self._task_manager.add_task(self._task_check_thumbnail,
-                                                 priority = ShotgunDataRetriever._CHECK_THUMB_PRIORITY,
-                                                 group = self._bg_tasks_group,
-                                                 url=url)
-
-        dl_task_id = self._task_manager.add_task(self._task_download_thumbnail,
-                                              upstream_task_ids = [check_task_id],
-                                              priority = ShotgunDataRetriever._DOWNLOAD_THUMB_PRIORITY,
+        task_id = self._task_manager.add_task(self._task_execute_update,
+                                              priority = ShotgunDataRetriever._SG_UPDATE_PRIORITY,
                                               group = self._bg_tasks_group,
-                                              entity_type=entity_type, 
-                                              entity_id=entity_id,
-                                              field=field)
-        return str(dl_task_id)
+                                              *args, **kwargs)
+        return str(task_id)
+
+    def execute_create(self, *args, **kwargs):
+        """
+        Execute a Shotgun create call asyncronously
+
+        This method takes the same parameters as the Shotgun create() call.
+
+        :param *args:       args to be passed to the Shotgun create() call
+        :param **kwargs:    Named parameters to be passed to the Shotgun create() call
+        :returns:           A unique task id representing this request.
+        """
+        if not self._task_manager:
+            return
+        task_id = self._task_manager.add_task(self._task_execute_create,
+                                              priority = ShotgunDataRetriever._SG_CREATE_PRIORITY,
+                                              group = self._bg_tasks_group,
+                                              *args, **kwargs)
+        return str(task_id)
+
+    def execute_delete(self, *args, **kwargs):
+        """
+        Execute a Shotgun delete call asyncronously
+
+        This method takes the same parameters as the Shotgun delete() call.
+
+        :param *args:       args to be passed to the Shotgun delete() call
+        :param **kwargs:    Named parameters to be passed to the Shotgun delete() call
+        :returns:           A unique task id representing this request.
+        """
+        if not self._task_manager:
+            return
+        task_id = self._task_manager.add_task(self._task_execute_delete,
+                                              priority = ShotgunDataRetriever._SG_DELETE_PRIORITY,
+                                              group = self._bg_tasks_group,
+                                              *args, **kwargs)
+        return str(task_id)
+
+    def execute_method(self, method, data):
+        """
+        Executes a generic execution of a method asyncronously.  This is pretty much a
+        wrapper for executing a task through the BackgroundTaskManager.
+
+        The specified method will be called with the form
+
+        > method(sg, data) 
+
+        Where sg is a shotgun API instance. Data is typically
+        a dictionary with specific data that the method needs.
+
+        :param method:  The method that should be executed.
+        :param data:    Dictionary of data to pass to the method.
+        :returns:       A unique task id representing this request.
+        """
+        if not self._task_manager:
+            return
+        task_id = self._task_manager.add_task(self._task_execute_method,
+                                              priority = ShotgunDataRetriever._EXECUTE_METHOD_PRIORITY,
+                                              group = self._bg_tasks_group,
+                                              project_id = project_id,
+                                              method = method,
+                                              data = data)
+
+
+    def request_thumbnail(self, url, entity_type, entity_id, field, load_image=False):
+        """
+        Downloads a thumbnail form Shotgun asyncronously or returns the cached thumbnail 
+        if found.  Optionally loads the thumbnail into a QImage.
+
+        :param url:         The thumbnail url string that is associated with this thumbnail. This is
+                            the field value as returned by a Shotgun query.
+        :param entity_type: Shotgun entity type with which the thumb is associated.
+        :param entity_id:   Shotgun entity id with which the thumb is associated.
+        :param field:       Thumbnail field. Normally 'image' but could also for example be a deep 
+                            link field such as 'sg_sequence.Sequence.image'
+        :param load_image:  If set to True, the return data structure will contain a QImage object 
+                            with the image data loaded.
+
+        :returns:           A unique task id representing this request.
+        """
+        if not self._task_manager:
+            return
+
+        # always add check for thumbnail already downloaded:
+        check_task_id = self._task_manager.add_task(self._task_check_thumbnail,
+                                                    priority = ShotgunDataRetriever._CHECK_THUMB_PRIORITY,
+                                                    group = self._bg_tasks_group,
+                                                    url = url,
+                                                    load_image = load_image)
+
+        # add download thumbnail task
+        dl_task_id = self._task_manager.add_task(self._task_download_thumbnail,
+                                                 upstream_task_ids = [check_task_id],
+                                                 priority = ShotgunDataRetriever._DOWNLOAD_THUMB_PRIORITY,
+                                                 group = self._bg_tasks_group,
+                                                 url = url,
+                                                 entity_type = entity_type, 
+                                                 entity_id = entity_id,
+                                                 field = field,
+                                                 load_image = load_image)
+
+        # all results for requesting a thumbnail should be returned with the same id so use
+        # a mapping to track the 'primary' task id:
+        self._thumb_task_id_map[dl_task_id] = check_task_id
+
+        return str(check_task_id)
 
 
 
     # ------------------------------------------------------------------------------------------------
     # Background task management and methods
 
-    def _task_execute_find(self, entity_type, filters, fields, order):
+    def _task_get_schema(self, project_id):
         """
+        Method that gets executed in a background task/thread to retrieve the fields
+        and types schema from Shotgun
+
+        :param project_id:  The id of the project to query the schema for or None to 
+                            retrieve for all projects
+        :returns:           Dictionary containing the 'action' together with the schema 
+                            fields and types
         """
-        sg_res = self._sg_find(entity_type, filters, fields, order)
+        if project_id is not None:
+            project = {"type": "Project", "id": project_id}
+        else:
+            project = None
+
+        # read in details about all fields
+        sg_field_schema = self._shotgun_connection.schema_read(project)
+
+        # and read in details about all entity types
+        sg_type_schema = self._shotgun_connection.schema_entity_read(project)
+
+        # need to wrap it in a dict not to confuse pyqt's signals and type system
+        return {"action":"schema", "fields":sg_field_schema, "types":sg_type_schema}
+
+    def _task_execute_find(self, *args, **kwargs):
+        """
+        Method that gets executed in a background task/thread to perform a Shotgun
+        find query
+
+        :param *args:       Unnamed arguments to be passed to the find() call
+        :param **kwargs:    Named arguments to be passed to the find() call 
+        :returns:           Dictionary containing the 'action' together with result
+                            returned by the find() call
+        """
+        sg_res = self._shotgun_connection.find(*args, **kwargs)
         return {"action":"find", "sg_result":sg_res}
 
-    def _task_check_thumbnail(self, url):
+    def _task_execute_update(self, *args, **kwargs):
         """
-        """
-        path_to_cached_thumb = self._get_cached_thumbnail_path(url)
-        if not os.path.exists(path_to_cached_thumb):
-            path_to_cached_thumb = None
-        return {"thumb_path":path_to_cached_thumb}
+        Method that gets executed in a background task/thread to perform a Shotgun
+        update call
 
-    def _task_download_thumbnail(self, thumb_path, entity_type, entity_id, field):
+        :param *args:       Unnamed arguments to be passed to the update() call
+        :param **kwargs:    Named arguments to be passed to the update() call 
+        :returns:           Dictionary containing the 'action' together with result
+                            returned by the update() call
         """
-        """
-        path = thumb_path or self._download_thumbnail(entity_type, entity_id, field)
-        return {"action":"find_thumbnail", "thumb_path":path}
+        sg_res = self._shotgun_connection.update(*args, **kwargs)
+        return {"action":"update", "sg_result":sg_res}
 
-    def _on_task_completed(self, task_id, group, result):
+    def _task_execute_create(self, *args, **kwargs):
         """
-        """
-        action = result.get("action")
-        if action == "find":
-            sg_res = result.get("sg_result", [])
-            self.work_completed.emit(str(task_id), "find", {"sg": sg_res })
-        elif action == "find_thumbnail":
-            path = result.get("thumb_path", "")
-            self.work_completed.emit(str(task_id), "find", {"thumb_path": path})
+        Method that gets executed in a background task/thread to perform a Shotgun
+        create call
 
-    def _on_task_failed(self, task_id, msg, tb):
+        :param *args:       Unnamed arguments to be passed to the create() call
+        :param **kwargs:    Named arguments to be passed to the create() call 
+        :returns:           Dictionary containing the 'action' together with result
+                            returned by the create() call
         """
+        sg_res = self._shotgun_connection.create(*args, **kwargs)
+        return {"action":"create", "sg_result":sg_res}
+
+    def _task_execute_delete(self, *args, **kwargs):
         """
-        self.work_failure.emit(str(task_id), msg)
+        Method that gets executed in a background task/thread to perform a Shotgun
+        delete call
 
-    # ------------------------------------------------------------------------------------------------
-    # Main implementation
-
-    def _sg_find(self, entity_type, filters, fields, order):
+        :param *args:       Unnamed arguments to be passed to the delete() call
+        :param **kwargs:    Named arguments to be passed to the delete() call 
+        :returns:           Dictionary containing the 'action' together with result
+                            returned by the delete() call
         """
-        Execute a Shotgun find query for the specified entity type using the specified 
-        filters, fields and order.
+        sg_res = self._shotgun_connection.delete(*args, **kwargs)
+        return {"action":"delete", "sg_result":sg_res}
 
-        :param entity_type: Entity type to find Shotgun records for
-        :param filters:     Filters to filter the found records by
-        :param fields:      Fields to return for any found records
-        :param order:       The order to return any found records in
-        :returns:           Any found records as a list of Shotgun dictionaries
+    def _task_execute_method(self, method, data):
         """
-        #res = self._bundle.engine.execute_in_main_thread(self._find_in_main_thread, 
-        #                                                 entity_type, filters, fields, order)
-        #time.sleep(random.randint(0, 20)/100.0)
-        #return res
+        Method that gets executed in a background task/thread to execute a method
+        with a thread-specific shotgun connection.
 
-        #res = sgtk.platform.current_engine().execute_in_main_thread(self._find_on_main_thread,
-        #                                                            entity_type, 
-        #                                                            filters, 
-        #                                                            fields, 
-        #                                                            order)
-        res = self.shotgun_connection.find(entity_type, filters, fields, order)
+        :param method:      The method to be run asyncronously
+        :param data:        Arguments to be passed to the method 
+        :returns:           Dictionary containing the 'action' together with the result
+                            returned by the method
         """
-        s = ""
-        for tick in range(20):
-            time.sleep(0.01)
-            multiplier = random.randint(1, 8)
-            for i in range(8*multiplier):
-                s = "%s%d" % (s, i)
-        time.sleep(1)
-        res = dict((i, c) for i, c in enumerate(s))
+        res = method(self._shotgun_connection, data)
+        return {"action":"method", "result":res}
+
+    def _task_check_thumbnail(self, url, load_image):
         """
-        #res = sg.find(entity_type, filters, fields, order)
-        #res = self.shotgun_connection.find_dummy(entity_type, filters, fields, order)
-        #res = sg.find_dummy(entity_type, filters, fields, order)
-        return res
-    
-    def _find_on_main_thread(self, entity_type, filters, fields, order):
-        
-        app = sgtk.platform.current_bundle()
-        res = app.shotgun.find(entity_type, filters, fields, order)
-        return res
+        Check to see if a thumbnail exists for the specified url.  If it does then it is returned.
 
-
-    def _get_cached_thumbnail_path(self, url):
+        :param url:         The url to return the cached path for
+        :param load_image:  If True then if the thumbnail is found in the cache then the file will 
+                            be loaded into a QImage
+        :returns:           A dictionary containing the cached path for the specified url and a QImage
+                            if load_image is True and the thumbnail exists in the cache.
         """
-        Get the cached thumbnail path for the specified url
+        # first look up the path in the cache:
+        thumb_path = ShotgunDataRetriever._get_thumbnail_path(url, self._bundle)
+        thumb_image = None
+        if thumb_path and os.path.exists(thumb_path):
+            if load_image:
+                # load the thumbnail into a QImage:
+                thumb_image = QtGui.QImage()
+                thumb_image.load(thumb_path)
+        else:
+            thumb_path = None
 
-        :param url: The url to return the cached path for
-        :returns:   The cached path for the specified url.
-        """
-        return ShotgunDataRetriever._get_thumbnail_path(url, self._bundle)
+        return {"action":"check_thumbnail", "thumb_path":thumb_path, "image":thumb_image}
 
-    def _download_thumbnail(self, entity_type, entity_id, field):
+    def _task_download_thumbnail(self, thumb_path, url, entity_type, entity_id, field, load_image):
         """
         Download the thumbnail for the specified entity type, id and field.  This downloads the
         thumbnail into the thumbnail cache directory and returns the cached path.
 
+        If thumb_path already contains a path then this method does nothing and just returns the path 
+        without further checking/work.
+
+        :param thumb_path:  Path to an existing thumbnail or None.
+        :param url:         The url for the thumbnail which may or may not still be valid!
         :param entity_type: Type of the entity to retrieve the thumbnail for
         :param entity_id:   Id of the entity to retrieve the thumbnail for
         :param field:       The field on the entity that holds the url for the thumbnail to retrieve
-        :returns:           The cached path on disk for the thumbnail if found
+        :param load_image:  If True then if the thumbnail is downloaded from Shotgun then the file will 
+                            be loaded into a QImage
+        :returns:           A dictionary containing the cached path for the specified url and a QImage
+                            if load_image is True and the thumbnail exists in the cache.
         """
-        path_to_cached_thumb = None
+        if thumb_path:
+            # no need to do anything as the thumbnail was previously
+            # found when we ran the check!
+            return {}
 
         # download the actual thumbnail. Because of S3, the url
-        # has most likely expired, so need to re-fetch it via a sg find
-        sg_data = self.shotgun_connection.find_one(entity_type, [["id", "is", entity_id]], [field])
-        if sg_data and sg_data.get(field):
-            url = sg_data[field]
-            path_to_cached_thumb = self._get_cached_thumbnail_path(url)
-            self._bundle.ensure_folder_exists(os.path.dirname(path_to_cached_thumb))
-            sgtk.util.download_url(self.shotgun_connection, url, path_to_cached_thumb)
-            # modify the permissions of the file so it's writeable by others
-            old_umask = os.umask(0)
+        # may have expired - in that case fall back, get a fresh url
+        # from shotgun and try again
+        thumb_path = self._get_thumbnail_path(url, self._bundle)
+        self._bundle.ensure_folder_exists(os.path.dirname(thumb_path))
+
+        # there may be a case where another process has alrady downloaded the thumbnail for us, so 
+        # make sure that we aren't doing any extra work :)
+        if not os.path.exists(thumb_path):
+
+            # try to download based on the path we have
             try:
-                os.chmod(path_to_cached_thumb, 0666)
-            finally:
-                os.umask(old_umask)
+                sgtk.util.download_url(self._shotgun_connection, url, thumb_path)
+            except TankError, e:
+                # Note: Unfortunately, the download_url will re-cast 
+                # all exceptions into tankerrors.
+                # get a fresh url from shotgun and try again
+                sg_data = self._shotgun_connection.find_one(entity_type, [["id", "is", entity_id]], [field])
 
-        return path_to_cached_thumb
+                if sg_data is None or sg_data.get(field) is None:
+                    # no thumbnail! This is possible if the thumb has changed
+                    # while we were queueing it for download.
+                    # indicate the fact that the thumbnail no longer exists on the server
+                    # by setting the path to None
+                    thumb_path = None
 
+                else:
+                    # download from sg
+                    url = sg_data[field]
+                    sgtk.util.download_url(self._shotgun_connection, url, thumb_path)
+
+            if thumb_path:
+                # now we have a thumbnail on disk, either via the direct
+                # download, or via the url-fresh-then-download approach
+                # the file is downloaded with user-only permissions
+                # modify the permissions of the file so it's writeable by others
+                old_umask = os.umask(0)
+                try:
+                    os.chmod(thumb_path, 0666)
+                finally:
+                    os.umask(old_umask)
+
+        # finally, see if we should also load in the image
+        thumb_image = None
+        if thumb_path and os.path.exists(thumb_path):
+            if load_image:
+                # load the thumbnail into a QImage:
+                thumb_image = QtGui.QImage()
+                thumb_image.load(thumb_path)
+        else:
+            thumb_path = None
+
+        return {"action":"download_thumbnail", "thumb_path":thumb_path, "image":thumb_image}
+
+    def _on_task_completed(self, task_id, group, result):
+        """
+        Slot triggered when a task is completed.
+
+        :param task_id: The id of the task that has completed
+        :param group:   The group the task belongs to
+        :param result:  The task result
+        """
+        action = result.get("action")
+        if action in ["find", "create", "delete", "update"]:
+            self.work_completed.emit(str(task_id), action, {"sg":result["sg_result"]})
+        elif action == "schema":
+            self.work_completed.emit(str(task_id), "schema", {"fields":result["fields"], "types":result["types"]})
+        elif action == "method":
+            self.work_completed.emit(str(task_id), "method", {"return_value":result["result"]})
+        elif action == "check_thumbnail":
+            path = result.get("thumb_path", "")
+            if path:
+                # check found a thumbnail!
+                self.work_completed.emit(str(task_id), "find", {"thumb_path": path, "image":result["image"]})
+        elif action == "download_thumbnail":
+            # look up the primary thumbnail task id in the map:
+            thumb_task_id = self._thumb_task_id_map.get(task_id)
+            if thumb_task_id is not None:
+                del self._thumb_task_id_map[task_id]
+                self.work_completed.emit(str(thumb_task_id), 
+                                         "find", 
+                                         {"thumb_path": result["thumb_path"], "image":result["image"]})
+
+    def _on_task_failed(self, task_id, msg, tb):
+        """
+        Slot triggered when a task fails for some reason
+
+        :param task_id: The id of the task that failed
+        :param msg:     The error/exception message for the failed task
+        :param tb:      The stack trace of the exception raised by the failed task
+        """
+        # remap task ids for thumbnails:
+        if task_id in self._thumb_task_id_map:
+            task_id = self._thumb_task_id_map[task_id]
+            del self._thumb_task_id_map[task_id]
+
+        # emit failure signal:
+        self.work_failure.emit(str(task_id), msg)
 

@@ -158,7 +158,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         for the model using this method as the work may be done on an arbitrary worker
         thread.
 
-        Instead, the BackgroundTaskManager is not responsible for providing a Shotgun
+        Instead, the BackgroundTaskManager is now responsible for providing a Shotgun
         connection for a thread to use if needed.
         """
         self.__log_warning("ShotgunModel.set_shotgun_connection() has been deprecated.")
