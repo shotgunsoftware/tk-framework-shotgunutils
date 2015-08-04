@@ -9,7 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import tank
-from .shotgunmodel import ShotgunModel
+from .shotgun_model import ShotgunModel
 from tank.platform.qt import QtCore, QtGui
 overlay_module = tank.platform.import_framework("tk-framework-qtwidgets", "overlay_widget") 
 
@@ -33,11 +33,11 @@ class ShotgunOverlayModel(ShotgunModel):
     # should be deactivated. 
     progress_spinner_end = QtCore.Signal()
 
-    def __init__(self, parent, overlay_widget, download_thumbs=True, schema_generation=0, bg_load_thumbs=False):
+    def __init__(self, parent, overlay_widget, download_thumbs=True, schema_generation=0, bg_load_thumbs=False, bg_task_manager=None):
         """
         Constructor. This will create a model which can later be used to load
         and manage Shotgun data.
-        
+
         :param parent: Parent object.
         :param overlay_widget: Widget on which the spinner/info overlay should be positioned.
         :param download_thumbs: Boolean to indicate if this model should attempt 
@@ -47,19 +47,20 @@ class ShotgunOverlayModel(ShotgunModel):
                                   want to invalidate any cache files that may already exist
                                   in the system, you can increment this integer.
         :param bg_load_thumbs: If set to True, thumbnails will be loaded in the background.
-        
+        :param bg_task_manager:     Background task manager to use for any asynchronous work.  If
+                                    this is None then a task manager will be created as needed.
         """
-        ShotgunModel.__init__(self, parent, download_thumbs, schema_generation, bg_load_thumbs)
-        
+        ShotgunModel.__init__(self, parent, download_thumbs, schema_generation, bg_load_thumbs, bg_task_manager)
+
         # set up our spinner UI handling
         self.__overlay = overlay_module.ShotgunOverlayWidget(overlay_widget)
         self._is_in_spin_state = False
         self._cache_loaded = False
-        
+
         # set up some model signals etc.
         self.data_refreshed.connect(self.__on_data_refreshed)
         self.data_refresh_fail.connect(self.__on_data_refresh_fail)
-        
+
     ########################################################################################
     # protected methods not meant to be subclassed but meant to be called by subclasses
     
@@ -80,18 +81,12 @@ class ShotgunOverlayModel(ShotgunModel):
         if not self._cache_loaded:
             # we are doing asynchronous loading into an uncached model.            
             # start spinning
-            self._show_overlay_spinner()
+            self.__overlay.start_spin()    
+            # signal to any external listeners
+            self.progress_spinner_start.emit()
+            self._is_in_spin_state = True
         # call base class
         return ShotgunModel._refresh_data(self)
-    
-    def _show_overlay_spinner(self):
-        """
-        Shows the overlay spinner
-        """
-        self.__overlay.start_spin()    
-        # signal to any external listeners
-        self.progress_spinner_start.emit()
-        self._is_in_spin_state = True        
     
     def _hide_overlay_info(self):
         """
