@@ -293,6 +293,17 @@ class ShotgunDataRetriever(QtCore.QObject):
         # stop any tasks running in the task group:
         self._task_manager.stop_task_group(self._bg_tasks_group)
 
+    def stop_work(self, task_id):
+        """
+        Stop the specified task
+
+        :param task_id: The task to stop
+        """
+        if not self._task_manager:
+            return
+        # stop the task:
+        self._task_manager.stop_task(task_id)
+
     def get_schema(self, project_id=None):
         """
         Execute the schema_read and schema_entity_read methods asynchronously
