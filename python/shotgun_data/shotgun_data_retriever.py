@@ -65,7 +65,7 @@ class ShotgunDataRetriever(QtCore.QObject):
                 os.umask(old_umask)
 
         return path_to_cached_thumb
-    
+
     @staticmethod
     def _get_thumbnail_path(url, bundle):
         """
@@ -75,13 +75,13 @@ class ShotgunDataRetriever(QtCore.QObject):
         :param bundle:  App, Engine or Framework instance
         :returns:       Path as a string.
         """
-    
+
         # hash the path portion of the thumbnail url
         url_obj = urlparse.urlparse(url)
         url_hash = hashlib.md5()
         url_hash.update(str(url_obj.path))
         hash_str = url_hash.hexdigest()
-    
+
         # Now turn this hash into a tree structure. For a discussion about sensible
         # sharding methodology, see 
         # http://stackoverflow.com/questions/13841931/using-guids-as-folder-names-splitting-up
@@ -93,14 +93,14 @@ class ShotgunDataRetriever(QtCore.QObject):
         second_folder = hash_str[2:4]
         file_name = "%s.jpeg" % hash_str[4:]
         path_chunks = [first_folder, second_folder, file_name]
-    
+
         # establish the root path
         cache_path_items = [bundle.cache_location, "thumbs"]
         # append the folders
         cache_path_items.extend(path_chunks)
         # join up the path
         path_to_cached_thumb = os.path.join(*cache_path_items)
-    
+
         # perform a simple migration to check if the old path still exists. In that case, 
         # try to move it across to the new path. This is to help transition from the previous
         # thumb caching structures and should be removed at some point in the future in order
@@ -122,9 +122,9 @@ class ShotgunDataRetriever(QtCore.QObject):
             except:
                 # ignore any errors in the transfer
                 pass
-            
+
         return path_to_cached_thumb
-    
+
     @staticmethod
     def _get_thumbnail_path_old(url, bundle):
         """
@@ -134,37 +134,37 @@ class ShotgunDataRetriever(QtCore.QObject):
         the new logic can attempt to over files over into the new scheme 
         if at all possible.
 
-        :param url:     Path to a thumbnail        
+        :param url:     Path to a thumbnail
         :param bundle:  App, Engine or Framework instance
-        :returns:       Path as a string.        
+        :returns:       Path as a string.
         """
-    
+
         url_obj = urlparse.urlparse(url)
         url_path = url_obj.path
         path_chunks = url_path.split("/")
-    
+
         CHUNK_LEN = 16
-    
+
         # post process the path
         # old (pre-S3) style result:
         # path_chunks: [ "", "thumbs", "1", "2", "2.jpg"]
-    
+
         # s3 result, form 1:
         # path_chunks: [u'',
         #               u'9902b5f5f336fae2fb248e8a8748fcd9aedd822e',
         #               u'be4236b8f198ae84df2366920e7ee327cc0a567e',
         #               u'render_0400_t.jpg']
-    
+
         # s3 result, form 2:
         # path_chunks: [u'', u'thumbnail', u'api_image', u'150']
-    
+
         def _to_chunks(s):
             #split the string 'abcdefghxx' into ['abcdefgh', 'xx']
             chunks = []
             for start in range(0, len(s), CHUNK_LEN):
                 chunks.append( s[start:start+CHUNK_LEN] )
             return chunks
-    
+
         new_chunks = []
         for folder in path_chunks[:-1]: # skip the file name
             if folder == "":
@@ -175,7 +175,7 @@ class ShotgunDataRetriever(QtCore.QObject):
                 new_chunks.extend( _to_chunks(folder) )
             else:
                 new_chunks.append(folder)
-    
+
         # establish the root path
         cache_path_items = [bundle.cache_location, "thumbnails"]
         # append the folders
@@ -183,10 +183,10 @@ class ShotgunDataRetriever(QtCore.QObject):
         # and append the file name
         # all sg thumbs are jpegs so append extension too - some url forms don't have this.
         cache_path_items.append("%s.jpeg" % path_chunks[-1])
-    
+
         # join up the path
         path_to_cached_thumb = os.path.join(*cache_path_items)
-    
+
         return path_to_cached_thumb
 
     # default individual task priorities
@@ -227,7 +227,7 @@ class ShotgunDataRetriever(QtCore.QObject):
     #   returned by the corresponding request call.
     # - error message is an error message string.
     work_failure = QtCore.Signal(str, str)
-    
+
     def __init__(self, parent=None, sg=None, bg_task_manager=None):
         """
         Construction
@@ -250,26 +250,12 @@ class ShotgunDataRetriever(QtCore.QObject):
     @property
     def _shotgun_connection(self):
         """
-        Returns the Shotgun connection currently being used.
+        Returns the Shotgun connection currently being used.  Note that this will be thread
+        specific.
 
-        :returns:    The Shotgun connection for this instance
+        :returns:    The Shotgun connection for this instance in the current thread
         """
         return self._task_manager.shotgun_connection
-
-    def set_shotgun_connection(self):
-        """
-        ** Deprecated **
-
-        Shotgun connections are only reentrant, not thread-safe so a single instance of
-        a connection should only ever be used by a single thread.  Because of this and a
-        change to the ShotgunDataRetriever to allow it to use a BackgroundTaskManager for
-        all it's asyncronous work, it is no longer safe to specify the Shotgun connection
-        for using this method as the work may be done on an arbitrary worker thread.
-
-        Instead, the BackgroundTaskManager is now responsible for providing a Shotgun
-        connection for a thread to use if needed.
-        """
-        self.__log_warning("ShotgunDataRetriever.set_shotgun_connection() has been deprecated.")
 
     def start(self):
         """
@@ -283,7 +269,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         """
         if not self._task_manager:
             return
-        
+
         if self._owns_task_manager:
             # we own the task manager so we'll need to completely shut it down before
             # returning

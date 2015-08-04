@@ -30,10 +30,15 @@ class ShotgunEntityModel(ShotgunModel):
         """
         Construction
 
-        :param entity_type:         
-        :param filters:             
-        :param hierarchy:           
-        :param fields:              
+        :param entity_type:         The type of the entities that should be loaded into this model.
+        :param filters:             A list of filters to be applied to entities in the model - these 
+                                    will be passed to the Shotgun API find() call when populating the 
+                                    model
+        :param hierarchy:           List of Shotgun fields that will be used to define the structure 
+                                    of the items in the model.
+        :param fields:              List of Shotgun fields to populate the items in the model with.
+                                    These will be passed to the Shotgun API find() call when populating
+                                    the model.
         :param parent:              Parent object.
         :param download_thumbs:     Boolean to indicate if this model should attempt
                                     to download and process thumbnails for the downloaded data.
@@ -69,6 +74,7 @@ class ShotgunEntityModel(ShotgunModel):
 
     def destroy(self):
         """
+        Call to clean-up the model when it is finished with
         """
         ShotgunModel.destroy(self)
         self._entity_icons = {}
@@ -77,6 +83,11 @@ class ShotgunEntityModel(ShotgunModel):
 
     def get_entity_icon(self, entity_type):
         """
+        Retrieve the icon for the specified entity type if available.
+
+        :param entity_type: The entity type to retrieve the icon for
+        :returns:           A QIcon if an icon was found for the specified entity
+                            type, otherwise None.
         """
         icon = None
         if entity_type in self._entity_icons:
@@ -94,8 +105,8 @@ class ShotgunEntityModel(ShotgunModel):
 
     def get_entities(self, item):
         """
-        Get entities for the current item by traversing up the tree
-        and pulling entity information from each item if possible
+        Get entities for the current item by traversing up the tree and pulling 
+        entity information from each item if possible
 
         :param item:    The item to find entities for
         :returns:       A list of entities in the order they were found starting
@@ -103,13 +114,13 @@ class ShotgunEntityModel(ShotgunModel):
         """
         entities = []
         current_item = item
-        
+
         # first, if this is a leaf item then it will represent an entity:
         sg_data = current_item.get_sg_data()
         if sg_data:
             entities.append(sg_data)
             current_item = current_item.parent()
-            
+
         # now walk up the tree and look for an entity in the fields of the 
         # parent items:
         while current_item:
@@ -121,16 +132,21 @@ class ShotgunEntityModel(ShotgunModel):
                 and "type" in field_value):
                 entities.append(field_value)
             current_item = current_item.parent()
-            
+
         return entities
-    
+
     def get_entity(self, item):
         """
+        Get the Shotgun entity details for the specified model item.
+
+        :param item:    The item to retrieve the entity details for
+        :returns:       A Shotgun entity dictionary for the item if it represents
+                        and entity, otherwise None
         """
         sg_data = item.get_sg_data()
         if sg_data:
             return sg_data
-        
+
         field_data = get_sanitized_data(item, self.SG_ASSOCIATED_FIELD_ROLE)
         field_value = field_data.get("value")
         if (field_value 
@@ -138,36 +154,36 @@ class ShotgunEntityModel(ShotgunModel):
             and "id" in field_value 
             and "type" in field_value):
             return field_value
-        
+
         return None
-    
+
     def async_refresh(self):
         """
         Trigger an asynchronous refresh of the model
         """
         self._refresh_data()
-    
+
     def _populate_default_thumbnail(self, item):
         """
         Whenever an item is constructed, this methods is called. It allows subclasses to intercept
         the construction of a QStandardItem and add additional metadata or make other changes
         that may be useful. Nothing needs to be returned.
-        
+
         :param item: QStandardItem that is about to be added to the model. This has been primed
                      with the standard settings that the ShotgunModel handles.
         :param sg_data: Shotgun data dictionary that was received from Shotgun given the fields
                         and other settings specified in load_data()
         """
         found_icon = False
-        
+
         # get the associated field data with this node
         field_data = get_sanitized_data(item, self.SG_ASSOCIATED_FIELD_ROLE)
         # get the full sg data for this node (leafs only)
-        sg_data = get_sg_data(item)     
-        
+        sg_data = get_sg_data(item)
+
         # {'name': 'sg_sequence', 'value': {'type': 'Sequence', 'id': 11, 'name': 'bunny_080'}}
         field_value = field_data["value"]
-        
+
         if isinstance(field_value, dict) and "name" in field_value and "type" in field_value:
             # this is an intermediate node which is an entity type link
             entity_icon = self._get_default_thumbnail(field_value)
@@ -175,7 +191,7 @@ class ShotgunEntityModel(ShotgunModel):
                 # use sg icon!
                 item.setIcon(QtGui.QIcon(entity_icon))
                 found_icon = True
-        
+
         elif sg_data:
             # this is a leaf node!
             entity_icon = self._get_default_thumbnail(sg_data)
@@ -183,13 +199,20 @@ class ShotgunEntityModel(ShotgunModel):
                 # use sg icon!
                 item.setIcon(QtGui.QIcon(entity_icon))
                 found_icon = True
-        
+
         # for all items where we didn't find the icon, fall back onto the default
         if not found_icon:
             item.setIcon(QtGui.QIcon(self._default_icon))
 
     def _get_default_thumbnail(self, sg_entity):
         """
+        Get the default icon for the specified entity.
+
+        :param sg_entity:   A Shotgun entity dictionary for the entity to get the
+                            icon for.
+        :returns:           A QIcon for the entity if available.  For Step entities, a
+                            swatch representing the step colour is returned.  If no
+                            icon is available for the entity type then None is returned
         """
         if sg_entity.get("type") == "Step":
             # special case handling for steps to return a colour swatch:
@@ -227,13 +250,10 @@ class ShotgunEntityModel(ShotgunModel):
                         finally:
                             painter.end()
                         self._step_swatch_icons[colour] = QtGui.QIcon(pm)
-                        
+
                     # return the icon:
                     return QtGui.QIcon(self._step_swatch_icons[colour])
-        
+
         # just return the entity icon:
         return self.get_entity_icon(sg_entity.get("type"))
-        
-        
-        
-        
+

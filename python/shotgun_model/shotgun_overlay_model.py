@@ -37,7 +37,7 @@ class ShotgunOverlayModel(ShotgunModel):
         """
         Constructor. This will create a model which can later be used to load
         and manage Shotgun data.
-        
+
         :param parent: Parent object.
         :param overlay_widget: Widget on which the spinner/info overlay should be positioned.
         :param download_thumbs: Boolean to indicate if this model should attempt 
@@ -51,16 +51,16 @@ class ShotgunOverlayModel(ShotgunModel):
                                     this is None then a task manager will be created as needed.
         """
         ShotgunModel.__init__(self, parent, download_thumbs, schema_generation, bg_load_thumbs, bg_task_manager)
-        
+
         # set up our spinner UI handling
         self.__overlay = overlay_module.ShotgunOverlayWidget(overlay_widget)
         self._is_in_spin_state = False
         self._cache_loaded = False
-        
+
         # set up some model signals etc.
         self.data_refreshed.connect(self.__on_data_refreshed)
         self.data_refresh_fail.connect(self.__on_data_refresh_fail)
-        
+
     ########################################################################################
     # protected methods not meant to be subclassed but meant to be called by subclasses
     

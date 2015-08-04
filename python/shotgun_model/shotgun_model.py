@@ -147,22 +147,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         return self.__entity_tree_data.keys()
 
-    def set_shotgun_connection(self, sg):
-        """
-        ** Deprecated **
-
-        Shotgun connections are only reentrant, not thread-safe so a single instance of
-        a connection should only ever be used by a single thread.  Because of this and a
-        change to the ShotgunDataRetriever to allow it to use a BackgroundTaskManager for
-        all it's asyncronous work, it is no longer safe to specify the Shotgun connection
-        for the model using this method as the work may be done on an arbitrary worker
-        thread.
-
-        Instead, the BackgroundTaskManager is now responsible for providing a Shotgun
-        connection for a thread to use if needed.
-        """
-        self.__log_warning("ShotgunModel.set_shotgun_connection() has been deprecated.")
-
     def destroy(self):
         """
         Call this method prior to destroying this object.
@@ -943,9 +927,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # https://sg-media-usor-01.s3.amazonaws.com/xxx/yyy/filename.ext?lots_of_authentication_headers
         #
         # the query string changes all the times, so when we check if an item is out of date, omit it.
-        elif isinstance(a, str) and isinstance(b, str) and \
-           a.startswith("http") and b.startswith("http") and \
-           ("amazonaws" in a or "AccessKeyId" in a):
+        elif (isinstance(a, str) and isinstance(b, str) 
+              and a.startswith("http") and b.startswith("http")
+              and ("amazonaws" in a or "AccessKeyId" in a)):
             # attempt to parse values are urls and eliminate the querystring
             # compare hostname + path only
             url_obj_a = urlparse.urlparse(a)

@@ -38,7 +38,7 @@ class SimpleShotgunModel(ShotgunOverlayModel):
         """
         ShotgunOverlayModel.__init__(self, parent, parent, download_thumbs=True, 
                                      bg_task_manager=bg_task_manager)
-        
+
     def load_data(self, entity_type, filters=None, fields=None):
         """
         Loads shotgun data into the model, using the cache if possible.
