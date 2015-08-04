@@ -25,7 +25,7 @@ class ShotgunEntityModel(ShotgunModel):
     _SG_STEP_COLOURS = {}
 
     def __init__(self, entity_type, filters, hierarchy, fields, parent, 
-                 download_thumbs=False, schema_generation=0, bg_load_thumbs=False
+                 download_thumbs=False, schema_generation=0, bg_load_thumbs=False,
                  bg_task_manager=None):
         """
         Construction
@@ -65,7 +65,6 @@ class ShotgunEntityModel(ShotgunModel):
                               parent = parent,
                               download_thumbs = download_thumbs,
                               schema_generation = schema_generation,
-                              bg_task_manager = bg_task_manager,
                               bg_load_thumbs = bg_load_thumbs,
                               bg_task_manager = bg_task_manager)
 

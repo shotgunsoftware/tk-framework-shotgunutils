@@ -19,24 +19,16 @@ import sgtk
 from sgtk.platform.qt import QtCore
 from sgtk import TankError
 
-def monitor_lifetime(obj):
-    obj_name = type(obj).__name__
-    obj.destroyed.connect(lambda: on_destroyed(obj_name))
-def on_destroyed(name):
-    pass
-    #fw = sgtk.platform.current_bundle()
-    #fw.log_debug("%s destroyed" % name)
-
 class _BackgroundTask(object):
     """
     Container class for a single task.
     """
-    def __init__(self, task_id, func, group, priority, *args, **kwargs):
+    def __init__(self, task_id, cbl, group, priority, args, **kwargs):
         """
         Construction.
 
         :param task_id:     The unique id for this task
-        :param func:        Function to execute to perform the task
+        :param cbl:         Callable to execute to perform the task
         :param group:       The group that this task belongs to
         :param priority:    The priority this task should be run with
         :param args:        Additional arguments that should be passed to func
@@ -44,7 +36,7 @@ class _BackgroundTask(object):
         """
         self._uid = task_id
 
-        self._func = func
+        self._cbl = cbl
         self._args = args
         self._kwargs = kwargs
 
@@ -56,7 +48,7 @@ class _BackgroundTask(object):
         Create a string representation of this instance
         :returns:   A string representation of this instance
         """
-        return "[%d, G:%s, P:%s] %s" % (self._uid, self._group, self._priority, self._func.__name__)
+        return "[%d, G:%s, P:%s] %s" % (self._uid, self._group, self._priority, self._cbl.__name__)
 
     @property
     def uid(self):
@@ -94,7 +86,7 @@ class _BackgroundTask(object):
 
         :returns:   The result of performing the task
         """
-        return self._func(*self._args, **self._kwargs)
+        return self._cbl(*self._args, **self._kwargs)
 
 class _WorkerThreadA(QtCore.QThread):
     """
@@ -195,6 +187,16 @@ class _WorkerThreadB(QtCore.QThread):
     Asynchrounous worker thread that can run tasks in a separate thread.  This implementation
     uses a separate worker object that exists in the new thread and then uses signals to
     communicate back and forth.
+
+    Note, this recipe exhibits odd behaviour in PyQt.  When initially created, the instance returned
+    in the assignment isn't always of type _WorkerThreadB!, e.g.:
+
+        thread = _WorkerThreadB()
+        assert isinstance(thread, _WorkerThreadB) # this should never assert!
+
+    Although this recipe is recommended in Qt as it is arguably a more 'correct' use of QThreads, it
+    is currently advised that the the overriden run recipe (_WorkerThreadA) be used instead whilst
+    Toolkit needs to support PyQt. 
     """
     class _Worker(QtCore.QObject):
         """
@@ -242,7 +244,6 @@ class _WorkerThreadB(QtCore.QThread):
 
         # create the worker instance:
         self._worker = _WorkerThreadB._Worker()
-        monitor_lifetime(self._worker)
 
         # move the worker to the thread and then connect up the signals 
         # that are used to communicate with it: 
@@ -287,20 +288,31 @@ class _WorkerThreadB(QtCore.QThread):
 
 class BackgroundTaskManager(QtCore.QObject):
     """
+    Main task manager class.  Manages a queue of tasks running them asyncronously through
+    a pool of worker threads.
     """
     # timeout when Shotgun connection fails
     _SG_CONNECTION_TIMEOUT_SECS = 20
-    
+
+    # signal emitted when a task has been completed
     task_completed = QtCore.Signal(int, object, object)# uid, group, result
+    # signal emitted when a task fails for some reason
     task_failed = QtCore.Signal(int, object, str, str)# uid, group, msg, traceback
+    # signal emitted when all tasks in a group have finished
     task_group_finished = QtCore.Signal(object)# group
 
     def __init__(self, parent, start_processing=False, max_threads=8):
         """
+        Construction
+
+        :param parent:              The parent QObject for this instance
+        :param start_processing:    If True then processing of tasks will start immediately
+        :param max_threads:         The maximum number of threads the task manager will use at any
+                                    time.
         """
         QtCore.QObject.__init__(self, parent)
 
-        #self._bundle = sgtk.platform.current_bundle()
+        self._bundle = sgtk.platform.current_bundle()
 
         self._next_task_id = 0
         self._next_group_id = 0
@@ -326,17 +338,13 @@ class BackgroundTaskManager(QtCore.QObject):
 
         self._threadlocal_storage = threading.local()
 
-        self._dbg_file = None#open("/Users/Alan_Dann/worfiles_v2_dbg_id%d.txt" % id(self), "w")
-        
-        monitor_lifetime(self)
-
     @property
     def shotgun_connection(self):
         """
-        Get a Shotgun connection to use.  Creates a new Shotgun connection if the
-        instance doesn't already have one.
-        
-        :returns:    The Shotgun connection for this instance
+        Get a Shotgun connection to use.  Creates a new Shotgun connection if the instance doesn't 
+        already have one.  The connection returned should only be used by the current thread.
+
+        :returns:   The Shotgun connection for this instance in the current thread
         """
         if not hasattr(self._threadlocal_storage, "shotgun"):
             # create our own private shotgun connection. This is because
@@ -351,6 +359,9 @@ class BackgroundTaskManager(QtCore.QObject):
 
     def next_group_id(self):
         """
+        Return the next available group id
+
+        :returns:    A unique group id to be used for tasks that belong to the same group.
         """
         group_id = self._next_group_id
         self._next_group_id += 1
@@ -358,29 +369,33 @@ class BackgroundTaskManager(QtCore.QObject):
 
     def _log(self, msg):
         """
+        Wrapper method for logging useful information to debug.
+
+        :param msg: The message to be logged.
         """
-        #return
-        #self._bundle.log_debug(msg)
-        if self._dbg_file:
-            self._dbg_file.write("%s\n" % msg)
-            self._dbg_file.flush()
-            
+        self._bundle.log_debug("Task Manager: %s" % msg)
+
     def start_processing(self):
         """
+        Start processing of tasks
         """
         self._can_process_tasks = True
         self._start_tasks()
 
     def pause_processing(self):
         """
+        Pause processing of tasks - any currently running tasks will
+        complete as normal.
         """
         self._can_process_tasks = False
         # and just let the current threads complete...
 
     def shut_down(self):
         """
+        Shut down the task manager.  This clears the task queue and gracefully stops all running
+        threads.  Completion/failure of any currently running tasks will be ignored.
         """
-        self._log("Shutting down background task manager...")
+        self._log("Shutting down...")
         self._can_process_tasks = False
 
         # clear out all storage:
@@ -396,24 +411,43 @@ class BackgroundTaskManager(QtCore.QObject):
         #for thread in self._all_threads:
         #    #thread.stop(wait_for_completion = False)
         #    thread.quit()
-        self._log("Waiting for %d background task manager threads to stop..." % len(self._all_threads))
+        self._log("Waiting for %d background threads to stop..." % len(self._all_threads))
         for thread in self._all_threads:
             thread.shut_down()
             #thread.deleteLater()
             #thread = None
             #thread.stop(wait_for_completion = True)
-        self._log("Background task manager shut down successfully!")
+        self._log("Shut down successfully!")
         self._all_threads = []
 
-    def add_task(self, func, priority=None, group=None, upstream_task_ids=None, **kwargs):
+    def add_task(self, cbl, priority=None, group=None, upstream_task_ids=None, args=[], **kwargs):
         """
+        Add a new task to the queue.  A task is a callable method/class together with any arguments that
+        should be passed to the callable when it is called.
+
+        :param cbl:                 The callable function/class to call when executing the task
+        :param priority:            The priority this task should be run with.  Tasks with higher priority
+                                    are run first.
+        :param group:               The group this task belongs to.  Task groups can be used to simplify task
+                                    management (e.g. stop a whole group, be notified when a group is complete)
+        :param upstream_task_ids:   A list of any upstream tasks that should be completed before this task
+                                    is run.  The results from any upstream tasks are appended to the kwargs
+                                    for this task.
+        :param args:                A list of unnamed parameters to be passed to the callable when running the 
+                                    task
+        :param **kwargs:            A dictionary of named parameters to be passed to the callable when running 
+                                    the task
+        :returns:                   A unique id representing the task.
         """
+        if not callable(cbl):
+            raise TankError("The task function, method or object '%s' must be callable!" % cbl)
+
         upstream_task_ids = set(upstream_task_ids or [])
 
         # create a new task instance:
         task_id = self._next_task_id
         self._next_task_id += 1
-        new_task = _BackgroundTask(task_id, func, group, priority, **kwargs)
+        new_task = _BackgroundTask(task_id, cbl, group, priority, args, **kwargs)
 
         # add the task to the pending queue:
         self._pending_tasks_by_priority.setdefault(priority, []).append(new_task)
@@ -427,7 +461,7 @@ class BackgroundTaskManager(QtCore.QObject):
         for us_task_id in upstream_task_ids:
             self._downstream_task_map.setdefault(us_task_id, set()).add(new_task.uid)
 
-        self._log("Added Task %s to be processed" % new_task)
+        self._log("Added Task %s to the queue" % new_task)
 
         # and start the next task:
         self._start_tasks()
@@ -436,11 +470,31 @@ class BackgroundTaskManager(QtCore.QObject):
 
     def add_pass_through_task(self, priority=None, group=None, upstream_task_ids=None, **kwargs):
         """
+        Add a pass-through task to the queue.  A pass-through task doesn't perform any work but can be useful
+        when syncronising other tasks (e.g. pulling the results from multiple upstream tasks into a single task)
+
+        :param priority:            The priority this task should be run with.  Tasks with higher priority
+                                    are run first.
+        :param group:               The group this task belongs to.  Task groups can be used to simplify task
+                                    management (e.g. stop a whole group, be notified when a group is complete)
+        :param upstream_task_ids:   A list of any upstream tasks that should be completed before this task
+                                    is run.  The results from any upstream tasks are appended to the kwargs
+                                    for this task.
+        :param **kwargs:            A dictionary of named parameters that will be appended to the result of
+                                    the pass-through task.
+        :returns:                   A unique id representing the task.
+
         """
         return self.add_task(self._task_pass_through, priority, group, upstream_task_ids, **kwargs)
 
     def stop_task(self, task_id, stop_upstream=True, stop_downstream=True):
         """
+        Stop the specified task from running.  If the task is already running then it will complete but
+        the completion/failure signal will be ignored.
+
+        :param task_id:         The id of the task to stop
+        :param stop_upstream:   If true then all upstream tasks will also be stopped
+        :param stop_downstream: If true then all downstream tasks will also be stopped
         """
         task = self._tasks_by_id.get(task_id)
         if task is None:
@@ -452,6 +506,12 @@ class BackgroundTaskManager(QtCore.QObject):
 
     def stop_task_group(self, group, stop_upstream=True, stop_downstream=True):
         """
+        Stop all tasks in the specified group from running.  If any tasks are already running then the will 
+        complete but their completion/failure signals will be ignored.
+
+        :param group:           The task group to stop
+        :param stop_upstream:   If true then all upstream tasks will also be stopped
+        :param stop_downstream: If true then all downstream tasks will also be stopped
         """
         task_ids = self._group_task_map.get(group)
         if task_ids is None:
@@ -466,11 +526,13 @@ class BackgroundTaskManager(QtCore.QObject):
                 tasks_to_stop.append(task)
         del self._group_task_map[group]
         self._stop_tasks(tasks_to_stop, stop_upstream, stop_downstream)
-        
+
         self._log(" > Task group %s stopped!" % group)
 
     def stop_all_tasks(self):
         """
+        Stop all currently queued or running tasks.  If any tasks are already running then the will 
+        complete but their completion/failure signals will be ignored.
         """
         self._log("Stopping all tasks...")
 
@@ -481,11 +543,16 @@ class BackgroundTaskManager(QtCore.QObject):
         self._group_task_map = {}
         self._upstream_task_map = {}
         self._downstream_task_map = {}
-        
+
         self._log(" > All tasks stopped!")
 
     def _stop_tasks(self, tasks_to_stop, stop_upstream, stop_downstream):
         """
+        Stop the specified list of tasks
+
+        :param tasks_to_stop:   A list of tasks to stop
+        :param stop_upstream:   If true then all upstream tasks will also be stopped
+        :param stop_downstream: If true then all downstream tasks will also be stopped
         """
         if not tasks_to_stop:
             return
@@ -524,6 +591,10 @@ class BackgroundTaskManager(QtCore.QObject):
 
     def _get_worker_thread(self):
         """
+        Get a worker thread to use.  
+
+        :returns:   An available worker thread if there is one, a new thread if needed or None if the thread
+                    limit has been reached.
         """
         if self._available_threads:
             # we can just use one of the available threads:
@@ -535,11 +606,10 @@ class BackgroundTaskManager(QtCore.QObject):
             # no available threads left!
             return None
 
-        # create a new worker thread - note, _WorkerThreadB doesn't behave correctly
-        # in PyQt :(
-        thread = _WorkerThreadA(self)  # overriden run-method
-        #thread = _WorkerThreadB(self)   # separate thread-specific worker object
-        monitor_lifetime(thread)
+        # create a new worker thread - note, there are two different implementations of the WorkerThread class
+        # that use two different recipes.  Although _WorkerThreadB is arguably more correct it has some issues
+        # in PyQt so _WorkerThreadA is currently preferred - see the notes in the class above for further details
+        thread = _WorkerThreadA(self)
         thread.task_failed.connect(self._on_task_failed)
         thread.task_completed.connect(self._on_task_completed)
         self._all_threads.append(thread)
@@ -554,6 +624,7 @@ class BackgroundTaskManager(QtCore.QObject):
 
     def _start_tasks(self):
         """
+        Start any queued tasks that are startable if there are available threads to run them.
         """
         # start tasks until we fail to start one for whatever reason:
         started = True
@@ -562,6 +633,10 @@ class BackgroundTaskManager(QtCore.QObject):
 
     def _start_next_task(self):
         """
+        Start the next task in the queue if there is a task that is startable and there is an 
+        available threads to run it.
+
+        :returns:    True if a task was started, otherwise False
         """
         if not self._can_process_tasks:
             return False
@@ -603,7 +678,7 @@ class BackgroundTaskManager(QtCore.QObject):
             # looks like we can't do anything!
             return False
 
-        self._log("Starting task %r with args: %s" % (task_to_process, task_to_process._kwargs.keys()))
+        self._log("Starting task %r" % task_to_process)
 
         # ok, we have a thread so lets move the task from the priority queue to the running list:
         self._pending_tasks_by_priority[priority] = (self._pending_tasks_by_priority[priority][:task_index] 
@@ -625,12 +700,17 @@ class BackgroundTaskManager(QtCore.QObject):
 
     def _on_task_completed(self, task, result):
         """
+        Slot triggered when a task is completed.  This processes the result and emits the 
+        task_completed signal if needed.
+
+        :param task:    The task that completed
+        :param result:  The task result
         """
         try:
             # check that we should process this result:
             if task.uid in self._running_tasks:
                 self._log("Task %r - completed" % (task))
-                
+
                 # if we have dependent tasks then update them:
                 for ds_task_id in self._downstream_task_map.get(task.uid) or []:
                     ds_task = self._tasks_by_id.get(ds_task_id)
@@ -644,15 +724,11 @@ class BackgroundTaskManager(QtCore.QObject):
                 group_finished = self._remove_task(task)
 
                 # emit signal that this task is completed:
-                self._log(" > [%d] Emitting task completed signal..." % task.uid)
                 self.task_completed.emit(task.uid, task.group, result)
-                self._log(" > [%d] Emitted task completed signal!" % task.uid)
-                
+
                 if group_finished:
-                    self._log(" > [%s] Emitting group finished signal..." % task.group)
                     # also emit signal that the entire group is completed:
                     self.task_group_finished.emit(task.group)
-                    self._log(" > [%s] Emitted group finished signal!" % task.group)
         finally:
             # move this task thread to the available threads list:
             self._available_threads.append(self.sender())
@@ -662,6 +738,12 @@ class BackgroundTaskManager(QtCore.QObject):
 
     def _on_task_failed(self, task, msg, tb):
         """
+        Slot triggered when a task has failed for some reason.  This processes the task and emits
+        the task_failed signal if needed.
+
+        :param task:    The task that failed
+        :param msg:     The error message for the failed task
+        :param tb:      The stack-trace for the failed task
         """
         try:
             # check that we should process this task:
@@ -689,14 +771,10 @@ class BackgroundTaskManager(QtCore.QObject):
                     group_finished = self._remove_task(failed_task)
 
                     # emit failed signal for the failed task:
-                    self._log(" > [%d] Emitting task failed signal..." % failed_task.uid)
                     self.task_failed.emit(failed_task.uid, failed_task.group, msg, tb)
-                    self._log(" > [%d] Emitted task failed signal!" % failed_task.uid)
 
                     if group_finished and failed_task.group not in finished_groups:
-                        self._log(" > [%s] Emitting group finished signal..." % failed_task.group)
                         self.task_group_finished.emit(failed_task.group)
-                        self._log(" > [%s] Emitted group finished signal!" % failed_task.group)
                         finished_groups.add(failed_task.group)
         finally:
             # move this task thread to the available threads list:
@@ -705,8 +783,11 @@ class BackgroundTaskManager(QtCore.QObject):
         # start processing of the next task:
         self._start_tasks()
 
-    def _remove_task(self, task):#, is_dead=False):
+    def _remove_task(self, task):
         """
+        Remove the specified task from the queue.
+
+        :param task:    The task to remove from the queue
         """
         group_completed = False
 
@@ -743,5 +824,9 @@ class BackgroundTaskManager(QtCore.QObject):
 
     def _task_pass_through(self, **kwargs):
         """
+        Pass-through task callable.  Simply returns the input kwargs as the result
+
+        :param **kwargs:    The named arguments for the task
+        :returns:           A dictionary containing the named input arguments.
         """
         return kwargs

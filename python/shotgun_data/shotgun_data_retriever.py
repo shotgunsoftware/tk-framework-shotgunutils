@@ -14,6 +14,7 @@ import hashlib
 
 import sgtk
 from sgtk.platform.qt import QtCore
+from sgtk import TankError
 
 from .background_task_manager import BackgroundTaskManager
 
@@ -321,10 +322,12 @@ class ShotgunDataRetriever(QtCore.QObject):
         """
         if not self._task_manager:
             return
+
         task_id = self._task_manager.add_task(self._task_execute_find,
                                               priority = ShotgunDataRetriever._SG_FIND_PRIORITY,
                                               group = self._bg_tasks_group,
-                                              *args, **kwargs)
+                                              args = args,
+                                              **kwargs)
         return str(task_id)
 
     def execute_update(self, *args, **kwargs):
@@ -342,7 +345,8 @@ class ShotgunDataRetriever(QtCore.QObject):
         task_id = self._task_manager.add_task(self._task_execute_update,
                                               priority = ShotgunDataRetriever._SG_UPDATE_PRIORITY,
                                               group = self._bg_tasks_group,
-                                              *args, **kwargs)
+                                              args = args, 
+                                              **kwargs)
         return str(task_id)
 
     def execute_create(self, *args, **kwargs):
@@ -360,7 +364,8 @@ class ShotgunDataRetriever(QtCore.QObject):
         task_id = self._task_manager.add_task(self._task_execute_create,
                                               priority = ShotgunDataRetriever._SG_CREATE_PRIORITY,
                                               group = self._bg_tasks_group,
-                                              *args, **kwargs)
+                                              args = args,
+                                              **kwargs)
         return str(task_id)
 
     def execute_delete(self, *args, **kwargs):
@@ -378,10 +383,11 @@ class ShotgunDataRetriever(QtCore.QObject):
         task_id = self._task_manager.add_task(self._task_execute_delete,
                                               priority = ShotgunDataRetriever._SG_DELETE_PRIORITY,
                                               group = self._bg_tasks_group,
-                                              *args, **kwargs)
+                                              args = args,
+                                              **kwargs)
         return str(task_id)
 
-    def execute_method(self, method, data):
+    def execute_method(self, method, *args, **kwargs):
         """
         Executes a generic execution of a method asyncronously.  This is pretty much a
         wrapper for executing a task through the BackgroundTaskManager.
@@ -393,9 +399,10 @@ class ShotgunDataRetriever(QtCore.QObject):
         Where sg is a shotgun API instance. Data is typically
         a dictionary with specific data that the method needs.
 
-        :param method:  The method that should be executed.
-        :param data:    Dictionary of data to pass to the method.
-        :returns:       A unique task id representing this request.
+        :param method:      The method that should be executed.
+        :param *args:       args to be passed to the method
+        :param **kwargs:    Named parameters to be passed to the method
+        :returns:           A unique task id representing this request.
         """
         if not self._task_manager:
             return
@@ -404,7 +411,8 @@ class ShotgunDataRetriever(QtCore.QObject):
                                               group = self._bg_tasks_group,
                                               project_id = project_id,
                                               method = method,
-                                              data = data)
+                                              args = args,
+                                              **kwargs)
 
 
     def request_thumbnail(self, url, entity_type, entity_id, field, load_image=False):
@@ -567,7 +575,7 @@ class ShotgunDataRetriever(QtCore.QObject):
 
         return {"action":"check_thumbnail", "thumb_path":thumb_path, "image":thumb_image}
 
-    def _task_download_thumbnail(self, thumb_path, url, entity_type, entity_id, field, load_image):
+    def _task_download_thumbnail(self, thumb_path, url, entity_type, entity_id, field, load_image, **kwargs):
         """
         Download the thumbnail for the specified entity type, id and field.  This downloads the
         thumbnail into the thumbnail cache directory and returns the cached path.
@@ -652,6 +660,10 @@ class ShotgunDataRetriever(QtCore.QObject):
         :param group:   The group the task belongs to
         :param result:  The task result
         """
+        if group != self._bg_tasks_group:
+            # ignore - it isn't our task!
+            return
+
         action = result.get("action")
         if action in ["find", "create", "delete", "update"]:
             self.work_completed.emit(str(task_id), action, {"sg":result["sg_result"]})
@@ -673,7 +685,7 @@ class ShotgunDataRetriever(QtCore.QObject):
                                          "find", 
                                          {"thumb_path": result["thumb_path"], "image":result["image"]})
 
-    def _on_task_failed(self, task_id, msg, tb):
+    def _on_task_failed(self, task_id, group, msg, tb):
         """
         Slot triggered when a task fails for some reason
 
@@ -681,10 +693,19 @@ class ShotgunDataRetriever(QtCore.QObject):
         :param msg:     The error/exception message for the failed task
         :param tb:      The stack trace of the exception raised by the failed task
         """
+        if group != self._bg_tasks_group:
+            # ignore - it isn't our task!
+            return
+
+        print "TASK %s FAILED:" % task_id
+        print msg
+        print tb
+
         # remap task ids for thumbnails:
         if task_id in self._thumb_task_id_map:
+            orig_task_id = task_id
             task_id = self._thumb_task_id_map[task_id]
-            del self._thumb_task_id_map[task_id]
+            del self._thumb_task_id_map[orig_task_id]
 
         # emit failure signal:
         self.work_failure.emit(str(task_id), msg)
