@@ -335,7 +335,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
     ########################################################################################
     # protected methods not meant to be subclassed but meant to be called by subclasses
 
-    def _load_data(self, entity_type, filters, hierarchy, fields, order=None, seed=None):
+    def _load_data(self, entity_type, filters, hierarchy, fields, order=None, seed=None, limit=None):
         """
         This is the main method to use to configure the model. You basically
         pass a specific find query to the model and it will start tracking
@@ -381,6 +381,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
                           shotgun query parameters. It may also depend on some external factors. In this case,
                           the cache seed should also be influenced by those parameters and you can pass
                           an external string via this parameter which will be added to the seed.
+        :param limit:     Limit the number of results returned from Shotgun. In conjunction with the order
+                          parameter, this can be used to effectively cap the data set that the model
+                          is handling, allowing a user to for example show the twenty most recent notes or
+                          similar.
 
         :returns:         True if cached data was loaded, False if not.
         """
@@ -396,6 +400,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__fields = fields
         self.__order = order or []
         self.__hierarchy = hierarchy
+        self.__limit = limit or 0 # 0 means get all matches
 
         # when we cache the data associated with this model, create
         # the file name and path based on several parameters.
@@ -510,7 +515,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
             self.__current_work_id = self.__sg_data_retriever.execute_find(self.__entity_type,
                                                                            self.__filters,
                                                                            fields,
-                                                                           self.__order)
+                                                                           self.__order,
+                                                                           limit=self.__limit)
 
 
     def _request_thumbnail_download(self, item, field, url, entity_type, entity_id):
