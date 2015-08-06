@@ -22,6 +22,48 @@ from sgtk import TankError
 class _BackgroundTask(object):
     """
     Container class for a single task.
+
+    A task is a Python callable (function/method/class) that takes some arguments, does some work and returns its
+    result.  Each task will be run in a thread and tasks will be executed in priority order.
+
+    For example:
+
+        def task_fetch_status():
+            return status_of_something()
+        ...
+        task_manager.add_task(task_fetch_status)
+        ...
+        def on_task_completion(task, group, result):
+            status = result
+            # do something with the status
+
+    Additionally, tasks can be chained together so that the output of one task can be passed directly to the input
+    of one or more downstream tasks.  To achieve this, the upstream task must returns it's result as a dictionary
+    and this dictionary is added to the named parameters of any downstream tasks by the task manager.  Care should
+    be taken when constructing these tasks that the result of one upstream task doesn't unintentionally overwrite 
+    any existing named parameters for a downstream task.
+
+    For example: 
+
+        def task_fetch_status():
+            return {"status":status_of_something()}
+        def task_do_something(status):
+            result = None
+            if status:
+                result = result_of_doing_something()
+            return result
+        ...
+        status_task_id = task_manager.add_task(task_fetch_status, priority=1)
+        work_task_id = task_manager.add_task(task_do_something, priority=2, upstream_task_ids = [status_task_id])
+        ...
+        def on_task_completion(task, group, result):
+            if task.id = work_task_id:
+                # do something with the result
+                ...
+
+    Upstream tasks can be fed into multiple down-stream tasks and the task priority can also be different so for 
+    example all status fetches could be set to happen before all do-somethings by setting the priority accordingly.
+    Down-stream tasks will also not start before it's upstream tasks have completed.
     """
     def __init__(self, task_id, cbl, group, priority, args, **kwargs):
         """
@@ -37,7 +79,7 @@ class _BackgroundTask(object):
         self._uid = task_id
 
         self._cbl = cbl
-        self._args = args
+        self._args = args or []
         self._kwargs = kwargs
 
         self._group = group
@@ -73,9 +115,13 @@ class _BackgroundTask(object):
 
     def append_upstream_result(self, result):
         """
-        Append the result from an upstream task to this tasks kwargs.
+        Append the result from an upstream task to this tasks kwargs.  In order for the result to be appended 
+        to the task it must be a dictionary.  Each entry in the result dictionary is then added to the tasks
+        named parameters so care should be taken when building the tasks that named parameters for a downstream
+        task are not unintentionally overwritten by the result of an upstream task. 
 
-        :param result:  A dictionary containing the result from an upstream task
+        :param result:  A dictionary containing the result from an upstream task.  If result is not a dictionary
+                        then it will be ignored.
         """
         if result and isinstance(result, dict):
             self._kwargs = dict(self._kwargs.items() + result.items())
@@ -290,6 +336,9 @@ class BackgroundTaskManager(QtCore.QObject):
     """
     Main task manager class.  Manages a queue of tasks running them asyncronously through
     a pool of worker threads.
+
+    Note that the BackgroundTaskManager class itself is reentrant but not thread-safe so its methods should only 
+    be called from the thread it is created in.  Typically this would be the main thread of the application.
     """
     # timeout when Shotgun connection fails
     _SG_CONNECTION_TIMEOUT_SECS = 20
@@ -398,29 +447,18 @@ class BackgroundTaskManager(QtCore.QObject):
         self._log("Shutting down...")
         self._can_process_tasks = False
 
-        # clear out all storage:
-        self._running_tasks = {}
-        self._available_threads = []
-        self._pending_tasks_by_priority = {}
-        self._tasks_by_id = {}
-        self._group_task_map = {}
-        self._upstream_task_map = {}
-        self._downstream_task_map = {}
+        # stop all tasks:
+        self.stop_all_tasks()
 
-        # stop all worker threads and then wait for them to complete:
-        #for thread in self._all_threads:
-        #    #thread.stop(wait_for_completion = False)
-        #    thread.quit()
+        # shut down all worker threads:
         self._log("Waiting for %d background threads to stop..." % len(self._all_threads))
         for thread in self._all_threads:
             thread.shut_down()
-            #thread.deleteLater()
-            #thread = None
-            #thread.stop(wait_for_completion = True)
-        self._log("Shut down successfully!")
+        self._available_threads = []
         self._all_threads = []
+        self._log("Shut down successfully!")
 
-    def add_task(self, cbl, priority=None, group=None, upstream_task_ids=None, args=[], **kwargs):
+    def add_task(self, cbl, priority=None, group=None, upstream_task_ids=None, args=None, **kwargs):
         """
         Add a new task to the queue.  A task is a callable method/class together with any arguments that
         should be passed to the callable when it is called.
@@ -506,7 +544,7 @@ class BackgroundTaskManager(QtCore.QObject):
 
     def stop_task_group(self, group, stop_upstream=True, stop_downstream=True):
         """
-        Stop all tasks in the specified group from running.  If any tasks are already running then the will 
+        Stop all tasks in the specified group from running.  If any tasks are already running then they will 
         complete but their completion/failure signals will be ignored.
 
         :param group:           The task group to stop
@@ -531,7 +569,7 @@ class BackgroundTaskManager(QtCore.QObject):
 
     def stop_all_tasks(self):
         """
-        Stop all currently queued or running tasks.  If any tasks are already running then the will 
+        Stop all currently queued or running tasks.  If any tasks are already running then they will 
         complete but their completion/failure signals will be ignored.
         """
         self._log("Stopping all tasks...")
@@ -610,8 +648,8 @@ class BackgroundTaskManager(QtCore.QObject):
         # that use two different recipes.  Although _WorkerThreadB is arguably more correct it has some issues
         # in PyQt so _WorkerThreadA is currently preferred - see the notes in the class above for further details
         thread = _WorkerThreadA(self)
-        thread.task_failed.connect(self._on_task_failed)
-        thread.task_completed.connect(self._on_task_completed)
+        thread.task_failed.connect(self._on_worker_thread_task_failed)
+        thread.task_completed.connect(self._on_worker_thread_task_completed)
         self._all_threads.append(thread)
 
         # start the thread - this will just put it into wait mode:
@@ -634,7 +672,7 @@ class BackgroundTaskManager(QtCore.QObject):
     def _start_next_task(self):
         """
         Start the next task in the queue if there is a task that is startable and there is an 
-        available threads to run it.
+        available thread to run it.
 
         :returns:    True if a task was started, otherwise False
         """
@@ -643,12 +681,11 @@ class BackgroundTaskManager(QtCore.QObject):
 
         # figure out next task to start from the priority queue:
         task_to_process = None
-        task_index = 0
         priorities = sorted(self._pending_tasks_by_priority.keys(), reverse=True)
         for priority in priorities:
             # iterate through the tasks and make sure we aren't waiting on the
             # completion of any upstream tasks:
-            for ti, task in enumerate(self._pending_tasks_by_priority[priority]):
+            for task in self._pending_tasks_by_priority[priority]:
                 awaiting_upstream_task_completion = False
                 for us_task_id in self._upstream_task_map.get(task.uid, []):
                     if us_task_id in self._tasks_by_id:
@@ -661,7 +698,6 @@ class BackgroundTaskManager(QtCore.QObject):
 
                 # ok, we've found the next task to process:
                 task_to_process = task
-                task_index = ti
                 break
 
             if task_to_process:
@@ -681,15 +717,14 @@ class BackgroundTaskManager(QtCore.QObject):
         self._log("Starting task %r" % task_to_process)
 
         # ok, we have a thread so lets move the task from the priority queue to the running list:
-        self._pending_tasks_by_priority[priority] = (self._pending_tasks_by_priority[priority][:task_index] 
-                                                     + self._pending_tasks_by_priority[priority][task_index+1:])
+        self._pending_tasks_by_priority[priority].remove(task_to_process)
         if not self._pending_tasks_by_priority[priority]:
             # no more tasks with this priority so also clean up the list
             del self._pending_tasks_by_priority[priority]
         self._running_tasks[task_to_process.uid] = (task_to_process, thread)
 
         num_tasks_left = 0
-        for pending_tasks in self._pending_tasks_by_priority.values():
+        for pending_tasks in self._pending_tasks_by_priority.itervalues():
             num_tasks_left += len(pending_tasks)
         self._log(" > Currently running tasks: '%s' - %d left in queue" % (self._running_tasks.keys(), num_tasks_left))
 
@@ -698,21 +733,25 @@ class BackgroundTaskManager(QtCore.QObject):
 
         return True
 
-    def _on_task_completed(self, task, result):
+    def _on_worker_thread_task_completed(self, task, result):
         """
-        Slot triggered when a task is completed.  This processes the result and emits the 
+        Slot triggered when a task is completed by a worker thread.  This processes the result and emits the 
         task_completed signal if needed.
+
+        The worker thread instance that completed the task can be retrieved from self.sender()
 
         :param task:    The task that completed
         :param result:  The task result
         """
+        worker_thread = self.sender()
+
         try:
             # check that we should process this result:
             if task.uid in self._running_tasks:
                 self._log("Task %r - completed" % (task))
 
                 # if we have dependent tasks then update them:
-                for ds_task_id in self._downstream_task_map.get(task.uid) or []:
+                for ds_task_id in self._downstream_task_map.get(task.uid, []):
                     ds_task = self._tasks_by_id.get(ds_task_id)
                     if not ds_task:
                         continue
@@ -731,20 +770,24 @@ class BackgroundTaskManager(QtCore.QObject):
                     self.task_group_finished.emit(task.group)
         finally:
             # move this task thread to the available threads list:
-            self._available_threads.append(self.sender())
+            self._available_threads.append(worker_thread)
 
         # start processing of the next task:
         self._start_tasks()
 
-    def _on_task_failed(self, task, msg, tb):
+    def _on_worker_thread_task_failed(self, task, msg, tb):
         """
-        Slot triggered when a task has failed for some reason.  This processes the task and emits
-        the task_failed signal if needed.
+        Slot triggered when a task being executed in by a worker thread has failed for some reason.  This processes 
+        the task and emits the task_failed signal if needed.
+
+        The worker thread instance that the task failed in can be retrieved from self.sender()
 
         :param task:    The task that failed
         :param msg:     The error message for the failed task
         :param tb:      The stack-trace for the failed task
         """
+        worker_thread = self.sender()
+
         try:
             # check that we should process this task:
             if task.uid in self._running_tasks:
@@ -778,7 +821,7 @@ class BackgroundTaskManager(QtCore.QObject):
                         finished_groups.add(failed_task.group)
         finally:
             # move this task thread to the available threads list:
-            self._available_threads.append(self.sender())
+            self._available_threads.append(worker_thread)
 
         # start processing of the next task:
         self._start_tasks()
@@ -797,10 +840,9 @@ class BackgroundTaskManager(QtCore.QObject):
 
         # find and remove the task from the pending queue:
         if task.priority in self._pending_tasks_by_priority:
-            for ti, p_task in enumerate(self._pending_tasks_by_priority.get(task.priority, [])):
+            for p_task in self._pending_tasks_by_priority.get(task.priority, []):
                 if p_task.uid == task.uid:
-                    self._pending_tasks_by_priority[task.priority] = (self._pending_tasks_by_priority[task.priority][:ti] 
-                                                                      + self._pending_tasks_by_priority[task.priority][ti+1:])
+                    self._pending_tasks_by_priority[task.priority].remove(p_task)
                     break 
 
             if not self._pending_tasks_by_priority[task.priority]:
