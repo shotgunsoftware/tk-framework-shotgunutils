@@ -63,14 +63,21 @@ class ShotgunOverlayModel(ShotgunModel):
     ########################################################################################
     # protected methods not meant to be subclassed but meant to be called by subclasses
     
-    def _load_data(self, entity_type, filters, hierarchy, fields, order=None, seed=None):
+    def _load_data(self, entity_type, filters, hierarchy, fields, order=None, seed=None, limit=None):
         """
         Overridden from ShotgunModel. 
         """
         # reset overlay
         self.__overlay.hide(hide_errors=True)
         # call base class
-        self._cache_loaded = ShotgunModel._load_data(self, entity_type, filters, hierarchy, fields, order, seed)
+        self._cache_loaded = ShotgunModel._load_data(self, 
+                                                     entity_type, 
+                                                     filters, 
+                                                     hierarchy, 
+                                                     fields, 
+                                                     order, 
+                                                     seed,
+                                                     limit)
         return self._cache_loaded        
     
     def _refresh_data(self):
