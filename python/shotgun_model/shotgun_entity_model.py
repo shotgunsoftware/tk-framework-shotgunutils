@@ -17,8 +17,10 @@ from .ui import resources_rc
 
 class ShotgunEntityModel(ShotgunModel):
     """
-    This model represents the data which is displayed inside one of the treeview tabs
-    on the left hand side.
+    A model that contains a hierarchy of Shotgun entity data and sets the icon for each item
+    to the icon for the entity type if available.
+
+    For Step entities, the icon will be a colour swatch based on the Step color field
     """
 
     # global cache of step colours - avoids querying from Shotgun multiple times!
@@ -39,7 +41,7 @@ class ShotgunEntityModel(ShotgunModel):
         :param fields:              List of Shotgun fields to populate the items in the model with.
                                     These will be passed to the Shotgun API find() call when populating
                                     the model.
-        :param parent:              Parent object.
+        :param parent:              Parent QObject.
         :param download_thumbs:     Boolean to indicate if this model should attempt
                                     to download and process thumbnails for the downloaded data.
         :param schema_generation:   Schema generation index. If you are changing the format
@@ -111,25 +113,12 @@ class ShotgunEntityModel(ShotgunModel):
         :returns:       A list of entities in the order they were found starting
                         from the specified item.
         """
-        entities = []
         current_item = item
-
-        # first, if this is a leaf item then it will represent an entity:
-        sg_data = current_item.get_sg_data()
-        if sg_data:
-            entities.append(sg_data)
-            current_item = current_item.parent()
-
-        # now walk up the tree and look for an entity in the fields of the 
-        # parent items:
+        entities = []
         while current_item:
-            field_data = get_sanitized_data(current_item, self.SG_ASSOCIATED_FIELD_ROLE)
-            field_value = field_data.get("value")
-            if (field_value 
-                and isinstance(field_value, dict) 
-                and "id" in field_value 
-                and "type" in field_value):
-                entities.append(field_value)
+            item_entity = self.get_entity(current_item)
+            if item_entity:
+                entities.append(item_entity)
             current_item = current_item.parent()
 
         return entities
@@ -142,10 +131,12 @@ class ShotgunEntityModel(ShotgunModel):
         :returns:       A Shotgun entity dictionary for the item if it represents
                         and entity, otherwise None
         """
+        # first, if this is a leaf item then it will represent an entity:
         sg_data = item.get_sg_data()
         if sg_data:
             return sg_data
 
+        # item doesn't represent an entity directly so look for an entity in the field data instead:
         field_data = get_sanitized_data(item, self.SG_ASSOCIATED_FIELD_ROLE)
         field_value = field_data.get("value")
         if (field_value 

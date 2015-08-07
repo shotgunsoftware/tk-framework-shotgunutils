@@ -37,7 +37,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         code - for a better solution, we recommend using the thumbnail retrieval
         that runs in a background thread.
 
-        Bcause Shotgun thumbnail urls have an expiry time, make sure to only
+        Because Shotgun thumbnail urls have an expiry time, make sure to only
         pass urls to this method that have been very recently retrieved via a Shotgun find call.
 
         :param url: The thumbnail url string that is associated with this thumbnail. This is
@@ -191,14 +191,14 @@ class ShotgunDataRetriever(QtCore.QObject):
         return path_to_cached_thumb
 
     # default individual task priorities
-    _DOWNLOAD_SCHEMA_PRIORITY = 10
-    _DOWNLOAD_THUMB_PRIORITY = 20
-    _EXECUTE_METHOD_PRIORITY = 30
-    _SG_DELETE_PRIORITY = 40
-    _SG_CREATE_PRIORITY = 50
-    _SG_UPDATE_PRIORITY = 60
-    _SG_FIND_PRIORITY = 70
-    _CHECK_THUMB_PRIORITY = 80
+    _SG_DOWNLOAD_SCHEMA_PRIORITY    = 10
+    _DOWNLOAD_THUMB_PRIORITY        = 20
+    _EXECUTE_METHOD_PRIORITY        = 30
+    _SG_DELETE_PRIORITY             = 40
+    _SG_CREATE_PRIORITY             = 40
+    _SG_UPDATE_PRIORITY             = 40
+    _SG_FIND_PRIORITY               = 40
+    _CHECK_THUMB_PRIORITY           = 40
 
     # ------------------------------------------------------------------------------------------------
     # Signals
@@ -260,13 +260,20 @@ class ShotgunDataRetriever(QtCore.QObject):
 
     def start(self):
         """
-        Start the retriever thread
+        Start the retriever thread.
+
+        :raises:    TankError if there is no BackgroundTaskManager associated with this instance
         """
+        if not self._task_manager:
+            raise TankError("Unable to start the ShotgunDataRetriever as it has no BackgroundTaskManager!")
         self._task_manager.start_processing()
 
     def stop(self):
         """
-        Stop the retriever thread
+        Stop the retriever thread.
+
+        Note that once stopped the data retriever can't be restarted as the handle to the
+        BackgroundTaskManager instance is released.
         """
         if not self._task_manager:
             return
@@ -313,13 +320,9 @@ class ShotgunDataRetriever(QtCore.QObject):
                             the given project.
         :returns:           A unique task id representing this request.
         """
-        if not self._task_manager:
-            return
-        task_id = self._task_manager.add_task(self._task_get_schema,
-                                              priority = ShotgunDataRetriever._DOWNLOAD_SCHEMA_PRIORITY,
-                                              group = self._bg_tasks_group,
-                                              project_id = project_id)
-        return str(task_id)
+        return self._add_task(self._task_get_schema, 
+                              priority = ShotgunDataRetriever._SG_DOWNLOAD_SCHEMA_PRIORITY,
+                              task_kwargs = {"project_id":project_id})
 
     def execute_find(self, *args, **kwargs):
         """
@@ -331,15 +334,10 @@ class ShotgunDataRetriever(QtCore.QObject):
         :param **kwargs:    Named parameters to be passed to the Shotgun find() call
         :returns:           A unique task id representing this request. 
         """
-        if not self._task_manager:
-            return
-
-        task_id = self._task_manager.add_task(self._task_execute_find,
-                                              priority = ShotgunDataRetriever._SG_FIND_PRIORITY,
-                                              group = self._bg_tasks_group,
-                                              args = args,
-                                              **kwargs)
-        return str(task_id)
+        return self._add_task(self._task_execute_find, 
+                              priority = ShotgunDataRetriever._SG_FIND_PRIORITY,
+                              task_args = args,
+                              task_kwargs = kwargs)
 
     def execute_update(self, *args, **kwargs):
         """
@@ -351,14 +349,10 @@ class ShotgunDataRetriever(QtCore.QObject):
         :param **kwargs:    Named parameters to be passed to the Shotgun update() call
         :returns:           A unique task id representing this request.
         """
-        if not self._task_manager:
-            return
-        task_id = self._task_manager.add_task(self._task_execute_update,
-                                              priority = ShotgunDataRetriever._SG_UPDATE_PRIORITY,
-                                              group = self._bg_tasks_group,
-                                              args = args, 
-                                              **kwargs)
-        return str(task_id)
+        return self._add_task(self._task_execute_update, 
+                              priority = ShotgunDataRetriever._SG_UPDATE_PRIORITY,
+                              task_args = args,
+                              task_kwargs = kwargs)
 
     def execute_create(self, *args, **kwargs):
         """
@@ -370,14 +364,10 @@ class ShotgunDataRetriever(QtCore.QObject):
         :param **kwargs:    Named parameters to be passed to the Shotgun create() call
         :returns:           A unique task id representing this request.
         """
-        if not self._task_manager:
-            return
-        task_id = self._task_manager.add_task(self._task_execute_create,
-                                              priority = ShotgunDataRetriever._SG_CREATE_PRIORITY,
-                                              group = self._bg_tasks_group,
-                                              args = args,
-                                              **kwargs)
-        return str(task_id)
+        return self._add_task(self._task_execute_create, 
+                              priority = ShotgunDataRetriever._SG_CREATE_PRIORITY,
+                              task_args = args,
+                              task_kwargs = kwargs)
 
     def execute_delete(self, *args, **kwargs):
         """
@@ -389,14 +379,10 @@ class ShotgunDataRetriever(QtCore.QObject):
         :param **kwargs:    Named parameters to be passed to the Shotgun delete() call
         :returns:           A unique task id representing this request.
         """
-        if not self._task_manager:
-            return
-        task_id = self._task_manager.add_task(self._task_execute_delete,
-                                              priority = ShotgunDataRetriever._SG_DELETE_PRIORITY,
-                                              group = self._bg_tasks_group,
-                                              args = args,
-                                              **kwargs)
-        return str(task_id)
+        return self._add_task(self._task_execute_delete, 
+                              priority = ShotgunDataRetriever._SG_DELETE_PRIORITY,
+                              task_args = args,
+                              task_kwargs = kwargs)
 
     def execute_method(self, method, *args, **kwargs):
         """
@@ -415,15 +401,36 @@ class ShotgunDataRetriever(QtCore.QObject):
         :param **kwargs:    Named parameters to be passed to the method
         :returns:           A unique task id representing this request.
         """
+        # note that as the 'task' is actually going to call through to another method, we
+        # encode the method name, args and kwargs in the task's kwargs dictionary as this
+        # keeps them nicely encapsulated.
+        task_kwargs = {"method":method, "method_args":args, "method_kwargs":kwargs}
+        return self._add_task(self._task_execute_method, 
+                              priority = ShotgunDataRetriever._EXECUTE_METHOD_PRIORITY,
+                              task_kwargs = task_kwargs)
+
+    def _add_task(self, task_cb, priority, task_args=None, task_kwargs=None):
+        """
+        Simplified wrapper to add a task to the task manager.  All tasks get added into
+        the same group (self._bg_tasks_group) and the returned task_id is case to a string
+        to retain backwards compatibility (it used to return a uuid string).
+
+        :param task_cb:     The function to execute for the task
+        :param priority:    The priority the task should be run with
+        :param task_args:   Arguments that should be passed to the task callback
+        :param task_kwargs: Named arguments that should be passed to the task callback
+        :returns:           String representation of the task id
+        :raises:            TankError if there is no task manager available to add the task to!
+        """
         if not self._task_manager:
-            return
-        task_id = self._task_manager.add_task(self._task_execute_method,
-                                              priority = ShotgunDataRetriever._EXECUTE_METHOD_PRIORITY,
+            raise TankError("Data retriever does not have a task manager to add the task to!")
+
+        task_id = self._task_manager.add_task(task_cb, 
+                                              priority, 
                                               group = self._bg_tasks_group,
-                                              project_id = project_id,
-                                              method = method,
-                                              args = args,
-                                              **kwargs)
+                                              task_args = task_args,
+                                              task_kwargs = task_kwargs)
+        return str(task_id)
 
 
     def request_thumbnail(self, url, entity_type, entity_id, field, load_image=False):
@@ -449,19 +456,19 @@ class ShotgunDataRetriever(QtCore.QObject):
         check_task_id = self._task_manager.add_task(self._task_check_thumbnail,
                                                     priority = ShotgunDataRetriever._CHECK_THUMB_PRIORITY,
                                                     group = self._bg_tasks_group,
-                                                    url = url,
-                                                    load_image = load_image)
+                                                    task_kwargs = {"url":url, 
+                                                                   "load_image":load_image})
 
         # add download thumbnail task
         dl_task_id = self._task_manager.add_task(self._task_download_thumbnail,
                                                  upstream_task_ids = [check_task_id],
                                                  priority = ShotgunDataRetriever._DOWNLOAD_THUMB_PRIORITY,
                                                  group = self._bg_tasks_group,
-                                                 url = url,
-                                                 entity_type = entity_type, 
-                                                 entity_id = entity_id,
-                                                 field = field,
-                                                 load_image = load_image)
+                                                 task_kwargs = {"url":url,
+                                                                "entity_type":entity_type, 
+                                                                "entity_id":entity_id,
+                                                                "field":field,
+                                                                "load_image":load_image})
 
         # all results for requesting a thumbnail should be returned with the same id so use
         # a mapping to track the 'primary' task id:
@@ -550,17 +557,18 @@ class ShotgunDataRetriever(QtCore.QObject):
         sg_res = self._shotgun_connection.delete(*args, **kwargs)
         return {"action":"delete", "sg_result":sg_res}
 
-    def _task_execute_method(self, method, data):
+    def _task_execute_method(self, method, method_args, method_kwargs):
         """
         Method that gets executed in a background task/thread to execute a method
         with a thread-specific shotgun connection.
 
-        :param method:      The method to be run asyncronously
-        :param data:        Arguments to be passed to the method 
-        :returns:           Dictionary containing the 'action' together with the result
-                            returned by the method
+        :param method:          The method to be run asyncronously
+        :param method_args:     Arguments to be passed to the method
+        :param method_kwargs:   Named arguments to be passed to the method 
+        :returns:               Dictionary containing the 'action' together with the result
+                                returned by the method
         """
-        res = method(self._shotgun_connection, data)
+        res = method(self._shotgun_connection, *method_args, **method_kwargs)
         return {"action":"method", "result":res}
 
     def _task_check_thumbnail(self, url, load_image):
@@ -641,10 +649,9 @@ class ShotgunDataRetriever(QtCore.QObject):
                     sgtk.util.download_url(self._shotgun_connection, url, thumb_path)
 
             if thumb_path:
-                # now we have a thumbnail on disk, either via the direct
-                # download, or via the url-fresh-then-download approach
-                # the file is downloaded with user-only permissions
-                # modify the permissions of the file so it's writeable by others
+                # now we have a thumbnail on disk, either via the direct download, or via the 
+                # url-fresh-then-download approach.  Because the file is downloaded with user-only 
+                # permissions we have to modify the permissions so that it's writeable by others
                 old_umask = os.umask(0)
                 try:
                     os.chmod(thumb_path, 0666)
@@ -707,10 +714,6 @@ class ShotgunDataRetriever(QtCore.QObject):
         if group != self._bg_tasks_group:
             # ignore - it isn't our task!
             return
-
-        print "TASK %s FAILED:" % task_id
-        print msg
-        print tb
 
         # remap task ids for thumbnails:
         if task_id in self._thumb_task_id_map:

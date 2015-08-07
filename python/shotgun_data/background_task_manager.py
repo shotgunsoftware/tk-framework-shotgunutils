@@ -65,7 +65,7 @@ class _BackgroundTask(object):
     example all status fetches could be set to happen before all do-somethings by setting the priority accordingly.
     Down-stream tasks will also not start before it's upstream tasks have completed.
     """
-    def __init__(self, task_id, cbl, group, priority, args, **kwargs):
+    def __init__(self, task_id, cbl, group, priority, args, kwargs):
         """
         Construction.
 
@@ -80,7 +80,7 @@ class _BackgroundTask(object):
 
         self._cbl = cbl
         self._args = args or []
-        self._kwargs = kwargs
+        self._kwargs = kwargs or {}
 
         self._group = group
         self._priority = priority
@@ -458,7 +458,7 @@ class BackgroundTaskManager(QtCore.QObject):
         self._all_threads = []
         self._log("Shut down successfully!")
 
-    def add_task(self, cbl, priority=None, group=None, upstream_task_ids=None, args=None, **kwargs):
+    def add_task(self, cbl, priority=None, group=None, upstream_task_ids=None, task_args=None, task_kwargs=None):
         """
         Add a new task to the queue.  A task is a callable method/class together with any arguments that
         should be passed to the callable when it is called.
@@ -471,9 +471,9 @@ class BackgroundTaskManager(QtCore.QObject):
         :param upstream_task_ids:   A list of any upstream tasks that should be completed before this task
                                     is run.  The results from any upstream tasks are appended to the kwargs
                                     for this task.
-        :param args:                A list of unnamed parameters to be passed to the callable when running the 
+        :param task_args:           A list of unnamed parameters to be passed to the callable when running the 
                                     task
-        :param **kwargs:            A dictionary of named parameters to be passed to the callable when running 
+        :param task_kwargs:         A dictionary of named parameters to be passed to the callable when running 
                                     the task
         :returns:                   A unique id representing the task.
         """
@@ -485,7 +485,7 @@ class BackgroundTaskManager(QtCore.QObject):
         # create a new task instance:
         task_id = self._next_task_id
         self._next_task_id += 1
-        new_task = _BackgroundTask(task_id, cbl, group, priority, args, **kwargs)
+        new_task = _BackgroundTask(task_id, cbl, group, priority, task_args, task_kwargs)
 
         # add the task to the pending queue:
         self._pending_tasks_by_priority.setdefault(priority, []).append(new_task)
@@ -506,7 +506,7 @@ class BackgroundTaskManager(QtCore.QObject):
 
         return new_task.uid
 
-    def add_pass_through_task(self, priority=None, group=None, upstream_task_ids=None, **kwargs):
+    def add_pass_through_task(self, priority=None, group=None, upstream_task_ids=None, task_kwargs=None):
         """
         Add a pass-through task to the queue.  A pass-through task doesn't perform any work but can be useful
         when syncronising other tasks (e.g. pulling the results from multiple upstream tasks into a single task)
@@ -518,12 +518,12 @@ class BackgroundTaskManager(QtCore.QObject):
         :param upstream_task_ids:   A list of any upstream tasks that should be completed before this task
                                     is run.  The results from any upstream tasks are appended to the kwargs
                                     for this task.
-        :param **kwargs:            A dictionary of named parameters that will be appended to the result of
+        :param task_kwargs:         A dictionary of named parameters that will be appended to the result of
                                     the pass-through task.
         :returns:                   A unique id representing the task.
 
         """
-        return self.add_task(self._task_pass_through, priority, group, upstream_task_ids, **kwargs)
+        return self.add_task(self._task_pass_through, priority, group, upstream_task_ids, task_kwargs = task_kwargs)
 
     def stop_task(self, task_id, stop_upstream=True, stop_downstream=True):
         """

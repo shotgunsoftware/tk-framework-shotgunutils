@@ -16,6 +16,7 @@ import hashlib
 import urlparse
 import datetime
 import time
+import weakref
 
 from tank.platform.qt import QtCore, QtGui
 
@@ -479,10 +480,18 @@ class ShotgunModel(QtGui.QStandardItemModel):
         if not self.__sg_data_retriever:
             raise TankError("Data retriever is not available!")
 
-        # stop any current work:
-        self.__current_work_id = None
-        self.__thumb_map = {}
-        self.__sg_data_retriever.clear()
+        # Stop any queued work that hasn't completed yet.  Note that we intentionally only stop the
+        # find query and not the thumbnail cache/download.  This is because the thumbnails returned
+        # are likely to still be valid for the current data in the model and if they are stopped then
+        # the pattern 'create model->load cached->refresh from sg' would result in empty icons being 
+        # presented to the user until the shotgun query has completed!
+        #
+        # This may result in unnecessary thumbnail downloads from Shotgun but in all likelihood, the
+        # thumbnails are going to be the same before and after the refresh and any additional overhead
+        # should be weighed against a cleaner user experience
+        if self.__current_work_id is not None:
+            self.__sg_data_retriever.stop_work(self.__current_work_id)
+            self.__current_work_id = None
 
         # emit that the data is refreshing.
         self.data_refreshing.emit()
@@ -540,8 +549,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                                          field, 
                                                          self.__bg_load_thumbs)
 
-        # keep tabs of this and call out later
-        self.__thumb_map[uid] = {"item": item, "field": field }
+        # keep tabs of this and call out later - note that we use a weakref to allow
+        # the model item to be gc'd if it's removed from the model before the thumb
+        # request completes.
+        self.__thumb_map[uid] = {"item_ref": weakref.ref(item), "field": field }
 
     ########################################################################################
     # methods to be implemented by subclasses
@@ -763,13 +774,18 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # a thumbnail is now present on disk!
             thumb_info = self.__thumb_map[uid]
             del self.__thumb_map[uid]
+
             thumbnail_path = data["thumb_path"]
             thumbnail = data["image"]
 
             # if the requested thumbnail has since dissapeared on the server,
             # path and image will be None. In this case, skip processing
             if thumbnail_path:
-                item = thumb_info["item"]
+                # get the model item from the weakref we stored in the thumb info:
+                item = thumb_info["item_ref"]()
+                if not item:
+                    # the model item no longer exists so we can ignore this result!
+                    return
                 sg_field = thumb_info["field"]
 
                 # call our deriving class implementation
@@ -827,13 +843,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 modifications_made = True
             else:
                 # no data coming in from shotgun, so no need to rebuild the tree
-                # however stil set the modifications flag (we went from an undefined
+                # however still set the modifications flag (we went from an undefined
                 # tree to an empty tree, to trigger a zero-item cache to be saved
                 modifications_made = True
 
         else:
             # go through and see if there are any changes we should apply to the tree.
-            # note that there may be items
 
             # check if anything has been deleted or added
             ids_from_shotgun = set([ d.get("id") for d in sg_data ])
