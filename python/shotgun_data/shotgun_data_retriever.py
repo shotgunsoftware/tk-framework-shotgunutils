@@ -13,7 +13,7 @@ import urlparse
 import hashlib
 
 import sgtk
-from sgtk.platform.qt import QtCore
+from sgtk.platform.qt import QtCore, QtGui
 from sgtk import TankError
 
 from .background_task_manager import BackgroundTaskManager
