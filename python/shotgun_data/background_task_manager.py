@@ -648,6 +648,12 @@ class BackgroundTaskManager(QtCore.QObject):
         # that use two different recipes.  Although _WorkerThreadB is arguably more correct it has some issues
         # in PyQt so _WorkerThreadA is currently preferred - see the notes in the class above for further details
         thread = _WorkerThreadA(self)
+        if not isinstance(thread, _WorkerThreadA):
+            # for some reason (probably memory corruption somewhere else) I've occasionally seen the above
+            # creation of a worker thread return another arbitrary object!  Added this in here so the code
+            # will at least continue correctly and not do unexpected things!
+            self._bundle.log_error("Failed to create background worker thread for task Manager!")
+            return None
         thread.task_failed.connect(self._on_worker_thread_task_failed)
         thread.task_completed.connect(self._on_worker_thread_task_completed)
         self._all_threads.append(thread)
