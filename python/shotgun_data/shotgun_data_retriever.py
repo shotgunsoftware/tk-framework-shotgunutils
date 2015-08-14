@@ -248,16 +248,6 @@ class ShotgunDataRetriever(QtCore.QObject):
     # ------------------------------------------------------------------------------------------------
     # Public interface
 
-    @property
-    def _shotgun_connection(self):
-        """
-        Returns the Shotgun connection currently being used.  Note that this will be thread
-        specific.
-
-        :returns:    The Shotgun connection for this instance in the current thread
-        """
-        return self._task_manager.shotgun_connection
-
     def start(self):
         """
         Start the retriever thread.
@@ -497,10 +487,10 @@ class ShotgunDataRetriever(QtCore.QObject):
             project = None
 
         # read in details about all fields
-        sg_field_schema = self._shotgun_connection.schema_read(project)
+        sg_field_schema = self._bundle.shotgun.schema_read(project)
 
         # and read in details about all entity types
-        sg_type_schema = self._shotgun_connection.schema_entity_read(project)
+        sg_type_schema = self._bundle.shotgun.schema_entity_read(project)
 
         # need to wrap it in a dict not to confuse pyqt's signals and type system
         return {"action":"schema", "fields":sg_field_schema, "types":sg_type_schema}
@@ -515,7 +505,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         :returns:           Dictionary containing the 'action' together with result
                             returned by the find() call
         """
-        sg_res = self._shotgun_connection.find(*args, **kwargs)
+        sg_res = self._bundle.shotgun.find(*args, **kwargs)
         return {"action":"find", "sg_result":sg_res}
 
     def _task_execute_update(self, *args, **kwargs):
@@ -528,7 +518,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         :returns:           Dictionary containing the 'action' together with result
                             returned by the update() call
         """
-        sg_res = self._shotgun_connection.update(*args, **kwargs)
+        sg_res = self._bundle.shotgun.update(*args, **kwargs)
         return {"action":"update", "sg_result":sg_res}
 
     def _task_execute_create(self, *args, **kwargs):
@@ -541,7 +531,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         :returns:           Dictionary containing the 'action' together with result
                             returned by the create() call
         """
-        sg_res = self._shotgun_connection.create(*args, **kwargs)
+        sg_res = self._bundle.shotgun.create(*args, **kwargs)
         return {"action":"create", "sg_result":sg_res}
 
     def _task_execute_delete(self, *args, **kwargs):
@@ -554,7 +544,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         :returns:           Dictionary containing the 'action' together with result
                             returned by the delete() call
         """
-        sg_res = self._shotgun_connection.delete(*args, **kwargs)
+        sg_res = self._bundle.shotgun.delete(*args, **kwargs)
         return {"action":"delete", "sg_result":sg_res}
 
     def _task_execute_method(self, method, method_args, method_kwargs):
@@ -568,7 +558,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         :returns:               Dictionary containing the 'action' together with the result
                                 returned by the method
         """
-        res = method(self._shotgun_connection, *method_args, **method_kwargs)
+        res = method(self._bundle.shotgun, *method_args, **method_kwargs)
         return {"action":"method", "result":res}
 
     def _task_check_thumbnail(self, url, load_image):
@@ -629,12 +619,12 @@ class ShotgunDataRetriever(QtCore.QObject):
 
             # try to download based on the path we have
             try:
-                sgtk.util.download_url(self._shotgun_connection, url, thumb_path)
+                sgtk.util.download_url(self._bundle.shotgun, url, thumb_path)
             except TankError, e:
                 # Note: Unfortunately, the download_url will re-cast 
                 # all exceptions into tankerrors.
                 # get a fresh url from shotgun and try again
-                sg_data = self._shotgun_connection.find_one(entity_type, [["id", "is", entity_id]], [field])
+                sg_data = self._bundle.shotgun.find_one(entity_type, [["id", "is", entity_id]], [field])
 
                 if sg_data is None or sg_data.get(field) is None:
                     # no thumbnail! This is possible if the thumb has changed
@@ -646,7 +636,7 @@ class ShotgunDataRetriever(QtCore.QObject):
                 else:
                     # download from sg
                     url = sg_data[field]
-                    sgtk.util.download_url(self._shotgun_connection, url, thumb_path)
+                    sgtk.util.download_url(self._bundle.shotgun, url, thumb_path)
 
             if thumb_path:
                 # now we have a thumbnail on disk, either via the direct download, or via the 

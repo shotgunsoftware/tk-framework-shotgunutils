@@ -11,9 +11,6 @@
 """
 """
 import traceback
-import copy
-import gc
-import threading
 
 import sgtk
 from sgtk.platform.qt import QtCore
@@ -340,8 +337,6 @@ class BackgroundTaskManager(QtCore.QObject):
     Note that the BackgroundTaskManager class itself is reentrant but not thread-safe so its methods should only 
     be called from the thread it is created in.  Typically this would be the main thread of the application.
     """
-    # timeout when Shotgun connection fails
-    _SG_CONNECTION_TIMEOUT_SECS = 20
 
     # signal emitted when a task has been completed
     task_completed = QtCore.Signal(int, object, object)# uid, group, result
@@ -384,27 +379,6 @@ class BackgroundTaskManager(QtCore.QObject):
         # track downstream dependencies for tasks:
         self._upstream_task_map = {}
         self._downstream_task_map = {}
-
-        self._threadlocal_storage = threading.local()
-
-    @property
-    def shotgun_connection(self):
-        """
-        Get a Shotgun connection to use.  Creates a new Shotgun connection if the instance doesn't 
-        already have one.  The connection returned should only be used by the current thread.
-
-        :returns:   The Shotgun connection for this instance in the current thread
-        """
-        if not hasattr(self._threadlocal_storage, "shotgun"):
-            # create our own private shotgun connection. This is because
-            # the shotgun API isn't threadsafe, so running multiple models in parallel
-            # (common) may result in side effects if a single connection is shared
-            self._threadlocal_storage.shotgun = sgtk.util.shotgun.create_sg_connection()
-
-            # set the maximum timeout for this connection for fluency
-            self._threadlocal_storage.shotgun.config.timeout_secs = BackgroundTaskManager._SG_CONNECTION_TIMEOUT_SECS
-
-        return self._threadlocal_storage.shotgun
 
     def next_group_id(self):
         """
