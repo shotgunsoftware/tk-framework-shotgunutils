@@ -33,20 +33,20 @@ class ShotgunOverlayModel(ShotgunModel):
     # should be deactivated. 
     progress_spinner_end = QtCore.Signal()
 
-    def __init__(self, parent, overlay_widget, download_thumbs=True, schema_generation=0, bg_load_thumbs=False, bg_task_manager=None):
+    def __init__(self, parent, overlay_widget, download_thumbs=True, schema_generation=0, 
+                 bg_load_thumbs=True, bg_task_manager=None):
         """
-        Constructor. This will create a model which can later be used to load
-        and manage Shotgun data.
+        Constructor. This will create a model which can later be used to load and manage Shotgun data.
 
-        :param parent: Parent object.
-        :param overlay_widget: Widget on which the spinner/info overlay should be positioned.
-        :param download_thumbs: Boolean to indicate if this model should attempt 
-                                to download and process thumbnails for the downloaded data.
-        :param schema_generation: Schema generation index. If you are changing the format 
-                                  of the data you are retrieving from Shotgun, and therefore
-                                  want to invalidate any cache files that may already exist
-                                  in the system, you can increment this integer.
-        :param bg_load_thumbs: If set to True, thumbnails will be loaded in the background.
+        :param parent:              Parent object.
+        :param overlay_widget:      Widget on which the spinner/info overlay should be positioned.
+        :param download_thumbs:     Boolean to indicate if this model should attempt 
+                                    to download and process thumbnails for the downloaded data.
+        :param schema_generation:   Schema generation index. If you are changing the format 
+                                    of the data you are retrieving from Shotgun, and therefore
+                                    want to invalidate any cache files that may already exist
+                                    in the system, you can increment this integer.
+        :param bg_load_thumbs:      If set to True, thumbnails will be loaded in the background.
         :param bg_task_manager:     Background task manager to use for any asynchronous work.  If
                                     this is None then a task manager will be created as needed.
         """

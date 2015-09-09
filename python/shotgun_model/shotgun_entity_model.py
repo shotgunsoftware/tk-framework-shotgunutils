@@ -27,7 +27,7 @@ class ShotgunEntityModel(ShotgunModel):
     _SG_STEP_COLOURS = {}
 
     def __init__(self, entity_type, filters, hierarchy, fields, parent, 
-                 download_thumbs=False, schema_generation=0, bg_load_thumbs=False,
+                 download_thumbs=False, schema_generation=0, bg_load_thumbs=True,
                  bg_task_manager=None):
         """
         Construction
@@ -57,10 +57,8 @@ class ShotgunEntityModel(ShotgunModel):
 
         # make sure fields is valid:
         fields = fields or []
-        # for backwards compatibility, make sure certain fields are added:
-        fields = list(set(fields + ["image", "sg_status_list", "description"]))
 
-        ## folder icon
+        # default icon
         self._default_icon = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Folder.png"))
 
         ShotgunModel.__init__(self, 
@@ -102,16 +100,21 @@ class ShotgunEntityModel(ShotgunModel):
                 icon = QtGui.QIcon(QtGui.QPixmap(icon_path))
             self._entity_icons[entity_type] = icon
 
-        return QtGui.QIcon(icon) if icon else None
+        return icon
 
     def get_entities(self, item):
         """
-        Get entities for the current item by traversing up the tree and pulling 
-        entity information from each item if possible
+        Get entities for the current item by traversing up the tree and pulling entity information 
+        from each item if possible
 
         :param item:    The item to find entities for
-        :returns:       A list of entities in the order they were found starting
-                        from the specified item.
+        :returns:       A list of Shotgun entity dictionaries in the order they were found starting from
+                        the specified item.  Each dictionary will contain all the entity information stored
+                        by the model which is usually determined by the list of fields passed during 
+                        construction plus name/code, type and id.
+
+                        For non-leaf items that represent Shotgun entities, the dictionary will typically
+                        just contain name, type and id.
         """
         current_item = item
         entities = []
@@ -128,8 +131,10 @@ class ShotgunEntityModel(ShotgunModel):
         Get the Shotgun entity details for the specified model item.
 
         :param item:    The item to retrieve the entity details for
-        :returns:       A Shotgun entity dictionary for the item if it represents
-                        and entity, otherwise None
+        :returns:       A Shotgun entity dictionary for the item if it represents an entity, otherwise 
+                        None.  The dictionary will contain all the entity information stored by the model 
+                        which is usually determined by the list of fields passed during construction plus
+                        name/code, type and id.
         """
         # first, if this is a leaf item then it will represent an entity:
         sg_data = item.get_sg_data()
@@ -174,25 +179,16 @@ class ShotgunEntityModel(ShotgunModel):
         # {'name': 'sg_sequence', 'value': {'type': 'Sequence', 'id': 11, 'name': 'bunny_080'}}
         field_value = field_data["value"]
 
+        entity_icon = None
         if isinstance(field_value, dict) and "name" in field_value and "type" in field_value:
             # this is an intermediate node which is an entity type link
             entity_icon = self._get_default_thumbnail(field_value)
-            if entity_icon:
-                # use sg icon!
-                item.setIcon(QtGui.QIcon(entity_icon))
-                found_icon = True
-
         elif sg_data:
             # this is a leaf node!
             entity_icon = self._get_default_thumbnail(sg_data)
-            if entity_icon:
-                # use sg icon!
-                item.setIcon(QtGui.QIcon(entity_icon))
-                found_icon = True
 
-        # for all items where we didn't find the icon, fall back onto the default
-        if not found_icon:
-            item.setIcon(QtGui.QIcon(self._default_icon))
+        # update item icon
+        item.setIcon(entity_icon or self._default_icon)
 
     def _get_default_thumbnail(self, sg_entity):
         """
@@ -200,9 +196,9 @@ class ShotgunEntityModel(ShotgunModel):
 
         :param sg_entity:   A Shotgun entity dictionary for the entity to get the
                             icon for.
-        :returns:           A QIcon for the entity if available.  For Step entities, a
-                            swatch representing the step colour is returned.  If no
-                            icon is available for the entity type then None is returned
+        :returns:           A QIcon for the entity if available.  For Step entities, a swatch 
+                            representing the step colour is returned.  If no icon is available 
+                            for the entity type then the default icon is returned
         """
         if sg_entity.get("type") == "Step":
             # special case handling for steps to return a colour swatch:
@@ -242,8 +238,8 @@ class ShotgunEntityModel(ShotgunModel):
                         self._step_swatch_icons[colour] = QtGui.QIcon(pm)
 
                     # return the icon:
-                    return QtGui.QIcon(self._step_swatch_icons[colour])
+                    return self._step_swatch_icons[colour]
 
-        # just return the entity icon:
-        return self.get_entity_icon(sg_entity.get("type"))
+        # just return the entity icon or the default icon if there is no entity icon:
+        return self.get_entity_icon(sg_entity.get("type")) or self._default_icon
 

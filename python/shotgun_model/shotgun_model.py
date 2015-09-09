@@ -90,7 +90,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
     FILE_VERSION = 21
 
 
-    def __init__(self, parent, download_thumbs=True, schema_generation=0, bg_load_thumbs=False, bg_task_manager=None):
+    def __init__(self, parent, download_thumbs=True, schema_generation=0, bg_load_thumbs=True, bg_task_manager=None):
         """
         Constructor. This will create a model which can later be used to load
         and manage Shotgun data.

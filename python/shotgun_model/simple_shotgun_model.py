@@ -36,7 +36,11 @@ class SimpleShotgunModel(ShotgunOverlayModel):
         :param bg_task_manager:     Background task manager to use for any asynchronous work.  If
                                     this is None then a task manager will be created as needed.
         """
-        ShotgunOverlayModel.__init__(self, parent, parent, download_thumbs=True, 
+        ShotgunOverlayModel.__init__(self, 
+                                     parent=parent, 
+                                     overlay_widget=parent, 
+                                     download_thumbs=True,
+                                     bg_load_thumbs=True, 
                                      bg_task_manager=bg_task_manager)
 
     def load_data(self, entity_type, filters=None, fields=None):

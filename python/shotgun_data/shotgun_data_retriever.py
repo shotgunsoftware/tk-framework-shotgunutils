@@ -190,15 +190,27 @@ class ShotgunDataRetriever(QtCore.QObject):
 
         return path_to_cached_thumb
 
-    # default individual task priorities
-    _SG_DOWNLOAD_SCHEMA_PRIORITY    = 10
+    # Individual task priorities used when adding tasks to the task manager
+    # Note: a higher value means more important and will get run before lower 
+    # priority tasks
+
+    # thumbnail checks are local disk checks and very fast.  These 
+    # are always carried out before any shotgun calls
+    _CHECK_THUMB_PRIORITY           = 50
+
+    # the shotgun schema is often useful to have as early on as possible,
+    # sometimes other shotgun operations also need the shotgun schema
+    # (and it's typically also cached) so this call has a higher priority
+    # than the rest of the shotgun calls
+    _SG_DOWNLOAD_SCHEMA_PRIORITY    = 40
+    
+    # next the priority for any other Shotgun calls (e.g. find, create, 
+    # update, delete, etc.)
+    _SG_CALL_PRIORITY               = 30
+    
+    # thumbnails are downloaded last as they are considered low-priority 
+    # and can take a relatively significant amount of time
     _DOWNLOAD_THUMB_PRIORITY        = 20
-    _EXECUTE_METHOD_PRIORITY        = 30
-    _SG_DELETE_PRIORITY             = 40
-    _SG_CREATE_PRIORITY             = 40
-    _SG_UPDATE_PRIORITY             = 40
-    _SG_FIND_PRIORITY               = 40
-    _CHECK_THUMB_PRIORITY           = 40
 
     # ------------------------------------------------------------------------------------------------
     # Signals
@@ -325,7 +337,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         :returns:           A unique task id representing this request. 
         """
         return self._add_task(self._task_execute_find, 
-                              priority = ShotgunDataRetriever._SG_FIND_PRIORITY,
+                              priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
                               task_args = args,
                               task_kwargs = kwargs)
 
@@ -340,7 +352,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         :returns:           A unique task id representing this request.
         """
         return self._add_task(self._task_execute_update, 
-                              priority = ShotgunDataRetriever._SG_UPDATE_PRIORITY,
+                              priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
                               task_args = args,
                               task_kwargs = kwargs)
 
@@ -355,7 +367,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         :returns:           A unique task id representing this request.
         """
         return self._add_task(self._task_execute_create, 
-                              priority = ShotgunDataRetriever._SG_CREATE_PRIORITY,
+                              priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
                               task_args = args,
                               task_kwargs = kwargs)
 
@@ -370,7 +382,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         :returns:           A unique task id representing this request.
         """
         return self._add_task(self._task_execute_delete, 
-                              priority = ShotgunDataRetriever._SG_DELETE_PRIORITY,
+                              priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
                               task_args = args,
                               task_kwargs = kwargs)
 
@@ -396,7 +408,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         # keeps them nicely encapsulated.
         task_kwargs = {"method":method, "method_args":args, "method_kwargs":kwargs}
         return self._add_task(self._task_execute_method, 
-                              priority = ShotgunDataRetriever._EXECUTE_METHOD_PRIORITY,
+                              priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
                               task_kwargs = task_kwargs)
 
     def _add_task(self, task_cb, priority, task_args=None, task_kwargs=None):
@@ -449,7 +461,9 @@ class ShotgunDataRetriever(QtCore.QObject):
                                                     task_kwargs = {"url":url, 
                                                                    "load_image":load_image})
 
-        # add download thumbnail task
+        # Add download thumbnail task.  This is dependent on the check task above and will be passed
+        # the returned results from that task in addition to the kwargs specified below.  This allows
+        # a task dependency chain to be created with different priorities for the separate tasks.
         dl_task_id = self._task_manager.add_task(self._task_download_thumbnail,
                                                  upstream_task_ids = [check_task_id],
                                                  priority = ShotgunDataRetriever._DOWNLOAD_THUMB_PRIORITY,
@@ -458,7 +472,10 @@ class ShotgunDataRetriever(QtCore.QObject):
                                                                 "entity_type":entity_type, 
                                                                 "entity_id":entity_id,
                                                                 "field":field,
-                                                                "load_image":load_image})
+                                                                "load_image":load_image
+                                                                #"thumb_path":<passed from check task>
+                                                                #"image":<passed from check task>
+                                                                })
 
         # all results for requesting a thumbnail should be returned with the same id so use
         # a mapping to track the 'primary' task id:
@@ -669,7 +686,8 @@ class ShotgunDataRetriever(QtCore.QObject):
         :param result:  The task result
         """
         if group != self._bg_tasks_group:
-            # ignore - it isn't our task!
+            # ignore - it isn't our task! - this slot will recieve signals for tasks started
+            # by other objects/instances so we need to make sure we filter them out here
             return
 
         action = result.get("action")
@@ -702,7 +720,8 @@ class ShotgunDataRetriever(QtCore.QObject):
         :param tb:      The stack trace of the exception raised by the failed task
         """
         if group != self._bg_tasks_group:
-            # ignore - it isn't our task!
+            # ignore - it isn't our task - this slot will recieve signals for tasks started
+            # by other objects/instances so we need to make sure we filter them out here
             return
 
         # remap task ids for thumbnails:
