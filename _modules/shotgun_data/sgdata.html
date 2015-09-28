@@ -1,0 +1,951 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>shotgun_data.sgdata &mdash; Shotgun Pipeline Toolkit v2.4.2 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Shotgun Pipeline Toolkit v2.4.2 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Shotgun Pipeline Toolkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v2.4.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_model.html">Shotgun Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Shotgun Pipeline Toolkit</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>shotgun_data.sgdata</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for shotgun_data.sgdata</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2013 Shotgun Software Inc.</span>
+<span class="c">#</span>
+<span class="c"># CONFIDENTIAL AND PROPRIETARY</span>
+<span class="c">#</span>
+<span class="c"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit</span>
+<span class="c"># Source Code License included in this distribution package. See LICENSE.</span>
+<span class="c"># By accessing, using, copying or modifying this work you indicate your</span>
+<span class="c"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights</span>
+<span class="c"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tank</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">urlparse</span>
+
+<span class="kn">from</span> <span class="nn">tank</span> <span class="kn">import</span> <span class="n">TankError</span>
+
+<span class="c"># timeout when connection fails</span>
+<span class="n">CONNECTION_TIMEOUT_SECS</span> <span class="o">=</span> <span class="mi">20</span>
+
+<span class="kn">from</span> <span class="nn">tank.platform.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+
+<div class="viewcode-block" id="ShotgunDataRetriever"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever">[docs]</a><span class="k">class</span> <span class="nc">ShotgunDataRetriever</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Asynchronous data retrieve class which can be used to retrieve data</span>
+<span class="sd">    and thumbnails from Shotgun and from disk thumbnail cache.</span>
+
+<span class="sd">    The class manages a queue where you can add various requests.</span>
+<span class="sd">    Requests are queued up using the execute_find() and request_thumbnail() methods.</span>
+
+<span class="sd">    Requests are executed in the following priority order:</span>
+
+<span class="sd">    - first any thumbnails that are already cached on disk are handled</span>
+<span class="sd">    - next, shotgun find() queries are handled</span>
+<span class="sd">    - lastly thumbnail downloads are handled</span>
+
+<span class="sd">    The thread will emit work_completed and work_failure signals</span>
+<span class="sd">    when tasks are completed (or fail).</span>
+
+<span class="sd">    The clear() method will clear the current queue. The currently</span>
+<span class="sd">    processing item will finish processing and may send out signals</span>
+<span class="sd">    even after a clear.</span>
+
+<span class="sd">    Make sure you call the stop() method prior to destruction in order</span>
+<span class="sd">    for the system to gracefully shut down.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="c"># syntax: work_completed(uid, request_type, data_dict)</span>
+    <span class="c"># - uid is a unique id which matches the unique id</span>
+    <span class="c">#   returned by the corresponding request call.</span>
+    <span class="c">#</span>
+    <span class="c"># - request_type is a string denoting the type of request</span>
+    <span class="c">#   this event is associated with. It can be either &quot;find&quot;</span>
+    <span class="c">#   &quot;update&quot;, &quot;create&quot;, &quot;delete&quot; &quot;schema&quot; or &quot;thumbnail&quot;</span>
+    <span class="c">#</span>
+    <span class="c"># - data_dict is a dictionary containing the payload</span>
+    <span class="c">#   of the request. It will be different depending on</span>
+    <span class="c">#   what type of request it is.</span>
+    <span class="c">#</span>
+    <span class="c">#   For find() requests, the data_dict will be on the form</span>
+    <span class="c">#   {&quot;sg&quot;: data }, where data is the data returned by the sg API</span>
+    <span class="c">#</span>
+    <span class="c">#   For thumbnail requests, the data dict will be on the form</span>
+    <span class="c">#   {&quot;thumb_path&quot;: path}, where path is a path to a location</span>
+    <span class="c">#   on disk where the thumbnail can be accessed.</span>
+    <span class="n">work_completed</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+
+    <span class="c"># syntax: work_failure(uid, error_message)</span>
+    <span class="c"># - uid is a unique id which matches the unique id</span>
+    <span class="c">#   returned by the corresponding request call.</span>
+    <span class="c"># - error message is an error message string.</span>
+    <span class="n">work_failure</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+
+    <span class="c"># async task types</span>
+    <span class="p">(</span><span class="n">_THUMB_CHECK</span><span class="p">,</span> 
+     <span class="n">_SG_FIND_QUERY</span><span class="p">,</span> 
+     <span class="n">_SG_UPDATE_QUERY</span><span class="p">,</span>
+     <span class="n">_SG_CREATE_QUERY</span><span class="p">,</span>
+     <span class="n">_SG_DELETE_QUERY</span><span class="p">,</span> 
+     <span class="n">_EXECUTE_METHOD</span><span class="p">,</span> 
+     <span class="n">_THUMB_DOWNLOAD</span><span class="p">,</span> 
+     <span class="n">_SCHEMA_DOWNLOAD</span><span class="p">)</span><span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construction</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span> <span class="o">=</span> <span class="n">tank</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_bundle</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_condition</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QWaitCondition</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_queue_mutex</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutex</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sg</span> <span class="o">=</span> <span class="bp">None</span> <span class="c"># Note: don&#39;t use directly - instead call __get_sg_connection()!</span>
+
+        <span class="c"># queue data structures</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_download_queue</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sg_requests_queue</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_check_queue</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c"># indicates that we should keep processing queue items</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process_queue</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+    <span class="k">def</span> <span class="nf">__get_sg_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a shotgun connection object. Initializes one </span>
+<span class="sd">        if one doesn&#39;t exist already.</span>
+<span class="sd">        </span>
+<span class="sd">        Do not call self.__sg directly - instead use this </span>
+<span class="sd">        method when you want to retrieve a Shotgun connection</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: A fully initialized Shotgun connection</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># create our own private shotgun connection. This is because</span>
+            <span class="c"># the shotgun API isn&#39;t threadsafe, so running multiple models in parallel</span>
+            <span class="c"># (common) may result in side effects if a single connection is shared</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sg</span> <span class="o">=</span> <span class="n">tank</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">create_sg_connection</span><span class="p">()</span>
+            <span class="c"># set the maximum timeout for this connection for fluency</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sg</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">timeout_secs</span> <span class="o">=</span> <span class="n">CONNECTION_TIMEOUT_SECS</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg</span>
+
+    <span class="c">############################################################################################################</span>
+    <span class="c"># Public methods</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ShotgunDataRetriever.download_thumbnail"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.download_thumbnail">[docs]</a>    <span class="k">def</span> <span class="nf">download_thumbnail</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convenience and compatibility method for quick and easy synchrnous thumbnail download.</span>
+<span class="sd">        This will retrieve a shotgun thumbnail given a url - if it already exists in the cache,</span>
+<span class="sd">        a path to it will be returned instantly. If not, it will be downloaded from Shotgun,</span>
+<span class="sd">        placed in the standard cache location on disk and its path will be returned.</span>
+
+<span class="sd">        This is a helper method meant to make it easy to port over synchronous legacy</span>
+<span class="sd">        code - for a better solution, we recommend using the thumbnail retrieval</span>
+<span class="sd">        that runs in a background thread.</span>
+
+<span class="sd">        Bcause Shotgun thumbnail urls have an expiry time, make sure to only</span>
+<span class="sd">        pass urls to this method that have been very recently retrieved via a Shotgun find call.</span>
+
+<span class="sd">        :param url: The thumbnail url string that is associated with this thumbnail. This is</span>
+<span class="sd">                    the field value as returned by a Shotgun query.</span>
+<span class="sd">        :param bundle: App, Framework or Engine object requesting the download.</span>
+
+<span class="sd">        :returns: A path to the thumbnail on disk.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">path_to_cached_thumb</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">):</span>
+
+            <span class="c"># create folders on disk</span>
+            <span class="n">bundle</span><span class="o">.</span><span class="n">ensure_folder_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">))</span>
+
+            <span class="c"># download using standard core method. This will ensure that</span>
+            <span class="c"># proxy and connection settings as set in the SG API are used</span>
+            <span class="n">tank</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span><span class="n">bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">path_to_cached_thumb</span><span class="p">)</span>
+
+            <span class="c"># modify the permissions of the file so it&#39;s writeable by others</span>
+            <span class="n">old_umask</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">,</span> <span class="mo">0666</span><span class="p">)</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">old_umask</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">path_to_cached_thumb</span>
+
+
+
+
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.set_shotgun_connection"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.set_shotgun_connection">[docs]</a>    <span class="k">def</span> <span class="nf">set_shotgun_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Specify the shotgun api instance this model should use to communicate</span>
+<span class="sd">        with Shotgun. If not specified, each instance will instantiate its</span>
+<span class="sd">        own connection, via toolkit. The behavior where each instance has its own</span>
+<span class="sd">        connection is generally recommended for thread safety reasons since</span>
+<span class="sd">        the Shotgun API isn&#39;t natively threadsafe.</span>
+
+<span class="sd">        We strongly recommend that the API instance passed in here is not used</span>
+<span class="sd">        in any other threads since this may lead to undefined behaviour.</span>
+
+<span class="sd">        :param sg: Shotgun API instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sg</span> <span class="o">=</span> <span class="n">sg</span>
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.clear"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clears the queue.</span>
+
+<span class="sd">        Any currently processing item will complete without interruption, and signals will be</span>
+<span class="sd">        sent out for these items.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_queue_mutex</span><span class="o">.</span><span class="n">lock</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">: Clearing queue. Discarded items: SG api requests: [</span><span class="si">%s</span><span class="s">] Thumb checks: [</span><span class="si">%s</span><span class="s">] &quot;</span>
+                                   <span class="s">&quot;Thumb downloads: [</span><span class="si">%s</span><span class="s">]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                                              <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sg_requests_queue</span><span class="p">),</span>
+                                                              <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_thumb_check_queue</span><span class="p">),</span>
+                                                              <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_thumb_download_queue</span><span class="p">)</span> <span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_download_queue</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sg_requests_queue</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_check_queue</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_queue_mutex</span><span class="o">.</span><span class="n">unlock</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.stop"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gracefully stop the receiver.</span>
+
+<span class="sd">        Once stop() has been called, the object needs to be discarded.</span>
+<span class="sd">        This is a blocking call. It will  synchronounsly wait</span>
+<span class="sd">        until any potential currently processing item has completed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">: Initiating shutdown.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process_queue</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_condition</span><span class="o">.</span><span class="n">wakeAll</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">: Stopped.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.get_schema"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.get_schema">[docs]</a>    <span class="k">def</span> <span class="nf">get_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute the schema_read and schema_entity_read methods asynchronously</span>
+<span class="sd">        </span>
+<span class="sd">        :param project_id: If specified, the schema listing returned will</span>
+<span class="sd">                           be constrained by the schema settings for </span>
+<span class="sd">                           the given project.</span>
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">uid</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span>
+
+        <span class="n">work</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;id&quot;</span><span class="p">:</span> <span class="n">uid</span><span class="p">,</span> <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="s">&quot;get_schema&quot;</span><span class="p">,</span> <span class="s">&quot;project_id&quot;</span><span class="p">:</span> <span class="n">project_id</span><span class="p">}</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_queue_mutex</span><span class="o">.</span><span class="n">lock</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sg_requests_queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_queue_mutex</span><span class="o">.</span><span class="n">unlock</span><span class="p">()</span>
+
+        <span class="c"># wake up execution loop!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_condition</span><span class="o">.</span><span class="n">wakeAll</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">uid</span>
+        
+        </div>
+    <span class="k">def</span> <span class="nf">__execute_sg_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action_type</span><span class="p">,</span> <span class="n">sg_args</span><span class="p">,</span> <span class="n">sg_kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a shotgun query to the queue.</span>
+<span class="sd">        </span>
+<span class="sd">        The query will be queued up and once processed, either a</span>
+<span class="sd">        work_completed or work_failure signal will be emitted.</span>
+
+<span class="sd">        :param action_type: Action type string to identify the operation.</span>
+<span class="sd">        :param sg_args: *args passed to the method that should be forwarded</span>
+<span class="sd">                        on to the actual execution.</span>
+<span class="sd">        :param sg_kwargs: **kwargs passed to the method that should be</span>
+<span class="sd">                          forwarded on to the actual execution.</span>
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">uid</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span>
+        <span class="n">work</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;id&quot;</span><span class="p">:</span> <span class="n">uid</span><span class="p">,</span>
+                <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="n">action_type</span><span class="p">,</span>
+                <span class="s">&quot;args&quot;</span><span class="p">:</span> <span class="n">sg_args</span><span class="p">,</span>
+                <span class="s">&quot;kwargs&quot;</span><span class="p">:</span> <span class="n">sg_kwargs</span> <span class="p">}</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_queue_mutex</span><span class="o">.</span><span class="n">lock</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sg_requests_queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_queue_mutex</span><span class="o">.</span><span class="n">unlock</span><span class="p">()</span>
+
+        <span class="c"># wake up execution loop!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_condition</span><span class="o">.</span><span class="n">wakeAll</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">uid</span>
+        
+<div class="viewcode-block" id="ShotgunDataRetriever.execute_find"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_find">[docs]</a>    <span class="k">def</span> <span class="nf">execute_find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a find query to the queue.</span>
+
+<span class="sd">        The query will be queued up and once processed, either a</span>
+<span class="sd">        work_completed or work_failure signal will be emitted.</span>
+
+<span class="sd">        This method takes the same parameters as the Shotgun find() call.</span>
+
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__execute_sg_call</span><span class="p">(</span><span class="s">&quot;execute_find&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.execute_update"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_update">[docs]</a>    <span class="k">def</span> <span class="nf">execute_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds an update query to the queue.</span>
+<span class="sd">        </span>
+<span class="sd">        The query will be queued up and once processed, either a</span>
+<span class="sd">        work_completed or work_failure signal will be emitted.</span>
+
+<span class="sd">        This method takes the same parameters as the Shotgun update() call.</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__execute_sg_call</span><span class="p">(</span><span class="s">&quot;execute_update&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="ShotgunDataRetriever.execute_create"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_create">[docs]</a>    <span class="k">def</span> <span class="nf">execute_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds an create query to the queue.</span>
+<span class="sd">        </span>
+<span class="sd">        The query will be queued up and once processed, either a</span>
+<span class="sd">        work_completed or work_failure signal will be emitted.</span>
+
+<span class="sd">        This method takes the same parameters as the Shotgun create() call.</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__execute_sg_call</span><span class="p">(</span><span class="s">&quot;execute_create&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>    
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.execute_delete"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_delete">[docs]</a>    <span class="k">def</span> <span class="nf">execute_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds an delete query to the queue.</span>
+<span class="sd">        </span>
+<span class="sd">        The query will be queued up and once processed, either a</span>
+<span class="sd">        work_completed or work_failure signal will be emitted.</span>
+
+<span class="sd">        This method takes the same parameters as the Shotgun delete() call.</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__execute_sg_call</span><span class="p">(</span><span class="s">&quot;execute_delete&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>    
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.execute_method"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_method">[docs]</a>    <span class="k">def</span> <span class="nf">execute_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds the generic execution of a method to the queue.</span>
+<span class="sd">        </span>
+<span class="sd">        The specified method will be called on the form</span>
+<span class="sd">        </span>
+<span class="sd">        &gt; method(sg, data) </span>
+<span class="sd">        </span>
+<span class="sd">        Where sg is a shotgun API instance. Data is typically</span>
+<span class="sd">        a dictionary with specific data that the method needs.</span>
+<span class="sd">                </span>
+<span class="sd">        The query will be queued up and once processed, either a</span>
+<span class="sd">        work_completed or work_failure signal will be emitted.</span>
+
+<span class="sd">        :param method: pointer to a method that should be executed.</span>
+<span class="sd">        :param data: dictionary of data to pass to the method.</span>
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">uid</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span>
+        <span class="n">work</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;id&quot;</span><span class="p">:</span> <span class="n">uid</span><span class="p">,</span>
+                <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="s">&quot;execute_method&quot;</span><span class="p">,</span>
+                <span class="s">&quot;method&quot;</span><span class="p">:</span> <span class="n">method</span><span class="p">,</span>
+                <span class="s">&quot;data&quot;</span><span class="p">:</span> <span class="n">data</span> <span class="p">}</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_queue_mutex</span><span class="o">.</span><span class="n">lock</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sg_requests_queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_queue_mutex</span><span class="o">.</span><span class="n">unlock</span><span class="p">()</span>
+
+        <span class="c"># wake up execution loop!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_condition</span><span class="o">.</span><span class="n">wakeAll</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">uid</span>
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.request_thumbnail"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.request_thumbnail">[docs]</a>    <span class="k">def</span> <span class="nf">request_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">load_image</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a Shotgun thumbnail request to the queue.</span>
+
+<span class="sd">        If a cached version of the thumbnail exists, this will be returned.</span>
+<span class="sd">        If not, the Shotgun will be downloaded from Shotgun.</span>
+
+<span class="sd">        :param url: The thumbnail url string that is associated with this thumbnail. This is</span>
+<span class="sd">                    the field value as returned by a Shotgun query.</span>
+<span class="sd">        :param entity_type: Shotgun entity type with which the thumb is associated.</span>
+<span class="sd">        :param entity_id: Shotgun entity id with which the thumb is associated.</span>
+<span class="sd">        :param field: Thumbnail field. Normally &#39;image&#39; but could also for example</span>
+<span class="sd">                      be a deep link field such as &#39;sg_sequence.Sequence.image&#39;</span>
+<span class="sd">        :param load_image: If set to True, the return data structure will contain</span>
+<span class="sd">                           a QImage object with the image data loaded.</span>
+
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">uid</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span>
+
+        <span class="n">work</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;id&quot;</span><span class="p">:</span> <span class="n">uid</span><span class="p">,</span>
+                <span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span>
+                <span class="s">&quot;field&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">,</span>
+                <span class="s">&quot;entity_type&quot;</span><span class="p">:</span> <span class="n">entity_type</span><span class="p">,</span>
+                <span class="s">&quot;entity_id&quot;</span><span class="p">:</span> <span class="n">entity_id</span><span class="p">,</span>
+                <span class="s">&quot;load_image&quot;</span><span class="p">:</span> <span class="n">load_image</span> <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_queue_mutex</span><span class="o">.</span><span class="n">lock</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_check_queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_queue_mutex</span><span class="o">.</span><span class="n">unlock</span><span class="p">()</span>
+
+        <span class="c"># wake up execution loop!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_condition</span><span class="o">.</span><span class="n">wakeAll</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">uid</span>
+
+
+    <span class="c">############################################################################################################</span>
+    <span class="c"># Internal methods</span>
+</div>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_thumbnail_path_old</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        March 2015 - Previous implementation of thumbnail caching logic.</span>
+<span class="sd">        This has now been replaced by a new, improved sharding algorithm.</span>
+<span class="sd">        In the interest of disk management, keep this method around so that</span>
+<span class="sd">        the new logic can attempt to over files over into the new scheme </span>
+<span class="sd">        if at all possible.</span>
+<span class="sd">        </span>
+<span class="sd">        :param bundle: App, Engine or Framework instance</span>
+<span class="sd">        :param url: Path to a thumbnail</span>
+<span class="sd">        :returns: Path as a string.        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">url_obj</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">url_path</span> <span class="o">=</span> <span class="n">url_obj</span><span class="o">.</span><span class="n">path</span>
+        <span class="n">path_chunks</span> <span class="o">=</span> <span class="n">url_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">)</span>
+
+        <span class="n">CHUNK_LEN</span> <span class="o">=</span> <span class="mi">16</span>
+
+        <span class="c"># post process the path</span>
+        <span class="c"># old (pre-S3) style result:</span>
+        <span class="c"># path_chunks: [ &quot;&quot;, &quot;thumbs&quot;, &quot;1&quot;, &quot;2&quot;, &quot;2.jpg&quot;]</span>
+
+        <span class="c"># s3 result, form 1:</span>
+        <span class="c"># path_chunks: [u&#39;&#39;,</span>
+        <span class="c">#               u&#39;9902b5f5f336fae2fb248e8a8748fcd9aedd822e&#39;,</span>
+        <span class="c">#               u&#39;be4236b8f198ae84df2366920e7ee327cc0a567e&#39;,</span>
+        <span class="c">#               u&#39;render_0400_t.jpg&#39;]</span>
+
+        <span class="c"># s3 result, form 2:</span>
+        <span class="c"># path_chunks: [u&#39;&#39;, u&#39;thumbnail&#39;, u&#39;api_image&#39;, u&#39;150&#39;]</span>
+
+        <span class="k">def</span> <span class="nf">_to_chunks</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+            <span class="c">#split the string &#39;abcdefghxx&#39; into [&#39;abcdefgh&#39;, &#39;xx&#39;]</span>
+            <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">CHUNK_LEN</span><span class="p">):</span>
+                <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">s</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="n">CHUNK_LEN</span><span class="p">]</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="n">chunks</span>
+
+        <span class="n">new_chunks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">path_chunks</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span> <span class="c"># skip the file name</span>
+            <span class="k">if</span> <span class="n">folder</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">CHUNK_LEN</span><span class="p">:</span>
+                <span class="c"># long url path segment like 9902b5f5f336fae2fb248e8a8748fcd9aedd822e</span>
+                <span class="c"># split it into chunks for 4</span>
+                <span class="n">new_chunks</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">_to_chunks</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+
+        <span class="c"># establish the root path</span>
+        <span class="n">cache_path_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">bundle</span><span class="o">.</span><span class="n">cache_location</span><span class="p">,</span> <span class="s">&quot;thumbnails&quot;</span><span class="p">]</span>
+        <span class="c"># append the folders</span>
+        <span class="n">cache_path_items</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">new_chunks</span><span class="p">)</span>
+        <span class="c"># and append the file name</span>
+        <span class="c"># all sg thumbs are jpegs so append extension too - some url forms don&#39;t have this.</span>
+        <span class="n">cache_path_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">.jpeg&quot;</span> <span class="o">%</span> <span class="n">path_chunks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c"># join up the path</span>
+        <span class="n">path_to_cached_thumb</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="n">cache_path_items</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">path_to_cached_thumb</span>
+
+
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the location on disk suitable for a thumbnail given its url.</span>
+<span class="sd">        </span>
+<span class="sd">        :param bundle: App, Engine or Framework instance</span>
+<span class="sd">        :param url: Path to a thumbnail</span>
+<span class="sd">        :returns: Path as a string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># hash the path portion of the thumbnail url</span>
+        <span class="n">url_obj</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">url_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
+        <span class="n">url_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">url_obj</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+        <span class="n">hash_str</span> <span class="o">=</span> <span class="n">url_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+        <span class="c"># Now turn this hash into a tree structure. For a discussion about sensible</span>
+        <span class="c"># sharding methodology, see </span>
+        <span class="c"># http://stackoverflow.com/questions/13841931/using-guids-as-folder-names-splitting-up</span>
+        <span class="c">#</span>
+        <span class="c"># From the hash, generate paths on the form C1C2/C3C4/rest_of_hash.jpeg</span>
+        <span class="c"># (where C1 is the first character of the hash.)</span>
+        <span class="c"># for a million evenly distributed items, this means ~15 items per folder</span>
+        <span class="n">first_folder</span> <span class="o">=</span> <span class="n">hash_str</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">second_folder</span> <span class="o">=</span> <span class="n">hash_str</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.jpeg&quot;</span> <span class="o">%</span> <span class="n">hash_str</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+        <span class="n">path_chunks</span> <span class="o">=</span> <span class="p">[</span><span class="n">first_folder</span><span class="p">,</span> <span class="n">second_folder</span><span class="p">,</span> <span class="n">file_name</span><span class="p">]</span>
+
+        <span class="c"># establish the root path</span>
+        <span class="n">cache_path_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">bundle</span><span class="o">.</span><span class="n">cache_location</span><span class="p">,</span> <span class="s">&quot;thumbs&quot;</span><span class="p">]</span>
+        <span class="c"># append the folders</span>
+        <span class="n">cache_path_items</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">path_chunks</span><span class="p">)</span>
+        <span class="c"># join up the path</span>
+        <span class="n">path_to_cached_thumb</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="n">cache_path_items</span><span class="p">)</span>
+
+        <span class="c"># perform a simple migration to check if the old path still exists. In that case, </span>
+        <span class="c"># try to move it across to the new path. This is to help transition from the previous</span>
+        <span class="c"># thumb caching structures and should be removed at some point in the future in order</span>
+        <span class="c"># to avoid I/O operations. </span>
+        <span class="c">#</span>
+        <span class="c"># NOTE! This check means that the _get_thumbnail_path() isn&#39;t </span>
+        <span class="c"># just calculating a path for a thumbnail but may have the side effect that it will</span>
+        <span class="c"># move files around. </span>
+        <span class="n">old_path</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_get_thumbnail_path_old</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">old_path</span><span class="p">):</span>
+            <span class="c"># move the file across</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">old_umask</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">bundle</span><span class="o">.</span><span class="n">ensure_folder_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">))</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">old_path</span><span class="p">,</span> <span class="n">path_to_cached_thumb</span><span class="p">)</span>
+                <span class="k">finally</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">old_umask</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="c"># ignore any errors in the transfer</span>
+                <span class="k">pass</span>
+            
+        <span class="k">return</span> <span class="n">path_to_cached_thumb</span>
+
+    <span class="c">############################################################################################</span>
+    <span class="c"># main thread loop</span>
+
+<div class="viewcode-block" id="ShotgunDataRetriever.run"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main thread loop</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># keep running until thread is terminated</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_queue</span><span class="p">:</span>
+
+            <span class="c"># Step 1. get the next item to process.</span>
+            <span class="c"># We check things in the following priority order:</span>
+            <span class="c"># - If there is anything in the thumb check queue, do that first</span>
+            <span class="c"># - Then check sg queue</span>
+            <span class="c"># - Lastly, check thumb downloads</span>
+            <span class="n">item_to_process</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">item_type</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_queue_mutex</span><span class="o">.</span><span class="n">lock</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_thumb_check_queue</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">item_to_process</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_check_queue</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">item_type</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_THUMB_CHECK</span>
+
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sg_requests_queue</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">item_to_process</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_requests_queue</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;execute_find&quot;</span><span class="p">:</span>
+                        <span class="n">item_type</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_FIND_QUERY</span>
+                    
+                    <span class="k">elif</span> <span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;get_schema&quot;</span><span class="p">:</span>
+                        <span class="n">item_type</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SCHEMA_DOWNLOAD</span>
+                    <span class="k">elif</span> <span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;execute_update&quot;</span><span class="p">:</span>
+                        <span class="n">item_type</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_UPDATE_QUERY</span>
+
+                    <span class="k">elif</span> <span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;execute_create&quot;</span><span class="p">:</span>
+                        <span class="n">item_type</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_CREATE_QUERY</span>
+                        
+                    <span class="k">elif</span> <span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;execute_delete&quot;</span><span class="p">:</span>
+                        <span class="n">item_type</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_DELETE_QUERY</span>
+
+                    <span class="k">elif</span> <span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;execute_method&quot;</span><span class="p">:</span>
+                        <span class="n">item_type</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_EXECUTE_METHOD</span>
+
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_thumb_download_queue</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">item_to_process</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_download_queue</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">item_type</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_THUMB_DOWNLOAD</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># no work to be done!</span>
+                    <span class="c"># wait for some more work - this unlocks the mutex</span>
+                    <span class="c"># until the wait condition is signalled where it</span>
+                    <span class="c"># will then attempt to obtain a lock before returning</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_wait_condition</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_queue_mutex</span><span class="p">)</span>
+                    <span class="c"># once the wait condition is triggered (usually by something</span>
+                    <span class="c"># inserted into one of the queues), trigger the check to happen again</span>
+                    <span class="k">continue</span>
+
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_queue_mutex</span><span class="o">.</span><span class="n">unlock</span><span class="p">()</span>
+
+            <span class="c"># Step 2. Process next item and send signals.</span>
+            <span class="k">try</span><span class="p">:</span>
+
+                <span class="c"># process the item:</span>
+                <span class="k">if</span> <span class="n">item_type</span> <span class="o">==</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_THUMB_CHECK</span><span class="p">:</span>
+                    <span class="c"># check if a thumbnail exists on disk. If not, fall back onto</span>
+                    <span class="c"># a thumbnail download from shotgun/s3</span>
+                    <span class="n">url</span> <span class="o">=</span> <span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;url&quot;</span><span class="p">]</span>
+                    <span class="n">path_to_cached_thumb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">):</span>
+                        <span class="c"># thumbnail already here! yay!</span>
+                        <span class="k">if</span> <span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;load_image&quot;</span><span class="p">]:</span>
+                            <span class="n">image</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">()</span>
+                            <span class="n">image</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">image</span> <span class="o">=</span> <span class="bp">None</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> 
+                                                 <span class="s">&quot;thumb&quot;</span><span class="p">,</span> 
+                                                 <span class="p">{</span><span class="s">&quot;thumb_path&quot;</span><span class="p">:</span> <span class="n">path_to_cached_thumb</span><span class="p">,</span> <span class="s">&quot;image&quot;</span><span class="p">:</span> <span class="n">image</span><span class="p">}</span> <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c"># no thumb here. Stick the data into the thumb download queue to request download</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_queue_mutex</span><span class="o">.</span><span class="n">lock</span><span class="p">()</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_download_queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_to_process</span><span class="p">)</span>
+                        <span class="k">finally</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_queue_mutex</span><span class="o">.</span><span class="n">unlock</span><span class="p">()</span>
+
+                <span class="k">elif</span> <span class="n">item_type</span> <span class="o">==</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_FIND_QUERY</span><span class="p">:</span>
+                    <span class="c"># get stuff from shotgun</span>
+                    <span class="n">sg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_sg_connection</span><span class="p">()</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="o">*</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;args&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;kwargs&quot;</span><span class="p">])</span>
+                    <span class="c"># need to wrap it in a dict not to confuse pyqt&#39;s signals and type system</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="s">&quot;find&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;sg&quot;</span><span class="p">:</span> <span class="n">sg</span> <span class="p">}</span> <span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">item_type</span> <span class="o">==</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_UPDATE_QUERY</span><span class="p">:</span>
+                    <span class="c"># update stuff in shotgun</span>
+                    <span class="n">sg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;args&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;kwargs&quot;</span><span class="p">])</span>
+                    <span class="c"># need to wrap it in a dict not to confuse pyqt&#39;s signals and type system</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="s">&quot;update&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;sg&quot;</span><span class="p">:</span> <span class="n">sg</span> <span class="p">}</span> <span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">item_type</span> <span class="o">==</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_CREATE_QUERY</span><span class="p">:</span>
+                    <span class="c"># create stuff in shotgun</span>
+                    <span class="n">sg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_sg_connection</span><span class="p">()</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">*</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;args&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;kwargs&quot;</span><span class="p">])</span>
+                    <span class="c"># need to wrap it in a dict not to confuse pyqt&#39;s signals and type system</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="s">&quot;create&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;sg&quot;</span><span class="p">:</span> <span class="n">sg</span> <span class="p">}</span> <span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">item_type</span> <span class="o">==</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_DELETE_QUERY</span><span class="p">:</span>
+                    <span class="c"># delete stuff in shotgun</span>
+                    <span class="n">sg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_sg_connection</span><span class="p">()</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="o">*</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;args&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;kwargs&quot;</span><span class="p">])</span>
+                    <span class="c"># need to wrap it in a dict not to confuse pyqt&#39;s signals and type system</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="s">&quot;delete&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;sg&quot;</span><span class="p">:</span> <span class="n">sg</span> <span class="p">}</span> <span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">item_type</span> <span class="o">==</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_EXECUTE_METHOD</span><span class="p">:</span>
+                    <span class="c"># run method</span>
+                    <span class="n">ret_val</span> <span class="o">=</span> <span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;method&quot;</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">__get_sg_connection</span><span class="p">(),</span> <span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;data&quot;</span><span class="p">])</span>
+                    <span class="c"># need to wrap it in a dict not to confuse pyqt&#39;s signals and type system</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="s">&quot;method&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;return_value&quot;</span><span class="p">:</span> <span class="n">ret_val</span> <span class="p">}</span> <span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">item_type</span> <span class="o">==</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SCHEMA_DOWNLOAD</span><span class="p">:</span>
+                    
+                    <span class="k">if</span> <span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;project_id&quot;</span><span class="p">]:</span>
+                        <span class="n">project</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;type&quot;</span><span class="p">:</span> <span class="s">&quot;Project&quot;</span><span class="p">,</span> <span class="s">&quot;id&quot;</span><span class="p">:</span> <span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;project_id&quot;</span><span class="p">]}</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
+                    
+                    <span class="c"># read in details about all fields</span>
+                    <span class="n">sg_field_schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_sg_connection</span><span class="p">()</span><span class="o">.</span><span class="n">schema_read</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+                    
+                    <span class="c"># and read in details about all entity types</span>
+                    <span class="n">sg_type_schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_sg_connection</span><span class="p">()</span><span class="o">.</span><span class="n">schema_entity_read</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+
+                    <span class="c"># need to wrap it in a dict not to confuse pyqt&#39;s signals and type system</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> 
+                                             <span class="s">&quot;schema&quot;</span><span class="p">,</span> 
+                                             <span class="p">{</span><span class="s">&quot;fields&quot;</span><span class="p">:</span> <span class="n">sg_field_schema</span><span class="p">,</span> <span class="s">&quot;types&quot;</span><span class="p">:</span> <span class="n">sg_type_schema</span> <span class="p">}</span> <span class="p">)</span>
+                    
+
+                <span class="k">elif</span> <span class="n">item_type</span> <span class="o">==</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_THUMB_DOWNLOAD</span><span class="p">:</span>
+                    <span class="c"># download the actual thumbnail. Because of S3, the url</span>
+                    <span class="c"># may have expired - in that case fall back, get a fresh url</span>
+                    <span class="c"># from shotgun and try again</span>
+                    <span class="n">entity_id</span> <span class="o">=</span> <span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;entity_id&quot;</span><span class="p">]</span>
+                    <span class="n">entity_type</span> <span class="o">=</span> <span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;entity_type&quot;</span><span class="p">]</span>
+                    <span class="n">field</span> <span class="o">=</span> <span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;field&quot;</span><span class="p">]</span>
+                    <span class="n">url</span> <span class="o">=</span> <span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;url&quot;</span><span class="p">]</span>
+                    <span class="n">path_to_cached_thumb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">ensure_folder_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">))</span>
+                    
+                    <span class="c"># first of all, there may be a case where another process has alrady downloaded</span>
+                    <span class="c"># the thumbnail for us, so make sure that we aren&#39;t doing any extra work :)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">):</span>
+
+                        <span class="c"># first try to download based on the path we have</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">tank</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__get_sg_connection</span><span class="p">(),</span> <span class="n">url</span><span class="p">,</span> <span class="n">path_to_cached_thumb</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="n">TankError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="c"># Note: Unfortunately, the download_url will re-cast </span>
+                            <span class="c"># all exceptions into tankerrors.</span>
+                            <span class="c"># get a fresh url from shotgun and try again</span>
+                            <span class="n">sg_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_sg_connection</span><span class="p">()</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="p">[[</span><span class="s">&quot;id&quot;</span><span class="p">,</span> <span class="s">&quot;is&quot;</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">]],</span> <span class="p">[</span><span class="n">field</span><span class="p">])</span>
+    
+                            <span class="k">if</span> <span class="n">sg_data</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                                <span class="c"># no thumbnail! This is possible if the thumb has changed</span>
+                                <span class="c"># while we were queueing it for download.</span>
+                                <span class="c"># indicate the fact that the thumbnail no longer exists on the server</span>
+                                <span class="c"># by setting the path to None</span>
+                                <span class="n">path_to_cached_thumb</span> <span class="o">=</span> <span class="bp">None</span>
+        
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="c"># download from sg</span>
+                                <span class="n">url</span> <span class="o">=</span> <span class="n">sg_data</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+                                <span class="n">tank</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__get_sg_connection</span><span class="p">(),</span> <span class="n">url</span><span class="p">,</span> <span class="n">path_to_cached_thumb</span><span class="p">)</span>
+                        
+                        <span class="k">if</span> <span class="n">path_to_cached_thumb</span><span class="p">:</span>
+                            <span class="c"># now we have a thumbnail on disk, either via the direct</span>
+                            <span class="c"># download, or via the url-fresh-then-download approach</span>
+                            <span class="c"># the file is downloaded with user-only permissions</span>
+                            <span class="c"># modify the permissions of the file so it&#39;s writeable by others</span>
+                            <span class="n">old_umask</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">,</span> <span class="mo">0666</span><span class="p">)</span>
+                            <span class="k">finally</span><span class="p">:</span>
+                                <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">old_umask</span><span class="p">)</span>
+    
+                    <span class="c"># finally, see if the worker thread should also load in the image</span>
+                    <span class="k">if</span> <span class="n">path_to_cached_thumb</span> <span class="ow">and</span> <span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;load_image&quot;</span><span class="p">]:</span>
+                        <span class="n">image</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">()</span>
+                        <span class="n">image</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">image</span> <span class="o">=</span> <span class="bp">None</span>
+                    
+                    <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> 
+                                             <span class="s">&quot;thumb&quot;</span><span class="p">,</span> 
+                                             <span class="p">{</span><span class="s">&quot;thumb_path&quot;</span><span class="p">:</span> <span class="n">path_to_cached_thumb</span><span class="p">,</span> 
+                                              <span class="s">&quot;image&quot;</span><span class="p">:</span> <span class="n">image</span><span class="p">}</span> <span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Unknown task type!&quot;</span><span class="p">)</span>
+
+
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">work_failure</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="s">&quot;An error occurred: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+</pre></div></div></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Autodesk.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'v2.4.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

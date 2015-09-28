@@ -1,0 +1,762 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Shotgun Model &mdash; Shotgun Pipeline Toolkit v2.4.2 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Shotgun Pipeline Toolkit v2.4.2 documentation" href="index.html"/>
+        <link rel="next" title="Shotgun Asynchronous Data Retriever" href="shotgun_data.html"/>
+        <link rel="prev" title="The Shotgun Utilities Framework" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Shotgun Pipeline Toolkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v2.4.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Shotgun Model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#why-should-i-use-the-shotgun-model">Why should I use the Shotgun Model?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shotgun-model-hello-world">Shotgun Model Hello World</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#beyond-hello-world">Beyond Hello World</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-items">Data Items</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#datetime-objects-and-the-shotgun-api">Datetime objects and the Shotgun API</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#simpleshotgunmodel">SimpleShotgunModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#shotgunoverlaymodel">ShotgunOverlayModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#shotgunmodel">ShotgunModel</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Shotgun Pipeline Toolkit</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Shotgun Model</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="shotgun-model">
+<h1>Shotgun Model<a class="headerlink" href="#shotgun-model" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>The shotgun data model helps you build responsive, data rich applications quickly and leverage
+QT&#8217;s build in model/view framework</p>
+<a class="reference internal image-reference" href="_images/model_overview.png"><img alt="_images/model_overview.png" src="_images/model_overview.png" style="width: 650px;" /></a>
+<p>The Shotgun Model is a custom QT Model specialized for Shotgun Queries. It uses a disk based cache
+and runs queries asynchronously to Shotgun in the background for performance. In a nutshell, you
+derive your own model class from it, set up a query, and then hook up your model to a QT View which
+will draw the data. The class contains several callbacks and allows for extensive customization, yet
+tries to shadow and encapsulate a lot of the details.</p>
+<a class="reference internal image-reference" href="_images/model_inheritance.png"><img alt="_images/model_inheritance.png" src="_images/model_inheritance.png" style="width: 650px;" /></a>
+<p>For convenience, three different classes are provided, allowing you to choose the right level of encapsulation.</p>
+<a class="reference internal image-reference" href="_images/model_classes.png"><img alt="_images/model_classes.png" src="_images/model_classes.png" style="width: 650px;" /></a>
+<div class="section" id="why-should-i-use-the-shotgun-model">
+<h3>Why should I use the Shotgun Model?<a class="headerlink" href="#why-should-i-use-the-shotgun-model" title="Permalink to this headline">¶</a></h3>
+<p>Using the Shotgun Model means switching to Model/View based programming. While there is perhaps slightly more
+overhead to get started with this, there are many benefits. The Shotgun Model (and the corresponding delegates
+and Shotgun View components) is an attempt to bridge this gap and make it quick and painless to get started
+with QT Model/View programming.</p>
+<p>QT provides a strong and mature Model/View hierarchy which is robust and easy to work with. If you are not
+familiar with it, please check the following links:</p>
+<ul class="simple">
+<li>Tutorial: <a class="reference external" href="http://qt-project.org/doc/qt-4.8/modelview.html">http://qt-project.org/doc/qt-4.8/modelview.html</a></li>
+<li>Technical details: <a class="reference external" href="http://qt-project.org/doc/qt-4.8/model-view-programming.html">http://qt-project.org/doc/qt-4.8/model-view-programming.html</a></li>
+</ul>
+<p>The benefits with this approach will become evident as you scale your UIs and their complexity. Developing code
+and tools where the data and the UI is combined will work in simple scenarios but for data rich applications
+this approach becomes hard to maintain, difficult to reuse and typically scales poorly as the dataset complexity grows.
+By leveraging QTs built-in functionality, you get access to a mature and well documented toolbox that makes
+it quick to develop tools:</p>
+<ul class="simple">
+<li>A Shotgun model instance represents a single shotgun query. With two lines of code you can connect the resultset
+of such a query with a standard Qt list, tree or table.</li>
+<li>The Shotgun model is cached, meaning that all data is fetched in the background in a worker thread. This means that
+the data in your UI will load up instantly and you never have to wait for shotgun. If the query result is different
+than the cached result, the view will be updated on the fly as the data arrives.</li>
+<li>With QT you have access to SelectionModels, making it easy to create consistent selection behaviour, even across
+multiple views. With full keyboard support.</li>
+<li>With QT proxy models you can easily create interactive searching and filtering on the client side.</li>
+<li>Views and models are optimized and will perform nicely even if you have thousands of items loaded.</li>
+<li>Through the shotgun view module, you can easily control the QT <em>delegates</em> system, making it easy to
+draw custom UIs for each cell in your view.</li>
+</ul>
+</div>
+<div class="section" id="shotgun-model-hello-world">
+<h3>Shotgun Model Hello World<a class="headerlink" href="#shotgun-model-hello-world" title="Permalink to this headline">¶</a></h3>
+<p>A hello world style example would look something like this, assuming this code is inside a
+toolkit app:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Import the shotgun_model module from the shotgun utils framework</span>
+<span class="n">shotgun_model</span> <span class="o">=</span> <span class="n">tank</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s">&quot;shotgun_model&quot;</span><span class="p">)</span>
+<span class="c"># Set up alias</span>
+<span class="n">ShotgunModel</span> <span class="o">=</span> <span class="n">shotgun_model</span><span class="o">.</span><span class="n">ShotgunModel</span>
+
+<span class="c"># Create a standard QT Tree View</span>
+<span class="n">view</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeView</span><span class="p">(</span><span class="n">parent_widget</span><span class="p">)</span>
+
+<span class="c"># Set up our data backend</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">shotgun_model</span><span class="o">.</span><span class="n">SimpleShotgunModel</span><span class="p">(</span><span class="n">parent_widget</span><span class="p">)</span>
+
+<span class="c"># Tell the view to pull data from the model</span>
+<span class="n">view</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+<span class="c"># load all assets from Shotgun</span>
+<span class="n">model</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">entity_type</span><span class="o">=</span><span class="s">&quot;Asset&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The above code will create a standard QT treeview of all assets in Shotgun.</p>
+</div>
+<div class="section" id="beyond-hello-world">
+<h3>Beyond Hello World<a class="headerlink" href="#beyond-hello-world" title="Permalink to this headline">¶</a></h3>
+<p>The simple setup outlined above could be extended in the following ways:</p>
+<ul class="simple">
+<li>If you need more control of how the data is being retrieved, consider instead creating
+your own class and derive from <a class="reference internal" href="#shotgun_model.ShotgunOverlayModel" title="shotgun_model.ShotgunOverlayModel"><code class="xref py py-class docutils literal"><span class="pre">ShotgunOverlayModel</span></code></a>. This makes it possible to customize
+the shotgun data as it arrives from Shotgun, control the hierarchy grouping and many other
+things.</li>
+<li>If you want to retrieve results from your view, connect signals to the view&#8217;s selection model.</li>
+<li>If you want to cull out items from the model, for example only to show items matching a particular
+search criteria, use a Proxy Model (typically <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QSortFilterProxyModel.html#PySide.QtGui.QSortFilterProxyModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QSortFilterProxyModel</span></code></a>).</li>
+<li>If you want to control the way items are displayed in the view, consider using the Shotgun delegates
+module which is part of the QT widgets framework. For more information, see
+<code class="xref py py-class docutils literal"><span class="pre">WidgetDelegate</span></code></li>
+</ul>
+</div>
+<div class="section" id="data-items">
+<h3>Data Items<a class="headerlink" href="#data-items" title="Permalink to this headline">¶</a></h3>
+<p>The Shotgun Model derives from <cite>QStandardItemModel</cite> which is a base model which managed the storage
+of model data inside a collection of <cite>QStandardItem</cite> objects. Each of these objects have a number of
+standard property and so called <em>roles</em>, holding various pieces of data such as icons, colours etc.
+The Shotgun Model introduces two new standard roles which can be used by both subclassing and calling
+code:</p>
+<ul class="simple">
+<li><cite>ShotgunModel.SG_DATA_ROLE</cite> holds the shotgun data associated with an object. In a tree view, only
+leaf nodes have this data defined - other nodes have it set to None. For leaf nodes, it is a standard
+shotgun dictionary containing all the items that were returned by the Shotgun query.</li>
+<li><cite>ShotgunModel.SG_ASSOCIATED_FIELD_ROLE</cite> holds the associated field value for a node. This is contained
+in a dictionary with the keys name and value. For example, for a leaf node this is typically something
+like <cite>{&#8220;name&#8221;: &#8220;code&#8221;, &#8220;value&#8221;: &#8220;AAA_123&#8221;}</cite>. For an intermediate node, it may be something such as
+<cite>{&#8220;name&#8221;: &#8220;sg_sequence&#8221;, &#8220;value&#8221;: {&#8220;id&#8221;: 123, &#8220;name&#8221;: &#8220;AAA&#8221;, &#8220;type&#8221;: &#8220;Sequence&#8221;} }</cite>.</li>
+</ul>
+</div>
+<div class="section" id="datetime-objects-and-the-shotgun-api">
+<h3>Datetime objects and the Shotgun API<a class="headerlink" href="#datetime-objects-and-the-shotgun-api" title="Permalink to this headline">¶</a></h3>
+<p>Because of issues with serialization, please note that datetime objects returned by the Shotgun API are
+automatically converted to unix timestamps by the model. A unix timestamp is the number of seconds since
+1 Jan 1971, in the UTC time zone.</p>
+<p>When you are pulling data from the shotgun model and want to convert this unix timestamp
+to a <em>local</em> timezone object, which is what you would get from the Shotgun API, use the following code:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">tank_vendor</span> <span class="kn">import</span> <span class="n">shotgun_api3</span>
+<span class="n">local_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">unix_time</span><span class="p">,</span> <span class="n">shotgun_api3</span><span class="o">.</span><span class="n">sg_timezone</span><span class="o">.</span><span class="n">LocalTimezone</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Furthermore, if you want to turn that into a nicely formatted string:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">time_str</span> <span class="o">=</span> <span class="n">local_datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%Y-%m-</span><span class="si">%d</span><span class="s"> %H:%M&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="simpleshotgunmodel">
+<h2>SimpleShotgunModel<a class="headerlink" href="#simpleshotgunmodel" title="Permalink to this headline">¶</a></h2>
+<p>Convenience wrapper around the Shotgun model for quick and easy access. Use this when you want
+to prototype data modeling or if your are looking for a simple flat data set reflecting a
+shotgun query. All you need to do is to instantiate the class (typically once, in your constructor)
+and then call <cite>load_data</cite> to
+specify which shotgun query to load up in the model. Subsequently call <cite>load_data</cite> whenever you
+wish to change the Shotgun query associated with the model.</p>
+<p>This class derives from ShotgunModel so all the customization methods available in the
+normal ShotgunModel can also be subclassed from this class.</p>
+<dl class="class">
+<dt id="shotgun_model.SimpleShotgunModel">
+<em class="property">class </em><code class="descclassname">shotgun_model.</code><code class="descname">SimpleShotgunModel</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/simpleshotgunmodel.html#SimpleShotgunModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.SimpleShotgunModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience wrapper around the Shotgun model for quick and easy access.</p>
+<p>When you quickly want to display some shotgun data in a QT view of some kind,
+this class may come in handy. Simply instantiate it and call load_data whenever
+you want to load up a new shotgun query into your view.</p>
+<p>It derives from ShotgunModel so all the customization methods available in the
+normal ShotgunModel can also be subclassed from this class.</p>
+<p>Constructor.</p>
+<p>The simple shotgun model will put the load spinner on top of the specified parent.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> &#8211; QWidget which this model will be parented under. This widget will
+also be used to paint a spinner and display error messages.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="shotgun_model.SimpleShotgunModel.load_data">
+<code class="descname">load_data</code><span class="sig-paren">(</span><em>entity_type</em>, <em>filters=None</em>, <em>fields=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/simpleshotgunmodel.html#SimpleShotgunModel.load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.SimpleShotgunModel.load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads shotgun data into the model, using the cache if possible.
+The model is not nested and the first field that is specified
+via the fields parameter (code by default) will be used as the default
+name for all model items.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>entity_type</strong> &#8211; Shotgun Entity Type to load data for</li>
+<li><strong>filters</strong> &#8211; Shotgun API find-style filter list. If no list is specified, all records
+for the given entity type will be retrieved.</li>
+<li><strong>fields</strong> &#8211; List of Shotgun fields to retrieve. If not spefified, the &#8216;code&#8217; field
+will be retrieved.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="shotgunoverlaymodel">
+<h2>ShotgunOverlayModel<a class="headerlink" href="#shotgunoverlaymodel" title="Permalink to this headline">¶</a></h2>
+<p>Convenience wrapper around the <cite>ShotgunModel</cite> class which adds spinner and error reporting overlay functionality.
+Where the <cite>ShotgunModel</cite> is a classic model class which purely deals with data, this class connects with a
+<cite>QWidget</cite> in order to provide progress feedback whenever necessary. Internally, it holds an instance of
+the <cite>ShotgunOverlayWidget</cite> widget (which is part of the QtWidgets framework) and will show this whenever
+there is no data to display in the view. This means that it is straight forward to create shotgun views with a
+spinner on top indicating when data is being loaded and where any errors are automatically reported to the user.</p>
+<dl class="class">
+<dt id="shotgun_model.ShotgunOverlayModel">
+<em class="property">class </em><code class="descclassname">shotgun_model.</code><code class="descname">ShotgunOverlayModel</code><span class="sig-paren">(</span><em>parent</em>, <em>overlay_widget</em>, <em>download_thumbs=True</em>, <em>schema_generation=0</em>, <em>bg_load_thumbs=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgunoverlaymodel.html#ShotgunOverlayModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunOverlayModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience wrapper around the ShotgunModel which adds
+spinner and error reporting overlay functionality.</p>
+<p>Constructor. This will create a model which can later be used to load
+and manage Shotgun data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parent</strong> &#8211; Parent object.</li>
+<li><strong>overlay_widget</strong> &#8211; Widget on which the spinner/info overlay should be positioned.</li>
+<li><strong>download_thumbs</strong> &#8211; Boolean to indicate if this model should attempt 
+to download and process thumbnails for the downloaded data.</li>
+<li><strong>schema_generation</strong> &#8211; Schema generation index. If you are changing the format 
+of the data you are retrieving from Shotgun, and therefore
+want to invalidate any cache files that may already exist
+in the system, you can increment this integer.</li>
+<li><strong>bg_load_thumbs</strong> &#8211; If set to True, thumbnails will be loaded in the background.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="shotgun_model.ShotgunOverlayModel.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunOverlayModel.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Re-implements QStandardItemModel::clear()</p>
+<p>From the QT documentation:
+Removes all items (including header items) from the model and 
+sets the number of rows and columns to zero.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunOverlayModel.destroy">
+<code class="descname">destroy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunOverlayModel.destroy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call this method prior to destroying this object.
+This will ensure all worker threads etc are stopped.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="shotgun_model.ShotgunOverlayModel.entity_ids">
+<code class="descname">entity_ids</code><a class="headerlink" href="#shotgun_model.ShotgunOverlayModel.entity_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of entity ids that are part of this model.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunOverlayModel.get_entity_type">
+<code class="descname">get_entity_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunOverlayModel.get_entity_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Shotgun Entity type associated with this model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Shotgun entity type string (e.g. &#8216;Shot&#8217;, &#8216;Asset&#8217; etc).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunOverlayModel.get_filters">
+<code class="descname">get_filters</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunOverlayModel.get_filters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of Shotgun filters representing the given item. This is useful if
+you are trying to determine how intermediate leaf nodes partition leaf node data.</p>
+<p>For example, if you have created a hierarchical model for a Shot listing:</p>
+<p>&gt; hierarchy: [sg_sequence, sg_status, code]</p>
+<p>The Shotgun model will group the data by sequence, then by status, then the leaf
+nodes will be the shot names. If you execute the get_filters() method on a sequence
+level tree node, it may return</p>
+<p>&gt; [ [&#8216;sg_sequence&#8217;, &#8216;is&#8217;, {&#8216;type&#8217;: &#8216;Sequence&#8217;, &#8216;id&#8217;: 123, &#8216;name&#8217;: &#8216;foo&#8217;}] ]</p>
+<p>If you execute the get_filters() on a status node in the tree, it may return</p>
+<dl class="docutils">
+<dt>&gt; [ [&#8216;sg_sequence&#8217;, &#8216;is&#8217;, {&#8216;type&#8217;: &#8216;Sequence&#8217;, &#8216;id&#8217;: 123, &#8216;name&#8217;: &#8216;foo&#8217;}],</dt>
+<dd>[&#8216;sg_status&#8217;, &#8216;is&#8217;, &#8216;ip&#8217;] ]</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> &#8211; One of the QStandardItem model items that is associated with this model.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">standard shotgun filter list to represent that item</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunOverlayModel.hard_refresh">
+<code class="descname">hard_refresh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunOverlayModel.hard_refresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears any caches on disk, then refreshes the data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunOverlayModel.index_from_entity">
+<code class="descname">index_from_entity</code><span class="sig-paren">(</span><em>entity_type</em>, <em>entity_id</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunOverlayModel.index_from_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a QModelIndex based on entity type and entity id
+Returns none if not found.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>entity_type</strong> &#8211; Shotgun entity type to look for</li>
+<li><strong>entity_id</strong> &#8211; Shotgun entity id to look for</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">QModelIndex or None if not found</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunOverlayModel.item_from_entity">
+<code class="descname">item_from_entity</code><span class="sig-paren">(</span><em>entity_type</em>, <em>entity_id</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunOverlayModel.item_from_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a QStandardItem based on entity type and entity id
+Returns none if not found.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>entity_type</strong> &#8211; Shotgun entity type to look for</li>
+<li><strong>entity_id</strong> &#8211; Shotgun entity id to look for</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">QStandardItem or None if not found</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunOverlayModel.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunOverlayModel.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reimplements QAbstractItemModel:reset() by &#8216;sealing it&#8217; so that
+it cannot be executed by calling code easily. This is because the reset method
+often results in crashes and instability because of how PySide/QT manages memory.</p>
+<p>For more information, see the clear() method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunOverlayModel.set_shotgun_connection">
+<code class="descname">set_shotgun_connection</code><span class="sig-paren">(</span><em>sg</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunOverlayModel.set_shotgun_connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify the shotgun api instance this model should use to communicate
+with Shotgun. If not specified, each model instance will instantiate its
+own connection, via toolkit. The behavior where each model has its own
+connection is generally recommended for thread safety reasons since
+the Shotgun API isn&#8217;t natively thread-safe.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sg</strong> &#8211; Shotgun API instance</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="shotgunmodel">
+<h2>ShotgunModel<a class="headerlink" href="#shotgunmodel" title="Permalink to this headline">¶</a></h2>
+<p>A QT Model representing a Shotgun query.</p>
+<p>This class implements a standard <cite>QAbstractItemModel</cite> specialized to hold the contents
+of a particular Shotgun query. It is cached and refreshes its data asynchronously.</p>
+<p>In order to use this class, you normally subclass it and implement certain key data
+methods for setting up queries, customizing etc. Then you connect your class to
+a <cite>QView</cite> of some sort which will display the result. If you need to do manipulations
+such as sorting or filtering on the data, connect a <cite>QProxyModel</cite> between your class
+and the view.</p>
+<p>The model can either be a flat list or a tree. This is controlled by a grouping
+parameter which works just like the Shotgun grouping. For example, if you pull
+in assets grouped by asset type, you get a tree of data with intermediate data
+types for the asset types. The leaf nodes in this case would be assets.</p>
+<dl class="class">
+<dt id="shotgun_model.ShotgunModel">
+<em class="property">class </em><code class="descclassname">shotgun_model.</code><code class="descname">ShotgunModel</code><span class="sig-paren">(</span><em>parent</em>, <em>download_thumbs=True</em>, <em>schema_generation=0</em>, <em>bg_load_thumbs=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgunmodel.html#ShotgunModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>A QT Model representing a Shotgun query.</p>
+<p>This class implements a standard QModel specialized to hold the contents
+of a particular Shotgun query. It is cached and refreshes its data asynchronously.</p>
+<p>In order to use this class, you typically subclass it and implement certain key data
+methods for setting up queries, customizing etc. Then you connect your class to
+a QView of some sort which will display the result. If you need to do manipulations
+such as sorting or filtering on the data, connect a QProxyModel between your class
+and the view.</p>
+<p>The model can either be a flat list or a tree. This is controlled by a grouping
+parameter which works just like the Shotgun grouping. For example, if you pull
+in assets grouped by asset type, you get a tree of data with intermediate data
+types for the asset types. The leaf nodes in this case would be assets.</p>
+<p>Constructor. This will create a model which can later be used to load
+and manage Shotgun data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parent</strong> &#8211; Parent object.</li>
+<li><strong>download_thumbs</strong> &#8211; Boolean to indicate if this model should attempt
+to download and process thumbnails for the downloaded data.</li>
+<li><strong>schema_generation</strong> &#8211; Schema generation index. If you are changing the format
+of the data you are retrieving from Shotgun, and therefore
+want to invalidate any cache files that may already exist
+in the system, you can increment this integer.</li>
+<li><strong>bg_load_thumbs</strong> &#8211; If set to True, thumbnails will be loaded in the background.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgunmodel.html#ShotgunModel.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Re-implements QStandardItemModel::clear()</p>
+<p>From the QT documentation:
+Removes all items (including header items) from the model and 
+sets the number of rows and columns to zero.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel.destroy">
+<code class="descname">destroy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgunmodel.html#ShotgunModel.destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.destroy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call this method prior to destroying this object.
+This will ensure all worker threads etc are stopped.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="shotgun_model.ShotgunModel.entity_ids">
+<code class="descname">entity_ids</code><a class="headerlink" href="#shotgun_model.ShotgunModel.entity_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of entity ids that are part of this model.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel.get_entity_type">
+<code class="descname">get_entity_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgunmodel.html#ShotgunModel.get_entity_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.get_entity_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Shotgun Entity type associated with this model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Shotgun entity type string (e.g. &#8216;Shot&#8217;, &#8216;Asset&#8217; etc).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel.get_filters">
+<code class="descname">get_filters</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgunmodel.html#ShotgunModel.get_filters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.get_filters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of Shotgun filters representing the given item. This is useful if
+you are trying to determine how intermediate leaf nodes partition leaf node data.</p>
+<p>For example, if you have created a hierarchical model for a Shot listing:</p>
+<p>&gt; hierarchy: [sg_sequence, sg_status, code]</p>
+<p>The Shotgun model will group the data by sequence, then by status, then the leaf
+nodes will be the shot names. If you execute the get_filters() method on a sequence
+level tree node, it may return</p>
+<p>&gt; [ [&#8216;sg_sequence&#8217;, &#8216;is&#8217;, {&#8216;type&#8217;: &#8216;Sequence&#8217;, &#8216;id&#8217;: 123, &#8216;name&#8217;: &#8216;foo&#8217;}] ]</p>
+<p>If you execute the get_filters() on a status node in the tree, it may return</p>
+<dl class="docutils">
+<dt>&gt; [ [&#8216;sg_sequence&#8217;, &#8216;is&#8217;, {&#8216;type&#8217;: &#8216;Sequence&#8217;, &#8216;id&#8217;: 123, &#8216;name&#8217;: &#8216;foo&#8217;}],</dt>
+<dd>[&#8216;sg_status&#8217;, &#8216;is&#8217;, &#8216;ip&#8217;] ]</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> &#8211; One of the QStandardItem model items that is associated with this model.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">standard shotgun filter list to represent that item</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel.hard_refresh">
+<code class="descname">hard_refresh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgunmodel.html#ShotgunModel.hard_refresh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.hard_refresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears any caches on disk, then refreshes the data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel.index_from_entity">
+<code class="descname">index_from_entity</code><span class="sig-paren">(</span><em>entity_type</em>, <em>entity_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgunmodel.html#ShotgunModel.index_from_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.index_from_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a QModelIndex based on entity type and entity id
+Returns none if not found.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>entity_type</strong> &#8211; Shotgun entity type to look for</li>
+<li><strong>entity_id</strong> &#8211; Shotgun entity id to look for</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">QModelIndex or None if not found</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel.item_from_entity">
+<code class="descname">item_from_entity</code><span class="sig-paren">(</span><em>entity_type</em>, <em>entity_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgunmodel.html#ShotgunModel.item_from_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.item_from_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a QStandardItem based on entity type and entity id
+Returns none if not found.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>entity_type</strong> &#8211; Shotgun entity type to look for</li>
+<li><strong>entity_id</strong> &#8211; Shotgun entity id to look for</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">QStandardItem or None if not found</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgunmodel.html#ShotgunModel.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reimplements QAbstractItemModel:reset() by &#8216;sealing it&#8217; so that
+it cannot be executed by calling code easily. This is because the reset method
+often results in crashes and instability because of how PySide/QT manages memory.</p>
+<p>For more information, see the clear() method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel.set_shotgun_connection">
+<code class="descname">set_shotgun_connection</code><span class="sig-paren">(</span><em>sg</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgunmodel.html#ShotgunModel.set_shotgun_connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.set_shotgun_connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify the shotgun api instance this model should use to communicate
+with Shotgun. If not specified, each model instance will instantiate its
+own connection, via toolkit. The behavior where each model has its own
+connection is generally recommended for thread safety reasons since
+the Shotgun API isn&#8217;t natively thread-safe.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sg</strong> &#8211; Shotgun API instance</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="shotgun_data.html" class="btn btn-neutral float-right" title="Shotgun Asynchronous Data Retriever" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="The Shotgun Utilities Framework" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Autodesk.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'v2.4.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
