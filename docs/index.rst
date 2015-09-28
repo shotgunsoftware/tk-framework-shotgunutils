@@ -1,4 +1,4 @@
-The QT Widgets Framework
+The Shotgun Utilities Framework
 ==================================================
 
 The Shotgun Utils Framework contains a collection of helpers and tools to make it easy and
