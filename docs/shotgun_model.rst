@@ -8,7 +8,7 @@ The shotgun data model helps you build responsive, data rich applications quickl
 QT's build in model/view framework
 
 .. image:: images/model_overview.png
-    :width: 650px
+
 
 The Shotgun Model is a custom QT Model specialized for Shotgun Queries. It uses a disk based cache
 and runs queries asynchronously to Shotgun in the background for performance. In a nutshell, you
@@ -18,13 +18,13 @@ tries to shadow and encapsulate a lot of the details.
 
 
 .. image:: images/model_inheritance.png
-    :width: 650px
+
 
 
 For convenience, three different classes are provided, allowing you to choose the right level of encapsulation.
 
 .. image:: images/model_classes.png
-    :width: 650px
+
 
 
 Why should I use the Shotgun Model?
