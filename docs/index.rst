@@ -24,3 +24,4 @@ Contents:
    shotgun_model
    shotgun_data
    settings
+   shotgun_globals
