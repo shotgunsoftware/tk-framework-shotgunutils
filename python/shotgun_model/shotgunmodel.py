@@ -330,7 +330,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                   "this method will not emit the standard before/after reset signals. "
                                   "It is possible that this method may be implemented in later versions "
                                   "of the framework. For more information, please "
-                                  "email toolkitsupport@shotgunsoftware.com." )
+                                  "email support@shotgunsoftware.com." )
 
 
     ########################################################################################
@@ -985,7 +985,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # so double check that the data actually is present.
                 if sg_data is None:
                     self.__log_warning("Found cached leaf node in tree with a missing SG_DATA_ROLE. Please report "
-                                       "to support on toolkitsupport@shotgunsoftware.com. If possible, please "
+                                       "to support on support@shotgunsoftware.com. If possible, please "
                                        "make a copy of the file '%s' and attach that with the support request. "
                                        "Affected Node name: '%s'. " % (self.__full_cache_path, child.text()))
                 else:
