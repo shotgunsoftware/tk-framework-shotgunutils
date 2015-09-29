@@ -48,7 +48,7 @@ class CachedShotgunSchema(object):
         """
         Constructor
         """
-        self._app = sgtk.platform.current_bundle()
+        self._bundle = sgtk.platform.current_bundle()
         self._field_schema = {}
         self._type_schema = {}
         self.__sg_data_retrievers = {}
@@ -57,8 +57,8 @@ class CachedShotgunSchema(object):
         self._sg_schema_query_id = None
         self._sg_status_query_id = None
         
-        self._schema_cache_path = os.path.join(self._app.cache_location, "sg_schema.pickle")
-        self._status_cache_path = os.path.join(self._app.cache_location, "sg_status.pickle")
+        self._schema_cache_path = os.path.join(self._bundle.cache_location, "sg_schema.pickle")
+        self._status_cache_path = os.path.join(self._bundle.cache_location, "sg_status.pickle")
 
         # load cached values from disk
         self._schema_loaded = self._load_cached_schema()
@@ -75,13 +75,13 @@ class CachedShotgunSchema(object):
         cache_loaded = False
         if os.path.exists(self._status_cache_path):
             try:
-                self._app.log_debug("Loading cached status from '%s'" % self._status_cache_path)
+                self._bundle.log_debug("Loading cached status from '%s'" % self._status_cache_path)
                 with open(self._status_cache_path, "rb") as fh:
                     self._status_data = pickle.load(fh)
                     cache_loaded = True
             except Exception, e:
-                self._app.log_warning("Could not open cached status "
-                                      "file '%s': %s" % (self._status_cache_path, e))       
+                self._bundle.log_warning("Could not open cached status "
+                                         "file '%s': %s" % (self._status_cache_path, e))       
         return cache_loaded
         
     def _load_cached_schema(self):
@@ -93,15 +93,15 @@ class CachedShotgunSchema(object):
         cache_loaded = False
         if os.path.exists(self._schema_cache_path):
             try:
-                self._app.log_debug("Loading cached schema from '%s'" % self._schema_cache_path)
+                self._bundle.log_debug("Loading cached schema from '%s'" % self._schema_cache_path)
                 with open(self._schema_cache_path, "rb") as fh:
                     data = pickle.load(fh)
                     self._field_schema = data["field_schema"]
                     self._type_schema = data["type_schema"]
                     cache_loaded = True
             except Exception, e:
-                self._app.log_warning("Could not open cached schema "
-                                      "file '%s': %s" % (self._schema_cache_path, e))
+                self._bundle.log_warning("Could not open cached schema "
+                                         "file '%s': %s" % (self._schema_cache_path, e))
         return cache_loaded            
             
     def _check_schema_refresh(self, entity_type, field_name=None):
@@ -117,13 +117,13 @@ class CachedShotgunSchema(object):
         if not self._schema_loaded and not self._schema_requested: 
             # schema is not requested and not loaded.
             # so download it from shotgun!
-            sg_project_id = self._app.context.project["id"]
+            sg_project_id = self._bundle.context.project["id"]
                     
-            self._app.log_debug("Starting to download new metaschema from Shotgun...")
+            self._bundle.log_debug("Starting to download new metaschema from Shotgun...")
             
             if len(self.__sg_data_retrievers) == 0:
-                self._app.log_warning("No data retrievers registered with this " 
-                                      "schema manager. Cannot load shotgun schema.")
+                self._bundle.log_warning("No data retrievers registered with this " 
+                                         "schema manager. Cannot load shotgun schema.")
             else:
                 # flag that we have submitted a request
                 # to avoid flooding of requests.
@@ -141,10 +141,10 @@ class CachedShotgunSchema(object):
         
             fields = ["bg_color", "code", "name"]
     
-            self._app.log_debug("Starting to download status list from Shotgun...")
+            self._bundle.log_debug("Starting to download status list from Shotgun...")
             
             if len(self.__sg_data_retrievers) == 0:
-                self._app.log_warning("No data retrievers registered with this " 
+                self._bundle.log_warning("No data retrievers registered with this " 
                                       "schema manager. Cannot load shotgun status.")
             else:
                 # flag that we have submitted a request
@@ -164,12 +164,12 @@ class CachedShotgunSchema(object):
         
         if uid == self._sg_schema_query_id:
             msg = shotgun_model.sanitize_qt(msg) # qstring on pyqt, str on pyside
-            self._app.log_warning("Could not load sg schema: %s" % msg)
+            self._bundle.log_warning("Could not load sg schema: %s" % msg)
             self._schema_requested = False
         
         elif uid == self._sg_status_query_id:
             msg = shotgun_model.sanitize_qt(msg) # qstring on pyqt, str on pyside
-            self._app.log_warning("Could not load sg status: %s" % msg)
+            self._bundle.log_warning("Could not load sg status: %s" % msg)
             self._status_requested = False
         
     def _on_worker_signal(self, uid, request_type, data):
@@ -185,7 +185,7 @@ class CachedShotgunSchema(object):
         data = shotgun_model.sanitize_qt(data)
 
         if self._sg_schema_query_id == uid:
-            self._app.log_debug("Metaschema arrived from Shotgun...")
+            self._bundle.log_debug("Metaschema arrived from Shotgun...")
             # store the schema in memory
             self._field_schema = data["fields"]
             self._type_schema = data["types"]
@@ -193,19 +193,19 @@ class CachedShotgunSchema(object):
             self._schema_loaded = True
             self._schema_requested = True
             # and write out the data to disk
-            self._app.log_debug("Saving schema to '%s'..." % self._schema_cache_path)
+            self._bundle.log_debug("Saving schema to '%s'..." % self._schema_cache_path)
             try:
                 with open(self._schema_cache_path, "wb") as fh:
                     data = {"field_schema": self._field_schema, 
                             "type_schema": self._type_schema}
                     pickle.dump(data, fh)
-                    self._app.log_debug("...done")
+                    self._bundle.log_debug("...done")
             except Exception, e:
-                self._app.log_warning("Could not write schema "
-                                      "file '%s': %s" % (self._schema_cache_path, e))            
+                self._bundle.log_warning("Could not write schema "
+                                         "file '%s': %s" % (self._schema_cache_path, e))            
         
         elif uid == self._sg_status_query_id:
-            self._app.log_debug("Status list arrived from Shotgun...")
+            self._bundle.log_debug("Status list arrived from Shotgun...")
             # store status in memory
             self._status_data = {}            
             for x in data["sg"]:
@@ -216,13 +216,13 @@ class CachedShotgunSchema(object):
             self._status_requested = True
             
             # and write out the data to disk
-            self._app.log_debug("Saving status to '%s'..." % self._status_cache_path)
+            self._bundle.log_debug("Saving status to '%s'..." % self._status_cache_path)
             try:
                 with open(self._status_cache_path, "wb") as fh:
                     pickle.dump(self._status_data, fh)
-                    self._app.log_debug("...done")
+                    self._bundle.log_debug("...done")
             except Exception, e:
-                self._app.log_warning("Could not write status "
+                self._bundle.log_warning("Could not write status "
                                       "file '%s': %s" % (self._status_cache_path, e))            
 
     ##########################################################################################
@@ -256,14 +256,14 @@ class CachedShotgunSchema(object):
         
         obj_hash = id(data_retriever)
         if obj_hash in self.__sg_data_retrievers:
-            self._app.log_debug("Unregistering %r from schema manager" % data_retriever)
+            self._bundle.log_debug("Unregistering %r from schema manager" % data_retriever)
             data_retriever = self.__sg_data_retrievers[obj_hash]
             del self.__sg_data_retrievers[obj_hash]
             data_retriever.work_completed.disconnect(self._on_worker_signal)
             data_retriever.work_failure.disconnect(self._on_worker_failure)
         else:
-            self._app.log_warning("Could not unregister unknown data "
-                                  "retriever %r with schema manager" %  data_retriever)
+            self._bundle.log_warning("Could not unregister unknown data "
+                                     "retriever %r with schema manager" %  data_retriever)
 
     @classmethod
     def get_type_display_name(cls, sg_entity_type):
