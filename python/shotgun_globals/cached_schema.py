@@ -223,7 +223,7 @@ class CachedShotgunSchema(object):
                     self._bundle.log_debug("...done")
             except Exception, e:
                 self._bundle.log_warning("Could not write status "
-                                      "file '%s': %s" % (self._status_cache_path, e))            
+                                         "file '%s': %s" % (self._status_cache_path, e))            
 
     ##########################################################################################
     # public methods
