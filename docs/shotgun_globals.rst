@@ -11,9 +11,6 @@ Sample Code
 
 
 
-Class ShotgunDataRetriever
-============================================
-
 .. note::
 
     Import the module into your Toolkit App using the following statement::
