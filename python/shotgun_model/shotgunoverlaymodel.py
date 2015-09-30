@@ -11,7 +11,7 @@
 import tank
 from .shotgunmodel import ShotgunModel
 from tank.platform.qt import QtCore, QtGui
-overlay_module = tank.platform.import_framework("tk-framework-qtwidgets", "overlay_widget") 
+ 
 
 
 class ShotgunOverlayModel(ShotgunModel):
@@ -52,6 +52,9 @@ class ShotgunOverlayModel(ShotgunModel):
         ShotgunModel.__init__(self, parent, download_thumbs, schema_generation, bg_load_thumbs)
         
         # set up our spinner UI handling
+        # run the import locally in the constructor to avoid cycles between 
+        # qtwidgets and shotgunutils on import
+        overlay_module = tank.platform.import_framework("tk-framework-qtwidgets", "overlay_widget")
         self.__overlay = overlay_module.ShotgunOverlayWidget(overlay_widget)
         self._is_in_spin_state = False
         self._cache_loaded = False
