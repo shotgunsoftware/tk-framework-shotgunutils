@@ -107,6 +107,9 @@ class CachedShotgunSchema(object):
     def _check_schema_refresh(self, entity_type, field_name=None):
         """
         Check and potentially trigger a cache refresh
+        
+        :param entity_type: Shotgun entity type
+        :param field_name: Shotgun field name
         """
         
         # TODO: currently, this only checks if there is a full cache in memory
@@ -235,7 +238,8 @@ class CachedShotgunSchema(object):
         Once a data retriever has been registered, the schema singleton
         can refresh its cache.
         
-        :data_retriever: shotgun data retriever object to register
+        :param data_retriever: shotgun data retriever object to register
+        :type data_retriever: :class:`~shotgun_data.ShotgunDataRetriever`
         """
         self = cls.__get_instance()
         
@@ -250,7 +254,8 @@ class CachedShotgunSchema(object):
         """
         Unregister a previously registered data retriever with the singleton.
         
-        :data_retriever: shotgun data retriever object to unregister
+        :param data_retriever: shotgun data retriever object to unregister
+        :type data_retriever: :class:`~shotgun_data.ShotgunDataRetriever`
         """     
         self = cls.__get_instance()
         
@@ -268,15 +273,17 @@ class CachedShotgunSchema(object):
     @classmethod
     def get_type_display_name(cls, sg_entity_type):
         """
-        Returns the schema info for an entity type.
-        If no data is known for this object, None is returned.
+        Returns the display name for a Shotgun entity type.
+        If no display name is known for this object, the system
+        name is returned, e.g. the same that's being passed in 
+        via the sg_entity_type parameter. 
         
-        If the entity type is not known to the system, a cache reload
+        If the data is not present locally, a cache reload
         will be triggered, meaning that subsequent cache requests may
         return valid data.
         
         :param sg_entity_type: Shotgun entity type
-        :returns: schema information dict if entity type is known, None if not.
+        :returns: Entity type display name
         """
         self = cls.__get_instance()
         self._check_schema_refresh(sg_entity_type)
@@ -294,9 +301,17 @@ class CachedShotgunSchema(object):
     @classmethod
     def get_field_display_name(cls, sg_entity_type, field_name):
         """
-        Returns the display name for a given field. If the field
-        cannot be found or the value is not yet cached, 
-        the field name is returned.
+        Returns the display name for a given Shotgun field. If the field
+        cannot be found or the value is not yet cached, the system name 
+        for the field is returned.
+        
+        If the data is not present locally, a cache reload
+        will be triggered, meaning that subsequent cache requests may
+        return valid data.
+        
+        :param sg_entity_type: Shotgun entity type
+        :param field_name: Shotgun field name
+        :returns: Field display name        
         """
         self = cls.__get_instance()
         self._check_schema_refresh(sg_entity_type, field_name)        
@@ -322,8 +337,12 @@ class CachedShotgunSchema(object):
     def get_empty_phrase(cls, sg_entity_type, field_name):
         """
         Get an appropriate phrase to describe the fact that 
-        a field is empty. The phrase will differ depending on 
+        a given Shotgun field is empty. The phrase will differ depending on 
         the data type of the field.
+
+        :param sg_entity_type: Shotgun entity type
+        :param field_name: Shotgun field name
+        :returns: Empty phrase string        
         """
         self = cls.__get_instance()
         self._check_schema_refresh(sg_entity_type, field_name)
@@ -345,7 +364,11 @@ class CachedShotgunSchema(object):
         """
         Returns the display name for a given status code.
         If the status code cannot be found or haven't been loaded,
-        the code is returned back.
+        the status code is returned back.
+        
+        If the data is not present locally, a cache reload
+        will be triggered, meaning that subsequent cache requests may
+        return valid data.
         
         :param status_code: Status short code (e.g 'ip')
         :returns: string with descriptive status name 
@@ -369,8 +392,12 @@ class CachedShotgunSchema(object):
         If the status code cannot be found or haven't been loaded,
         None is returned.
         
+        If the data is not present locally, a cache reload
+        will be triggered, meaning that subsequent cache requests may
+        return valid data.        
+        
         :param status_code: Status short code (e.g 'ip')
-        :returns: string with r,g,b values, e.g. "123,255,10"
+        :returns: string with r,g,b values, e.g. ``"123,255,10"``
         """
         self = cls.__get_instance()
         self._check_status_refresh()

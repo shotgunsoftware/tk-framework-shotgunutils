@@ -102,22 +102,25 @@ The simple setup outlined above could be extended in the following ways:
   :class:`~tk-framework-qtwidgets:views.WidgetDelegate`
 
 
+.. _sg-model-data-items:
+
 Data Items
 ----------------------
 
-The Shotgun Model derives from `QStandardItemModel` which is a base model which managed the storage
-of model data inside a collection of `QStandardItem` objects. Each of these objects have a number of
+
+The Shotgun Model derives from :class:`~PySide.QtGui.QStandardItemModel` which is a base model which managed the storage
+of model data inside a collection of :class:`~PySide.QtGui.QStandardItem` objects. Each of these objects have a number of
 standard property and so called *roles*, holding various pieces of data such as icons, colours etc.
 The Shotgun Model introduces two new standard roles which can be used by both subclassing and calling
 code:
 
-- `ShotgunModel.SG_DATA_ROLE` holds the shotgun data associated with an object. In a tree view, only
+- ``ShotgunModel.SG_DATA_ROLE`` holds the shotgun data associated with an object. In a tree view, only
   leaf nodes have this data defined - other nodes have it set to None. For leaf nodes, it is a standard
   shotgun dictionary containing all the items that were returned by the Shotgun query.
-- `ShotgunModel.SG_ASSOCIATED_FIELD_ROLE` holds the associated field value for a node. This is contained
+- ``ShotgunModel.SG_ASSOCIATED_FIELD_ROLE`` holds the associated field value for a node. This is contained
   in a dictionary with the keys name and value. For example, for a leaf node this is typically something
-  like `{"name": "code", "value": "AAA_123"}`. For an intermediate node, it may be something such as
-  `{"name": "sg_sequence", "value": {"id": 123, "name": "AAA", "type": "Sequence"} }`.
+  like ``{"name": "code", "value": "AAA_123"}``. For an intermediate node, it may be something such as
+  ``{"name": "sg_sequence", "value": {"id": 123, "name": "AAA", "type": "Sequence"} }``.
 
 Datetime objects and the Shotgun API
 ------------------------------------------
@@ -141,7 +144,7 @@ Furthermore, if you want to turn that into a nicely formatted string::
     time_str = local_datetime.strftime('%Y-%m-%d %H:%M')
 
 
-
+.. currentmodule:: shotgun_model
 
 SimpleShotgunModel
 =====================================================
@@ -149,17 +152,18 @@ SimpleShotgunModel
 Convenience wrapper around the Shotgun model for quick and easy access. Use this when you want
 to prototype data modeling or if your are looking for a simple flat data set reflecting a
 shotgun query. All you need to do is to instantiate the class (typically once, in your constructor)
-and then call `load_data` to
-specify which shotgun query to load up in the model. Subsequently call `load_data` whenever you
+and then call :meth:`SimpleShotgunModel.load_data()` to
+specify which shotgun query to load up in the model. Subsequently call 
+:meth:`~SimpleShotgunModel.load_data()` whenever you
 wish to change the Shotgun query associated with the model.
 
-This class derives from ShotgunModel so all the customization methods available in the
+This class derives from :class:`ShotgunModel` so all the 
+customization methods available in the
 normal ShotgunModel can also be subclassed from this class.
 
 
-.. currentmodule:: shotgun_model
-
 .. autoclass:: SimpleShotgunModel
+    :show-inheritance:
     :members:
 
 
@@ -171,19 +175,22 @@ ShotgunOverlayModel
 
 
 
-Convenience wrapper around the `ShotgunModel` class which adds spinner and error reporting overlay functionality.
-Where the `ShotgunModel` is a classic model class which purely deals with data, this class connects with a
-`QWidget` in order to provide progress feedback whenever necessary. Internally, it holds an instance of
-the `ShotgunOverlayWidget` widget (which is part of the QtWidgets framework) and will show this whenever
+Convenience wrapper around the :class:`ShotgunModel` class which adds spinner and error reporting overlay functionality.
+Where the :class:`ShotgunModel` is a classic model class which purely deals with data, this class connects with a
+:class:`~PySide.QtGui.QWidget` in order to provide progress feedback whenever necessary. Internally, it holds an instance of
+the :class:`~tk-framework-qtwidgets:overlay_widget.ShotgunOverlayWidget` widget 
+(which is part of the QtWidgets framework) and will show this whenever
 there is no data to display in the view. This means that it is straight forward to create shotgun views with a
 spinner on top indicating when data is being loaded and where any errors are automatically reported to the user.
 
+.. note:: Only the methods specific to the overlay model are displayed here. For
+   additional methods, see the :class:`ShotgunModel`.
 
 .. currentmodule:: shotgun_model
 
 .. autoclass:: ShotgunOverlayModel
-    :inherited-members:
-    :members:
+    :show-inheritance: 
+    :members: _show_overlay_spinner, _hide_overlay_info, _show_overlay_pixmap, _show_overlay_info_message, _show_overlay_error_message
 
 
 ShotgunModel
@@ -191,14 +198,8 @@ ShotgunModel
 
 A QT Model representing a Shotgun query.
 
-This class implements a standard `QAbstractItemModel` specialized to hold the contents
+This class implements a standard :class:`~PySide.QtCore.QAbstractItemModel` specialized to hold the contents
 of a particular Shotgun query. It is cached and refreshes its data asynchronously.
-
-In order to use this class, you normally subclass it and implement certain key data
-methods for setting up queries, customizing etc. Then you connect your class to
-a `QView` of some sort which will display the result. If you need to do manipulations
-such as sorting or filtering on the data, connect a `QProxyModel` between your class
-and the view.
 
 The model can either be a flat list or a tree. This is controlled by a grouping
 parameter which works just like the Shotgun grouping. For example, if you pull
@@ -209,5 +210,27 @@ types for the asset types. The leaf nodes in this case would be assets.
 .. currentmodule:: shotgun_model
 
 .. autoclass:: ShotgunModel
+    :show-inheritance:
     :inherited-members:
     :members:
+    :private-members: 
+    :exclude-members: _ShotgunModel__add_sg_item_to_tree,
+                      _ShotgunModel__add_sg_item_to_tree_r,
+                      _ShotgunModel__check_constraints,
+                      _ShotgunModel__do_depth_first_tree_deletion,
+                      _ShotgunModel__load_from_disk,
+                      _ShotgunModel__log_debug,
+                      _ShotgunModel__log_warning,
+                      _ShotgunModel__on_sg_data_arrived,
+                      _ShotgunModel__on_worker_failure,
+                      _ShotgunModel__on_worker_signal,
+                      _ShotgunModel__populate_complete_tree_r,
+                      _ShotgunModel__process_thumbnail_for_item,
+                      _ShotgunModel__rebuild_whole_tree_from_sg_data,
+                      _ShotgunModel__save_to_disk,
+                      _ShotgunModel__save_to_disk_r,
+                      _ShotgunModel__sg_compare_data,
+                      _generate_display_name,
+                      reset,
+                      clear
+    
