@@ -1,5 +1,7 @@
 
 
+
+
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -8,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_data.sgdata &mdash; Shotgun Pipeline Toolkit v2.4.2 documentation</title>
+  <title>shotgun_data.sgdata &mdash; tk-framework-shotgunutils 31352_sphinx documentation</title>
   
 
   
@@ -30,7 +32,7 @@
   
 
   
-    <link rel="top" title="Shotgun Pipeline Toolkit v2.4.2 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils 31352_sphinx documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -47,21 +49,20 @@
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search">
           
+    <img style='width: 191px; 
+                height: 60px; 
+                border-radius: 0px; 
+                padding: 0px;' 
+         src='./_static/logo@2x.png'/>
+    
 
           
-            <a href="../../index.html" class="icon icon-home"> Shotgun Pipeline Toolkit
+            <a href="../../index.html" class="icon icon-home"> tk-framework-shotgunutils
           
 
           
           </a>
 
-          
-            
-            
-              <div class="version">
-                v2.4.2
-              </div>
-            
           
 
           
@@ -74,20 +75,49 @@
 </div>
 
           
+
         </div>
 
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
+    
             
             
                 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_model.html">Shotgun Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_globals.html">Shotgun Globals Access</a></li>
 </ul>
 
             
           
+       
+    <div style='margin-top: 50px;
+                margin-left: 10px;
+                margin-right: 10px;
+                padding: 10px; 
+                color: #b3b3b3; 
+                font-size: 70%;
+                border-radius: 3px;
+                background-color: #444;
+                line-height: 18px;
+                '>    
+    <style>
+        a.custom_post_menu { display: inline; 
+                             padding: 0px; 
+                             text-decoration: underline; }
+    </style>
+
+    <b>tk-framework-shotgunutils</b> 31352_sphinx.<br>
+    This documentation is part of the Shotgun Pipeline Toolkit. 
+    For more information, please visit 
+    <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
+    The code associated with this documentation can be found 
+    <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
+
+    </div>
+
         </div>
       </div>
     </nav>
@@ -97,7 +127,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../index.html">Shotgun Pipeline Toolkit</a>
+        <a href="../../index.html">tk-framework-shotgunutils</a>
       </nav>
 
 
@@ -155,27 +185,36 @@
 
 <div class="viewcode-block" id="ShotgunDataRetriever"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever">[docs]</a><span class="k">class</span> <span class="nc">ShotgunDataRetriever</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Asynchronous data retrieve class which can be used to retrieve data</span>
-<span class="sd">    and thumbnails from Shotgun and from disk thumbnail cache.</span>
-
-<span class="sd">    The class manages a queue where you can add various requests.</span>
-<span class="sd">    Requests are queued up using the execute_find() and request_thumbnail() methods.</span>
+<span class="sd">    Asynchronous data retriever class which can be used to retrieve data and </span>
+<span class="sd">    thumbnails from Shotgun and from disk thumbnail cache. The class manages </span>
+<span class="sd">    a queue where you can add various requests. Requests are queued up using </span>
+<span class="sd">    for example the :meth:`execute_find()` and :meth:`request_thumbnail()` </span>
+<span class="sd">    methods.</span>
 
 <span class="sd">    Requests are executed in the following priority order:</span>
 
-<span class="sd">    - first any thumbnails that are already cached on disk are handled</span>
-<span class="sd">    - next, shotgun find() queries are handled</span>
-<span class="sd">    - lastly thumbnail downloads are handled</span>
-
-<span class="sd">    The thread will emit work_completed and work_failure signals</span>
-<span class="sd">    when tasks are completed (or fail).</span>
-
-<span class="sd">    The clear() method will clear the current queue. The currently</span>
-<span class="sd">    processing item will finish processing and may send out signals</span>
-<span class="sd">    even after a clear.</span>
-
-<span class="sd">    Make sure you call the stop() method prior to destruction in order</span>
-<span class="sd">    for the system to gracefully shut down.</span>
+<span class="sd">    - First any thumbnails that are already cached on disk are handled.</span>
+<span class="sd">    - Next, shotgun find() queries are handled.</span>
+<span class="sd">    - Lastly thumbnail downloads are handled.</span>
+<span class="sd">    </span>
+<span class="sd">    The thread will emit work_completed and work_failure signals when </span>
+<span class="sd">    tasks are completed (or fail). The :meth:`clear()` method will </span>
+<span class="sd">    clear the current queue. The currently processing item will finish </span>
+<span class="sd">    processing and may send out signals even after a clear. Make sure you </span>
+<span class="sd">    call the :meth:`stop()` method prior to destruction in order for the </span>
+<span class="sd">    system to gracefully shut down.    </span>
+<span class="sd">    </span>
+<span class="sd">    :signal work_completed(uid, request_type, data_dict): Emitted every time </span>
+<span class="sd">        a requested task has completed. ``uid`` is a unique id which matches </span>
+<span class="sd">        the unique id returned by the corresponding request call. </span>
+<span class="sd">        ``request_type`` is a string denoting the type of request this </span>
+<span class="sd">        event is associated with. ``data_dict`` is a dictionary containing </span>
+<span class="sd">        the payload of the request. It will be different depending on what </span>
+<span class="sd">        type of request it is. </span>
+<span class="sd">    </span>
+<span class="sd">    :signal work_failure(uid, error_message): Emitted every time a requested </span>
+<span class="sd">        task has failed. ``uid`` is a unique id which matches the unique </span>
+<span class="sd">        id returned by the corresponding request call.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 
@@ -218,7 +257,8 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Construction</span>
+<span class="sd">        :param parent: Parent object</span>
+<span class="sd">        :type parent: :class:`~PySide.QtGui.QWidget`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span> <span class="o">=</span> <span class="n">tank</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_bundle</span><span class="p">()</span>
@@ -310,10 +350,10 @@
 <span class="sd">        with Shotgun. If not specified, each instance will instantiate its</span>
 <span class="sd">        own connection, via toolkit. The behavior where each instance has its own</span>
 <span class="sd">        connection is generally recommended for thread safety reasons since</span>
-<span class="sd">        the Shotgun API isn&#39;t natively threadsafe.</span>
+<span class="sd">        the Shotgun API isn&#39;t natively thread safe.</span>
 
 <span class="sd">        We strongly recommend that the API instance passed in here is not used</span>
-<span class="sd">        in any other threads since this may lead to undefined behaviour.</span>
+<span class="sd">        in any other threads since this may lead to undefined behavior.</span>
 
 <span class="sd">        :param sg: Shotgun API instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -344,7 +384,7 @@
 <span class="sd">        Gracefully stop the receiver.</span>
 
 <span class="sd">        Once stop() has been called, the object needs to be discarded.</span>
-<span class="sd">        This is a blocking call. It will  synchronounsly wait</span>
+<span class="sd">        This is a blocking call. It will synchronously wait</span>
 <span class="sd">        until any potential currently processing item has completed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">: Initiating shutdown.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
@@ -483,13 +523,12 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds the generic execution of a method to the queue.</span>
 <span class="sd">        </span>
-<span class="sd">        The specified method will be called on the form</span>
+<span class="sd">        The specified method will be called on the following form::</span>
 <span class="sd">        </span>
-<span class="sd">        &gt; method(sg, data) </span>
+<span class="sd">            method(sg, data)</span>
 <span class="sd">        </span>
 <span class="sd">        Where sg is a shotgun API instance. Data is typically</span>
 <span class="sd">        a dictionary with specific data that the method needs.</span>
-<span class="sd">                </span>
 <span class="sd">        The query will be queued up and once processed, either a</span>
 <span class="sd">        work_completed or work_failure signal will be emitted.</span>
 
@@ -690,7 +729,7 @@
     <span class="c">############################################################################################</span>
     <span class="c"># main thread loop</span>
 
-<div class="viewcode-block" id="ShotgunDataRetriever.run"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Main thread loop</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -888,7 +927,7 @@
 
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">work_failure</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">item_to_process</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="s">&quot;An error occurred: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
-</pre></div></div></div>
+</pre></div></div>
 
            </div>
           </div>
@@ -902,8 +941,7 @@
         &copy; Copyright 2015, Autodesk.
 
     </p>
-  </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  </div> 
 
 </footer>
 
@@ -921,7 +959,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v2.4.2',
+            VERSION:'31352_sphinx',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

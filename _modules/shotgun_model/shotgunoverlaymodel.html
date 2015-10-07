@@ -1,5 +1,7 @@
 
 
+
+
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -8,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgunoverlaymodel &mdash; Shotgun Pipeline Toolkit v2.4.2 documentation</title>
+  <title>shotgun_model.shotgunoverlaymodel &mdash; tk-framework-shotgunutils 31352_sphinx documentation</title>
   
 
   
@@ -30,7 +32,7 @@
   
 
   
-    <link rel="top" title="Shotgun Pipeline Toolkit v2.4.2 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils 31352_sphinx documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -47,21 +49,20 @@
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search">
           
+    <img style='width: 191px; 
+                height: 60px; 
+                border-radius: 0px; 
+                padding: 0px;' 
+         src='./_static/logo@2x.png'/>
+    
 
           
-            <a href="../../index.html" class="icon icon-home"> Shotgun Pipeline Toolkit
+            <a href="../../index.html" class="icon icon-home"> tk-framework-shotgunutils
           
 
           
           </a>
 
-          
-            
-            
-              <div class="version">
-                v2.4.2
-              </div>
-            
           
 
           
@@ -74,20 +75,49 @@
 </div>
 
           
+
         </div>
 
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
+    
             
             
                 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_model.html">Shotgun Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_globals.html">Shotgun Globals Access</a></li>
 </ul>
 
             
           
+       
+    <div style='margin-top: 50px;
+                margin-left: 10px;
+                margin-right: 10px;
+                padding: 10px; 
+                color: #b3b3b3; 
+                font-size: 70%;
+                border-radius: 3px;
+                background-color: #444;
+                line-height: 18px;
+                '>    
+    <style>
+        a.custom_post_menu { display: inline; 
+                             padding: 0px; 
+                             text-decoration: underline; }
+    </style>
+
+    <b>tk-framework-shotgunutils</b> 31352_sphinx.<br>
+    This documentation is part of the Shotgun Pipeline Toolkit. 
+    For more information, please visit 
+    <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
+    The code associated with this documentation can be found 
+    <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
+
+    </div>
+
         </div>
       </div>
     </nav>
@@ -97,7 +127,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../index.html">Shotgun Pipeline Toolkit</a>
+        <a href="../../index.html">tk-framework-shotgunutils</a>
       </nav>
 
 
@@ -142,13 +172,32 @@
 <span class="kn">import</span> <span class="nn">tank</span>
 <span class="kn">from</span> <span class="nn">.shotgunmodel</span> <span class="kn">import</span> <span class="n">ShotgunModel</span>
 <span class="kn">from</span> <span class="nn">tank.platform.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
-<span class="n">overlay_module</span> <span class="o">=</span> <span class="n">tank</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s">&quot;tk-framework-qtwidgets&quot;</span><span class="p">,</span> <span class="s">&quot;overlay_widget&quot;</span><span class="p">)</span> 
+ 
 
 
 <div class="viewcode-block" id="ShotgunOverlayModel"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunOverlayModel">[docs]</a><span class="k">class</span> <span class="nc">ShotgunOverlayModel</span><span class="p">(</span><span class="n">ShotgunModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convenience wrapper around the ShotgunModel which adds</span>
-<span class="sd">    spinner and error reporting overlay functionality. </span>
+<span class="sd">    Convenience wrapper around the :class:`ShotgunModel` class which adds spinner and </span>
+<span class="sd">    error reporting overlay functionality. Where the :class:`ShotgunModel` is a classic </span>
+<span class="sd">    model class which purely deals with data, this class connects with a :class:`~PySide.QtGui.QWidget` </span>
+<span class="sd">    in order to provide progress feedback whenever necessary. Internally, </span>
+<span class="sd">    it holds an instance of the :class:`~tk-framework-qtwidgets:overlay_widget.ShotgunOverlayWidget` widget (which is part of </span>
+<span class="sd">    the QtWidgets framework) and will show this whenever there is no data to </span>
+<span class="sd">    display in the view. This means that it is straight forward to create </span>
+<span class="sd">    shotgun views with a spinner on top indicating when data is being loaded </span>
+<span class="sd">    and where any errors are automatically reported to the user.</span>
+<span class="sd">    </span>
+<span class="sd">    :signal progress_spinner_start(): Signal that gets emitted whenever the </span>
+<span class="sd">        model deems it appropriate to indicate that data is being loaded. </span>
+<span class="sd">        Note that this signal is not emitted every time data is loaded from </span>
+<span class="sd">        Shotgun, but only when there is no cached data available to display. </span>
+<span class="sd">        This signal can be useful if an implementation wants to set up a custom </span>
+<span class="sd">        overlay system instead of or in addition to the built in one that is </span>
+<span class="sd">        provided via the :meth:`set_overlay_parent()` method.</span>
+<span class="sd">    </span>
+<span class="sd">    :signal progress_spinner_end(): Emitted every time a progress spinner </span>
+<span class="sd">        should be deactivated.</span>
+<span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c"># signal that gets emitted whenever the model deems it appropriate to </span>
@@ -166,11 +215,10 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">overlay_widget</span><span class="p">,</span> <span class="n">download_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Constructor. This will create a model which can later be used to load</span>
-<span class="sd">        and manage Shotgun data.</span>
-<span class="sd">        </span>
 <span class="sd">        :param parent: Parent object.</span>
+<span class="sd">        :type parent: :class:`~PySide.QtGui.QWidget`</span>
 <span class="sd">        :param overlay_widget: Widget on which the spinner/info overlay should be positioned.</span>
+<span class="sd">        :type overlay_widget: :class:`~PySide.QtGui.QWidget`</span>
 <span class="sd">        :param download_thumbs: Boolean to indicate if this model should attempt </span>
 <span class="sd">                                to download and process thumbnails for the downloaded data.</span>
 <span class="sd">        :param schema_generation: Schema generation index. If you are changing the format </span>
@@ -183,6 +231,9 @@
         <span class="n">ShotgunModel</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">download_thumbs</span><span class="p">,</span> <span class="n">schema_generation</span><span class="p">,</span> <span class="n">bg_load_thumbs</span><span class="p">)</span>
         
         <span class="c"># set up our spinner UI handling</span>
+        <span class="c"># run the import locally in the constructor to avoid cycles between </span>
+        <span class="c"># qtwidgets and shotgunutils on import</span>
+        <span class="n">overlay_module</span> <span class="o">=</span> <span class="n">tank</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s">&quot;tk-framework-qtwidgets&quot;</span><span class="p">,</span> <span class="s">&quot;overlay_widget&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__overlay</span> <span class="o">=</span> <span class="n">overlay_module</span><span class="o">.</span><span class="n">ShotgunOverlayWidget</span><span class="p">(</span><span class="n">overlay_widget</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_spin_state</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cache_loaded</span> <span class="o">=</span> <span class="bp">False</span>
@@ -222,7 +273,7 @@
         <span class="c"># call base class</span>
         <span class="k">return</span> <span class="n">ShotgunModel</span><span class="o">.</span><span class="n">_refresh_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     
-    <span class="k">def</span> <span class="nf">_show_overlay_spinner</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ShotgunOverlayModel._show_overlay_spinner"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunOverlayModel._show_overlay_spinner">[docs]</a>    <span class="k">def</span> <span class="nf">_show_overlay_spinner</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Shows the overlay spinner</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -230,25 +281,26 @@
         <span class="c"># signal to any external listeners</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">progress_spinner_start</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_spin_state</span> <span class="o">=</span> <span class="bp">True</span>        
-    
-    <span class="k">def</span> <span class="nf">_hide_overlay_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    </div>
+<div class="viewcode-block" id="ShotgunOverlayModel._hide_overlay_info"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunOverlayModel._hide_overlay_info">[docs]</a>    <span class="k">def</span> <span class="nf">_hide_overlay_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Hides any overlay that is currently shown, except for error messages.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__overlay</span><span class="o">.</span><span class="n">hide</span><span class="p">(</span><span class="n">hide_errors</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-        
-    <span class="k">def</span> <span class="nf">_show_overlay_pixmap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__overlay</span><span class="o">.</span><span class="n">hide</span><span class="p">(</span><span class="n">hide_errors</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="ShotgunOverlayModel._show_overlay_pixmap"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunOverlayModel._show_overlay_pixmap">[docs]</a>    <span class="k">def</span> <span class="nf">_show_overlay_pixmap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Show an overlay status message in the form of a pixmap.</span>
-<span class="sd">        This is for example useful if a particular query doesn&#39;t return any results.</span>
+<span class="sd">        Shows an overlay status message in the form of an image.</span>
 <span class="sd">        If an error message is already being shown, the pixmap will not </span>
 <span class="sd">        replace the error message. </span>
 <span class="sd">        </span>
 <span class="sd">        :param pixmap: QPixmap object containing graphic to show.</span>
+<span class="sd">        :type pixmap: :class:`~PySide.QtGui.QPixmap`</span>
+<span class="sd">        :returns: True if the message was shown, False if not.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__overlay</span><span class="o">.</span><span class="n">show_message_pixmap</span><span class="p">(</span><span class="n">pixmap</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_show_overlay_info_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__overlay</span><span class="o">.</span><span class="n">show_message_pixmap</span><span class="p">(</span><span class="n">pixmap</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShotgunOverlayModel._show_overlay_info_message"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunOverlayModel._show_overlay_info_message">[docs]</a>    <span class="k">def</span> <span class="nf">_show_overlay_info_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Show an overlay status message.</span>
 <span class="sd">        If an error is already displayed, </span>
@@ -257,19 +309,19 @@
 <span class="sd">        :param msg: message to display</span>
 <span class="sd">        :returns: True if the message was shown, False if not.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__overlay</span><span class="o">.</span><span class="n">show_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        
-    <span class="k">def</span> <span class="nf">_show_overlay_error_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__overlay</span><span class="o">.</span><span class="n">show_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="ShotgunOverlayModel._show_overlay_error_message"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunOverlayModel._show_overlay_error_message">[docs]</a>    <span class="k">def</span> <span class="nf">_show_overlay_error_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Show an overlay error message.</span>
 <span class="sd">        </span>
-<span class="sd">        :param msg: error message to display</span>
+<span class="sd">        :param msg: Error message to display</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__overlay</span><span class="o">.</span><span class="n">show_error_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__overlay</span><span class="o">.</span><span class="n">show_error_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="c">########################################################################################</span>
     <span class="c"># private methods</span>
-
+</div>
     <span class="k">def</span> <span class="nf">__on_data_refreshed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Callback when async data has arrived successfully</span>
@@ -304,8 +356,7 @@
         &copy; Copyright 2015, Autodesk.
 
     </p>
-  </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  </div> 
 
 </footer>
 
@@ -323,7 +374,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v2.4.2',
+            VERSION:'31352_sphinx',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

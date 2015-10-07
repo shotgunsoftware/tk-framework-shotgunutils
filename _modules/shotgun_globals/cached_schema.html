@@ -1,0 +1,633 @@
+
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>shotgun_globals.cached_schema &mdash; tk-framework-shotgunutils 31352_sphinx documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="tk-framework-shotgunutils 31352_sphinx documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+    <img style='width: 191px; 
+                height: 60px; 
+                border-radius: 0px; 
+                padding: 0px;' 
+         src='./_static/logo@2x.png'/>
+    
+
+          
+            <a href="../../index.html" class="icon icon-home"> tk-framework-shotgunutils
+          
+
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+    
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_model.html">Shotgun Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_globals.html">Shotgun Globals Access</a></li>
+</ul>
+
+            
+          
+       
+    <div style='margin-top: 50px;
+                margin-left: 10px;
+                margin-right: 10px;
+                padding: 10px; 
+                color: #b3b3b3; 
+                font-size: 70%;
+                border-radius: 3px;
+                background-color: #444;
+                line-height: 18px;
+                '>    
+    <style>
+        a.custom_post_menu { display: inline; 
+                             padding: 0px; 
+                             text-decoration: underline; }
+    </style>
+
+    <b>tk-framework-shotgunutils</b> 31352_sphinx.<br>
+    This documentation is part of the Shotgun Pipeline Toolkit. 
+    For more information, please visit 
+    <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
+    The code associated with this documentation can be found 
+    <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
+
+    </div>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">tk-framework-shotgunutils</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>shotgun_globals.cached_schema</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for shotgun_globals.cached_schema</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2015 Shotgun Software Inc.</span>
+<span class="c"># </span>
+<span class="c"># CONFIDENTIAL AND PROPRIETARY</span>
+<span class="c"># </span>
+<span class="c"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit </span>
+<span class="c"># Source Code License included in this distribution package. See LICENSE.</span>
+<span class="c"># By accessing, using, copying or modifying this work you indicate your </span>
+<span class="c"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights </span>
+<span class="c"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
+
+<span class="c"># make sure that py25 has access to with statement</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">with_statement</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sgtk</span>
+<span class="kn">from</span> <span class="nn">sgtk</span> <span class="kn">import</span> <span class="n">TankError</span>
+<span class="kn">from</span> <span class="nn">sgtk.platform.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">import</span> <span class="nn">cPickle</span> <span class="kn">as</span> <span class="nn">pickle</span>
+
+<span class="k">class</span> <span class="nc">CachedShotgunSchema</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wraps around the shotgun schema and caches it for fast lookups.</span>
+
+<span class="sd">    Singleton-style setup, so all access method happen via class methods:</span>
+<span class="sd">    </span>
+<span class="sd">    - get_type_display_name     - Display name for entity type</span>
+<span class="sd">    - get_field_display_name    - Display name for field</span>
+<span class="sd">    - get_empty_phrase          - String to denote &#39;no value&#39; for item</span>
+<span class="sd">    - get_status_display_name   - Display name for status code</span>
+<span class="sd">    </span>
+<span class="sd">    This caches the shotgun schema to disk *once* and doesn&#39;t check for </span>
+<span class="sd">    further updates. If the cache fails to find a value, the technical </span>
+<span class="sd">    name rather than the display name is returned, so there is graceful</span>
+<span class="sd">    fallback.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__instance</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">__get_instance</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Singleton access</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">__instance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">__instance</span> <span class="o">=</span> <span class="n">CachedShotgunSchema</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">__instance</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_bundle</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sg_schema_query_id</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sg_status_query_id</span> <span class="o">=</span> <span class="bp">None</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_schema_cache_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">cache_location</span><span class="p">,</span> <span class="s">&quot;sg_schema.pickle&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status_cache_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">cache_location</span><span class="p">,</span> <span class="s">&quot;sg_status.pickle&quot;</span><span class="p">)</span>
+
+        <span class="c"># load cached values from disk</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_schema_loaded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_cached_schema</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status_loaded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_cached_status</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_schema_requested</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status_requested</span> <span class="o">=</span> <span class="bp">False</span>        
+        
+        
+    <span class="k">def</span> <span class="nf">_load_cached_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load cached status from disk if it exists</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cache_loaded</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_status_cache_path</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;Loading cached status from &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_cache_path</span><span class="p">)</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_status_cache_path</span><span class="p">,</span> <span class="s">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+                    <span class="n">cache_loaded</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span><span class="s">&quot;Could not open cached status &quot;</span>
+                                         <span class="s">&quot;file &#39;</span><span class="si">%s</span><span class="s">&#39;: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_status_cache_path</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>       
+        <span class="k">return</span> <span class="n">cache_loaded</span>
+        
+    <span class="k">def</span> <span class="nf">_load_cached_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load cached metaschema from disk if it exists</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: true if cache was loaded, false if not</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cache_loaded</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema_cache_path</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;Loading cached schema from &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema_cache_path</span><span class="p">)</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema_cache_path</span><span class="p">,</span> <span class="s">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&quot;field_schema&quot;</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&quot;type_schema&quot;</span><span class="p">]</span>
+                    <span class="n">cache_loaded</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span><span class="s">&quot;Could not open cached schema &quot;</span>
+                                         <span class="s">&quot;file &#39;</span><span class="si">%s</span><span class="s">&#39;: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema_cache_path</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">cache_loaded</span>            
+            
+    <span class="k">def</span> <span class="nf">_check_schema_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check and potentially trigger a cache refresh</span>
+<span class="sd">        </span>
+<span class="sd">        :param entity_type: Shotgun entity type</span>
+<span class="sd">        :param field_name: Shotgun field name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c"># TODO: currently, this only checks if there is a full cache in memory</span>
+        <span class="c"># or not. Later on, when we have the ability to check the current </span>
+        <span class="c"># metaschema generation via the shotgun API, this can be handled in a </span>
+        <span class="c"># more graceful fashion.</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema_loaded</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema_requested</span><span class="p">:</span> 
+            <span class="c"># schema is not requested and not loaded.</span>
+            <span class="c"># so download it from shotgun!</span>
+            <span class="n">sg_project_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">project</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">]</span>
+                    
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;Starting to download new metaschema from Shotgun...&quot;</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span><span class="s">&quot;No data retrievers registered with this &quot;</span> 
+                                         <span class="s">&quot;schema manager. Cannot load shotgun schema.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># flag that we have submitted a request</span>
+                <span class="c"># to avoid flooding of requests.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_schema_requested</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="c"># pick the first one</span>
+                <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="o">.</span><span class="n">values</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sg_schema_query_id</span> <span class="o">=</span> <span class="n">dr</span><span class="o">.</span><span class="n">get_schema</span><span class="p">(</span><span class="n">sg_project_id</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">_check_status_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Request status data from shotgun</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_loaded</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_requested</span><span class="p">:</span>
+        
+            <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;bg_color&quot;</span><span class="p">,</span> <span class="s">&quot;code&quot;</span><span class="p">,</span> <span class="s">&quot;name&quot;</span><span class="p">]</span>
+    
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;Starting to download status list from Shotgun...&quot;</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span><span class="s">&quot;No data retrievers registered with this &quot;</span> 
+                                      <span class="s">&quot;schema manager. Cannot load shotgun status.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># flag that we have submitted a request</span>
+                <span class="c"># to avoid flooding of requests.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_status_requested</span> <span class="o">=</span> <span class="bp">True</span>
+                
+                <span class="c"># pick the first one</span>
+                <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="o">.</span><span class="n">values</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sg_status_query_id</span> <span class="o">=</span> <span class="n">dr</span><span class="o">.</span><span class="n">execute_find</span><span class="p">(</span><span class="s">&quot;Status&quot;</span><span class="p">,</span> <span class="p">[],</span> <span class="n">fields</span><span class="p">)</span>        
+        
+    <span class="k">def</span> <span class="nf">_on_worker_failure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Asynchronous callback - the worker thread errored.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">shotgun_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s">&quot;shotgun_model&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">uid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_schema_query_id</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">shotgun_model</span><span class="o">.</span><span class="n">sanitize_qt</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="c"># qstring on pyqt, str on pyside</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span><span class="s">&quot;Could not load sg schema: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_schema_requested</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="k">elif</span> <span class="n">uid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_status_query_id</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">shotgun_model</span><span class="o">.</span><span class="n">sanitize_qt</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="c"># qstring on pyqt, str on pyside</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span><span class="s">&quot;Could not load sg status: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_status_requested</span> <span class="o">=</span> <span class="bp">False</span>
+        
+    <span class="k">def</span> <span class="nf">_on_worker_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">request_type</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Signaled whenever the worker completes something.</span>
+<span class="sd">        This method will dispatch the work to different methods</span>
+<span class="sd">        depending on what async task has completed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">shotgun_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s">&quot;shotgun_model&quot;</span><span class="p">)</span>
+        
+        <span class="n">uid</span> <span class="o">=</span> <span class="n">shotgun_model</span><span class="o">.</span><span class="n">sanitize_qt</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span> <span class="c"># qstring on pyqt, str on pyside</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">shotgun_model</span><span class="o">.</span><span class="n">sanitize_qt</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_schema_query_id</span> <span class="o">==</span> <span class="n">uid</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;Metaschema arrived from Shotgun...&quot;</span><span class="p">)</span>
+            <span class="c"># store the schema in memory</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&quot;fields&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&quot;types&quot;</span><span class="p">]</span>
+            <span class="c"># job done! set our load flags accordingly.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_schema_loaded</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_schema_requested</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="c"># and write out the data to disk</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;Saving schema to &#39;</span><span class="si">%s</span><span class="s">&#39;...&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema_cache_path</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema_cache_path</span><span class="p">,</span> <span class="s">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;field_schema&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">,</span> 
+                            <span class="s">&quot;type_schema&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">}</span>
+                    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fh</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;...done&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span><span class="s">&quot;Could not write schema &quot;</span>
+                                         <span class="s">&quot;file &#39;</span><span class="si">%s</span><span class="s">&#39;: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema_cache_path</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>            
+        
+        <span class="k">elif</span> <span class="n">uid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_status_query_id</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;Status list arrived from Shotgun...&quot;</span><span class="p">)</span>
+            <span class="c"># store status in memory</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span> <span class="o">=</span> <span class="p">{}</span>            
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s">&quot;sg&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span> <span class="n">x</span><span class="p">[</span><span class="s">&quot;code&quot;</span><span class="p">]</span> <span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+            
+            <span class="c"># job done! set our load flags accordingly.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_status_loaded</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_status_requested</span> <span class="o">=</span> <span class="bp">True</span>
+            
+            <span class="c"># and write out the data to disk</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;Saving status to &#39;</span><span class="si">%s</span><span class="s">&#39;...&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_cache_path</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_status_cache_path</span><span class="p">,</span> <span class="s">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">,</span> <span class="n">fh</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;...done&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span><span class="s">&quot;Could not write status &quot;</span>
+                                         <span class="s">&quot;file &#39;</span><span class="si">%s</span><span class="s">&#39;: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_status_cache_path</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>            
+
+    <span class="c">##########################################################################################</span>
+    <span class="c"># public methods</span>
+    
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">register_data_retriever</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data_retriever</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Register a data retriever with the singleton.</span>
+<span class="sd">        Once a data retriever has been registered, the schema singleton</span>
+<span class="sd">        can refresh its cache.</span>
+<span class="sd">        </span>
+<span class="sd">        :param data_retriever: shotgun data retriever object to register</span>
+<span class="sd">        :type data_retriever: :class:`~shotgun_data.ShotgunDataRetriever`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
+        
+        <span class="c"># add to dict of registered data retrievers</span>
+        <span class="n">obj_hash</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">data_retriever</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">[</span><span class="n">obj_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_retriever</span>
+        <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_signal</span><span class="p">)</span>
+        <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_failure</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_failure</span><span class="p">)</span>
+        
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">unregister_data_retriever</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data_retriever</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unregister a previously registered data retriever with the singleton.</span>
+<span class="sd">        </span>
+<span class="sd">        :param data_retriever: shotgun data retriever object to unregister</span>
+<span class="sd">        :type data_retriever: :class:`~shotgun_data.ShotgunDataRetriever`</span>
+<span class="sd">        &quot;&quot;&quot;</span>     
+        <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
+        
+        <span class="n">obj_hash</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">data_retriever</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">obj_hash</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;Unregistering </span><span class="si">%r</span><span class="s"> from schema manager&quot;</span> <span class="o">%</span> <span class="n">data_retriever</span><span class="p">)</span>
+            <span class="n">data_retriever</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">[</span><span class="n">obj_hash</span><span class="p">]</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">[</span><span class="n">obj_hash</span><span class="p">]</span>
+            <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_signal</span><span class="p">)</span>
+            <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_failure</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_failure</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span><span class="s">&quot;Could not unregister unknown data &quot;</span>
+                                     <span class="s">&quot;retriever </span><span class="si">%r</span><span class="s"> with schema manager&quot;</span> <span class="o">%</span>  <span class="n">data_retriever</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_type_display_name</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the display name for a Shotgun entity type.</span>
+<span class="sd">        If no display name is known for this object, the system</span>
+<span class="sd">        name is returned, e.g. the same that&#39;s being passed in </span>
+<span class="sd">        via the sg_entity_type parameter. </span>
+<span class="sd">        </span>
+<span class="sd">        If the data is not present locally, a cache reload</span>
+<span class="sd">        will be triggered, meaning that subsequent cache requests may</span>
+<span class="sd">        return valid data.</span>
+<span class="sd">        </span>
+<span class="sd">        :param sg_entity_type: Shotgun entity type</span>
+<span class="sd">        :returns: Entity type display name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">:</span>
+            <span class="c"># cache contains our item</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">sg_entity_type</span><span class="p">]</span>
+            <span class="n">display_name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">][</span><span class="s">&quot;value&quot;</span><span class="p">]</span>
+        
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">display_name</span> <span class="o">=</span> <span class="n">sg_entity_type</span>
+        
+        <span class="k">return</span> <span class="n">display_name</span>
+        
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_field_display_name</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the display name for a given Shotgun field. If the field</span>
+<span class="sd">        cannot be found or the value is not yet cached, the system name </span>
+<span class="sd">        for the field is returned.</span>
+<span class="sd">        </span>
+<span class="sd">        If the data is not present locally, a cache reload</span>
+<span class="sd">        will be triggered, meaning that subsequent cache requests may</span>
+<span class="sd">        return valid data.</span>
+<span class="sd">        </span>
+<span class="sd">        :param sg_entity_type: Shotgun entity type</span>
+<span class="sd">        :param field_name: Shotgun field name</span>
+<span class="sd">        :returns: Field display name        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>        
+
+        <span class="k">if</span> <span class="n">field_name</span> <span class="o">==</span> <span class="s">&quot;type&quot;</span><span class="p">:</span>
+            <span class="c"># type doesn&#39;t seem to exist in the schema</span>
+            <span class="c"># so treat as a special case</span>
+            <span class="n">display_name</span> <span class="o">=</span> <span class="s">&quot;Type&quot;</span>
+        
+        <span class="k">elif</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="ow">and</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">sg_entity_type</span><span class="p">]:</span>
+            <span class="c"># cache contains our item</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">sg_entity_type</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span>
+            <span class="n">display_name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">][</span><span class="s">&quot;value&quot;</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">display_name</span> <span class="o">=</span> <span class="n">field_name</span>
+
+
+        <span class="k">return</span> <span class="n">display_name</span>
+        
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_empty_phrase</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get an appropriate phrase to describe the fact that </span>
+<span class="sd">        a given Shotgun field is empty. The phrase will differ depending on </span>
+<span class="sd">        the data type of the field.</span>
+
+<span class="sd">        :param sg_entity_type: Shotgun entity type</span>
+<span class="sd">        :param field_name: Shotgun field name</span>
+<span class="sd">        :returns: Empty phrase string        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
+        
+        <span class="n">empty_value</span> <span class="o">=</span> <span class="s">&quot;Not set&quot;</span>
+        
+        <span class="k">if</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="ow">and</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">sg_entity_type</span><span class="p">]:</span>        
+            <span class="c"># cache contains our item</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">sg_entity_type</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&quot;data_type&quot;</span><span class="p">][</span><span class="s">&quot;value&quot;</span><span class="p">]</span>
+            
+            <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s">&quot;Entity&quot;</span><span class="p">:</span>
+                <span class="n">empty_value</span> <span class="o">=</span> <span class="s">&quot;Not set&quot;</span>
+
+        <span class="k">return</span> <span class="n">empty_value</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_status_display_name</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">status_code</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the display name for a given status code.</span>
+<span class="sd">        If the status code cannot be found or haven&#39;t been loaded,</span>
+<span class="sd">        the status code is returned back.</span>
+<span class="sd">        </span>
+<span class="sd">        If the data is not present locally, a cache reload</span>
+<span class="sd">        will be triggered, meaning that subsequent cache requests may</span>
+<span class="sd">        return valid data.</span>
+<span class="sd">        </span>
+<span class="sd">        :param status_code: Status short code (e.g &#39;ip&#39;)</span>
+<span class="sd">        :returns: string with descriptive status name </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_status_refresh</span><span class="p">()</span>
+        
+        <span class="n">display_name</span> <span class="o">=</span> <span class="n">status_code</span>
+        
+        <span class="k">if</span> <span class="n">status_code</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">status_code</span><span class="p">]</span>
+            <span class="n">display_name</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">status_code</span>
+        
+        <span class="k">return</span> <span class="n">display_name</span>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_status_color</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">status_code</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the color for a given status code.</span>
+<span class="sd">        If the status code cannot be found or haven&#39;t been loaded,</span>
+<span class="sd">        None is returned.</span>
+<span class="sd">        </span>
+<span class="sd">        If the data is not present locally, a cache reload</span>
+<span class="sd">        will be triggered, meaning that subsequent cache requests may</span>
+<span class="sd">        return valid data.        </span>
+<span class="sd">        </span>
+<span class="sd">        :param status_code: Status short code (e.g &#39;ip&#39;)</span>
+<span class="sd">        :returns: string with r,g,b values, e.g. ``&quot;123,255,10&quot;``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_status_refresh</span><span class="p">()</span>
+        
+        <span class="n">status_color</span> <span class="o">=</span> <span class="bp">None</span>
+        
+        <span class="k">if</span> <span class="n">status_code</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">status_code</span><span class="p">]</span>
+            <span class="n">status_color</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;bg_color&quot;</span><span class="p">)</span>
+            <span class="c"># color is on the form &quot;123,255,10&quot;</span>
+        
+        <span class="k">return</span> <span class="n">status_color</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Autodesk.
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'31352_sphinx',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

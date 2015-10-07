@@ -16,16 +16,16 @@ instances of apps, shotgun setups etc. Please note that the setting is still per
 so if it is scoped to be "global", it means that it will be shared across all different apps, engines,
 configurations, projects and shotgun sites for the current user on their local machine.
 
-- `SCOPE_GLOBAL` - No restriction.
-- `SCOPE_SITE` - Settings are per Shotgun site.
-- `SCOPE_PROJECT` - Settings are per Shotgun project.
-- `SCOPE_CONFIG` - Settings are per Shotgun Pipeline Configuration.
-- `SCOPE_INSTANCE` - Settings are per app or engine instance. For example, if your app
+- ``SCOPE_GLOBAL`` - No restriction.
+- ``SCOPE_SITE`` - Settings are per Shotgun site.
+- ``SCOPE_PROJECT`` - Settings are per Shotgun project.
+- ``SCOPE_CONFIG`` - Settings are per Shotgun Pipeline Configuration.
+- ``SCOPE_INSTANCE`` - Settings are per app or engine instance. For example, if your app
   contains a set of filters, and you want these to be remembered across sessions, you would
   typically use this scope. Each instance of the app will remember its own filters, so when you
   run it in the asset environment, one set of filters are remembered, when you run it in the shot
   environment, another set of filters etc.
-- `SCOPE_ENGINE` - One setting per engine. This makes it possible to store one set of preferences
+- ``SCOPE_ENGINE`` - One setting per engine. This makes it possible to store one set of preferences
   for apps running in Photoshop, Maya, Nuke etc. This makes it possible to for example store a setting
   that remembers if a "welcome screen" for your app has been displayed - so that it is only displayed
   once in Maya, once in Nuke etc.

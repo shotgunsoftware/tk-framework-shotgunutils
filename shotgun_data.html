@@ -1,5 +1,7 @@
 
 
+
+
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -8,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Asynchronous Data Retriever &mdash; Shotgun Pipeline Toolkit v2.4.2 documentation</title>
+  <title>Shotgun Asynchronous Data Retriever &mdash; tk-framework-shotgunutils 31352_sphinx documentation</title>
   
 
   
@@ -30,7 +32,7 @@
   
 
   
-    <link rel="top" title="Shotgun Pipeline Toolkit v2.4.2 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils 31352_sphinx documentation" href="index.html"/>
         <link rel="next" title="Shotgun Toolkit QT Settings Wrapper" href="settings.html"/>
         <link rel="prev" title="Shotgun Model" href="shotgun_model.html"/> 
 
@@ -48,21 +50,20 @@
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search">
           
+    <img style='width: 191px; 
+                height: 60px; 
+                border-radius: 0px; 
+                padding: 0px;' 
+         src='./_static/logo@2x.png'/>
+    
 
           
-            <a href="index.html" class="icon icon-home"> Shotgun Pipeline Toolkit
+            <a href="index.html" class="icon icon-home"> tk-framework-shotgunutils
           
 
           
           </a>
 
-          
-            
-            
-              <div class="version">
-                v2.4.2
-              </div>
-            
           
 
           
@@ -75,10 +76,12 @@
 </div>
 
           
+
         </div>
 
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
+    
             
             
                 <ul class="current">
@@ -90,10 +93,37 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="shotgun_globals.html">Shotgun Globals Access</a></li>
 </ul>
 
             
           
+       
+    <div style='margin-top: 50px;
+                margin-left: 10px;
+                margin-right: 10px;
+                padding: 10px; 
+                color: #b3b3b3; 
+                font-size: 70%;
+                border-radius: 3px;
+                background-color: #444;
+                line-height: 18px;
+                '>    
+    <style>
+        a.custom_post_menu { display: inline; 
+                             padding: 0px; 
+                             text-decoration: underline; }
+    </style>
+
+    <b>tk-framework-shotgunutils</b> 31352_sphinx.<br>
+    This documentation is part of the Shotgun Pipeline Toolkit. 
+    For more information, please visit 
+    <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
+    The code associated with this documentation can be found 
+    <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
+
+    </div>
+
         </div>
       </div>
     </nav>
@@ -103,7 +133,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Shotgun Pipeline Toolkit</a>
+        <a href="index.html">tk-framework-shotgunutils</a>
       </nav>
 
 
@@ -210,24 +240,45 @@ always take precedence over shotgun thumbnail downloads.</p>
 <dl class="class">
 <dt id="shotgun_data.ShotgunDataRetriever">
 <em class="property">class </em><code class="descclassname">shotgun_data.</code><code class="descname">ShotgunDataRetriever</code><span class="sig-paren">(</span><em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/sgdata.html#ShotgunDataRetriever"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asynchronous data retrieve class which can be used to retrieve data
-and thumbnails from Shotgun and from disk thumbnail cache.</p>
-<p>The class manages a queue where you can add various requests.
-Requests are queued up using the execute_find() and request_thumbnail() methods.</p>
+<dd><p>Asynchronous data retriever class which can be used to retrieve data and 
+thumbnails from Shotgun and from disk thumbnail cache. The class manages 
+a queue where you can add various requests. Requests are queued up using 
+for example the <a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.execute_find" title="shotgun_data.ShotgunDataRetriever.execute_find"><code class="xref py py-meth docutils literal"><span class="pre">execute_find()</span></code></a> and <a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.request_thumbnail" title="shotgun_data.ShotgunDataRetriever.request_thumbnail"><code class="xref py py-meth docutils literal"><span class="pre">request_thumbnail()</span></code></a> 
+methods.</p>
 <p>Requests are executed in the following priority order:</p>
 <ul class="simple">
-<li>first any thumbnails that are already cached on disk are handled</li>
-<li>next, shotgun find() queries are handled</li>
-<li>lastly thumbnail downloads are handled</li>
+<li>First any thumbnails that are already cached on disk are handled.</li>
+<li>Next, shotgun find() queries are handled.</li>
+<li>Lastly thumbnail downloads are handled.</li>
 </ul>
-<p>The thread will emit work_completed and work_failure signals
-when tasks are completed (or fail).</p>
-<p>The clear() method will clear the current queue. The currently
-processing item will finish processing and may send out signals
-even after a clear.</p>
-<p>Make sure you call the stop() method prior to destruction in order
-for the system to gracefully shut down.</p>
-<p>Construction</p>
+<p>The thread will emit work_completed and work_failure signals when 
+tasks are completed (or fail). The <a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.clear" title="shotgun_data.ShotgunDataRetriever.clear"><code class="xref py py-meth docutils literal"><span class="pre">clear()</span></code></a> method will 
+clear the current queue. The currently processing item will finish 
+processing and may send out signals even after a clear. Make sure you 
+call the <a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.stop" title="shotgun_data.ShotgunDataRetriever.stop"><code class="xref py py-meth docutils literal"><span class="pre">stop()</span></code></a> method prior to destruction in order for the 
+system to gracefully shut down.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Signal work_completed(uid, request_type, data_dict):</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">Emitted every time 
+a requested task has completed. <code class="docutils literal"><span class="pre">uid</span></code> is a unique id which matches 
+the unique id returned by the corresponding request call. 
+<code class="docutils literal"><span class="pre">request_type</span></code> is a string denoting the type of request this 
+event is associated with. <code class="docutils literal"><span class="pre">data_dict</span></code> is a dictionary containing 
+the payload of the request. It will be different depending on what 
+type of request it is.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Signal work_failure(uid, error_message):</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">Emitted every time a requested 
+task has failed. <code class="docutils literal"><span class="pre">uid</span></code> is a unique id which matches the unique 
+id returned by the corresponding request call.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> (<a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QWidget.html#PySide.QtGui.QWidget" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QWidget</span></code></a>) &#8211; Parent object</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.clear">
 <code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/sgdata.html#ShotgunDataRetriever.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.clear" title="Permalink to this definition">¶</a></dt>
@@ -330,11 +381,13 @@ possible to match them up.</td>
 <dt id="shotgun_data.ShotgunDataRetriever.execute_method">
 <code class="descname">execute_method</code><span class="sig-paren">(</span><em>method</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/sgdata.html#ShotgunDataRetriever.execute_method"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_method" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds the generic execution of a method to the queue.</p>
-<p>The specified method will be called on the form</p>
-<p>&gt; method(sg, data)</p>
+<p>The specified method will be called on the following form:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">method</span><span class="p">(</span><span class="n">sg</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Where sg is a shotgun API instance. Data is typically
-a dictionary with specific data that the method needs.</p>
-<p>The query will be queued up and once processed, either a
+a dictionary with specific data that the method needs.
+The query will be queued up and once processed, either a
 work_completed or work_failure signal will be emitted.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -430,21 +483,15 @@ possible to match them up.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="shotgun_data.ShotgunDataRetriever.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/sgdata.html#ShotgunDataRetriever.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Main thread loop</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.set_shotgun_connection">
 <code class="descname">set_shotgun_connection</code><span class="sig-paren">(</span><em>sg</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/sgdata.html#ShotgunDataRetriever.set_shotgun_connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.set_shotgun_connection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Specify the shotgun api instance this model should use to communicate
 with Shotgun. If not specified, each instance will instantiate its
 own connection, via toolkit. The behavior where each instance has its own
 connection is generally recommended for thread safety reasons since
-the Shotgun API isn&#8217;t natively threadsafe.</p>
+the Shotgun API isn&#8217;t natively thread safe.</p>
 <p>We strongly recommend that the API instance passed in here is not used
-in any other threads since this may lead to undefined behaviour.</p>
+in any other threads since this may lead to undefined behavior.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -460,7 +507,7 @@ in any other threads since this may lead to undefined behaviour.</p>
 <code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/sgdata.html#ShotgunDataRetriever.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.stop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gracefully stop the receiver.</p>
 <p>Once stop() has been called, the object needs to be discarded.
-This is a blocking call. It will  synchronounsly wait
+This is a blocking call. It will synchronously wait
 until any potential currently processing item has completed.</p>
 </dd></dl>
 
@@ -491,8 +538,7 @@ until any potential currently processing item has completed.</p>
         &copy; Copyright 2015, Autodesk.
 
     </p>
-  </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  </div> 
 
 </footer>
 
@@ -510,7 +556,7 @@ until any potential currently processing item has completed.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v2.4.2',
+            VERSION:'31352_sphinx',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -1,0 +1,393 @@
+
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Shotgun Globals Access &mdash; tk-framework-shotgunutils 31352_sphinx documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="tk-framework-shotgunutils 31352_sphinx documentation" href="index.html"/>
+        <link rel="prev" title="Shotgun Toolkit QT Settings Wrapper" href="settings.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+    <img style='width: 191px; 
+                height: 60px; 
+                border-radius: 0px; 
+                padding: 0px;' 
+         src='./_static/logo@2x.png'/>
+    
+
+          
+            <a href="index.html" class="icon icon-home"> tk-framework-shotgunutils
+          
+
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+    
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="shotgun_model.html">Shotgun Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Shotgun Globals Access</a></li>
+</ul>
+
+            
+          
+       
+    <div style='margin-top: 50px;
+                margin-left: 10px;
+                margin-right: 10px;
+                padding: 10px; 
+                color: #b3b3b3; 
+                font-size: 70%;
+                border-radius: 3px;
+                background-color: #444;
+                line-height: 18px;
+                '>    
+    <style>
+        a.custom_post_menu { display: inline; 
+                             padding: 0px; 
+                             text-decoration: underline; }
+    </style>
+
+    <b>tk-framework-shotgunutils</b> 31352_sphinx.<br>
+    This documentation is part of the Shotgun Pipeline Toolkit. 
+    For more information, please visit 
+    <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
+    The code associated with this documentation can be found 
+    <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
+
+    </div>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">tk-framework-shotgunutils</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Shotgun Globals Access</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="shotgun-globals-access">
+<h1>Shotgun Globals Access<a class="headerlink" href="#shotgun-globals-access" title="Permalink to this headline">¶</a></h1>
+<p>The globals module contains various accessors to Shotgun globals such as the schema, task statuses, etc.
+The globals are cached locally for fast access and updated in a background worker.
+Pass a data retriever object to the module in order for it to pull updates from Shotgun.
+When you shut down your app or tool, make sure you unregister the data retriever.</p>
+<p>The sample code below shows how you can use the globals in your Toolkit App Code:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">shotgun_globals</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s">&quot;shotgun_globals&quot;</span><span class="p">)</span>
+<span class="n">sg_data</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s">&quot;shotgun_data&quot;</span><span class="p">)</span>
+
+
+<span class="c"># typically, in your UI or app constructor, create a</span>
+<span class="c"># data retriever and register it</span>
+<span class="n">sg_data</span> <span class="o">=</span> <span class="n">sg_data</span><span class="o">.</span><span class="n">ShotgunDataRetriever</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+<span class="n">shotgun_globals</span><span class="o">.</span><span class="n">register_data_retriever</span><span class="p">(</span><span class="n">sg_data</span><span class="p">)</span>
+
+<span class="c"># at runtime, access things</span>
+<span class="n">get_type_display_name</span><span class="p">(</span><span class="s">&quot;CustomEntity01&quot;</span><span class="p">)</span>
+
+<span class="c"># at shutdown time, unregister</span>
+<span class="n">shotgun_globals</span><span class="o">.</span><span class="n">unregister_data_retriever</span><span class="p">(</span><span class="n">sg_data</span><span class="p">)</span>
+<span class="n">sg_data_retriever</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="shotgun_globals.register_data_retriever">
+<code class="descclassname">shotgun_globals.</code><code class="descname">register_data_retriever</code><span class="sig-paren">(</span><em>cls</em>, <em>data_retriever</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.register_data_retriever" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a data retriever with the singleton.
+Once a data retriever has been registered, the schema singleton
+can refresh its cache.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data_retriever</strong> (<a class="reference internal" href="shotgun_data.html#shotgun_data.ShotgunDataRetriever" title="shotgun_data.ShotgunDataRetriever"><code class="xref py py-class docutils literal"><span class="pre">ShotgunDataRetriever</span></code></a>) &#8211; shotgun data retriever object to register</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.unregister_data_retriever">
+<code class="descclassname">shotgun_globals.</code><code class="descname">unregister_data_retriever</code><span class="sig-paren">(</span><em>cls</em>, <em>data_retriever</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.unregister_data_retriever" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unregister a previously registered data retriever with the singleton.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data_retriever</strong> (<a class="reference internal" href="shotgun_data.html#shotgun_data.ShotgunDataRetriever" title="shotgun_data.ShotgunDataRetriever"><code class="xref py py-class docutils literal"><span class="pre">ShotgunDataRetriever</span></code></a>) &#8211; shotgun data retriever object to unregister</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.get_type_display_name">
+<code class="descclassname">shotgun_globals.</code><code class="descname">get_type_display_name</code><span class="sig-paren">(</span><em>cls</em>, <em>sg_entity_type</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.get_type_display_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the display name for a Shotgun entity type.
+If no display name is known for this object, the system
+name is returned, e.g. the same that&#8217;s being passed in 
+via the sg_entity_type parameter.</p>
+<p>If the data is not present locally, a cache reload
+will be triggered, meaning that subsequent cache requests may
+return valid data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sg_entity_type</strong> &#8211; Shotgun entity type</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Entity type display name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.get_field_display_name">
+<code class="descclassname">shotgun_globals.</code><code class="descname">get_field_display_name</code><span class="sig-paren">(</span><em>cls</em>, <em>sg_entity_type</em>, <em>field_name</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.get_field_display_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the display name for a given Shotgun field. If the field
+cannot be found or the value is not yet cached, the system name 
+for the field is returned.</p>
+<p>If the data is not present locally, a cache reload
+will be triggered, meaning that subsequent cache requests may
+return valid data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sg_entity_type</strong> &#8211; Shotgun entity type</li>
+<li><strong>field_name</strong> &#8211; Shotgun field name</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Field display name</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.get_empty_phrase">
+<code class="descclassname">shotgun_globals.</code><code class="descname">get_empty_phrase</code><span class="sig-paren">(</span><em>cls</em>, <em>sg_entity_type</em>, <em>field_name</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.get_empty_phrase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an appropriate phrase to describe the fact that 
+a given Shotgun field is empty. The phrase will differ depending on 
+the data type of the field.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sg_entity_type</strong> &#8211; Shotgun entity type</li>
+<li><strong>field_name</strong> &#8211; Shotgun field name</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Empty phrase string</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.get_status_display_name">
+<code class="descclassname">shotgun_globals.</code><code class="descname">get_status_display_name</code><span class="sig-paren">(</span><em>cls</em>, <em>status_code</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.get_status_display_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the display name for a given status code.
+If the status code cannot be found or haven&#8217;t been loaded,
+the status code is returned back.</p>
+<p>If the data is not present locally, a cache reload
+will be triggered, meaning that subsequent cache requests may
+return valid data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>status_code</strong> &#8211; Status short code (e.g &#8216;ip&#8217;)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">string with descriptive status name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.get_status_color">
+<code class="descclassname">shotgun_globals.</code><code class="descname">get_status_color</code><span class="sig-paren">(</span><em>cls</em>, <em>status_code</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.get_status_color" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the color for a given status code.
+If the status code cannot be found or haven&#8217;t been loaded,
+None is returned.</p>
+<p>If the data is not present locally, a cache reload
+will be triggered, meaning that subsequent cache requests may
+return valid data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>status_code</strong> &#8211; Status short code (e.g &#8216;ip&#8217;)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">string with r,g,b values, e.g. <code class="docutils literal"><span class="pre">&quot;123,255,10&quot;</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="settings.html" class="btn btn-neutral" title="Shotgun Toolkit QT Settings Wrapper" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Autodesk.
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'31352_sphinx',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

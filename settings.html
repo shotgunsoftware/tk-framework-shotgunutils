@@ -1,5 +1,7 @@
 
 
+
+
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -8,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Toolkit QT Settings Wrapper &mdash; Shotgun Pipeline Toolkit v2.4.2 documentation</title>
+  <title>Shotgun Toolkit QT Settings Wrapper &mdash; tk-framework-shotgunutils 31352_sphinx documentation</title>
   
 
   
@@ -30,7 +32,8 @@
   
 
   
-    <link rel="top" title="Shotgun Pipeline Toolkit v2.4.2 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils 31352_sphinx documentation" href="index.html"/>
+        <link rel="next" title="Shotgun Globals Access" href="shotgun_globals.html"/>
         <link rel="prev" title="Shotgun Asynchronous Data Retriever" href="shotgun_data.html"/> 
 
   
@@ -47,21 +50,20 @@
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search">
           
+    <img style='width: 191px; 
+                height: 60px; 
+                border-radius: 0px; 
+                padding: 0px;' 
+         src='./_static/logo@2x.png'/>
+    
 
           
-            <a href="index.html" class="icon icon-home"> Shotgun Pipeline Toolkit
+            <a href="index.html" class="icon icon-home"> tk-framework-shotgunutils
           
 
           
           </a>
 
-          
-            
-            
-              <div class="version">
-                v2.4.2
-              </div>
-            
           
 
           
@@ -74,20 +76,49 @@
 </div>
 
           
+
         </div>
 
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
+    
             
             
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="shotgun_model.html">Shotgun Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Shotgun Toolkit QT Settings Wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="shotgun_globals.html">Shotgun Globals Access</a></li>
 </ul>
 
             
           
+       
+    <div style='margin-top: 50px;
+                margin-left: 10px;
+                margin-right: 10px;
+                padding: 10px; 
+                color: #b3b3b3; 
+                font-size: 70%;
+                border-radius: 3px;
+                background-color: #444;
+                line-height: 18px;
+                '>    
+    <style>
+        a.custom_post_menu { display: inline; 
+                             padding: 0px; 
+                             text-decoration: underline; }
+    </style>
+
+    <b>tk-framework-shotgunutils</b> 31352_sphinx.<br>
+    This documentation is part of the Shotgun Pipeline Toolkit. 
+    For more information, please visit 
+    <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
+    The code associated with this documentation can be found 
+    <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
+
+    </div>
+
         </div>
       </div>
     </nav>
@@ -97,7 +128,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Shotgun Pipeline Toolkit</a>
+        <a href="index.html">tk-framework-shotgunutils</a>
       </nav>
 
 
@@ -140,16 +171,16 @@ instances of apps, shotgun setups etc. Please note that the setting is still per
 so if it is scoped to be &#8220;global&#8221;, it means that it will be shared across all different apps, engines,
 configurations, projects and shotgun sites for the current user on their local machine.</p>
 <ul class="simple">
-<li><cite>SCOPE_GLOBAL</cite> - No restriction.</li>
-<li><cite>SCOPE_SITE</cite> - Settings are per Shotgun site.</li>
-<li><cite>SCOPE_PROJECT</cite> - Settings are per Shotgun project.</li>
-<li><cite>SCOPE_CONFIG</cite> - Settings are per Shotgun Pipeline Configuration.</li>
-<li><cite>SCOPE_INSTANCE</cite> - Settings are per app or engine instance. For example, if your app
+<li><code class="docutils literal"><span class="pre">SCOPE_GLOBAL</span></code> - No restriction.</li>
+<li><code class="docutils literal"><span class="pre">SCOPE_SITE</span></code> - Settings are per Shotgun site.</li>
+<li><code class="docutils literal"><span class="pre">SCOPE_PROJECT</span></code> - Settings are per Shotgun project.</li>
+<li><code class="docutils literal"><span class="pre">SCOPE_CONFIG</span></code> - Settings are per Shotgun Pipeline Configuration.</li>
+<li><code class="docutils literal"><span class="pre">SCOPE_INSTANCE</span></code> - Settings are per app or engine instance. For example, if your app
 contains a set of filters, and you want these to be remembered across sessions, you would
 typically use this scope. Each instance of the app will remember its own filters, so when you
 run it in the asset environment, one set of filters are remembered, when you run it in the shot
 environment, another set of filters etc.</li>
-<li><cite>SCOPE_ENGINE</cite> - One setting per engine. This makes it possible to store one set of preferences
+<li><code class="docutils literal"><span class="pre">SCOPE_ENGINE</span></code> - One setting per engine. This makes it possible to store one set of preferences
 for apps running in Photoshop, Maya, Nuke etc. This makes it possible to for example store a setting
 that remembers if a &#8220;welcome screen&#8221; for your app has been displayed - so that it is only displayed
 once in Maya, once in Nuke etc.</li>
@@ -191,6 +222,8 @@ once in Maya, once in Nuke etc.</li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="shotgun_globals.html" class="btn btn-neutral float-right" title="Shotgun Globals Access" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
       
         <a href="shotgun_data.html" class="btn btn-neutral" title="Shotgun Asynchronous Data Retriever" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
@@ -204,8 +237,7 @@ once in Maya, once in Nuke etc.</li>
         &copy; Copyright 2015, Autodesk.
 
     </p>
-  </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  </div> 
 
 </footer>
 
@@ -223,7 +255,7 @@ once in Maya, once in Nuke etc.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v2.4.2',
+            VERSION:'31352_sphinx',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

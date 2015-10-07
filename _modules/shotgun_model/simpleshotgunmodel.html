@@ -1,5 +1,7 @@
 
 
+
+
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -8,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.simpleshotgunmodel &mdash; Shotgun Pipeline Toolkit v2.4.2 documentation</title>
+  <title>shotgun_model.simpleshotgunmodel &mdash; tk-framework-shotgunutils 31352_sphinx documentation</title>
   
 
   
@@ -30,7 +32,7 @@
   
 
   
-    <link rel="top" title="Shotgun Pipeline Toolkit v2.4.2 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils 31352_sphinx documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -47,21 +49,20 @@
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search">
           
+    <img style='width: 191px; 
+                height: 60px; 
+                border-radius: 0px; 
+                padding: 0px;' 
+         src='./_static/logo@2x.png'/>
+    
 
           
-            <a href="../../index.html" class="icon icon-home"> Shotgun Pipeline Toolkit
+            <a href="../../index.html" class="icon icon-home"> tk-framework-shotgunutils
           
 
           
           </a>
 
-          
-            
-            
-              <div class="version">
-                v2.4.2
-              </div>
-            
           
 
           
@@ -74,20 +75,49 @@
 </div>
 
           
+
         </div>
 
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
+    
             
             
                 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_model.html">Shotgun Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_globals.html">Shotgun Globals Access</a></li>
 </ul>
 
             
           
+       
+    <div style='margin-top: 50px;
+                margin-left: 10px;
+                margin-right: 10px;
+                padding: 10px; 
+                color: #b3b3b3; 
+                font-size: 70%;
+                border-radius: 3px;
+                background-color: #444;
+                line-height: 18px;
+                '>    
+    <style>
+        a.custom_post_menu { display: inline; 
+                             padding: 0px; 
+                             text-decoration: underline; }
+    </style>
+
+    <b>tk-framework-shotgunutils</b> 31352_sphinx.<br>
+    This documentation is part of the Shotgun Pipeline Toolkit. 
+    For more information, please visit 
+    <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
+    The code associated with this documentation can be found 
+    <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
+
+    </div>
+
         </div>
       </div>
     </nav>
@@ -97,7 +127,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../index.html">Shotgun Pipeline Toolkit</a>
+        <a href="../../index.html">tk-framework-shotgunutils</a>
       </nav>
 
 
@@ -148,22 +178,27 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convenience wrapper around the Shotgun model for quick and easy access.</span>
 <span class="sd">    </span>
-<span class="sd">    When you quickly want to display some shotgun data in a QT view of some kind,</span>
-<span class="sd">    this class may come in handy. Simply instantiate it and call load_data whenever</span>
-<span class="sd">    you want to load up a new shotgun query into your view.</span>
+<span class="sd">    Use this when you want to prototype data modeling or if your are looking </span>
+<span class="sd">    for a simple flat data set reflecting a shotgun query. All you need to do </span>
+<span class="sd">    is to instantiate the class (typically once, in your constructor) and then </span>
+<span class="sd">    call :meth:`load_data` to specify which shotgun query to load up in the model. </span>
+<span class="sd">    Subsequently call :meth:`load_data` whenever you wish to change the Shotgun </span>
+<span class="sd">    query associated with the model.</span>
+
+<span class="sd">    This class derives from :class:`ShotgunModel` so all the customization methods </span>
+<span class="sd">    available in the normal :class:`ShotgunModel` can also be subclassed from this class.</span>
 <span class="sd">    </span>
-<span class="sd">    It derives from ShotgunModel so all the customization methods available in the</span>
-<span class="sd">    normal ShotgunModel can also be subclassed from this class.</span>
+<span class="sd">    The simple shotgun model contains a progress spinner which will appear </span>
+<span class="sd">    whenever the object is doesn&#39;t have any data to display. This progress </span>
+<span class="sd">    spinner will be placed on top of the parent object specified in the </span>
+<span class="sd">    parent constructor parameter</span>
 <span class="sd">    &quot;&quot;&quot;</span>
  
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Constructor.</span>
-<span class="sd">        </span>
-<span class="sd">        The simple shotgun model will put the load spinner on top of the specified parent.</span>
-<span class="sd">        </span>
 <span class="sd">        :param parent: QWidget which this model will be parented under. This widget will</span>
 <span class="sd">                       also be used to paint a spinner and display error messages.</span>
+<span class="sd">        :type parent: :class:`~PySide.QtGui.QWidget`                   </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ShotgunOverlayModel</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">download_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
         
@@ -171,7 +206,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Loads shotgun data into the model, using the cache if possible.</span>
 <span class="sd">        The model is not nested and the first field that is specified</span>
-<span class="sd">        via the fields parameter (code by default) will be used as the default</span>
+<span class="sd">        via the fields parameter (``code`` by default) will be used as the default</span>
 <span class="sd">        name for all model items. </span>
 <span class="sd">        </span>
 <span class="sd">        :param entity_type: Shotgun Entity Type to load data for</span>
@@ -200,8 +235,7 @@
         &copy; Copyright 2015, Autodesk.
 
     </p>
-  </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  </div> 
 
 </footer>
 
@@ -219,7 +253,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v2.4.2',
+            VERSION:'31352_sphinx',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

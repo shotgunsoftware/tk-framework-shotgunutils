@@ -1,5 +1,7 @@
 
 
+
+
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -8,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgunmodel &mdash; Shotgun Pipeline Toolkit v2.4.2 documentation</title>
+  <title>shotgun_model.shotgunmodel &mdash; tk-framework-shotgunutils 31352_sphinx documentation</title>
   
 
   
@@ -30,7 +32,7 @@
   
 
   
-    <link rel="top" title="Shotgun Pipeline Toolkit v2.4.2 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils 31352_sphinx documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -47,21 +49,20 @@
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search">
           
+    <img style='width: 191px; 
+                height: 60px; 
+                border-radius: 0px; 
+                padding: 0px;' 
+         src='./_static/logo@2x.png'/>
+    
 
           
-            <a href="../../index.html" class="icon icon-home"> Shotgun Pipeline Toolkit
+            <a href="../../index.html" class="icon icon-home"> tk-framework-shotgunutils
           
 
           
           </a>
 
-          
-            
-            
-              <div class="version">
-                v2.4.2
-              </div>
-            
           
 
           
@@ -74,20 +75,49 @@
 </div>
 
           
+
         </div>
 
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
+    
             
             
                 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_model.html">Shotgun Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_globals.html">Shotgun Globals Access</a></li>
 </ul>
 
             
           
+       
+    <div style='margin-top: 50px;
+                margin-left: 10px;
+                margin-right: 10px;
+                padding: 10px; 
+                color: #b3b3b3; 
+                font-size: 70%;
+                border-radius: 3px;
+                background-color: #444;
+                line-height: 18px;
+                '>    
+    <style>
+        a.custom_post_menu { display: inline; 
+                             padding: 0px; 
+                             text-decoration: underline; }
+    </style>
+
+    <b>tk-framework-shotgunutils</b> 31352_sphinx.<br>
+    This documentation is part of the Shotgun Pipeline Toolkit. 
+    For more information, please visit 
+    <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
+    The code associated with this documentation can be found 
+    <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
+
+    </div>
+
         </div>
       </div>
     </nav>
@@ -97,7 +127,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../index.html">Shotgun Pipeline Toolkit</a>
+        <a href="../../index.html">tk-framework-shotgunutils</a>
       </nav>
 
 
@@ -159,61 +189,71 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A QT Model representing a Shotgun query.</span>
 
-<span class="sd">    This class implements a standard QModel specialized to hold the contents</span>
-<span class="sd">    of a particular Shotgun query. It is cached and refreshes its data asynchronously.</span>
+<span class="sd">    This class implements a standard  :class:`~PySide.QtCore.QAbstractItemModel` </span>
+<span class="sd">    specialized to hold the contents of a particular Shotgun query. It is cached </span>
+<span class="sd">    and refreshes its data asynchronously.</span>
 
-<span class="sd">    In order to use this class, you typically subclass it and implement certain key data</span>
+<span class="sd">    In order to use this class, you normally subclass it and implement certain key data</span>
 <span class="sd">    methods for setting up queries, customizing etc. Then you connect your class to</span>
-<span class="sd">    a QView of some sort which will display the result. If you need to do manipulations</span>
-<span class="sd">    such as sorting or filtering on the data, connect a QProxyModel between your class</span>
-<span class="sd">    and the view.</span>
+<span class="sd">    a :class:`~PySide.QtGui.QAbstractItemView` of some sort which will display the result. If you need to do manipulations</span>
+<span class="sd">    such as sorting or filtering on the data, connect a proxy model (typically :class:`~PySide.QtGui.QSortFilterProxyModel`) </span>
+<span class="sd">    between your class and the view.</span>
+<span class="sd">    </span>
+<span class="sd">    :signal query_changed(): Gets emitted whenever the model&#39;s sg query is changed.</span>
+<span class="sd">        When the query changes, the contents of the model is cleared and the</span>
+<span class="sd">        loading of new data is initiated.</span>
+<span class="sd">        </span>
+<span class="sd">    :signal cache_loaded(): Emitted whenever the model loads cache data.</span>
+<span class="sd">        This typically follows shortly after a query changed signal, if</span>
+<span class="sd">        cache data is available.</span>
+<span class="sd">    </span>
+<span class="sd">    :signal data_refreshing(): Emitted whenever the model starts to refresh its</span>
+<span class="sd">        shotgun data. This is emitted from :meth:`_refresh_data()`.  Useful </span>
+<span class="sd">        signal if you want to present a loading indicator of some kind.</span>
+<span class="sd">        </span>
+<span class="sd">    :signal data_refreshed(bool): Emitted whenever the model has been updated with fresh</span>
+<span class="sd">        shotgun data. The boolean indicates that a change in the model data has</span>
+<span class="sd">        taken place as part of this process. If the refresh fails for some reason,</span>
+<span class="sd">        this signal may not be emitted. The synchronous data refresh cycle starts </span>
+<span class="sd">        with a call to :meth:`_refresh_data()` and normally ends with either a </span>
+<span class="sd">        data_refreshed or a data_refresh_fail signal being emitted.</span>
+<span class="sd">        </span>
+<span class="sd">    :signal data_refresh_fail(): Emitted in the case the refresh fails for some reason,</span>
+<span class="sd">        typically due to the absence of an internet connection. This signal could</span>
+<span class="sd">        for example be used to drive a &quot;retry&quot; button of some kind. The str</span>
+<span class="sd">        parameter carries an error message with details about why the</span>
+<span class="sd">        refresh wasn&#39;t successful.</span>
 
-<span class="sd">    The model can either be a flat list or a tree. This is controlled by a grouping</span>
-<span class="sd">    parameter which works just like the Shotgun grouping. For example, if you pull</span>
-<span class="sd">    in assets grouped by asset type, you get a tree of data with intermediate data</span>
-<span class="sd">    types for the asset types. The leaf nodes in this case would be assets.</span>
+<span class="sd">    :constant SG_DATA_ROLE: Custom model role that holds the </span>
+<span class="sd">        associated value. See :ref:`sg-model-data-items`.</span>
+<span class="sd">        </span>
+<span class="sd">    :constant SG_ASSOCIATED_FIELD_ROLE: Custom model role that holds the </span>
+<span class="sd">        shotgun data payload. See :ref:`sg-model-data-items`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c"># signal which gets emitted whenever the model&#39;s sg query is changed.</span>
-    <span class="c"># when the query changes, the contents of the model is cleared and the</span>
-    <span class="c"># loading of new data is initiated.</span>
     <span class="n">query_changed</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">()</span>
 
     <span class="c"># signal which gets emitted whenever the model loads cache data.</span>
-    <span class="c"># this typically follows shortly after a query changed signal, if</span>
-    <span class="c"># cache data is available.</span>
     <span class="n">cache_loaded</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">()</span>
 
-    <span class="c"># signal which gets emitted whenever the model starts to refresh its</span>
-    <span class="c"># shotgun data. This is emitted from _refresh_data().  Useful signal if</span>
-    <span class="c"># you want to present a loading indicator of some kind.</span>
+    <span class="c"># signal which gets emitted whenever the model starts to refresh its shotgun data. </span>
     <span class="n">data_refreshing</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">()</span>
 
-    <span class="c"># signal which gets emitted whenever the model has been updated with fresh</span>
-    <span class="c"># shotgun data. The boolean indicates that a change in the model data has</span>
-    <span class="c"># taken place as part of this process. If the refresh fails for some reason,</span>
-    <span class="c"># this signal may not be emitted.</span>
-    <span class="c">#</span>
-    <span class="c"># The synchronous data refresh cycle starts with a call to _refresh_data()</span>
-    <span class="c"># and normally ends with either a data_refreshed or a data_refresh_fail</span>
-    <span class="c"># being emitted. The exception being that if you call _load_data() or clear</span>
-    <span class="c"># the model in some other way, the signals may never be emitted.</span>
+    <span class="c"># signal which gets emitted whenever the model has been updated with fresh shotgun data. </span>
     <span class="n">data_refreshed</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
 
-    <span class="c"># signal which gets emitted in the case the refresh fails for some reason,</span>
-    <span class="c"># typically due to the absence of an internet connection. This signal could</span>
-    <span class="c"># for example be used to drive a &quot;retry&quot; button of some kind. The str</span>
-    <span class="c"># parameter carries an error message with details about why the</span>
-    <span class="c"># refresh wasn&#39;t successful.</span>
+    <span class="c"># signal which gets emitted in the case the refresh fails</span>
     <span class="n">data_refresh_fail</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
 
-    <span class="c"># roles that can be used to access data</span>
+    <span class="c"># Custom model role that holds the shotgun data payload. </span>
     <span class="n">SG_DATA_ROLE</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span> <span class="o">+</span> <span class="mi">1</span>
+    
+    <span class="c"># Custom model role that holds the associated value. </span>
     <span class="n">SG_ASSOCIATED_FIELD_ROLE</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span> <span class="o">+</span> <span class="mi">3</span>
 
     <span class="c"># internal constants - please do not access directly but instead use the helper</span>
     <span class="c"># methods provided! We may change these constants without prior notice.</span>
-    <span class="c"># internal roles</span>
     <span class="n">IS_SG_MODEL_ROLE</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span> <span class="o">+</span> <span class="mi">2</span>
     <span class="c"># magic number for IO streams</span>
     <span class="n">FILE_MAGIC_NUMBER</span> <span class="o">=</span> <span class="mh">0xDEADBEEF</span>
@@ -223,10 +263,8 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">download_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Constructor. This will create a model which can later be used to load</span>
-<span class="sd">        and manage Shotgun data.</span>
-
 <span class="sd">        :param parent: Parent object.</span>
+<span class="sd">        :type parent: :class:`~PySide.QtGui.QWidget`</span>
 <span class="sd">        :param download_thumbs: Boolean to indicate if this model should attempt</span>
 <span class="sd">                                to download and process thumbnails for the downloaded data.</span>
 <span class="sd">        :param schema_generation: Schema generation index. If you are changing the format</span>
@@ -315,12 +353,12 @@
 </div>
 <div class="viewcode-block" id="ShotgunModel.item_from_entity"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.item_from_entity">[docs]</a>    <span class="k">def</span> <span class="nf">item_from_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns a QStandardItem based on entity type and entity id</span>
+<span class="sd">        Returns a :class:`~PySide.QtGui.QStandardItem` based on entity type and entity id</span>
 <span class="sd">        Returns none if not found.</span>
 
 <span class="sd">        :param entity_type: Shotgun entity type to look for</span>
 <span class="sd">        :param entity_id: Shotgun entity id to look for</span>
-<span class="sd">        :returns: QStandardItem or None if not found</span>
+<span class="sd">        :returns: :class:`~PySide.QtGui.QStandardItem` or None if not found</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">entity_type</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">None</span>
@@ -335,7 +373,7 @@
 
 <span class="sd">        :param entity_type: Shotgun entity type to look for</span>
 <span class="sd">        :param entity_id: Shotgun entity id to look for</span>
-<span class="sd">        :returns: QModelIndex or None if not found</span>
+<span class="sd">        :returns: :class:`~PySide.QtCore.QModelIndex` or None if not found</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">item_from_entity</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
@@ -347,22 +385,24 @@
 <span class="sd">        Returns a list of Shotgun filters representing the given item. This is useful if</span>
 <span class="sd">        you are trying to determine how intermediate leaf nodes partition leaf node data.</span>
 
-<span class="sd">        For example, if you have created a hierarchical model for a Shot listing:</span>
+<span class="sd">        For example, if you have created a hierarchical model for a Shot listing::</span>
 
-<span class="sd">        &gt; hierarchy: [sg_sequence, sg_status, code]</span>
+<span class="sd">            hierarchy: [sg_sequence, sg_status, code]</span>
 
 <span class="sd">        The Shotgun model will group the data by sequence, then by status, then the leaf</span>
 <span class="sd">        nodes will be the shot names. If you execute the get_filters() method on a sequence</span>
-<span class="sd">        level tree node, it may return</span>
+<span class="sd">        level tree node, it may return::</span>
 
-<span class="sd">        &gt; [ [&#39;sg_sequence&#39;, &#39;is&#39;, {&#39;type&#39;: &#39;Sequence&#39;, &#39;id&#39;: 123, &#39;name&#39;: &#39;foo&#39;}] ]</span>
+<span class="sd">            [ [&#39;sg_sequence&#39;, &#39;is&#39;, {&#39;type&#39;: &#39;Sequence&#39;, &#39;id&#39;: 123, &#39;name&#39;: &#39;foo&#39;}] ]</span>
 
-<span class="sd">        If you execute the get_filters() on a status node in the tree, it may return</span>
+<span class="sd">        If you execute the get_filters() on a status node in the tree, it may return::</span>
 
-<span class="sd">        &gt; [ [&#39;sg_sequence&#39;, &#39;is&#39;, {&#39;type&#39;: &#39;Sequence&#39;, &#39;id&#39;: 123, &#39;name&#39;: &#39;foo&#39;}],</span>
-<span class="sd">            [&#39;sg_status&#39;, &#39;is&#39;, &#39;ip&#39;] ]</span>
+<span class="sd">            [ </span>
+<span class="sd">              [&#39;sg_sequence&#39;, &#39;is&#39;, {&#39;type&#39;: &#39;Sequence&#39;, &#39;id&#39;: 123, &#39;name&#39;: &#39;foo&#39;}],</span>
+<span class="sd">              [&#39;sg_status&#39;, &#39;is&#39;, &#39;ip&#39;] </span>
+<span class="sd">            ]</span>
 
-<span class="sd">        :param item: One of the QStandardItem model items that is associated with this model.</span>
+<span class="sd">        :param item: One of the :class:`~PySide.QtGui.QStandardItem` model items that is associated with this model.</span>
 <span class="sd">        :returns: standard shotgun filter list to represent that item</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c"># prime filters with our base query</span>
@@ -409,7 +449,7 @@
     <span class="c">########################################################################################</span>
     <span class="c"># methods overridden from the base class.</span>
 </div>
-<div class="viewcode-block" id="ShotgunModel.clear"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Re-implements QStandardItemModel::clear()</span>
 <span class="sd">        </span>
@@ -445,8 +485,8 @@
         <span class="c"># a crash in some versions of shiboken</span>
         <span class="c"># (see https://bugreports.qt-project.org/browse/PYSIDE-158 )</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__do_depth_first_tree_deletion</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">())</span>        
-</div>
-<div class="viewcode-block" id="ShotgunModel.reset"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reimplements QAbstractItemModel:reset() by &#39;sealing it&#39; so that</span>
 <span class="sd">        it cannot be executed by calling code easily. This is because the reset method</span>
@@ -461,13 +501,13 @@
                                   <span class="s">&quot;this method will not emit the standard before/after reset signals. &quot;</span>
                                   <span class="s">&quot;It is possible that this method may be implemented in later versions &quot;</span>
                                   <span class="s">&quot;of the framework. For more information, please &quot;</span>
-                                  <span class="s">&quot;email toolkitsupport@shotgunsoftware.com.&quot;</span> <span class="p">)</span>
+                                  <span class="s">&quot;email support@shotgunsoftware.com.&quot;</span> <span class="p">)</span>
 
 
     <span class="c">########################################################################################</span>
     <span class="c"># protected methods not meant to be subclassed but meant to be called by subclasses</span>
-</div>
-    <span class="k">def</span> <span class="nf">_load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">hierarchy</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ShotgunModel._load_data"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._load_data">[docs]</a>    <span class="k">def</span> <span class="nf">_load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">hierarchy</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is the main method to use to configure the model. You basically</span>
 <span class="sd">        pass a specific find query to the model and it will start tracking</span>
@@ -480,18 +520,18 @@
 <span class="sd">        substantial amounts of data).</span>
 
 <span class="sd">        If you want to refresh the data contained in the model (which you typically</span>
-<span class="sd">        want to!), call the _refresh_data() method.</span>
+<span class="sd">        want to), call the :meth:`_refresh_data()` method.</span>
 
 <span class="sd">        :param entity_type: Shotgun entity type to download</span>
 <span class="sd">        :param filters:   List of Shotgun filters. Standard Shotgun syntax. Passing None instead of a list of</span>
 <span class="sd">                          filters indicates that no shotgun data should be retrieved and no API calls will be made.</span>
 <span class="sd">        :param hierarchy: List of grouping fields. These should be names of Shotgun</span>
 <span class="sd">                          fields. If you for example want to create a list of items,</span>
-<span class="sd">                          the value [&quot;code&quot;] will be suitable. This will generate a data</span>
+<span class="sd">                          the value ``[&quot;code&quot;]`` will be suitable. This will generate a data</span>
 <span class="sd">                          model which is flat and where each item&#39;s default name is the</span>
 <span class="sd">                          Shotgun name field. If you want to generate a tree where assets</span>
 <span class="sd">                          are broken down by asset type, you could instead specify</span>
-<span class="sd">                          [&quot;sg_asset_type&quot;, &quot;code&quot;].</span>
+<span class="sd">                          ``[&quot;sg_asset_type&quot;, &quot;code&quot;]``.</span>
 <span class="sd">        :param fields:    Fields to retrieve from Shotgun (in addition to the ones specified</span>
 <span class="sd">                          in the hierarchy parameter). Standard Shotgun API syntax. If you</span>
 <span class="sd">                          specify None for this parameter, Shotgun will not be called when</span>
@@ -503,7 +543,7 @@
 <span class="sd">                          use for example a QProxyModel to handle this. However, knowing in which</span>
 <span class="sd">                          order results will arrive from Shotgun can be beneficial if you are doing</span>
 <span class="sd">                          grouping, deferred loading and aggregation of data as part of your</span>
-<span class="sd">                          subclassed implementation, typically via the _before_data_processing() method.</span>
+<span class="sd">                          subclassed implementation, typically via the :meth:`_before_data_processing()` method.</span>
 <span class="sd">        :param seed:      Advanced parameter. With each shotgun query being cached on disk, the model</span>
 <span class="sd">                          generates a cache seed which it is using to store data on disk. Since the cache</span>
 <span class="sd">                          data on disk is a reflection of a particular shotgun query, this seed is typically</span>
@@ -596,8 +636,8 @@
                                 <span class="s">&quot;full SG load. Error reported: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">loaded_cache_data</span>
-
-    <span class="k">def</span> <span class="nf">_refresh_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="ShotgunModel._refresh_data"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._refresh_data">[docs]</a>    <span class="k">def</span> <span class="nf">_refresh_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Rebuilds the data in the model to ensure it is up to date.</span>
 <span class="sd">        This call is asynchronous and will return instantly.</span>
@@ -635,8 +675,8 @@
                                                                            <span class="bp">self</span><span class="o">.</span><span class="n">__order</span><span class="p">,</span>
                                                                            <span class="n">limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__limit</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">_request_thumbnail_download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="ShotgunModel._request_thumbnail_download"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._request_thumbnail_download">[docs]</a>    <span class="k">def</span> <span class="nf">_request_thumbnail_download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Request that a thumbnail is downloaded for an item. If a thumbnail is successfully</span>
 <span class="sd">        retrieved, either from disk (cached) or via shotgun, the method _populate_thumbnail()</span>
@@ -645,16 +685,16 @@
 <span class="sd">        this method and perform image composition prior to the image being added to</span>
 <span class="sd">        the item object.</span>
 
-<span class="sd">        Note: This is an advanced method which you can use if you want to load thumbnail</span>
-<span class="sd">        data other than the standard &#39;image&#39; field. If that&#39;s what you need, simply make</span>
-<span class="sd">        sure that you set the download_thumbs parameter to true when you create the model</span>
-<span class="sd">        and standard thumbnails will be automatically downloaded. This method is either used</span>
-<span class="sd">        for linked thumb fields or if you want to download thumbnails for external model data</span>
-<span class="sd">        that doesn&#39;t come from Shotgun.</span>
+<span class="sd">        .. note:: This is an advanced method which you can use if you want to load thumbnail</span>
+<span class="sd">            data other than the standard &#39;image&#39; field. If that&#39;s what you need, simply make</span>
+<span class="sd">            sure that you set the download_thumbs parameter to true when you create the model</span>
+<span class="sd">            and standard thumbnails will be automatically downloaded. This method is either used</span>
+<span class="sd">            for linked thumb fields or if you want to download thumbnails for external model data</span>
+<span class="sd">            that doesn&#39;t come from Shotgun.</span>
 
-<span class="sd">        :param item: QStandardItem which belongs to this model</span>
-<span class="sd">        :param field: Shotgun field where the thumbnail is stored. This is typically &#39;image&#39; but</span>
-<span class="sd">                      can also for example be &#39;sg_sequence.Sequence.image&#39;.</span>
+<span class="sd">        :param item: :class:`~PySide.QtGui.QStandardItem` which belongs to this model</span>
+<span class="sd">        :param field: Shotgun field where the thumbnail is stored. This is typically ``image`` but</span>
+<span class="sd">                      can also for example be ``sg_sequence.Sequence.image``.</span>
 <span class="sd">        :param url: thumbnail url</span>
 <span class="sd">        :param entity_type: Shotgun entity type</span>
 <span class="sd">        :param entity_id: Shotgun entity id</span>
@@ -675,11 +715,11 @@
 
     <span class="c">########################################################################################</span>
     <span class="c"># methods to be implemented by subclasses</span>
-
-    <span class="k">def</span> <span class="nf">_populate_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">sg_data</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="ShotgunModel._populate_item"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._populate_item">[docs]</a>    <span class="k">def</span> <span class="nf">_populate_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">sg_data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Whenever an item is constructed, this method is called. It allows subclasses to intercept</span>
-<span class="sd">        the construction of a QStandardItem and add additional metadata or make other changes</span>
+<span class="sd">        Whenever an item is downloaded from Shotgun, this method is called. It allows subclasses to intercept</span>
+<span class="sd">        the construction of a :class:`~PySide.QtGui.QStandardItem` and add additional metadata or make other changes</span>
 <span class="sd">        that may be useful. Nothing needs to be returned.</span>
 
 <span class="sd">        This method is called before the item is added into the model tree. At the point when</span>
@@ -687,21 +727,21 @@
 <span class="sd">        models that a new item has been added. This methods allows a subclassing object to</span>
 <span class="sd">        add custom data prior to this.</span>
 
-<span class="sd">        Note that when an item is fetched from the cache, this method is *not* called, it will</span>
-<span class="sd">        only be called when shotgun data initially arrives from a Shotgun API query.</span>
+<span class="sd">        .. note:: When an item is fetched from the cache, this method is *not* called, it will</span>
+<span class="sd">            only be called when shotgun data initially arrives from a Shotgun API query.</span>
 
-<span class="sd">        This is typically subclassed if you retrieve additional fields alongside the standard &quot;name&quot; field</span>
-<span class="sd">        and you want to put those into various custom data roles. These custom fields on the item</span>
-<span class="sd">        can later on be picked up by custom (delegate) rendering code in the view.</span>
+<span class="sd">        .. note:: This is typically subclassed if you retrieve additional fields alongside the standard &quot;name&quot; field</span>
+<span class="sd">            and you want to put those into various custom data roles. These custom fields on the item</span>
+<span class="sd">            can later on be picked up by custom (delegate) rendering code in the view.</span>
 
-<span class="sd">        :param item: QStandardItem that is about to be added to the model. This has been primed</span>
+<span class="sd">        :param item: :class:`~PySide.QtGui.QStandardItem` that is about to be added to the model. This has been primed</span>
 <span class="sd">                     with the standard settings that the ShotgunModel handles.</span>
 <span class="sd">        :param sg_data: Shotgun data dictionary that was received from Shotgun given the fields</span>
 <span class="sd">                        and other settings specified in _load_data()</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c"># default implementation does nothing</span>
-
-    <span class="k">def</span> <span class="nf">_populate_default_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="ShotgunModel._populate_default_thumbnail"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._populate_default_thumbnail">[docs]</a>    <span class="k">def</span> <span class="nf">_populate_default_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called whenever an item is constructed and needs to be associated with a default thumbnail.</span>
 <span class="sd">        In the current implementation, thumbnails are not cached in the same way as the rest of</span>
@@ -713,43 +753,48 @@
 
 <span class="sd">        Later on in the data load cycle, if the model was instantiated with the</span>
 <span class="sd">        `download_thumbs` parameter set to True,</span>
-<span class="sd">        the standard Shotgun `image` field thumbnail will be automatically downloaded for all items (or</span>
+<span class="sd">        the standard Shotgun ``image`` field thumbnail will be automatically downloaded for all items (or</span>
 <span class="sd">        picked up from local cache if possible). When these real thumbnails arrive, the</span>
-<span class="sd">        `_populate_thumbnail()` method will be called.</span>
+<span class="sd">        meth:`_populate_thumbnail()` method will be called.</span>
 
-<span class="sd">        :param item: QStandardItem that is about to be added to the model. This has been primed</span>
-<span class="sd">                     with the standard settings that the ShotgunModel handles.</span>
+<span class="sd">        :param item: :class:`~PySide.QtGui.QStandardItem` that is about to be added to the model. </span>
+<span class="sd">            This has been primed with the standard settings that the ShotgunModel handles.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c"># the default implementation does nothing</span>
-
-    <span class="k">def</span> <span class="nf">_finalize_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="ShotgunModel._finalize_item"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._finalize_item">[docs]</a>    <span class="k">def</span> <span class="nf">_finalize_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called whenever an item is fully constructed, either because a shotgun query returned it</span>
 <span class="sd">        or because it was loaded as part of a cache load from disk.</span>
+<span class="sd">        </span>
+<span class="sd">        .. note:: You can subclass this if you want to run post processing on </span>
+<span class="sd">            the data as it is arriving. For example, if you are showing a list of</span>
+<span class="sd">            task statuses in a filter view, you may want to remember which </span>
+<span class="sd">            statuses a user had checked and unchecked the last time he was running</span>
+<span class="sd">            the tool. By subclassing this UI you can easily apply those settings</span>
+<span class="sd">            before items appear in the UI. </span>
 
-<span class="sd">        :param item: QStandardItem that is about to be added to the model. This has been primed</span>
-<span class="sd">                     with the standard settings that the ShotgunModel handles.</span>
+<span class="sd">        :param item: :class:`~PySide.QtGui.QStandardItem` that is about to be added to the model. </span>
+<span class="sd">            This has been primed with the standard settings that the ShotgunModel handles.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c"># the default implementation does nothing</span>
-
-    <span class="k">def</span> <span class="nf">_populate_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="ShotgunModel._populate_thumbnail"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._populate_thumbnail">[docs]</a>    <span class="k">def</span> <span class="nf">_populate_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called whenever the real thumbnail for an item exists on disk. The following</span>
 <span class="sd">        execution sequence typically happens:</span>
 
-<span class="sd">        - QStandardItem is created, either through a cache load from disk or</span>
-<span class="sd">          from a payload coming from the Shogun API.</span>
+<span class="sd">        - :class:`~PySide.QtGui.QStandardItem` is created, either through a cache load from disk or</span>
+<span class="sd">          from a payload coming from the Shotgun API.</span>
 <span class="sd">        - After the item has been set up with its associated Shotgun data,</span>
-<span class="sd">          _populate_default_thumbnail() is called, allowing client code to set</span>
+<span class="sd">          :meth:`_populate_default_thumbnail()` is called, allowing client code to set</span>
 <span class="sd">          up a default thumbnail that will be shown while potential real thumbnail</span>
 <span class="sd">          data is being loaded.</span>
 <span class="sd">        - The model will now start looking for the real thumbail.</span>
-<span class="sd">          - If the thumbnail is already cached on disk, _populate_thumbnai() is</span>
-<span class="sd">            called very soon.</span>
-<span class="sd">          - If there isn&#39;t a thumbnail associated, _populate_thumbnail() will not</span>
-<span class="sd">            be called.</span>
+<span class="sd">          - If the thumbnail is already cached on disk, :meth:`_populate_thumbnail()` is called very soon.</span>
+<span class="sd">          - If there isn&#39;t a thumbnail associated, :meth:`_populate_thumbnail()` will not be called.</span>
 <span class="sd">          - If there isn&#39;t a thumbnail cached, the model will asynchronously download</span>
-<span class="sd">            the thumbnail from Shotgun and then (after some time) call _populate_thumbnail().</span>
+<span class="sd">            the thumbnail from Shotgun and then (after some time) call :meth:`_populate_thumbnail()`.</span>
 
 <span class="sd">        This method will be called for standard thumbnails if the model has been</span>
 <span class="sd">        instantiated with the download_thumbs flag set to be true. It will be called for</span>
@@ -761,24 +806,24 @@
 <span class="sd">        with the item. The default implementation will simply set the thumbnail to be icon</span>
 <span class="sd">        of the item, but this can be altered by subclassing this method.</span>
 
-<span class="sd">        :param item: QStandardItem which is associated with the given thumbnail</span>
+<span class="sd">        :param item: :class:`~PySide.QtGui.QStandardItem` which is associated with the given thumbnail</span>
 <span class="sd">        :param field: The Shotgun field which the thumbnail is associated with.</span>
 <span class="sd">        :param path: A path on disk to the thumbnail. This is a file in jpeg format.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c"># the default implementation sets the icon</span>
         <span class="n">thumb</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="n">item</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">thumb</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_populate_thumbnail_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="ShotgunModel._populate_thumbnail_image"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._populate_thumbnail_image">[docs]</a>    <span class="k">def</span> <span class="nf">_populate_thumbnail_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Similar to _populate_thumbnail() but this method is called instead</span>
+<span class="sd">        Similar to :meth:`_populate_thumbnail()` but this method is called instead</span>
 <span class="sd">        when the bg_load_thumbs parameter has been set to true. In this case, no</span>
 <span class="sd">        loading of thumbnail data from disk is necessary - this has already been</span>
 <span class="sd">        carried out async and is passed in the form of a QImage object.</span>
 <span class="sd">    </span>
-<span class="sd">        For further details, see _populate_thumbnail()</span>
+<span class="sd">        For further details, see :meth:`_populate_thumbnail()`</span>
 <span class="sd">        </span>
-<span class="sd">        :param item: QStandardItem which is associated with the given thumbnail</span>
+<span class="sd">        :param item: :class:`~PySide.QtGui.QStandardItem` which is associated with the given thumbnail</span>
 <span class="sd">        :param field: The Shotgun field which the thumbnail is associated with.</span>
 <span class="sd">        :param image: QImage object with the thumbnail loaded</span>
 <span class="sd">        :param path: A path on disk to the thumbnail. This is a file in jpeg format.</span>
@@ -787,34 +832,44 @@
         <span class="n">thumb</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="o">.</span><span class="n">fromImage</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
         <span class="n">item</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">thumb</span><span class="p">)</span>
 
-    
-    <span class="k">def</span> <span class="nf">_before_data_processing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sg_data_list</span><span class="p">):</span>
+    </div>
+<div class="viewcode-block" id="ShotgunModel._before_data_processing"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._before_data_processing">[docs]</a>    <span class="k">def</span> <span class="nf">_before_data_processing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sg_data_list</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called just after data has been retrieved from Shotgun but before any processing</span>
-<span class="sd">        takes place. This makes it possible for deriving classes to perform summaries,</span>
-<span class="sd">        calculations and other manipulations of the data before it is passed on to the model</span>
-<span class="sd">        class.</span>
+<span class="sd">        takes place. </span>
+<span class="sd">        </span>
+<span class="sd">        .. note:: You can subclass this if you want to perform summaries, </span>
+<span class="sd">            calculations and other manipulations of the data before it is </span>
+<span class="sd">            passed on to the model class. For example, if you request the model</span>
+<span class="sd">            to retrieve a list of versions from Shotgun given a Shot,</span>
+<span class="sd">            you can then subclass this method to cull out the data so that you </span>
+<span class="sd">            are only left with the latest version for each task. This method</span>
+<span class="sd">            is often used in conjunction with the order parameter in :meth:`_load_data()`.</span>
 
 <span class="sd">        :param sg_data_list: list of shotgun dictionaries, as retunrned by the find() call.</span>
 <span class="sd">        :returns: should return a list of shotgun dictionaries, on the same form as the input.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c"># default implementation is a passthrough</span>
         <span class="k">return</span> <span class="n">sg_data_list</span>
-
-    <span class="k">def</span> <span class="nf">_load_external_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="ShotgunModel._load_external_data"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._load_external_data">[docs]</a>    <span class="k">def</span> <span class="nf">_load_external_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called whenever the model needs to be rebuilt from scratch. This is called prior</span>
-<span class="sd">        to any shotgun data is added to the model. This makes it possible for deriving classes</span>
-<span class="sd">        to add custom data to the model in a very flexible fashion. Such data will not be</span>
-<span class="sd">        cached by the ShotgunModel framework.</span>
+<span class="sd">        to any shotgun data is added to the model. </span>
+<span class="sd">        </span>
+<span class="sd">        .. note:: You can subclass this to add custom data to the model in a very </span>
+<span class="sd">            flexible fashion. If you for example are loading published files from </span>
+<span class="sd">            Shotgun, you could use this to load up a listing of files on disk,</span>
+<span class="sd">            resulting in a model that shows both published files and local files.</span>
+<span class="sd">            External data will not be cached by the ShotgunModel framework.</span>
 
-<span class="sd">        :returns: list of QStandardItems</span>
+<span class="sd">        :returns: list of :class:`~PySide.QtGui.QStandardItem`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="c">########################################################################################</span>
     <span class="c"># private methods</span>
-
+</div>
     <span class="k">def</span> <span class="nf">__log_debug</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convenience wrapper around debug logging</span>
@@ -835,7 +890,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Depth first interation and deletion of all child nodes</span>
 
-<span class="sd">        :param node: QStandardItem tree node</span>
+<span class="sd">        :param node: :class:`~PySide.QtGui.QStandardItem` tree node</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c"># cleanup children</span>
@@ -1116,7 +1171,7 @@
                 <span class="c"># so double check that the data actually is present.</span>
                 <span class="k">if</span> <span class="n">sg_data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__log_warning</span><span class="p">(</span><span class="s">&quot;Found cached leaf node in tree with a missing SG_DATA_ROLE. Please report &quot;</span>
-                                       <span class="s">&quot;to support on toolkitsupport@shotgunsoftware.com. If possible, please &quot;</span>
+                                       <span class="s">&quot;to support on support@shotgunsoftware.com. If possible, please &quot;</span>
                                        <span class="s">&quot;make a copy of the file &#39;</span><span class="si">%s</span><span class="s">&#39; and attach that with the support request. &quot;</span>
                                        <span class="s">&quot;Affected Node name: &#39;</span><span class="si">%s</span><span class="s">&#39;. &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__full_cache_path</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">text</span><span class="p">()))</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -1566,8 +1621,7 @@
         &copy; Copyright 2015, Autodesk.
 
     </p>
-  </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  </div> 
 
 </footer>
 
@@ -1585,7 +1639,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v2.4.2',
+            VERSION:'31352_sphinx',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
