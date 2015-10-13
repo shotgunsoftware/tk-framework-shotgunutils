@@ -24,27 +24,36 @@ from tank.platform.qt import QtCore, QtGui
 
 class ShotgunDataRetriever(QtCore.QThread):
     """
-    Asynchronous data retrieve class which can be used to retrieve data
-    and thumbnails from Shotgun and from disk thumbnail cache.
-
-    The class manages a queue where you can add various requests.
-    Requests are queued up using the execute_find() and request_thumbnail() methods.
+    Asynchronous data retriever class which can be used to retrieve data and 
+    thumbnails from Shotgun and from disk thumbnail cache. The class manages 
+    a queue where you can add various requests. Requests are queued up using 
+    for example the :meth:`execute_find()` and :meth:`request_thumbnail()` 
+    methods.
 
     Requests are executed in the following priority order:
 
-    - first any thumbnails that are already cached on disk are handled
-    - next, shotgun find() queries are handled
-    - lastly thumbnail downloads are handled
-
-    The thread will emit work_completed and work_failure signals
-    when tasks are completed (or fail).
-
-    The clear() method will clear the current queue. The currently
-    processing item will finish processing and may send out signals
-    even after a clear.
-
-    Make sure you call the stop() method prior to destruction in order
-    for the system to gracefully shut down.
+    - First any thumbnails that are already cached on disk are handled.
+    - Next, shotgun find() queries are handled.
+    - Lastly thumbnail downloads are handled.
+    
+    The thread will emit work_completed and work_failure signals when 
+    tasks are completed (or fail). The :meth:`clear()` method will 
+    clear the current queue. The currently processing item will finish 
+    processing and may send out signals even after a clear. Make sure you 
+    call the :meth:`stop()` method prior to destruction in order for the 
+    system to gracefully shut down.    
+    
+    :signal work_completed(uid, request_type, data_dict): Emitted every time 
+        a requested task has completed. ``uid`` is a unique id which matches 
+        the unique id returned by the corresponding request call. 
+        ``request_type`` is a string denoting the type of request this 
+        event is associated with. ``data_dict`` is a dictionary containing 
+        the payload of the request. It will be different depending on what 
+        type of request it is. 
+    
+    :signal work_failure(uid, error_message): Emitted every time a requested 
+        task has failed. ``uid`` is a unique id which matches the unique 
+        id returned by the corresponding request call.
     """
 
 
@@ -87,7 +96,8 @@ class ShotgunDataRetriever(QtCore.QThread):
 
     def __init__(self, parent=None):
         """
-        Construction
+        :param parent: Parent object
+        :type parent: :class:`~PySide.QtGui.QWidget`
         """
         QtCore.QThread.__init__(self, parent)
         self._bundle = tank.platform.current_bundle()
@@ -179,10 +189,10 @@ class ShotgunDataRetriever(QtCore.QThread):
         with Shotgun. If not specified, each instance will instantiate its
         own connection, via toolkit. The behavior where each instance has its own
         connection is generally recommended for thread safety reasons since
-        the Shotgun API isn't natively threadsafe.
+        the Shotgun API isn't natively thread safe.
 
         We strongly recommend that the API instance passed in here is not used
-        in any other threads since this may lead to undefined behaviour.
+        in any other threads since this may lead to undefined behavior.
 
         :param sg: Shotgun API instance
         """
@@ -213,7 +223,7 @@ class ShotgunDataRetriever(QtCore.QThread):
         Gracefully stop the receiver.
 
         Once stop() has been called, the object needs to be discarded.
-        This is a blocking call. It will  synchronounsly wait
+        This is a blocking call. It will synchronously wait
         until any potential currently processing item has completed.
         """
         self._bundle.log_debug("%s: Initiating shutdown." % self)
@@ -352,13 +362,12 @@ class ShotgunDataRetriever(QtCore.QThread):
         """
         Adds the generic execution of a method to the queue.
         
-        The specified method will be called on the form
+        The specified method will be called on the following form::
         
-        > method(sg, data) 
+            method(sg, data)
         
         Where sg is a shotgun API instance. Data is typically
         a dictionary with specific data that the method needs.
-                
         The query will be queued up and once processed, either a
         work_completed or work_failure signal will be emitted.
 
