@@ -52,7 +52,7 @@ The following code illustrates typical use of the settings module::
     # by default, things are scoped with `SCOPE_GLOBAL`.
     # If you want to specify another scope, add a scope parameter.
 
-    # Fetch a prefeence with a specific scope
+    # Fetch a preference with a specific scope
     ui_launched = self._settings_manager.retrieve("ui_launched", False, self._settings_manager.SCOPE_ENGINE)
 
     # And store a preference with a specific scope

@@ -11,7 +11,7 @@ QT's build in model/view framework
 
 
 The Shotgun Model is a custom QT Model specialized for Shotgun Queries. It uses a disk based cache
-and runs queries asynchronously to Shotgun in the background for performance. In a nutshell, you
+and runs queries asynchronously to Shotgun in the background for performance. In a nut shell, you
 derive your own model class from it, set up a query, and then hook up your model to a QT View which
 will draw the data. The class contains several callbacks and allows for extensive customization, yet
 tries to shadow and encapsulate a lot of the details.
@@ -52,7 +52,7 @@ it quick to develop tools:
 - The Shotgun model is cached, meaning that all data is fetched in the background in a worker thread. This means that
   the data in your UI will load up instantly and you never have to wait for shotgun. If the query result is different
   than the cached result, the view will be updated on the fly as the data arrives.
-- With QT you have access to SelectionModels, making it easy to create consistent selection behaviour, even across
+- With QT you have access to SelectionModels, making it easy to create consistent selection behavior, even across
   multiple views. With full keyboard support.
 - With QT proxy models you can easily create interactive searching and filtering on the client side.
 - Views and models are optimized and will perform nicely even if you have thousands of items loaded.
@@ -83,7 +83,7 @@ toolkit app::
     model.load_data(entity_type="Asset")
 
 
-The above code will create a standard QT treeview of all assets in Shotgun.
+The above code will create a standard QT tree view of all assets in Shotgun.
 
 Beyond Hello World
 ---------------------------------
@@ -110,7 +110,7 @@ Data Items
 
 The Shotgun Model derives from :class:`~PySide.QtGui.QStandardItemModel` which is a base model which managed the storage
 of model data inside a collection of :class:`~PySide.QtGui.QStandardItem` objects. Each of these objects have a number of
-standard property and so called *roles*, holding various pieces of data such as icons, colours etc.
+standard property and so called *roles*, holding various pieces of data such as icons, colors etc.
 The Shotgun Model introduces two new standard roles which can be used by both subclassing and calling
 code:
 
