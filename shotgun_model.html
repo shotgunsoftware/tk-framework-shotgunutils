@@ -253,7 +253,7 @@ things.</li>
 search criteria, use a Proxy Model (typically <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QSortFilterProxyModel.html#PySide.QtGui.QSortFilterProxyModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QSortFilterProxyModel</span></code></a>).</li>
 <li>If you want to control the way items are displayed in the view, consider using the Shotgun delegates
 module which is part of the QT widgets framework. For more information, see
-<a class="reference external" href="http://shotgunsoftware.github.io/tk-framework-qtwidgets/views.html#views.WidgetDelegate" title="(in tk-framework-qtwidgets v)"><code class="xref py py-class docutils literal"><span class="pre">WidgetDelegate</span></code></a></li>
+<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/views.html#views.WidgetDelegate" title="(in tk-framework-qtwidgets v)"><code class="xref py py-class docutils literal"><span class="pre">WidgetDelegate</span></code></a></li>
 </ul>
 </div>
 <div class="section" id="data-items">
@@ -361,7 +361,7 @@ will be retrieved.</li>
 <p>Convenience wrapper around the <a class="reference internal" href="#shotgun_model.ShotgunModel" title="shotgun_model.ShotgunModel"><code class="xref py py-class docutils literal"><span class="pre">ShotgunModel</span></code></a> class which adds spinner and error reporting overlay functionality.
 Where the <a class="reference internal" href="#shotgun_model.ShotgunModel" title="shotgun_model.ShotgunModel"><code class="xref py py-class docutils literal"><span class="pre">ShotgunModel</span></code></a> is a classic model class which purely deals with data, this class connects with a
 <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QWidget.html#PySide.QtGui.QWidget" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QWidget</span></code></a> in order to provide progress feedback whenever necessary. Internally, it holds an instance of
-the <a class="reference external" href="http://shotgunsoftware.github.io/tk-framework-qtwidgets/overlay_widget.html#overlay_widget.ShotgunOverlayWidget" title="(in tk-framework-qtwidgets v)"><code class="xref py py-class docutils literal"><span class="pre">ShotgunOverlayWidget</span></code></a> widget
+the <a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/overlay_widget.html#overlay_widget.ShotgunOverlayWidget" title="(in tk-framework-qtwidgets v)"><code class="xref py py-class docutils literal"><span class="pre">ShotgunOverlayWidget</span></code></a> widget
 (which is part of the QtWidgets framework) and will show this whenever
 there is no data to display in the view. This means that it is straight forward to create shotgun views with a
 spinner on top indicating when data is being loaded and where any errors are automatically reported to the user.</p>
@@ -378,7 +378,7 @@ additional methods, see the <a class="reference internal" href="#shotgun_model.S
 error reporting overlay functionality. Where the <a class="reference internal" href="#shotgun_model.ShotgunModel" title="shotgun_model.ShotgunModel"><code class="xref py py-class docutils literal"><span class="pre">ShotgunModel</span></code></a> is a classic 
 model class which purely deals with data, this class connects with a <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QWidget.html#PySide.QtGui.QWidget" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QWidget</span></code></a> 
 in order to provide progress feedback whenever necessary. Internally, 
-it holds an instance of the <a class="reference external" href="http://shotgunsoftware.github.io/tk-framework-qtwidgets/overlay_widget.html#overlay_widget.ShotgunOverlayWidget" title="(in tk-framework-qtwidgets v)"><code class="xref py py-class docutils literal"><span class="pre">ShotgunOverlayWidget</span></code></a> widget (which is part of 
+it holds an instance of the <a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/overlay_widget.html#overlay_widget.ShotgunOverlayWidget" title="(in tk-framework-qtwidgets v)"><code class="xref py py-class docutils literal"><span class="pre">ShotgunOverlayWidget</span></code></a> widget (which is part of 
 the QtWidgets framework) and will show this whenever there is no data to 
 display in the view. This means that it is straight forward to create 
 shotgun views with a spinner on top indicating when data is being loaded 
