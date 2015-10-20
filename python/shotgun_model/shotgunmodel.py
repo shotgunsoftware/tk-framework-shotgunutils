@@ -22,7 +22,14 @@ from .util import get_sanitized_data, get_sg_data, sanitize_qt, sanitize_for_qt_
 
 from tank.platform.qt import QtCore, QtGui
 
+class ShotgunModelError(tank.TankError):
+    """Base class for all shotgun model exceptions"""
+    pass
 
+class CacheReadVersionMismatch(ShotgunModelError):
+    """Indicates that a cache file is incompatible with this code"""
+    pass
+    
 
 class ShotgunModel(QtGui.QStandardItemModel):
     """
@@ -97,7 +104,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
     # magic number for IO streams
     FILE_MAGIC_NUMBER = 0xDEADBEEF
     # version of binary format
-    FILE_VERSION = 21
+    FILE_VERSION = 22
 
 
     def __init__(self, parent, download_thumbs=True, schema_generation=0, bg_load_thumbs=False):
@@ -106,10 +113,14 @@ class ShotgunModel(QtGui.QStandardItemModel):
         :type parent: :class:`~PySide.QtGui.QWidget`
         :param download_thumbs: Boolean to indicate if this model should attempt
                                 to download and process thumbnails for the downloaded data.
-        :param schema_generation: Schema generation index. If you are changing the format
-                                  of the data you are retrieving from Shotgun, and therefore
-                                  want to invalidate any cache files that may already exist
-                                  in the system, you can increment this integer.
+        :param schema_generation: Schema generation number. Advanced parameter. If your
+                                  shotgun model contains logic in subclassed methods
+                                  that modify the shotgun data prior to it being put into
+                                  the cache system that the ShotgunModel maintains, you can 
+                                  use this option to ensure that different versions of the code
+                                  access different caches. If you change your custom business logic
+                                  around and update the generation number, both new and old
+                                  versions of the code will work correctly against the cached data.
         :param bg_load_thumbs: If set to True, thumbnails will be loaded in the background.
 
         """
@@ -422,17 +433,42 @@ class ShotgunModel(QtGui.QStandardItemModel):
         #
         # the reason these are split up is because the params tend to be constant and
         # the filters keep varying depending on user input.
-
+        #
+        # some comment regarding the fields that make up the hash
+        #
+        # fields, order, hierarchy are all coming from Shotgun
+        # and are used to uniquely identify the cache file. Typically,
+        # code using the shotgun model will keep these fields constant
+        # while varying filters. With the filters hashed separately,
+        # this typically generates a folder structure where there is one
+        # top level folder containing a series of cache files
+        # all for different filters.
+        #
+        # the schema generation is used for advanced implementations 
+        # See constructor docstring for details.
+        # 
+        # bg_load_thumbs is hashed so that the system can cache 
+        # thumb and non-thumb caches independently. This is because
+        # as soon as you start caching thumbnails, qpixmap will be used
+        # internally by the serialization and this means that you get 
+        # warnings if you try to use those caches in threads. By keeping
+        # caches separate, there is no risk that a thumb cache 'pollutes'
+        # a non-thumb cache.
+        #
         # now hash up the rest of the parameters and make that the filename
         params_hash = hashlib.md5()
+        params_hash.update(str(self.__schema_generation))
+        params_hash.update(str(self.__bg_load_thumbs))
         params_hash.update(str(self.__fields))
         params_hash.update(str(self.__order))
-        params_hash.update(str(seed))
         params_hash.update(str(self.__hierarchy))
 
-        # now hash up the rest of the parameters and make that the filename
+        # now hash up the filter parameters and the seed - these are dynamic
+        # values that tend to change and be data driven, so they are handled
+        # on a different level in the path
         filter_hash = hashlib.md5()
         filter_hash.update(str(self.__filters))
+        params_hash.update(str(seed))
         
         # organize files on disk based on entity type and then filter hash
         # keep extension names etc short in order to stay away from MAX_PATH
@@ -1310,7 +1346,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         
                 # write a header
                 out.writeInt64(self.FILE_MAGIC_NUMBER)
-                out.writeInt32((self.FILE_VERSION + self.__schema_generation))
+                out.writeInt32(self.FILE_VERSION)
         
                 # todo: if it turns out that there are ongoing issues with
                 # md5 cache collisions, we could write the actual query parameters
@@ -1371,11 +1407,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         magic = file_in.readInt64()
         if magic != self.FILE_MAGIC_NUMBER:
-            raise Exception("Invalid file magic number!")
+            raise CacheReadVersionMismatch("Invalid file magic number!")
 
         version = file_in.readInt32()
-        if version != (self.FILE_VERSION + self.__schema_generation):
-            raise Exception("Invalid file version!")
+        if version != self.FILE_VERSION:
+            raise CacheReadVersionMismatch("Cache file version %s, "
+                                           "expected version %s" % (version, self.FILE_VERSION))
 
         # tell which deserialization dialect to use
         file_in.setVersion(QtCore.QDataStream.Qt_4_0)
