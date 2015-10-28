@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgunmodel &mdash; tk-framework-shotgunutils v2.5.0 documentation</title>
+  <title>shotgun_model.shotgunmodel &mdash; tk-framework-shotgunutils v2.5.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v2.5.0 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v2.5.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -109,7 +109,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v2.5.0.<br>
+    <b>tk-framework-shotgunutils</b> v2.5.1.<br>
     This documentation is part of the Shotgun Pipeline Toolkit. 
     For more information, please visit 
     <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
@@ -183,7 +183,14 @@
 
 <span class="kn">from</span> <span class="nn">tank.platform.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
 
+<span class="k">class</span> <span class="nc">ShotgunModelError</span><span class="p">(</span><span class="n">tank</span><span class="o">.</span><span class="n">TankError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for all shotgun model exceptions&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
 
+<span class="k">class</span> <span class="nc">CacheReadVersionMismatch</span><span class="p">(</span><span class="n">ShotgunModelError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Indicates that a cache file is incompatible with this code&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+    
 
 <div class="viewcode-block" id="ShotgunModel"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel">[docs]</a><span class="k">class</span> <span class="nc">ShotgunModel</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItemModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -258,7 +265,7 @@
     <span class="c"># magic number for IO streams</span>
     <span class="n">FILE_MAGIC_NUMBER</span> <span class="o">=</span> <span class="mh">0xDEADBEEF</span>
     <span class="c"># version of binary format</span>
-    <span class="n">FILE_VERSION</span> <span class="o">=</span> <span class="mi">21</span>
+    <span class="n">FILE_VERSION</span> <span class="o">=</span> <span class="mi">22</span>
 
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">download_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
@@ -267,10 +274,14 @@
 <span class="sd">        :type parent: :class:`~PySide.QtGui.QWidget`</span>
 <span class="sd">        :param download_thumbs: Boolean to indicate if this model should attempt</span>
 <span class="sd">                                to download and process thumbnails for the downloaded data.</span>
-<span class="sd">        :param schema_generation: Schema generation index. If you are changing the format</span>
-<span class="sd">                                  of the data you are retrieving from Shotgun, and therefore</span>
-<span class="sd">                                  want to invalidate any cache files that may already exist</span>
-<span class="sd">                                  in the system, you can increment this integer.</span>
+<span class="sd">        :param schema_generation: Schema generation number. Advanced parameter. If your</span>
+<span class="sd">                                  shotgun model contains logic in subclassed methods</span>
+<span class="sd">                                  that modify the shotgun data prior to it being put into</span>
+<span class="sd">                                  the cache system that the ShotgunModel maintains, you can </span>
+<span class="sd">                                  use this option to ensure that different versions of the code</span>
+<span class="sd">                                  access different caches. If you change your custom business logic</span>
+<span class="sd">                                  around and update the generation number, both new and old</span>
+<span class="sd">                                  versions of the code will work correctly against the cached data.</span>
 <span class="sd">        :param bg_load_thumbs: If set to True, thumbnails will be loaded in the background.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -583,17 +594,42 @@
         <span class="c">#</span>
         <span class="c"># the reason these are split up is because the params tend to be constant and</span>
         <span class="c"># the filters keep varying depending on user input.</span>
-
+        <span class="c">#</span>
+        <span class="c"># some comment regarding the fields that make up the hash</span>
+        <span class="c">#</span>
+        <span class="c"># fields, order, hierarchy are all coming from Shotgun</span>
+        <span class="c"># and are used to uniquely identify the cache file. Typically,</span>
+        <span class="c"># code using the shotgun model will keep these fields constant</span>
+        <span class="c"># while varying filters. With the filters hashed separately,</span>
+        <span class="c"># this typically generates a folder structure where there is one</span>
+        <span class="c"># top level folder containing a series of cache files</span>
+        <span class="c"># all for different filters.</span>
+        <span class="c">#</span>
+        <span class="c"># the schema generation is used for advanced implementations </span>
+        <span class="c"># See constructor docstring for details.</span>
+        <span class="c"># </span>
+        <span class="c"># bg_load_thumbs is hashed so that the system can cache </span>
+        <span class="c"># thumb and non-thumb caches independently. This is because</span>
+        <span class="c"># as soon as you start caching thumbnails, qpixmap will be used</span>
+        <span class="c"># internally by the serialization and this means that you get </span>
+        <span class="c"># warnings if you try to use those caches in threads. By keeping</span>
+        <span class="c"># caches separate, there is no risk that a thumb cache &#39;pollutes&#39;</span>
+        <span class="c"># a non-thumb cache.</span>
+        <span class="c">#</span>
         <span class="c"># now hash up the rest of the parameters and make that the filename</span>
         <span class="n">params_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__schema_generation</span><span class="p">))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bg_load_thumbs</span><span class="p">))</span>
         <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fields</span><span class="p">))</span>
         <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__order</span><span class="p">))</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">seed</span><span class="p">))</span>
         <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy</span><span class="p">))</span>
 
-        <span class="c"># now hash up the rest of the parameters and make that the filename</span>
+        <span class="c"># now hash up the filter parameters and the seed - these are dynamic</span>
+        <span class="c"># values that tend to change and be data driven, so they are handled</span>
+        <span class="c"># on a different level in the path</span>
         <span class="n">filter_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
         <span class="n">filter_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__filters</span><span class="p">))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">seed</span><span class="p">))</span>
         
         <span class="c"># organize files on disk based on entity type and then filter hash</span>
         <span class="c"># keep extension names etc short in order to stay away from MAX_PATH</span>
@@ -1471,7 +1507,7 @@
         
                 <span class="c"># write a header</span>
                 <span class="n">out</span><span class="o">.</span><span class="n">writeInt64</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FILE_MAGIC_NUMBER</span><span class="p">)</span>
-                <span class="n">out</span><span class="o">.</span><span class="n">writeInt32</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">FILE_VERSION</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__schema_generation</span><span class="p">))</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">writeInt32</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FILE_VERSION</span><span class="p">)</span>
         
                 <span class="c"># todo: if it turns out that there are ongoing issues with</span>
                 <span class="c"># md5 cache collisions, we could write the actual query parameters</span>
@@ -1532,11 +1568,12 @@
 
         <span class="n">magic</span> <span class="o">=</span> <span class="n">file_in</span><span class="o">.</span><span class="n">readInt64</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">magic</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FILE_MAGIC_NUMBER</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Invalid file magic number!&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">CacheReadVersionMismatch</span><span class="p">(</span><span class="s">&quot;Invalid file magic number!&quot;</span><span class="p">)</span>
 
         <span class="n">version</span> <span class="o">=</span> <span class="n">file_in</span><span class="o">.</span><span class="n">readInt32</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">version</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FILE_VERSION</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__schema_generation</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Invalid file version!&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FILE_VERSION</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">CacheReadVersionMismatch</span><span class="p">(</span><span class="s">&quot;Cache file version </span><span class="si">%s</span><span class="s">, &quot;</span>
+                                           <span class="s">&quot;expected version </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FILE_VERSION</span><span class="p">))</span>
 
         <span class="c"># tell which deserialization dialect to use</span>
         <span class="n">file_in</span><span class="o">.</span><span class="n">setVersion</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QDataStream</span><span class="o">.</span><span class="n">Qt_4_0</span><span class="p">)</span>
@@ -1639,7 +1676,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v2.5.0',
+            VERSION:'v2.5.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

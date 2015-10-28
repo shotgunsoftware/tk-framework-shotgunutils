@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Model &mdash; tk-framework-shotgunutils v2.5.0 documentation</title>
+  <title>Shotgun Model &mdash; tk-framework-shotgunutils v2.5.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v2.5.0 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v2.5.1 documentation" href="index.html"/>
         <link rel="next" title="Shotgun Asynchronous Data Retriever" href="shotgun_data.html"/>
         <link rel="prev" title="The Shotgun Utilities Framework" href="index.html"/> 
 
@@ -123,7 +123,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v2.5.0.<br>
+    <b>tk-framework-shotgunutils</b> v2.5.1.<br>
     This documentation is part of the Shotgun Pipeline Toolkit. 
     For more information, please visit 
     <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
@@ -557,10 +557,14 @@ shotgun data payload. See <a class="reference internal" href="#sg-model-data-ite
 <li><strong>parent</strong> (<a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QWidget.html#PySide.QtGui.QWidget" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QWidget</span></code></a>) &#8211; Parent object.</li>
 <li><strong>download_thumbs</strong> &#8211; Boolean to indicate if this model should attempt
 to download and process thumbnails for the downloaded data.</li>
-<li><strong>schema_generation</strong> &#8211; Schema generation index. If you are changing the format
-of the data you are retrieving from Shotgun, and therefore
-want to invalidate any cache files that may already exist
-in the system, you can increment this integer.</li>
+<li><strong>schema_generation</strong> &#8211; Schema generation number. Advanced parameter. If your
+shotgun model contains logic in subclassed methods
+that modify the shotgun data prior to it being put into
+the cache system that the ShotgunModel maintains, you can 
+use this option to ensure that different versions of the code
+access different caches. If you change your custom business logic
+around and update the generation number, both new and old
+versions of the code will work correctly against the cached data.</li>
 <li><strong>bg_load_thumbs</strong> &#8211; If set to True, thumbnails will be loaded in the background.</li>
 </ul>
 </td>
@@ -1062,7 +1066,7 @@ the Shotgun API isn&#8217;t natively thread-safe.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v2.5.0',
+            VERSION:'v2.5.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
