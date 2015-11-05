@@ -18,10 +18,115 @@ from sgtk import TankError
 
 class ShotgunDataRetriever(QtCore.QObject):
     """
-    Asyncrounous Shotgun data retriever used to execute queries and download/manage
-    thumbnails from Shotgun. Uses the :class:`~task_manager.BackgroundTaskManager` to run tasks in background 
+    Asynchronous data retriever class which can be used to retrieve data and 
+    thumbnails from Shotgun and from disk thumbnail cache. Uses the 
+    :class:`~task_manager.BackgroundTaskManager` to run tasks in background 
     threads and emits signals when each query has either completed or failed.
+    Requests are queued up using for example the :meth:`execute_find()` and 
+    :meth:`request_thumbnail()` methods.
+
+    Requests are executed in the following priority order:
+
+    - First any thumbnails that are already cached on disk are handled.
+    - Next, shotgun find() queries are handled.
+    - Lastly thumbnail downloads are handled.
+    
+    The thread will emit work_completed and work_failure signals when 
+    tasks are completed (or fail). The :meth:`clear()` method will 
+    clear the current queue. The currently processing item will finish 
+    processing and may send out signals even after a clear. Make sure you 
+    call the :meth:`stop()` method prior to destruction in order for the 
+    system to gracefully shut down.    
+    
+    :signal work_completed(uid, request_type, data_dict): Emitted every time 
+        a requested task has completed. ``uid`` is a unique id which matches 
+        the unique id returned by the corresponding request call. 
+        ``request_type`` is a string denoting the type of request this 
+        event is associated with. ``data_dict`` is a dictionary containing 
+        the payload of the request. It will be different depending on what 
+        type of request it is. 
+    
+    :signal work_failure(uid, error_message): Emitted every time a requested 
+        task has failed. ``uid`` is a unique id which matches the unique 
+        id returned by the corresponding request call.
+    
+    
     """
+    
+    # syntax: work_completed(uid, request_type, data_dict)
+    # - uid is a unique id which matches the unique id
+    #   returned by the corresponding request call.
+    #
+    # - request_type is a string denoting the type of request
+    #   this event is associated with. It can be either "find"
+    #   "update", "create", "delete" "schema" or "thumbnail"
+    #
+    # - data_dict is a dictionary containing the payload
+    #   of the request. It will be different depending on
+    #   what type of request it is.
+    #
+    #   For find() requests, the data_dict will be on the form
+    #   {"sg": data }, where data is the data returned by the sg API
+    #
+    #   For thumbnail requests, the data dict will be on the form
+    #   {"thumb_path": path}, where path is a path to a location
+    #   on disk where the thumbnail can be accessed.
+    work_completed = QtCore.Signal(str, str, dict)
+
+    # syntax: work_failure(uid, error_message)
+    # - uid is a unique id which matches the unique id
+    #   returned by the corresponding request call.
+    # - error message is an error message string.
+    work_failure = QtCore.Signal(str, str)
+
+
+    # Individual task priorities used when adding tasks to the task manager
+    # Note: a higher value means more important and will get run before lower 
+    # priority tasks
+
+    # thumbnail checks are local disk checks and very fast.  These 
+    # are always carried out before any shotgun calls
+    _CHECK_THUMB_PRIORITY           = 50
+
+    # the shotgun schema is often useful to have as early on as possible,
+    # sometimes other shotgun operations also need the shotgun schema
+    # (and it's typically also cached) so this call has a higher priority
+    # than the rest of the shotgun calls
+    _SG_DOWNLOAD_SCHEMA_PRIORITY    = 40
+    
+    # next the priority for any other Shotgun calls (e.g. find, create, 
+    # update, delete, etc.)
+    _SG_CALL_PRIORITY               = 30
+    
+    # thumbnails are downloaded last as they are considered low-priority 
+    # and can take a relatively significant amount of time
+    _DOWNLOAD_THUMB_PRIORITY        = 20
+
+
+    def __init__(self, parent=None, sg=None, bg_task_manager=None):
+        """
+        :param parent: Parent object
+        :type parent: :class:`~PySide.QtGui.QWidget`
+        :param sg: Optional Shotgun API Instance
+        :param bg_task_manager: Optional Task manager
+        :class bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
+        """
+        QtCore.QObject.__init__(self, parent)
+        self._bundle = sgtk.platform.current_bundle()
+
+        # set up the background task manager:
+        task_manager = self._bundle.import_module("task_manager")
+        self._task_manager = bg_task_manager or task_manager.BackgroundTaskManager(parent=self, max_threads=1)
+        self._owns_task_manager = (bg_task_manager is None)
+        self._bg_tasks_group = self._task_manager.next_group_id()
+        self._task_manager.task_completed.connect(self._on_task_completed)
+        self._task_manager.task_failed.connect(self._on_task_failed)
+
+        self._thumb_task_id_map = {}
+
+
+    ############################################################################################################
+    # Public methods
 
     @staticmethod
     def download_thumbnail(url, bundle):
@@ -35,7 +140,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         code - for a better solution, we recommend using the thumbnail retrieval
         that runs in a background thread.
 
-        Because Shotgun thumbnail urls have an expiry time, make sure to only
+        Bcause Shotgun thumbnail urls have an expiry time, make sure to only
         pass urls to this method that have been very recently retrieved via a Shotgun find call.
 
         :param url: The thumbnail url string that is associated with this thumbnail. This is
@@ -64,6 +169,279 @@ class ShotgunDataRetriever(QtCore.QObject):
                 os.umask(old_umask)
 
         return path_to_cached_thumb
+
+
+
+    def start(self):
+        """
+        Start the retriever thread.
+
+        :raises:    TankError if there is no :class:`~task_manager.BackgroundTaskManager` associated with this instance
+        """
+        if not self._task_manager:
+            raise TankError("Unable to start the ShotgunDataRetriever as it has no BackgroundTaskManager!")
+        self._task_manager.start_processing()
+
+    def stop(self):
+        """
+        Gracefully stop the receiver.
+
+        Once stop() has been called, the object needs to be discarded.
+        This is a blocking call. It will synchronously wait
+        until any potential currently processing item has completed.
+
+        Note that once stopped the data retriever can't be restarted as the handle to the
+        :class:`~task_manager.BackgroundTaskManager` instance is released.
+        """
+        if not self._task_manager:
+            return
+
+        if self._owns_task_manager:
+            # we own the task manager so we'll need to completely shut it down before
+            # returning
+            self._task_manager.shut_down()
+            self._task_manager = None
+        else:
+            # we don't own the task manager so just stop any tasks we might be running 
+            # and disconnect from it:
+            self._task_manager.stop_task_group(self._bg_tasks_group)
+            self._task_manager.task_completed.disconnect(self._on_task_completed)
+            self._task_manager.task_failed.disconnect(self._on_task_failed)
+            self._task_manager = None
+
+    def clear(self):
+        """
+        Clears the queue.
+
+        Any currently processing item will complete without interruption, and signals will be
+        sent out for these items.
+        """
+        if not self._task_manager:
+            return
+        # stop any tasks running in the task group:
+        self._task_manager.stop_task_group(self._bg_tasks_group)
+
+    def stop_work(self, task_id):
+        """
+        Stop the specified task
+
+        :param task_id: The task to stop
+        """
+        if not self._task_manager:
+            return
+        # stop the task:
+        self._task_manager.stop_task(task_id)
+
+    def get_schema(self, project_id=None):
+        """
+        Execute the schema_read and schema_entity_read methods asynchronously
+
+        :param project_id:  If specified, the schema listing returned will
+                            be constrained by the schema settings for 
+                            the given project.
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.
+        """
+        return self._add_task(self._task_get_schema, 
+                              priority = ShotgunDataRetriever._SG_DOWNLOAD_SCHEMA_PRIORITY,
+                              task_kwargs = {"project_id":project_id})
+
+    def execute_find(self, *args, **kwargs):
+        """
+        Executes a Shotgun find query asynchronously.
+
+        This method takes the same parameters as the Shotgun find() call.
+
+        The query will be queued up and once processed, either a
+        work_completed or work_failure signal will be emitted.
+
+        :param ``*args``:       args to be passed to the Shotgun find() call
+        :param ``**kwargs``:    Named parameters to be passed to the Shotgun find() call
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.
+
+        """
+        return self._add_task(self._task_execute_find, 
+                              priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
+                              task_args = args,
+                              task_kwargs = kwargs)
+
+    def execute_update(self, *args, **kwargs):
+        """
+        Execute a Shotgun update call asynchronously
+
+        This method takes the same parameters as the Shotgun update() call.
+
+        The query will be queued up and once processed, either a
+        work_completed or work_failure signal will be emitted.
+
+        :param ``*args``:       args to be passed to the Shotgun update() call
+        :param ``**kwargs``:    Named parameters to be passed to the Shotgun update() call
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.        
+        """
+        return self._add_task(self._task_execute_update, 
+                              priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
+                              task_args = args,
+                              task_kwargs = kwargs)
+
+    def execute_create(self, *args, **kwargs):
+        """
+        Execute a Shotgun create call asynchronously
+
+        The query will be queued up and once processed, either a
+        work_completed or work_failure signal will be emitted.
+
+        This method takes the same parameters as the Shotgun create() call.
+
+        :param ``*args``:       args to be passed to the Shotgun create() call
+        :param ``**kwargs``:    Named parameters to be passed to the Shotgun create() call
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.        
+        """
+        return self._add_task(self._task_execute_create, 
+                              priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
+                              task_args = args,
+                              task_kwargs = kwargs)
+
+    def execute_delete(self, *args, **kwargs):
+        """
+        Execute a Shotgun delete call asynchronously
+
+        This method takes the same parameters as the Shotgun delete() call.
+
+        The query will be queued up and once processed, either a
+        work_completed or work_failure signal will be emitted.
+
+        :param ``*args``:       args to be passed to the Shotgun delete() call
+        :param ``**kwargs``:    Named parameters to be passed to the Shotgun delete() call
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.        
+        """
+        return self._add_task(self._task_execute_delete, 
+                              priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
+                              task_args = args,
+                              task_kwargs = kwargs)
+
+    def execute_method(self, method, *args, **kwargs):
+        """
+        Executes a generic execution of a method asynchronously.  This is pretty much a
+        wrapper for executing a task through the :class:`~task_manager.BackgroundTaskManager`.
+
+        The specified method will be called on the following form::
+
+            method(sg, data) 
+
+        Where sg is a shotgun API instance. Data is typically
+        a dictionary with specific data that the method needs.
+        The query will be queued up and once processed, either a
+        work_completed or work_failure signal will be emitted.
+
+        :param method:      The method that should be executed.
+        :param ``*args``:       args to be passed to the method
+        :param ``**kwargs``:    Named parameters to be passed to the method
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.        
+        """
+        # note that as the 'task' is actually going to call through to another method, we
+        # encode the method name, args and kwargs in the task's kwargs dictionary as this
+        # keeps them nicely encapsulated.
+        task_kwargs = {"method":method, "method_args":args, "method_kwargs":kwargs}
+        return self._add_task(self._task_execute_method, 
+                              priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
+                              task_kwargs = task_kwargs)
+
+    def _add_task(self, task_cb, priority, task_args=None, task_kwargs=None):
+        """
+        Simplified wrapper to add a task to the task manager.  All tasks get added into
+        the same group (self._bg_tasks_group) and the returned task_id is case to a string
+        to retain backwards compatibility (it used to return a uuid string).
+
+        :param task_cb:     The function to execute for the task
+        :param priority:    The priority the task should be run with
+        :param task_args:   Arguments that should be passed to the task callback
+        :param task_kwargs: Named arguments that should be passed to the task callback
+        :returns:           String representation of the task id
+        :raises:            TankError if there is no task manager available to add the task to!
+        """
+        if not self._task_manager:
+            raise TankError("Data retriever does not have a task manager to add the task to!")
+
+        task_id = self._task_manager.add_task(task_cb, 
+                                              priority, 
+                                              group = self._bg_tasks_group,
+                                              task_args = task_args,
+                                              task_kwargs = task_kwargs)
+        return str(task_id)
+
+
+    def request_thumbnail(self, url, entity_type, entity_id, field, load_image=False):
+        """
+        Downloads a thumbnail form Shotgun asynchronously or returns a cached thumbnail 
+        if found.  Optionally loads the thumbnail into a QImage.
+
+        :param url:         The thumbnail url string that is associated with this thumbnail. This is
+                            the field value as returned by a Shotgun query.
+        :param entity_type: Shotgun entity type with which the thumb is associated.
+        :param entity_id:   Shotgun entity id with which the thumb is associated.
+        :param field:       Thumbnail field. Normally 'image' but could also for example be a deep 
+                            link field such as ``sg_sequence.Sequence.image``
+        :param load_image:  If set to True, the return data structure will contain a QImage object 
+                            with the image data loaded.
+
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.
+        """
+        if not self._task_manager:
+            return
+
+        # always add check for thumbnail already downloaded:
+        check_task_id = self._task_manager.add_task(self._task_check_thumbnail,
+                                                    priority = ShotgunDataRetriever._CHECK_THUMB_PRIORITY,
+                                                    group = self._bg_tasks_group,
+                                                    task_kwargs = {"url":url, 
+                                                                   "load_image":load_image})
+
+        # Add download thumbnail task.  This is dependent on the check task above and will be passed
+        # the returned results from that task in addition to the kwargs specified below.  This allows
+        # a task dependency chain to be created with different priorities for the separate tasks.
+        dl_task_id = self._task_manager.add_task(self._task_download_thumbnail,
+                                                 upstream_task_ids = [check_task_id],
+                                                 priority = ShotgunDataRetriever._DOWNLOAD_THUMB_PRIORITY,
+                                                 group = self._bg_tasks_group,
+                                                 task_kwargs = {"url":url,
+                                                                "entity_type":entity_type, 
+                                                                "entity_id":entity_id,
+                                                                "field":field,
+                                                                "load_image":load_image
+                                                                #"thumb_path":<passed from check task>
+                                                                #"image":<passed from check task>
+                                                                })
+
+        # all results for requesting a thumbnail should be returned with the same id so use
+        # a mapping to track the 'primary' task id:
+        self._thumb_task_id_map[dl_task_id] = check_task_id
+
+        return str(check_task_id)
+
+
+
+    # ------------------------------------------------------------------------------------------------
+    # Background task management and methods
 
     @staticmethod
     def _get_thumbnail_path(url, bundle):
@@ -188,304 +566,6 @@ class ShotgunDataRetriever(QtCore.QObject):
 
         return path_to_cached_thumb
 
-    # Individual task priorities used when adding tasks to the task manager
-    # Note: a higher value means more important and will get run before lower 
-    # priority tasks
-
-    # thumbnail checks are local disk checks and very fast.  These 
-    # are always carried out before any shotgun calls
-    _CHECK_THUMB_PRIORITY           = 50
-
-    # the shotgun schema is often useful to have as early on as possible,
-    # sometimes other shotgun operations also need the shotgun schema
-    # (and it's typically also cached) so this call has a higher priority
-    # than the rest of the shotgun calls
-    _SG_DOWNLOAD_SCHEMA_PRIORITY    = 40
-    
-    # next the priority for any other Shotgun calls (e.g. find, create, 
-    # update, delete, etc.)
-    _SG_CALL_PRIORITY               = 30
-    
-    # thumbnails are downloaded last as they are considered low-priority 
-    # and can take a relatively significant amount of time
-    _DOWNLOAD_THUMB_PRIORITY        = 20
-
-    # ------------------------------------------------------------------------------------------------
-    # Signals
-    #
-    # syntax: work_completed(uid, request_type, data_dict)
-    # - uid is a unique id which matches the unique id
-    #   returned by the corresponding request call.
-    #
-    # - request_type is a string denoting the type of request
-    #   this event is associated with. It can be either "find"
-    #   or "thumbnail"
-    #
-    # - data_dict is a dictionary containing the payload
-    #   of the request. It will be different depending on
-    #   what type of request it is.
-    #
-    #   For find() requests, the data_dict will be on the form
-    #   {"sg": data }, where data is the data returned by the sg API
-    #
-    #   For thumbnail requests, the data dict will be on the form
-    #   {"thumb_path": path}, where path is a path to a location
-    #   on disk where the thumbnail can be accessed.
-    work_completed = QtCore.Signal(str, str, dict)
-
-    # syntax: work_failure(uid, error_message)
-    # - uid is a unique id which matches the unique id
-    #   returned by the corresponding request call.
-    # - error message is an error message string.
-    work_failure = QtCore.Signal(str, str)
-
-    def __init__(self, parent=None, sg=None, bg_task_manager=None):
-        """
-        Construction
-        """
-        QtCore.QObject.__init__(self, parent)
-        self._bundle = sgtk.platform.current_bundle()
-
-        # set up the background task manager:
-        task_manager = self._bundle.import_module("task_manager")
-        self._task_manager = bg_task_manager or task_manager.BackgroundTaskManager(parent=self, max_threads=1)
-        self._owns_task_manager = (bg_task_manager is None)
-        self._bg_tasks_group = self._task_manager.next_group_id()
-        self._task_manager.task_completed.connect(self._on_task_completed)
-        self._task_manager.task_failed.connect(self._on_task_failed)
-
-        self._thumb_task_id_map = {}
-
-    # ------------------------------------------------------------------------------------------------
-    # Public interface
-
-    def start(self):
-        """
-        Start the retriever thread.
-
-        :raises:    TankError if there is no :class:`~task_manager.BackgroundTaskManager` associated with this instance
-        """
-        if not self._task_manager:
-            raise TankError("Unable to start the ShotgunDataRetriever as it has no BackgroundTaskManager!")
-        self._task_manager.start_processing()
-
-    def stop(self):
-        """
-        Stop the retriever thread.
-
-        Note that once stopped the data retriever can't be restarted as the handle to the
-        :class:`~task_manager.BackgroundTaskManager` instance is released.
-        """
-        if not self._task_manager:
-            return
-
-        if self._owns_task_manager:
-            # we own the task manager so we'll need to completely shut it down before
-            # returning
-            self._task_manager.shut_down()
-            self._task_manager = None
-        else:
-            # we don't own the task manager so just stop any tasks we might be running 
-            # and disconnect from it:
-            self._task_manager.stop_task_group(self._bg_tasks_group)
-            self._task_manager.task_completed.disconnect(self._on_task_completed)
-            self._task_manager.task_failed.disconnect(self._on_task_failed)
-            self._task_manager = None
-
-    def clear(self):
-        """
-        Clear the retriever thread job queue
-        """
-        if not self._task_manager:
-            return
-        # stop any tasks running in the task group:
-        self._task_manager.stop_task_group(self._bg_tasks_group)
-
-    def stop_work(self, task_id):
-        """
-        Stop the specified task
-
-        :param task_id: The task to stop
-        """
-        if not self._task_manager:
-            return
-        # stop the task:
-        self._task_manager.stop_task(task_id)
-
-    def get_schema(self, project_id=None):
-        """
-        Execute the schema_read and schema_entity_read methods asynchronously
-
-        :param project_id:  If specified, the schema listing returned will
-                            be constrained by the schema settings for 
-                            the given project.
-        :returns:           A unique task id representing this request.
-        """
-        return self._add_task(self._task_get_schema, 
-                              priority = ShotgunDataRetriever._SG_DOWNLOAD_SCHEMA_PRIORITY,
-                              task_kwargs = {"project_id":project_id})
-
-    def execute_find(self, *args, **kwargs):
-        """
-        Executes a Shotgun find query asyncronously.
-
-        This method takes the same parameters as the Shotgun find() call.
-
-        :param *args:       args to be passed to the Shotgun find() call
-        :param **kwargs:    Named parameters to be passed to the Shotgun find() call
-        :returns:           A unique task id representing this request. 
-        """
-        return self._add_task(self._task_execute_find, 
-                              priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
-                              task_args = args,
-                              task_kwargs = kwargs)
-
-    def execute_update(self, *args, **kwargs):
-        """
-        Execute a Shotgun update call asyncronously
-
-        This method takes the same parameters as the Shotgun update() call.
-
-        :param *args:       args to be passed to the Shotgun update() call
-        :param **kwargs:    Named parameters to be passed to the Shotgun update() call
-        :returns:           A unique task id representing this request.
-        """
-        return self._add_task(self._task_execute_update, 
-                              priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
-                              task_args = args,
-                              task_kwargs = kwargs)
-
-    def execute_create(self, *args, **kwargs):
-        """
-        Execute a Shotgun create call asyncronously
-
-        This method takes the same parameters as the Shotgun create() call.
-
-        :param *args:       args to be passed to the Shotgun create() call
-        :param **kwargs:    Named parameters to be passed to the Shotgun create() call
-        :returns:           A unique task id representing this request.
-        """
-        return self._add_task(self._task_execute_create, 
-                              priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
-                              task_args = args,
-                              task_kwargs = kwargs)
-
-    def execute_delete(self, *args, **kwargs):
-        """
-        Execute a Shotgun delete call asyncronously
-
-        This method takes the same parameters as the Shotgun delete() call.
-
-        :param *args:       args to be passed to the Shotgun delete() call
-        :param **kwargs:    Named parameters to be passed to the Shotgun delete() call
-        :returns:           A unique task id representing this request.
-        """
-        return self._add_task(self._task_execute_delete, 
-                              priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
-                              task_args = args,
-                              task_kwargs = kwargs)
-
-    def execute_method(self, method, *args, **kwargs):
-        """
-        Executes a generic execution of a method asyncronously.  This is pretty much a
-        wrapper for executing a task through the :class:`~task_manager.BackgroundTaskManager`.
-
-        The specified method will be called with the form
-
-        > method(sg, data) 
-
-        Where sg is a shotgun API instance. Data is typically
-        a dictionary with specific data that the method needs.
-
-        :param method:      The method that should be executed.
-        :param *args:       args to be passed to the method
-        :param **kwargs:    Named parameters to be passed to the method
-        :returns:           A unique task id representing this request.
-        """
-        # note that as the 'task' is actually going to call through to another method, we
-        # encode the method name, args and kwargs in the task's kwargs dictionary as this
-        # keeps them nicely encapsulated.
-        task_kwargs = {"method":method, "method_args":args, "method_kwargs":kwargs}
-        return self._add_task(self._task_execute_method, 
-                              priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
-                              task_kwargs = task_kwargs)
-
-    def _add_task(self, task_cb, priority, task_args=None, task_kwargs=None):
-        """
-        Simplified wrapper to add a task to the task manager.  All tasks get added into
-        the same group (self._bg_tasks_group) and the returned task_id is case to a string
-        to retain backwards compatibility (it used to return a uuid string).
-
-        :param task_cb:     The function to execute for the task
-        :param priority:    The priority the task should be run with
-        :param task_args:   Arguments that should be passed to the task callback
-        :param task_kwargs: Named arguments that should be passed to the task callback
-        :returns:           String representation of the task id
-        :raises:            TankError if there is no task manager available to add the task to!
-        """
-        if not self._task_manager:
-            raise TankError("Data retriever does not have a task manager to add the task to!")
-
-        task_id = self._task_manager.add_task(task_cb, 
-                                              priority, 
-                                              group = self._bg_tasks_group,
-                                              task_args = task_args,
-                                              task_kwargs = task_kwargs)
-        return str(task_id)
-
-
-    def request_thumbnail(self, url, entity_type, entity_id, field, load_image=False):
-        """
-        Downloads a thumbnail form Shotgun asyncronously or returns the cached thumbnail 
-        if found.  Optionally loads the thumbnail into a QImage.
-
-        :param url:         The thumbnail url string that is associated with this thumbnail. This is
-                            the field value as returned by a Shotgun query.
-        :param entity_type: Shotgun entity type with which the thumb is associated.
-        :param entity_id:   Shotgun entity id with which the thumb is associated.
-        :param field:       Thumbnail field. Normally 'image' but could also for example be a deep 
-                            link field such as 'sg_sequence.Sequence.image'
-        :param load_image:  If set to True, the return data structure will contain a QImage object 
-                            with the image data loaded.
-
-        :returns:           A unique task id representing this request.
-        """
-        if not self._task_manager:
-            return
-
-        # always add check for thumbnail already downloaded:
-        check_task_id = self._task_manager.add_task(self._task_check_thumbnail,
-                                                    priority = ShotgunDataRetriever._CHECK_THUMB_PRIORITY,
-                                                    group = self._bg_tasks_group,
-                                                    task_kwargs = {"url":url, 
-                                                                   "load_image":load_image})
-
-        # Add download thumbnail task.  This is dependent on the check task above and will be passed
-        # the returned results from that task in addition to the kwargs specified below.  This allows
-        # a task dependency chain to be created with different priorities for the separate tasks.
-        dl_task_id = self._task_manager.add_task(self._task_download_thumbnail,
-                                                 upstream_task_ids = [check_task_id],
-                                                 priority = ShotgunDataRetriever._DOWNLOAD_THUMB_PRIORITY,
-                                                 group = self._bg_tasks_group,
-                                                 task_kwargs = {"url":url,
-                                                                "entity_type":entity_type, 
-                                                                "entity_id":entity_id,
-                                                                "field":field,
-                                                                "load_image":load_image
-                                                                #"thumb_path":<passed from check task>
-                                                                #"image":<passed from check task>
-                                                                })
-
-        # all results for requesting a thumbnail should be returned with the same id so use
-        # a mapping to track the 'primary' task id:
-        self._thumb_task_id_map[dl_task_id] = check_task_id
-
-        return str(check_task_id)
-
-
-
-    # ------------------------------------------------------------------------------------------------
-    # Background task management and methods
 
     def _task_get_schema(self, project_id):
         """
@@ -516,8 +596,8 @@ class ShotgunDataRetriever(QtCore.QObject):
         Method that gets executed in a background task/thread to perform a Shotgun
         find query
 
-        :param *args:       Unnamed arguments to be passed to the find() call
-        :param **kwargs:    Named arguments to be passed to the find() call 
+        :param ``*args``:       Unnamed arguments to be passed to the find() call
+        :param ``**kwargs``:    Named arguments to be passed to the find() call 
         :returns:           Dictionary containing the 'action' together with result
                             returned by the find() call
         """
@@ -529,8 +609,8 @@ class ShotgunDataRetriever(QtCore.QObject):
         Method that gets executed in a background task/thread to perform a Shotgun
         update call
 
-        :param *args:       Unnamed arguments to be passed to the update() call
-        :param **kwargs:    Named arguments to be passed to the update() call 
+        :param ``*args``:       Unnamed arguments to be passed to the update() call
+        :param ``**kwargs``:    Named arguments to be passed to the update() call 
         :returns:           Dictionary containing the 'action' together with result
                             returned by the update() call
         """
@@ -542,8 +622,8 @@ class ShotgunDataRetriever(QtCore.QObject):
         Method that gets executed in a background task/thread to perform a Shotgun
         create call
 
-        :param *args:       Unnamed arguments to be passed to the create() call
-        :param **kwargs:    Named arguments to be passed to the create() call 
+        :param ``*args``:       Unnamed arguments to be passed to the create() call
+        :param ``**kwargs``:    Named arguments to be passed to the create() call 
         :returns:           Dictionary containing the 'action' together with result
                             returned by the create() call
         """
@@ -555,8 +635,8 @@ class ShotgunDataRetriever(QtCore.QObject):
         Method that gets executed in a background task/thread to perform a Shotgun
         delete call
 
-        :param *args:       Unnamed arguments to be passed to the delete() call
-        :param **kwargs:    Named arguments to be passed to the delete() call 
+        :param ``*args``:       Unnamed arguments to be passed to the delete() call
+        :param ``**kwargs``:    Named arguments to be passed to the delete() call 
         :returns:           Dictionary containing the 'action' together with result
                             returned by the delete() call
         """
@@ -568,7 +648,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         Method that gets executed in a background task/thread to execute a method
         with a thread-specific shotgun connection.
 
-        :param method:          The method to be run asyncronously
+        :param method:          The method to be run asynchronously
         :param method_args:     Arguments to be passed to the method
         :param method_kwargs:   Named arguments to be passed to the method 
         :returns:               Dictionary containing the 'action' together with the result

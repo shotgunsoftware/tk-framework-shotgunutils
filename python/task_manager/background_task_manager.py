@@ -21,7 +21,7 @@ from .worker_thread import WorkerThread
 
 class BackgroundTaskManager(QtCore.QObject):
     """
-    Main task manager class.  Manages a queue of tasks running them asyncronously through
+    Main task manager class.  Manages a queue of tasks running them asynchronously through
     a pool of worker threads.
 
     Note that the BackgroundTaskManager class itself is reentrant but not thread-safe so its methods should only 
