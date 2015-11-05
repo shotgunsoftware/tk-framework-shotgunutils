@@ -1370,8 +1370,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 out_stream = QtCore.QDataStream(fh)
 
                 # write a header
-                out.writeInt64(self.FILE_MAGIC_NUMBER)
-                out.writeInt32(self.FILE_VERSION)
+                out_stream.writeInt64(self.FILE_MAGIC_NUMBER)
+                out_stream.writeInt32(self.FILE_VERSION)
         
                 # todo: if it turns out that there are ongoing issues with
                 # md5 cache collisions, we could write the actual query parameters
@@ -1424,8 +1424,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         num_items_loaded = 0
 
         fh = QtCore.QFile(filename)
-        
-<<<<<<< HEAD:python/shotgun_model/shotgun_model.py
+
         fh.open(QtCore.QIODevice.ReadOnly)
         try:
             in_stream = QtCore.QDataStream(fh)
@@ -1434,7 +1433,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             if magic != self.FILE_MAGIC_NUMBER:
                 raise Exception("Invalid file magic number!")
 
-            version = file_in.readInt32()
+            version = in_stream.readInt32()
             if version != self.FILE_VERSION:
                 raise CacheReadVersionMismatch("Cache file version %s, "
                                                "expected version %s" % (version, self.FILE_VERSION))
