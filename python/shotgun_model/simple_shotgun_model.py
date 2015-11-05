@@ -17,24 +17,30 @@ class SimpleShotgunModel(ShotgunOverlayModel):
     """
     Convenience wrapper around the Shotgun model for quick and easy access.
     
-    When you quickly want to display some shotgun data in a QT view of some kind,
-    this class may come in handy. Simply instantiate it and call load_data whenever
-    you want to load up a new shotgun query into your view.
+    Use this when you want to prototype data modeling or if your are looking 
+    for a simple flat data set reflecting a shotgun query. All you need to do 
+    is to instantiate the class (typically once, in your constructor) and then 
+    call :meth:`load_data` to specify which shotgun query to load up in the model. 
+    Subsequently call :meth:`load_data` whenever you wish to change the Shotgun 
+    query associated with the model.
+
+    This class derives from :class:`ShotgunModel` so all the customization methods 
+    available in the normal :class:`ShotgunModel` can also be subclassed from this class.
     
-    It derives from ShotgunModel so all the customization methods available in the
-    normal ShotgunModel can also be subclassed from this class.
+    The simple shotgun model contains a progress spinner which will appear 
+    whenever the object is doesn't have any data to display. This progress 
+    spinner will be placed on top of the parent object specified in the 
+    parent constructor parameter
     """
  
     def __init__(self, parent, bg_task_manager=None):
         """
-        Constructor.
-
-        The simple shotgun model will put the load spinner on top of the specified parent.
-
-        :param parent:              QWidget which this model will be parented under. This widget will
-                                    also be used to paint a spinner and display error messages.
+        :param parent: QWidget which this model will be parented under. This widget will
+                       also be used to paint a spinner and display error messages.
+        :type parent: :class:`~PySide.QtGui.QWidget`                   
         :param bg_task_manager:     Background task manager to use for any asynchronous work.  If
                                     this is None then a task manager will be created as needed.
+        :type bg_task_manager: :class:`BackgroundTaskManager`                                    
         """
         ShotgunOverlayModel.__init__(self, 
                                      parent=parent, 
@@ -47,7 +53,7 @@ class SimpleShotgunModel(ShotgunOverlayModel):
         """
         Loads shotgun data into the model, using the cache if possible.
         The model is not nested and the first field that is specified
-        via the fields parameter (code by default) will be used as the default
+        via the fields parameter (``code`` by default) will be used as the default
         name for all model items. 
         
         :param entity_type: Shotgun Entity Type to load data for

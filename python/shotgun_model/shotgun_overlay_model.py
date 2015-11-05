@@ -11,13 +11,32 @@
 import tank
 from .shotgun_model import ShotgunModel
 from tank.platform.qt import QtCore, QtGui
-overlay_module = tank.platform.import_framework("tk-framework-qtwidgets", "overlay_widget") 
+ 
 
 
 class ShotgunOverlayModel(ShotgunModel):
     """
-    Convenience wrapper around the ShotgunModel which adds
-    spinner and error reporting overlay functionality. 
+    Convenience wrapper around the :class:`ShotgunModel` class which adds spinner and 
+    error reporting overlay functionality. Where the :class:`ShotgunModel` is a classic 
+    model class which purely deals with data, this class connects with a :class:`~PySide.QtGui.QWidget` 
+    in order to provide progress feedback whenever necessary. Internally, 
+    it holds an instance of the :class:`~tk-framework-qtwidgets:overlay_widget.ShotgunOverlayWidget` widget (which is part of 
+    the QtWidgets framework) and will show this whenever there is no data to 
+    display in the view. This means that it is straight forward to create 
+    shotgun views with a spinner on top indicating when data is being loaded 
+    and where any errors are automatically reported to the user.
+    
+    :signal progress_spinner_start(): Signal that gets emitted whenever the 
+        model deems it appropriate to indicate that data is being loaded. 
+        Note that this signal is not emitted every time data is loaded from 
+        Shotgun, but only when there is no cached data available to display. 
+        This signal can be useful if an implementation wants to set up a custom 
+        overlay system instead of or in addition to the built in one that is 
+        provided via the :meth:`set_overlay_parent()` method.
+    
+    :signal progress_spinner_end(): Emitted every time a progress spinner 
+        should be deactivated.
+    
     """
     
     # signal that gets emitted whenever the model deems it appropriate to 
@@ -36,23 +55,27 @@ class ShotgunOverlayModel(ShotgunModel):
     def __init__(self, parent, overlay_widget, download_thumbs=True, schema_generation=0, 
                  bg_load_thumbs=True, bg_task_manager=None):
         """
-        Constructor. This will create a model which can later be used to load and manage Shotgun data.
-
-        :param parent:              Parent object.
-        :param overlay_widget:      Widget on which the spinner/info overlay should be positioned.
-        :param download_thumbs:     Boolean to indicate if this model should attempt 
-                                    to download and process thumbnails for the downloaded data.
-        :param schema_generation:   Schema generation index. If you are changing the format 
-                                    of the data you are retrieving from Shotgun, and therefore
-                                    want to invalidate any cache files that may already exist
-                                    in the system, you can increment this integer.
-        :param bg_load_thumbs:      If set to True, thumbnails will be loaded in the background.
-        :param bg_task_manager:     Background task manager to use for any asynchronous work.  If
-                                    this is None then a task manager will be created as needed.
+        :param parent: Parent object.
+        :type parent: :class:`~PySide.QtGui.QWidget`
+        :param overlay_widget: Widget on which the spinner/info overlay should be positioned.
+        :type overlay_widget: :class:`~PySide.QtGui.QWidget`
+        :param download_thumbs: Boolean to indicate if this model should attempt 
+                                to download and process thumbnails for the downloaded data.
+        :param schema_generation: Schema generation index. If you are changing the format 
+                                  of the data you are retrieving from Shotgun, and therefore
+                                  want to invalidate any cache files that may already exist
+                                  in the system, you can increment this integer.
+        :param bg_load_thumbs: If set to True, thumbnails will be loaded in the background.
+        :param bg_task_manager: Background task manager to use for any asynchronous work.  If
+                                this is None then a task manager will be created as needed.     
+        :type bg_task_manager: :class:`BackgroundTaskManager`   
         """
         ShotgunModel.__init__(self, parent, download_thumbs, schema_generation, bg_load_thumbs, bg_task_manager)
 
         # set up our spinner UI handling
+        # run the import locally in the constructor to avoid cycles between 
+        # qtwidgets and shotgunutils on import
+        overlay_module = tank.platform.import_framework("tk-framework-qtwidgets", "overlay_widget")
         self.__overlay = overlay_module.ShotgunOverlayWidget(overlay_widget)
         self._is_in_spin_state = False
         self._cache_loaded = False
@@ -99,18 +122,19 @@ class ShotgunOverlayModel(ShotgunModel):
         """
         Hides any overlay that is currently shown, except for error messages.
         """
-        self.__overlay.hide(hide_errors=False)
+        return self.__overlay.hide(hide_errors=False)
         
     def _show_overlay_pixmap(self, pixmap):
         """
-        Show an overlay status message in the form of a pixmap.
-        This is for example useful if a particular query doesn't return any results.
+        Shows an overlay status message in the form of an image.
         If an error message is already being shown, the pixmap will not 
         replace the error message. 
         
         :param pixmap: QPixmap object containing graphic to show.
+        :type pixmap: :class:`~PySide.QtGui.QPixmap`
+        :returns: True if the message was shown, False if not.
         """
-        self.__overlay.show_message_pixmap(pixmap)
+        return self.__overlay.show_message_pixmap(pixmap)
 
     def _show_overlay_info_message(self, msg):
         """
@@ -121,15 +145,15 @@ class ShotgunOverlayModel(ShotgunModel):
         :param msg: message to display
         :returns: True if the message was shown, False if not.
         """
-        self.__overlay.show_message(msg)
+        return self.__overlay.show_message(msg)
         
     def _show_overlay_error_message(self, msg):
         """
         Show an overlay error message.
         
-        :param msg: error message to display
+        :param msg: Error message to display
         """
-        self.__overlay.show_error_message(msg)
+        return self.__overlay.show_error_message(msg)
 
     ########################################################################################
     # private methods
