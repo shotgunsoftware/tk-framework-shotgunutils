@@ -21,7 +21,6 @@ import weakref
 from tank.platform.qt import QtCore, QtGui
 from .shotgun_standard_item import ShotgunStandardItem
 from .util import get_sanitized_data, get_sg_data, sanitize_qt, sanitize_for_qt_model
-from ..shotgun_data import ShotgunDataRetriever
 
 class ShotgunModelError(tank.TankError):
     """Base class for all shotgun model exceptions"""
@@ -152,7 +151,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__thumb_map = {}
 
         # set up data retriever and start work:
-        self.__sg_data_retriever = ShotgunDataRetriever(parent=self, bg_task_manager=bg_task_manager)
+        shotgun_data = self._bundle.import_module("shotgun_data")
+        self.__sg_data_retriever = shotgun_data.ShotgunDataRetriever(parent=self, bg_task_manager=bg_task_manager)
         self.__sg_data_retriever.work_completed.connect(self._on_data_retriever_work_completed)
         self.__sg_data_retriever.work_failure.connect(self._on_data_retriever_work_failure)
         self.__current_work_id = None
