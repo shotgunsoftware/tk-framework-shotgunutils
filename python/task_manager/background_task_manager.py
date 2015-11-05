@@ -8,8 +8,6 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-"""
-"""
 import traceback
 
 import sgtk
@@ -21,11 +19,27 @@ from .worker_thread import WorkerThread
 
 class BackgroundTaskManager(QtCore.QObject):
     """
-    Main task manager class.  Manages a queue of tasks running them asynchronously through
+    Main task manager class. Manages a queue of tasks running them asynchronously through
     a pool of worker threads.
 
     Note that the BackgroundTaskManager class itself is reentrant but not thread-safe so its methods should only 
-    be called from the thread it is created in.  Typically this would be the main thread of the application.
+    be called from the thread it is created in. Typically this would be the main thread of the application.
+    
+    
+    :signal task_completed(uid, group, result): Emitted when a task has been completed.
+        The ``uid`` parameter holds the unique id associated with the task, 
+        the ``group`` is the group that the task is associated with and 
+        the ``result`` is the data returned by the task. 
+    
+    :signal task_failed(uid, group, message, traceback_str): Emitted when a task fails for some reason.
+        The ``uid`` parameter holds the unique id associated with the task, 
+        the ``group`` is the group that the task is associated with, 
+        the ``message`` is a short error message and the ``traceback_str``
+        holds a full traceback.
+        
+    :signal task_group_finished(group): Emitted when all tasks in a group have finished.
+        The ``group`` is the group that has completed.
+
     """
 
     # signal emitted when a task has been completed
@@ -37,9 +51,8 @@ class BackgroundTaskManager(QtCore.QObject):
 
     def __init__(self, parent, start_processing=False, max_threads=8):
         """
-        Construction
-
         :param parent:              The parent QObject for this instance
+        :type parent:               :class:`~PySide.QtGui.QWidget`
         :param start_processing:    If True then processing of tasks will start immediately
         :param max_threads:         The maximum number of threads the task manager will use at any
                                     time.
@@ -173,12 +186,13 @@ class BackgroundTaskManager(QtCore.QObject):
     def add_pass_through_task(self, priority=None, group=None, upstream_task_ids=None, task_kwargs=None):
         """
         Add a pass-through task to the queue.  A pass-through task doesn't perform any work but can be useful
-        when syncronising other tasks (e.g. pulling the results from multiple upstream tasks into a single task)
+        when synchronising other tasks (e.g. pulling the results from multiple upstream tasks into a single task)
 
         :param priority:            The priority this task should be run with.  Tasks with higher priority
                                     are run first.
         :param group:               The group this task belongs to.  Task groups can be used to simplify task
-                                    management (e.g. stop a whole group, be notified when a group is complete)
+                                    management (e.g. stop a whole group, be notified when a group is complete).
+                                    A group is expressed as a string, for example 'thumbnails', 'IO' or 'shotgun'.
         :param upstream_task_ids:   A list of any upstream tasks that should be completed before this task
                                     is run.  The results from any upstream tasks are appended to the kwargs
                                     for this task.
