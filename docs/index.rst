@@ -28,5 +28,7 @@ Contents:
 
    shotgun_model
    shotgun_data
+   task_manager
    settings
    shotgun_globals
+   
