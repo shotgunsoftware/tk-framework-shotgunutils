@@ -16,8 +16,6 @@ import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 from sgtk import TankError
 
-from .background_task_manager import BackgroundTaskManager
-
 class ShotgunDataRetriever(QtCore.QObject):
     """
     Asyncrounous Shotgun data retriever used to execute queries and download/manage
@@ -249,7 +247,8 @@ class ShotgunDataRetriever(QtCore.QObject):
         self._bundle = sgtk.platform.current_bundle()
 
         # set up the background task manager:
-        self._task_manager = bg_task_manager or BackgroundTaskManager(parent=self, max_threads=1)
+        task_manager = self._bundle.import_module("task_manager")
+        self._task_manager = bg_task_manager or task_manager.BackgroundTaskManager(parent=self, max_threads=1)
         self._owns_task_manager = (bg_task_manager is None)
         self._bg_tasks_group = self._task_manager.next_group_id()
         self._task_manager.task_completed.connect(self._on_task_completed)
