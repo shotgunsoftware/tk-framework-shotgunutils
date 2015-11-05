@@ -124,7 +124,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         :param bg_load_thumbs: If set to True, thumbnails will be loaded in the background.
         :param bg_task_manager:  Background task manager to use for any asynchronous work. If
                                  this is None then a task manager will be created as needed.
-        :type bg_task_manager: :class:`BackgroundTaskManager`
+        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         """
         QtGui.QStandardItemModel.__init__(self, parent)
 

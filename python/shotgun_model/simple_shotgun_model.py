@@ -40,7 +40,7 @@ class SimpleShotgunModel(ShotgunOverlayModel):
         :type parent: :class:`~PySide.QtGui.QWidget`                   
         :param bg_task_manager:     Background task manager to use for any asynchronous work.  If
                                     this is None then a task manager will be created as needed.
-        :type bg_task_manager: :class:`BackgroundTaskManager`                                    
+        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`                                    
         """
         ShotgunOverlayModel.__init__(self, 
                                      parent=parent, 

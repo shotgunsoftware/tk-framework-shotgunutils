@@ -19,7 +19,7 @@ from sgtk import TankError
 class ShotgunDataRetriever(QtCore.QObject):
     """
     Asyncrounous Shotgun data retriever used to execute queries and download/manage
-    thumbnails from Shotgun. Uses the BackgroundTaskManager to run tasks in background 
+    thumbnails from Shotgun. Uses the :class:`~task_manager.BackgroundTaskManager` to run tasks in background 
     threads and emits signals when each query has either completed or failed.
     """
 
@@ -263,7 +263,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         """
         Start the retriever thread.
 
-        :raises:    TankError if there is no BackgroundTaskManager associated with this instance
+        :raises:    TankError if there is no :class:`~task_manager.BackgroundTaskManager` associated with this instance
         """
         if not self._task_manager:
             raise TankError("Unable to start the ShotgunDataRetriever as it has no BackgroundTaskManager!")
@@ -274,7 +274,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         Stop the retriever thread.
 
         Note that once stopped the data retriever can't be restarted as the handle to the
-        BackgroundTaskManager instance is released.
+        :class:`~task_manager.BackgroundTaskManager` instance is released.
         """
         if not self._task_manager:
             return
@@ -388,7 +388,7 @@ class ShotgunDataRetriever(QtCore.QObject):
     def execute_method(self, method, *args, **kwargs):
         """
         Executes a generic execution of a method asyncronously.  This is pretty much a
-        wrapper for executing a task through the BackgroundTaskManager.
+        wrapper for executing a task through the :class:`~task_manager.BackgroundTaskManager`.
 
         The specified method will be called with the form
 
