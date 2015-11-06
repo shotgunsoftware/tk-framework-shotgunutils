@@ -240,7 +240,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
               ['sg_status', 'is', 'ip'] 
             ]
 
-        :param item: One of the :class:`~PySide.QtGui.QStandardItem` model items that is associated with this model.
+        :param item: One of the :class:`~PySide.QtGui.QStandardItem`s that are 
+                     associated with this model.
         :returns: standard shotgun filter list to represent that item
         """
         # prime filters with our base query
@@ -297,9 +298,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
     def clear(self):
         """
-        Re-implements QStandardItemModel::clear()
-
-        From the QT documentation:
         Removes all items (including header items) from the model and 
         sets the number of rows and columns to zero.
         """
@@ -685,10 +683,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
           up a default thumbnail that will be shown while potential real thumbnail
           data is being loaded.
         - The model will now start looking for the real thumbail.
-          - If the thumbnail is already cached on disk, :meth:`_populate_thumbnail()` is called very soon.
-          - If there isn't a thumbnail associated, :meth:`_populate_thumbnail()` will not be called.
-          - If there isn't a thumbnail cached, the model will asynchronously download
-            the thumbnail from Shotgun and then (after some time) call :meth:`_populate_thumbnail()`.
+        - If the thumbnail is already cached on disk, :meth:`_populate_thumbnail()` is called very soon.
+        - If there isn't a thumbnail associated, :meth:`_populate_thumbnail()` will not be called.
+        - If there isn't a thumbnail cached, the model will asynchronously download
+          the thumbnail from Shotgun and then (after some time) call :meth:`_populate_thumbnail()`.
 
         This method will be called for standard thumbnails if the model has been
         instantiated with the download_thumbs flag set to be true. It will be called for

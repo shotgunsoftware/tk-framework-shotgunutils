@@ -30,8 +30,6 @@ class ShotgunEntityModel(ShotgunModel):
                  download_thumbs=False, schema_generation=0, bg_load_thumbs=True,
                  bg_task_manager=None):
         """
-        Construction
-
         :param entity_type:         The type of the entities that should be loaded into this model.
         :param filters:             A list of filters to be applied to entities in the model - these 
                                     will be passed to the Shotgun API find() call when populating the 
@@ -42,6 +40,7 @@ class ShotgunEntityModel(ShotgunModel):
                                     These will be passed to the Shotgun API find() call when populating
                                     the model.
         :param parent:              Parent QObject.
+        :type  parent:              :class:`~PySide.QtGui.QWidget`
         :param download_thumbs:     Boolean to indicate if this model should attempt
                                     to download and process thumbnails for the downloaded data.
         :param schema_generation:   Schema generation index. If you are changing the format
@@ -51,6 +50,7 @@ class ShotgunEntityModel(ShotgunModel):
         :param bg_load_thumbs:      If set to True, thumbnails will be loaded in the background.
         :param bg_task_manager:     Background task manager to use for any asynchronous work.  If
                                     this is None then a task manager will be created as needed.
+        :type  bg_task_manager:     :class:`~task_manager.BackgroundTaskManager`
         """
         self._entity_icons = {}
         self._step_swatch_icons = {}
@@ -107,7 +107,8 @@ class ShotgunEntityModel(ShotgunModel):
         Get entities for the current item by traversing up the tree and pulling entity information 
         from each item if possible
 
-        :param item:    The item to find entities for
+        :param item:    The item to find entities for.
+        :type  item:    :class:`~PySide.QtGui.QStandardItem`
         :returns:       A list of Shotgun entity dictionaries in the order they were found starting from
                         the specified item.  Each dictionary will contain all the entity information stored
                         by the model which is usually determined by the list of fields passed during 
@@ -130,7 +131,8 @@ class ShotgunEntityModel(ShotgunModel):
         """
         Get the Shotgun entity details for the specified model item.
 
-        :param item:    The item to retrieve the entity details for
+        :param item:    The item to retrieve the entity details for.
+        :type  item:    :class:`~PySide.QtGui.QStandardItem`
         :returns:       A Shotgun entity dictionary for the item if it represents an entity, otherwise 
                         None.  The dictionary will contain all the entity information stored by the model 
                         which is usually determined by the list of fields passed during construction plus
