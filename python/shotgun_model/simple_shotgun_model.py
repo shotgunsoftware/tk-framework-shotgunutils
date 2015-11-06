@@ -9,7 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
-from .shotgunoverlaymodel import ShotgunOverlayModel
+from .shotgun_overlay_model import ShotgunOverlayModel
 
 from sgtk.platform.qt import QtCore, QtGui
 
@@ -33,14 +33,22 @@ class SimpleShotgunModel(ShotgunOverlayModel):
     parent constructor parameter
     """
  
-    def __init__(self, parent):
+    def __init__(self, parent, bg_task_manager=None):
         """
         :param parent: QWidget which this model will be parented under. This widget will
                        also be used to paint a spinner and display error messages.
         :type parent: :class:`~PySide.QtGui.QWidget`                   
+        :param bg_task_manager:     Background task manager to use for any asynchronous work.  If
+                                    this is None then a task manager will be created as needed.
+        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`                                    
         """
-        ShotgunOverlayModel.__init__(self, parent, parent, download_thumbs=True)
-        
+        ShotgunOverlayModel.__init__(self, 
+                                     parent=parent, 
+                                     overlay_widget=parent, 
+                                     download_thumbs=True,
+                                     bg_load_thumbs=True, 
+                                     bg_task_manager=bg_task_manager)
+
     def load_data(self, entity_type, filters=None, fields=None):
         """
         Loads shotgun data into the model, using the cache if possible.

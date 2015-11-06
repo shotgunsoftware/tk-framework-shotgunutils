@@ -27,7 +27,7 @@ def get_sg_data(item):
     :param item: QStandardItem or QModelIndex or similar
     :returns: Shotgun data or None if no data was associated
     """
-    from .shotgunmodel import ShotgunModel
+    from .shotgun_model import ShotgunModel
     return get_sanitized_data(item, ShotgunModel.SG_DATA_ROLE)
 
 def get_sanitized_data(item, role):
@@ -52,12 +52,12 @@ def get_sanitized_data(item, role):
         return sanitize_qt(item.data(role))
     except AttributeError:
         return None
-    
+
 def sanitize_for_qt_model(val):
     """
     Useful when you have shotgun (or other) data and want to 
     prepare it for storage as role data in a model.
-    
+
     QT/pyside/pyqt automatically changes the data to be unicode
     according to internal rules of its own, sometimes resulting in 
     unicode errors. A safe strategy for storing unicode data inside
@@ -65,39 +65,38 @@ def sanitize_for_qt_model(val):
     unicode prior to insertion into the model. This method ensures 
     that. All string values will be coonverted to unicode. UTF-8
     is assumed for all strings: 
-    
+
     in:  {"a":"aaa", "b": 123, "c": {"x":"y", "z":"aa"}, "d": [ {"x":"y", "z":"aa"} ] }
     out: {'a': u'aaa', 'c': {'x': u'y', 'z': u'aa'}, 'b': 123, 'd': [{'x': u'y', 'z': u'aa'}]}
-    
+
     This method is the counterpart to sanitize_qt() which is the reciprocal
     of this operation. When working with QT models and shotgun data, 
     we recommend the following best practices:
-    
+
     - when sg data is inserted into a role in model, run it through
       sanitize_for_qt_model() first
     - When taking it back out again, run it through sanitize_qt()
-    
+
     :param val: value to convert
     :returns: sanitized data
     """
-    
+
     if isinstance(val, list):
         return [ sanitize_for_qt_model(d) for d in val ]
-    
+
     elif isinstance(val, dict):
         new_val = {}
         for (k,v) in val.iteritems():
             # go through dictionary and convert each value separately
             new_val[k] = sanitize_for_qt_model(v)
         return new_val
-    
+
     elif isinstance(val, str):
         return val.decode("UTF-8")
-        
+
     # for everything else, just pass through
     return val
-    
-    
+
 def sanitize_qt(val):
     """
     Converts a value to a tk friendly and consistent representation.
@@ -145,4 +144,4 @@ def sanitize_qt(val):
 
     else:
         return val        
-    
+
