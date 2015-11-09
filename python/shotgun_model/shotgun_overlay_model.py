@@ -111,12 +111,18 @@ class ShotgunOverlayModel(ShotgunModel):
         if not self._cache_loaded:
             # we are doing asynchronous loading into an uncached model.            
             # start spinning
-            self.__overlay.start_spin()    
-            # signal to any external listeners
-            self.progress_spinner_start.emit()
-            self._is_in_spin_state = True
+            self._show_overlay_spinner()
         # call base class
         return ShotgunModel._refresh_data(self)
+    
+    def _show_overlay_spinner(self):
+        """
+        Shows the overlay spinner
+        """
+        self.__overlay.start_spin()    
+        # signal to any external listeners
+        self.progress_spinner_start.emit()
+        self._is_in_spin_state = True        
     
     def _hide_overlay_info(self):
         """

@@ -17,7 +17,7 @@ from sgtk import TankError
 from sgtk.platform.qt import QtCore, QtGui
 import cPickle as pickle
 
-class CachedShotgunSchema(object):
+class CachedShotgunSchema(QtCore.QObject):
     """
     Wraps around the shotgun schema and caches it for fast lookups.
 
@@ -48,10 +48,12 @@ class CachedShotgunSchema(object):
         """
         Constructor
         """
+        QtCore.QObject.__init__(self)
+        
         self._bundle = sgtk.platform.current_bundle()
         self._field_schema = {}
         self._type_schema = {}
-        self.__sg_data_retrievers = {}
+        self.__sg_data_retrievers = []
         self._status_data = {}
         
         self._sg_schema_query_id = None
@@ -132,7 +134,7 @@ class CachedShotgunSchema(object):
                 # to avoid flooding of requests.
                 self._schema_requested = True
                 # pick the first one
-                dr = self.__sg_data_retrievers.values()[0]
+                dr = self.__sg_data_retrievers[0]["data_retriever"]
                 self._sg_schema_query_id = dr.get_schema(sg_project_id)
         
     def _check_status_refresh(self):
@@ -155,7 +157,7 @@ class CachedShotgunSchema(object):
                 self._status_requested = True
                 
                 # pick the first one
-                dr = self.__sg_data_retrievers.values()[0]
+                dr = self.__sg_data_retrievers[0]["data_retriever"]
                 self._sg_status_query_id = dr.execute_find("Status", [], fields)        
         
     def _on_worker_failure(self, uid, msg):
@@ -232,43 +234,52 @@ class CachedShotgunSchema(object):
     # public methods
     
     @classmethod
-    def register_data_retriever(cls, data_retriever):
+    def register_bg_task_manager(cls, task_manager):
         """
-        Register a data retriever with the singleton.
-        Once a data retriever has been registered, the schema singleton
-        can refresh its cache.
+        Register a background task manager with the singleton.
+        Once a background task manager has been registered, the schema 
+        singleton can refresh its cache.
         
-        :param data_retriever: shotgun data retriever object to register
-        :type data_retriever: :class:`~shotgun_data.ShotgunDataRetriever`
+        :param task_manager: Background task manager to use
+        :type task_manager: :class:`~tk-framework-shotgunutils:task_manager.BackgroundTaskManager` 
         """
         self = cls.__get_instance()
         
-        # add to dict of registered data retrievers
-        obj_hash = id(data_retriever)
-        self.__sg_data_retrievers[obj_hash] = data_retriever
+        # create a data retriever
+        shotgun_data = self._bundle.import_module("shotgun_data")
+        data_retriever = shotgun_data.ShotgunDataRetriever(self, bg_task_manager=task_manager)        
+        data_retriever.start()
         data_retriever.work_completed.connect(self._on_worker_signal)
         data_retriever.work_failure.connect(self._on_worker_failure)
         
+        dr = {"data_retriever": data_retriever, "task_manager": task_manager}        
+        self.__sg_data_retrievers.append(dr)
+        
     @classmethod
-    def unregister_data_retriever(cls, data_retriever):
+    def unregister_bg_task_manager(cls, task_manager):
         """
         Unregister a previously registered data retriever with the singleton.
         
-        :param data_retriever: shotgun data retriever object to unregister
-        :type data_retriever: :class:`~shotgun_data.ShotgunDataRetriever`
+        :param task_manager: Background task manager to use
+        :type task_manager: :class:`~tk-framework-shotgunutils:task_manager.BackgroundTaskManager` 
         """     
         self = cls.__get_instance()
         
-        obj_hash = id(data_retriever)
-        if obj_hash in self.__sg_data_retrievers:
-            self._bundle.log_debug("Unregistering %r from schema manager" % data_retriever)
-            data_retriever = self.__sg_data_retrievers[obj_hash]
-            del self.__sg_data_retrievers[obj_hash]
-            data_retriever.work_completed.disconnect(self._on_worker_signal)
-            data_retriever.work_failure.disconnect(self._on_worker_failure)
-        else:
-            self._bundle.log_warning("Could not unregister unknown data "
-                                     "retriever %r with schema manager" %  data_retriever)
+        culled_retrievers = []
+        
+        for dr in self.__sg_data_retrievers:
+            
+            if dr["task_manager"] == task_manager:
+                self._bundle.log_debug("Unregistering %r from schema manager" % task_manager)
+                data_retriever = dr["data_retriever"]
+                data_retriever.stop()
+                data_retriever.work_completed.disconnect(self._on_worker_signal)
+                data_retriever.work_failure.disconnect(self._on_worker_failure)
+                
+            else:
+                culled_retrievers.append(dr)
+
+        self.__sg_data_retrievers = culled_retrievers        
 
     @classmethod
     def get_type_display_name(cls, sg_entity_type):

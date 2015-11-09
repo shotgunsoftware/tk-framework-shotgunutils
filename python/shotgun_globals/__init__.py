@@ -11,8 +11,8 @@
 
 from . import cached_schema as _cs
 
-register_data_retriever = _cs.CachedShotgunSchema.register_data_retriever
-unregister_data_retriever = _cs.CachedShotgunSchema.unregister_data_retriever
+register_bg_task_manager = _cs.CachedShotgunSchema.register_bg_task_manager
+unregister_bg_task_manager = _cs.CachedShotgunSchema.unregister_bg_task_manager
 get_type_display_name = _cs.CachedShotgunSchema.get_type_display_name
 get_field_display_name = _cs.CachedShotgunSchema.get_field_display_name
 get_empty_phrase = _cs.CachedShotgunSchema.get_empty_phrase
