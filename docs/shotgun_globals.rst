@@ -39,3 +39,5 @@ The sample code below shows how you can use the globals in your Toolkit App Code
 .. autofunction:: get_empty_phrase
 .. autofunction:: get_status_display_name
 .. autofunction:: get_status_color
+.. autofunction:: get_entity_type_icon
+.. autofunction:: get_entity_type_icon_url

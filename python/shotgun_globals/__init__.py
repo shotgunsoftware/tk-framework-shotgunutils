@@ -11,6 +11,8 @@
 
 from . import cached_schema as _cs
 
+from .icon import get_entity_type_icon, get_entity_type_icon_url
+
 register_bg_task_manager = _cs.CachedShotgunSchema.register_bg_task_manager
 unregister_bg_task_manager = _cs.CachedShotgunSchema.unregister_bg_task_manager
 get_type_display_name = _cs.CachedShotgunSchema.get_type_display_name

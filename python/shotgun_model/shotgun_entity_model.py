@@ -13,7 +13,6 @@ from sgtk.platform.qt import QtGui, QtCore
 
 from .shotgun_model import ShotgunModel
 from .util import get_sg_data, get_sanitized_data
-from .ui import resources_rc
 
 class ShotgunEntityModel(ShotgunModel):
     """
@@ -52,7 +51,6 @@ class ShotgunEntityModel(ShotgunModel):
                                     this is None then a task manager will be created as needed.
         :type  bg_task_manager:     :class:`~task_manager.BackgroundTaskManager`
         """
-        self._entity_icons = {}
         self._step_swatch_icons = {}
 
         # make sure fields is valid:
@@ -76,31 +74,19 @@ class ShotgunEntityModel(ShotgunModel):
         Call to clean-up the model when it is finished with
         """
         ShotgunModel.destroy(self)
-        self._entity_icons = {}
         self._step_swatch_icons = {}
         self._default_icon = None
 
     def get_entity_icon(self, entity_type):
         """
-        Retrieve the icon for the specified entity type if available.
+        Convenience method. Retrieve the icon for the specified entity type if available.
 
         :param entity_type: The entity type to retrieve the icon for
         :returns:           A QIcon if an icon was found for the specified entity
                             type, otherwise None.
         """
-        icon = None
-        if entity_type in self._entity_icons:
-            # we've previously asked for the icon
-            icon = self._entity_icons[entity_type]
-        else:
-            # see if we have the icon in the resources:
-            icon_path = ":/tk-framework-shotgunutils/icon_%s_dark.png" % entity_type
-            if QtCore.QFile.exists(icon_path): 
-                # create the new icon from this resource:
-                icon = QtGui.QIcon(QtGui.QPixmap(icon_path))
-            self._entity_icons[entity_type] = icon
-
-        return icon
+        shotgun_globals = self._bundle.import_module("shotgun_globals")
+        return shotgun_globals.get_entity_type_icon(entity_type)
 
     def get_entities(self, item):
         """
