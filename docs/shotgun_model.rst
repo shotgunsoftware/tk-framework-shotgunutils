@@ -22,13 +22,6 @@ tries to shadow and encapsulate a lot of the details.
 .. image:: images/model_inheritance.png
 
 
-
-For convenience, three different classes are provided, allowing you to choose the right level of encapsulation.
-
-.. image:: images/model_classes.png
-
-
-
 Why should I use the Shotgun Model?
 ---------------------------------------
 
@@ -106,6 +99,25 @@ The simple setup outlined above could be extended in the following ways:
 
 .. _sg-model-data-items:
 
+Progress Spinner
+----------------------
+
+The model emits several signals at various points in its refresh cycle. If you want a spinner
+to pop up to indicate that data is being loaded, simply add a :class:`~tk-framework-qtwidgets:overlay_widget.ShotgunModelOverlayWidget`
+between your view and model, like this::
+
+    overlay_widget = tank.platform.import_framework("tk-framework-qtwidgets", "overlay_widget")
+
+    # once you have created a view and a model, set up an overlay object to
+    # track the model's activity. Whenver the model is loading data,
+    # the overlay will show a spinner.
+
+    overlay = overlay_widget.ShotgunModelOverlayWidget(model, view)
+
+If you want to refine how the overlay behaves, simply subclass the class above.
+This can be useful if you for example want to display a 'no items found' message whenever
+a shotgun query returns zero items.
+
 Data Items
 ----------------------
 
@@ -173,7 +185,7 @@ ShotgunEntityModel
 
 Another convenience wrapper around the :class:`ShotgunModel`. This model is useful when you
 want to represent a tree view of Sequences, Shots or Assets. By default, the model will
-associate standard dark-style Shotgun entity type icons to items in the list. 
+associate standard dark-style Shotgun entity type icons to items in the list.
 
 .. autoclass:: ShotgunEntityModel
     :show-inheritance:
