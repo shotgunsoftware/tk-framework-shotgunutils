@@ -93,7 +93,7 @@ Beyond Hello World
 The simple setup outlined above could be extended in the following ways:
 
 - If you need more control of how the data is being retrieved, consider instead creating
-  your own class and derive from :class:`ShotgunOverlayModel`. This makes it possible to customize
+  your own class and derive from :class:`ShotgunModel`. This makes it possible to customize
   the shotgun data as it arrives from Shotgun, control the hierarchy grouping and many other
   things.
 - If you want to retrieve results from your view, connect signals to the view's selection model.
@@ -166,26 +166,6 @@ normal ShotgunModel can also be subclassed from this class.
     :show-inheritance:
     :members:
 
-
-
-
-ShotgunOverlayModel
-=====================================================
-
-Convenience wrapper around the :class:`ShotgunModel` class which adds spinner and error reporting overlay functionality.
-Where the :class:`ShotgunModel` is a classic model class which purely deals with data, this class connects with a
-:class:`~PySide.QtGui.QWidget` in order to provide progress feedback whenever necessary. Internally, it holds an instance of
-the :class:`~tk-framework-qtwidgets:overlay_widget.ShotgunOverlayWidget` widget
-(which is part of the QtWidgets framework) and will show this whenever
-there is no data to display in the view. This means that it is straight forward to create shotgun views with a
-spinner on top indicating when data is being loaded and where any errors are automatically reported to the user.
-
-.. note:: Only the methods specific to the overlay model are displayed here. For
-   additional methods, see the :class:`ShotgunModel`.
-
-.. autoclass:: ShotgunOverlayModel
-    :show-inheritance:
-    :members: _show_overlay_spinner, _hide_overlay_info, _show_overlay_pixmap, _show_overlay_info_message, _show_overlay_error_message
 
 
 ShotgunEntityModel

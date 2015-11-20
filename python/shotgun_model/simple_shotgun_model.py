@@ -9,11 +9,11 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
-from .shotgun_overlay_model import ShotgunOverlayModel
+from .shotgun_overlay_model import ShotgunModel
 
 from sgtk.platform.qt import QtCore, QtGui
 
-class SimpleShotgunModel(ShotgunOverlayModel):
+class SimpleShotgunModel(ShotgunModel):
     """
     Convenience wrapper around the Shotgun model for quick and easy access.
     
@@ -42,12 +42,12 @@ class SimpleShotgunModel(ShotgunOverlayModel):
                                     this is None then a task manager will be created as needed.
         :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`                                    
         """
-        ShotgunOverlayModel.__init__(self, 
-                                     parent=parent, 
-                                     overlay_widget=parent, 
-                                     download_thumbs=True,
-                                     bg_load_thumbs=True, 
-                                     bg_task_manager=bg_task_manager)
+        ShotgunModel.__init__(self, 
+            parent=parent, 
+            overlay_widget=parent, 
+            download_thumbs=True,
+            bg_load_thumbs=True, 
+            bg_task_manager=bg_task_manager)
 
     def load_data(self, entity_type, filters=None, fields=None):
         """
@@ -65,6 +65,6 @@ class SimpleShotgunModel(ShotgunOverlayModel):
         filters = filters or []
         fields = fields or ["code"]
         hierarchy = [fields[0]]
-        ShotgunOverlayModel._load_data(self, entity_type, filters, hierarchy, fields)
+        ShotgunModel._load_data(self, entity_type, filters, hierarchy, fields)
         self._refresh_data()
         
