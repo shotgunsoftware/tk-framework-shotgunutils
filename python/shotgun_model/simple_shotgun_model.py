@@ -9,7 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
-from .shotgun_overlay_model import ShotgunModel
+from .shotgun_model import ShotgunModel
 
 from sgtk.platform.qt import QtCore, QtGui
 
@@ -38,7 +38,6 @@ class SimpleShotgunModel(ShotgunModel):
         """
         ShotgunModel.__init__(self, 
             parent=parent, 
-            overlay_widget=parent, 
             download_thumbs=True,
             bg_load_thumbs=True, 
             bg_task_manager=bg_task_manager)
