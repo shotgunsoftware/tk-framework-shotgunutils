@@ -62,7 +62,7 @@ def get_entity_type_icon(entity_type):
         url = get_entity_type_icon_url(entity_type) 
         if url:
             # create a QIcon for it
-            icon = QtGui.QIcon(QtGui.QPixmap(icon_path))
+            icon = QtGui.QIcon(QtGui.QPixmap(url))
         # cache it
         _cached_entity_icons[entity_type] = icon
         

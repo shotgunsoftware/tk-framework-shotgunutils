@@ -516,8 +516,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
         This call is asynchronous and will return instantly.
         The update will be applied whenever the data from Shotgun is returned.
 
-        If the model is empty (no cached data), a spinner is shown. If cached
-        data is available, the update happens silently in the background.
+        If the model is empty (no cached data) no data will be shown at first
+        while the model fetches data from Shotgun. 
+        
+        As soon as a local cache exists, data is shown straight away and the 
+        shotgun update happens silently in the background.
 
         If data has been added, this will be injected into the existing structure.
         In this case, the rest of the model is intact, meaning that also selections

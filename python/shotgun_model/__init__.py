@@ -10,7 +10,6 @@
 
 from .shotgun_model import ShotgunModel
 from .shotgun_entity_model import ShotgunEntityModel
-from .shotgun_overlay_model import ShotgunOverlayModel
 from .simple_shotgun_model import SimpleShotgunModel
 from .shotgun_standard_item import ShotgunStandardItem
 from .util import get_sg_data, get_sanitized_data, sanitize_qt, sanitize_for_qt_model

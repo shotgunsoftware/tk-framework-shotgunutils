@@ -22,13 +22,6 @@ tries to shadow and encapsulate a lot of the details.
 .. image:: images/model_inheritance.png
 
 
-
-For convenience, three different classes are provided, allowing you to choose the right level of encapsulation.
-
-.. image:: images/model_classes.png
-
-
-
 Why should I use the Shotgun Model?
 ---------------------------------------
 
@@ -93,7 +86,7 @@ Beyond Hello World
 The simple setup outlined above could be extended in the following ways:
 
 - If you need more control of how the data is being retrieved, consider instead creating
-  your own class and derive from :class:`ShotgunOverlayModel`. This makes it possible to customize
+  your own class and derive from :class:`ShotgunModel`. This makes it possible to customize
   the shotgun data as it arrives from Shotgun, control the hierarchy grouping and many other
   things.
 - If you want to retrieve results from your view, connect signals to the view's selection model.
@@ -105,6 +98,25 @@ The simple setup outlined above could be extended in the following ways:
 
 
 .. _sg-model-data-items:
+
+Progress Spinner
+----------------------
+
+The model emits several signals at various points in its refresh cycle. If you want a spinner
+to pop up to indicate that data is being loaded, simply add a :class:`~tk-framework-qtwidgets:overlay_widget.ShotgunModelOverlayWidget`
+between your view and model, like this::
+
+    overlay_widget = tank.platform.import_framework("tk-framework-qtwidgets", "overlay_widget")
+
+    # once you have created a view and a model, set up an overlay object to
+    # track the model's activity. Whenver the model is loading data,
+    # the overlay will show a spinner.
+
+    overlay = overlay_widget.ShotgunModelOverlayWidget(model, view)
+
+If you want to refine how the overlay behaves, simply subclass the class above.
+This can be useful if you for example want to display a 'no items found' message whenever
+a shotgun query returns zero items.
 
 Data Items
 ----------------------
@@ -168,32 +180,12 @@ normal ShotgunModel can also be subclassed from this class.
 
 
 
-
-ShotgunOverlayModel
-=====================================================
-
-Convenience wrapper around the :class:`ShotgunModel` class which adds spinner and error reporting overlay functionality.
-Where the :class:`ShotgunModel` is a classic model class which purely deals with data, this class connects with a
-:class:`~PySide.QtGui.QWidget` in order to provide progress feedback whenever necessary. Internally, it holds an instance of
-the :class:`~tk-framework-qtwidgets:overlay_widget.ShotgunOverlayWidget` widget
-(which is part of the QtWidgets framework) and will show this whenever
-there is no data to display in the view. This means that it is straight forward to create shotgun views with a
-spinner on top indicating when data is being loaded and where any errors are automatically reported to the user.
-
-.. note:: Only the methods specific to the overlay model are displayed here. For
-   additional methods, see the :class:`ShotgunModel`.
-
-.. autoclass:: ShotgunOverlayModel
-    :show-inheritance:
-    :members: _show_overlay_spinner, _hide_overlay_info, _show_overlay_pixmap, _show_overlay_info_message, _show_overlay_error_message
-
-
 ShotgunEntityModel
 =====================================================
 
 Another convenience wrapper around the :class:`ShotgunModel`. This model is useful when you
 want to represent a tree view of Sequences, Shots or Assets. By default, the model will
-associate standard dark-style Shotgun entity type icons to items in the list. 
+associate standard dark-style Shotgun entity type icons to items in the list.
 
 .. autoclass:: ShotgunEntityModel
     :show-inheritance:
