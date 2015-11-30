@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_globals.cached_schema &mdash; tk-framework-shotgunutils v2.5.1 documentation</title>
+  <title>shotgun_globals.cached_schema &mdash; tk-framework-shotgunutils v4.0.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v2.5.1 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -49,11 +49,16 @@
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search">
           
-    <img style='width: 191px; 
+    <a href='http://developer.shotgunsoftware.com'>
+    
+        <img style='width: 191px;
                 height: 60px; 
+                margin: 2px;
                 border-radius: 0px; 
                 padding: 0px;' 
-         src='./_static/logo@2x.png'/>
+            src='./_static/logo@2x.png'/>
+    
+    </a>
     
 
           
@@ -86,6 +91,7 @@
                 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_model.html">Shotgun Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../task_manager.html">Background Task Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_globals.html">Shotgun Globals Access</a></li>
 </ul>
@@ -109,9 +115,11 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v2.5.1.<br>
-    This documentation is part of the Shotgun Pipeline Toolkit. 
-    For more information, please visit 
+    <b>tk-framework-shotgunutils</b> v4.0.1.<br>
+    
+        This documentation is part of the Shotgun Pipeline Toolkit.
+    
+    For more information, please visit
     <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
     The code associated with this documentation can be found 
     <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
@@ -178,7 +186,7 @@
 <span class="kn">from</span> <span class="nn">sgtk.platform.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
 <span class="kn">import</span> <span class="nn">cPickle</span> <span class="kn">as</span> <span class="nn">pickle</span>
 
-<span class="k">class</span> <span class="nc">CachedShotgunSchema</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">CachedShotgunSchema</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wraps around the shotgun schema and caches it for fast lookups.</span>
 
@@ -209,10 +217,12 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_bundle</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span> <span class="o">=</span> <span class="p">{}</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">_sg_schema_query_id</span> <span class="o">=</span> <span class="bp">None</span>
@@ -293,7 +303,7 @@
                 <span class="c"># to avoid flooding of requests.</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_schema_requested</span> <span class="o">=</span> <span class="bp">True</span>
                 <span class="c"># pick the first one</span>
-                <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="o">.</span><span class="n">values</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">&quot;data_retriever&quot;</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_sg_schema_query_id</span> <span class="o">=</span> <span class="n">dr</span><span class="o">.</span><span class="n">get_schema</span><span class="p">(</span><span class="n">sg_project_id</span><span class="p">)</span>
         
     <span class="k">def</span> <span class="nf">_check_status_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -316,7 +326,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_status_requested</span> <span class="o">=</span> <span class="bp">True</span>
                 
                 <span class="c"># pick the first one</span>
-                <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="o">.</span><span class="n">values</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">&quot;data_retriever&quot;</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_sg_status_query_id</span> <span class="o">=</span> <span class="n">dr</span><span class="o">.</span><span class="n">execute_find</span><span class="p">(</span><span class="s">&quot;Status&quot;</span><span class="p">,</span> <span class="p">[],</span> <span class="n">fields</span><span class="p">)</span>        
         
     <span class="k">def</span> <span class="nf">_on_worker_failure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
@@ -393,43 +403,52 @@
     <span class="c"># public methods</span>
     
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">register_data_retriever</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data_retriever</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">register_bg_task_manager</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">task_manager</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Register a data retriever with the singleton.</span>
-<span class="sd">        Once a data retriever has been registered, the schema singleton</span>
-<span class="sd">        can refresh its cache.</span>
+<span class="sd">        Register a background task manager with the singleton.</span>
+<span class="sd">        Once a background task manager has been registered, the schema </span>
+<span class="sd">        singleton can refresh its cache.</span>
 <span class="sd">        </span>
-<span class="sd">        :param data_retriever: shotgun data retriever object to register</span>
-<span class="sd">        :type data_retriever: :class:`~shotgun_data.ShotgunDataRetriever`</span>
+<span class="sd">        :param task_manager: Background task manager to use</span>
+<span class="sd">        :type task_manager: :class:`~tk-framework-shotgunutils:task_manager.BackgroundTaskManager` </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
         
-        <span class="c"># add to dict of registered data retrievers</span>
-        <span class="n">obj_hash</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">data_retriever</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">[</span><span class="n">obj_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_retriever</span>
+        <span class="c"># create a data retriever</span>
+        <span class="n">shotgun_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s">&quot;shotgun_data&quot;</span><span class="p">)</span>
+        <span class="n">data_retriever</span> <span class="o">=</span> <span class="n">shotgun_data</span><span class="o">.</span><span class="n">ShotgunDataRetriever</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="n">task_manager</span><span class="p">)</span>        
+        <span class="n">data_retriever</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
         <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_signal</span><span class="p">)</span>
         <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_failure</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_failure</span><span class="p">)</span>
         
+        <span class="n">dr</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;data_retriever&quot;</span><span class="p">:</span> <span class="n">data_retriever</span><span class="p">,</span> <span class="s">&quot;task_manager&quot;</span><span class="p">:</span> <span class="n">task_manager</span><span class="p">}</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dr</span><span class="p">)</span>
+        
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">unregister_data_retriever</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data_retriever</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">unregister_bg_task_manager</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">task_manager</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Unregister a previously registered data retriever with the singleton.</span>
 <span class="sd">        </span>
-<span class="sd">        :param data_retriever: shotgun data retriever object to unregister</span>
-<span class="sd">        :type data_retriever: :class:`~shotgun_data.ShotgunDataRetriever`</span>
+<span class="sd">        :param task_manager: Background task manager to use</span>
+<span class="sd">        :type task_manager: :class:`~tk-framework-shotgunutils:task_manager.BackgroundTaskManager` </span>
 <span class="sd">        &quot;&quot;&quot;</span>     
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
         
-        <span class="n">obj_hash</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">data_retriever</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">obj_hash</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;Unregistering </span><span class="si">%r</span><span class="s"> from schema manager&quot;</span> <span class="o">%</span> <span class="n">data_retriever</span><span class="p">)</span>
-            <span class="n">data_retriever</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">[</span><span class="n">obj_hash</span><span class="p">]</span>
-            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">[</span><span class="n">obj_hash</span><span class="p">]</span>
-            <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_signal</span><span class="p">)</span>
-            <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_failure</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_failure</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span><span class="s">&quot;Could not unregister unknown data &quot;</span>
-                                     <span class="s">&quot;retriever </span><span class="si">%r</span><span class="s"> with schema manager&quot;</span> <span class="o">%</span>  <span class="n">data_retriever</span><span class="p">)</span>
+        <span class="n">culled_retrievers</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">dr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">:</span>
+            
+            <span class="k">if</span> <span class="n">dr</span><span class="p">[</span><span class="s">&quot;task_manager&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">task_manager</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;Unregistering </span><span class="si">%r</span><span class="s"> from schema manager&quot;</span> <span class="o">%</span> <span class="n">task_manager</span><span class="p">)</span>
+                <span class="n">data_retriever</span> <span class="o">=</span> <span class="n">dr</span><span class="p">[</span><span class="s">&quot;data_retriever&quot;</span><span class="p">]</span>
+                <span class="n">data_retriever</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+                <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_signal</span><span class="p">)</span>
+                <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_failure</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_failure</span><span class="p">)</span>
+                
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">culled_retrievers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dr</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span> <span class="o">=</span> <span class="n">culled_retrievers</span>        
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_type_display_name</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">):</span>
@@ -603,7 +622,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v2.5.1',
+            VERSION:'v4.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

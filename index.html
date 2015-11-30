@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>The Shotgun Utilities Framework &mdash; tk-framework-shotgunutils v2.5.1 documentation</title>
+  <title>The Shotgun Utilities Framework &mdash; tk-framework-shotgunutils v4.0.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v2.5.1 documentation" href="#"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.0.1 documentation" href="#"/>
         <link rel="next" title="Shotgun Model" href="shotgun_model.html"/> 
 
   
@@ -49,11 +49,16 @@
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search">
           
-    <img style='width: 191px; 
+    <a href='http://developer.shotgunsoftware.com'>
+    
+        <img style='width: 191px;
                 height: 60px; 
+                margin: 2px;
                 border-radius: 0px; 
                 padding: 0px;' 
-         src='./_static/logo@2x.png'/>
+            src='./_static/logo@2x.png'/>
+    
+    </a>
     
 
           
@@ -86,6 +91,7 @@
                 <ul>
 <li class="toctree-l1"><a class="reference internal" href="shotgun_model.html">Shotgun Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_manager.html">Background Task Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="shotgun_globals.html">Shotgun Globals Access</a></li>
 </ul>
@@ -109,9 +115,11 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v2.5.1.<br>
-    This documentation is part of the Shotgun Pipeline Toolkit. 
-    For more information, please visit 
+    <b>tk-framework-shotgunutils</b> v4.0.1.<br>
+    
+        This documentation is part of the Shotgun Pipeline Toolkit.
+    
+    For more information, please visit
     <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
     The code associated with this documentation can be found 
     <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
@@ -168,6 +176,7 @@ to quickly build responsive, data rich applications quickly.</li>
 <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtCore/QSettings.html#PySide.QtCore.QSettings" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QSettings</span></code></a> class from within your app code.</li>
 <li>An asynchronous Shotgun data receiver which makes it easy to work with background queries
 and thumbnail retrieval.</li>
+<li>A background processing manager to help schedule background worker threads.</li>
 <li>A <code class="docutils literal"><span class="pre">globals</span></code> helper module which provides cached access to various global data
 in Shotgun, including status names, display names for fields and schema data.</li>
 </ul>
@@ -179,7 +188,7 @@ reference and code examples.</p>
 <li class="toctree-l1"><a class="reference internal" href="shotgun_model.html">Shotgun Model</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="shotgun_model.html#introduction">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="shotgun_model.html#simpleshotgunmodel">SimpleShotgunModel</a></li>
-<li class="toctree-l2"><a class="reference internal" href="shotgun_model.html#shotgunoverlaymodel">ShotgunOverlayModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="shotgun_model.html#shotgunentitymodel">ShotgunEntityModel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="shotgun_model.html#shotgunmodel">ShotgunModel</a></li>
 </ul>
 </li>
@@ -187,6 +196,11 @@ reference and code examples.</p>
 <li class="toctree-l2"><a class="reference internal" href="shotgun_data.html#introduction">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="shotgun_data.html#sample-code">Sample Code</a></li>
 <li class="toctree-l2"><a class="reference internal" href="shotgun_data.html#class-shotgundataretriever">Class ShotgunDataRetriever</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="task_manager.html">Background Task Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="task_manager.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="task_manager.html#class-backgroundtaskmanager">Class BackgroundTaskManager</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
@@ -233,7 +247,7 @@ reference and code examples.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v2.5.1',
+            VERSION:'v4.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

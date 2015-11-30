@@ -1,0 +1,1042 @@
+
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v4.0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="tk-framework-shotgunutils v4.0.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+    <a href='http://developer.shotgunsoftware.com'>
+    
+        <img style='width: 191px;
+                height: 60px; 
+                margin: 2px;
+                border-radius: 0px; 
+                padding: 0px;' 
+            src='./_static/logo@2x.png'/>
+    
+    </a>
+    
+
+          
+            <a href="../../index.html" class="icon icon-home"> tk-framework-shotgunutils
+          
+
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+    
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_model.html">Shotgun Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../task_manager.html">Background Task Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_globals.html">Shotgun Globals Access</a></li>
+</ul>
+
+            
+          
+       
+    <div style='margin-top: 50px;
+                margin-left: 10px;
+                margin-right: 10px;
+                padding: 10px; 
+                color: #b3b3b3; 
+                font-size: 70%;
+                border-radius: 3px;
+                background-color: #444;
+                line-height: 18px;
+                '>    
+    <style>
+        a.custom_post_menu { display: inline; 
+                             padding: 0px; 
+                             text-decoration: underline; }
+    </style>
+
+    <b>tk-framework-shotgunutils</b> v4.0.1.<br>
+    
+        This documentation is part of the Shotgun Pipeline Toolkit.
+    
+    For more information, please visit
+    <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
+    The code associated with this documentation can be found 
+    <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
+
+    </div>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">tk-framework-shotgunutils</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>shotgun_data.shotgun_data_retriever</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for shotgun_data.shotgun_data_retriever</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2015 Shotgun Software Inc.</span>
+<span class="c">#</span>
+<span class="c"># CONFIDENTIAL AND PROPRIETARY</span>
+<span class="c">#</span>
+<span class="c"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit</span>
+<span class="c"># Source Code License included in this distribution package. See LICENSE.</span>
+<span class="c"># By accessing, using, copying or modifying this work you indicate your</span>
+<span class="c"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights</span>
+<span class="c"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">urlparse</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+
+<span class="kn">import</span> <span class="nn">sgtk</span>
+<span class="kn">from</span> <span class="nn">sgtk.platform.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">sgtk</span> <span class="kn">import</span> <span class="n">TankError</span>
+
+<div class="viewcode-block" id="ShotgunDataRetriever"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever">[docs]</a><span class="k">class</span> <span class="nc">ShotgunDataRetriever</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Asynchronous data retriever class which can be used to retrieve data and </span>
+<span class="sd">    thumbnails from Shotgun and from disk thumbnail cache. Uses the </span>
+<span class="sd">    :class:`~task_manager.BackgroundTaskManager` to run tasks in background </span>
+<span class="sd">    threads and emits signals when each query has either completed or failed.</span>
+<span class="sd">    Requests are queued up using for example the :meth:`execute_find()` and </span>
+<span class="sd">    :meth:`request_thumbnail()` methods.</span>
+
+<span class="sd">    Requests are executed in the following priority order:</span>
+
+<span class="sd">    - First any thumbnails that are already cached on disk are handled.</span>
+<span class="sd">    - Next, shotgun find() queries are handled.</span>
+<span class="sd">    - Lastly thumbnail downloads are handled.</span>
+<span class="sd">    </span>
+<span class="sd">    The thread will emit work_completed and work_failure signals when </span>
+<span class="sd">    tasks are completed (or fail). The :meth:`clear()` method will </span>
+<span class="sd">    clear the current queue. The currently processing item will finish </span>
+<span class="sd">    processing and may send out signals even after a clear. Make sure you </span>
+<span class="sd">    call the :meth:`stop()` method prior to destruction in order for the </span>
+<span class="sd">    system to gracefully shut down.    </span>
+<span class="sd">    </span>
+<span class="sd">    :signal work_completed(uid, request_type, data_dict): Emitted every time </span>
+<span class="sd">        a requested task has completed. ``uid`` is a unique id which matches </span>
+<span class="sd">        the unique id returned by the corresponding request call. </span>
+<span class="sd">        ``request_type`` is a string denoting the type of request this </span>
+<span class="sd">        event is associated with. ``data_dict`` is a dictionary containing </span>
+<span class="sd">        the payload of the request. It will be different depending on what </span>
+<span class="sd">        type of request it is. </span>
+<span class="sd">    </span>
+<span class="sd">    :signal work_failure(uid, error_message): Emitted every time a requested </span>
+<span class="sd">        task has failed. ``uid`` is a unique id which matches the unique </span>
+<span class="sd">        id returned by the corresponding request call.</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c"># syntax: work_completed(uid, request_type, data_dict)</span>
+    <span class="c"># - uid is a unique id which matches the unique id</span>
+    <span class="c">#   returned by the corresponding request call.</span>
+    <span class="c">#</span>
+    <span class="c"># - request_type is a string denoting the type of request</span>
+    <span class="c">#   this event is associated with. It can be either &quot;find&quot;</span>
+    <span class="c">#   &quot;update&quot;, &quot;create&quot;, &quot;delete&quot; &quot;schema&quot; or &quot;thumbnail&quot;</span>
+    <span class="c">#</span>
+    <span class="c"># - data_dict is a dictionary containing the payload</span>
+    <span class="c">#   of the request. It will be different depending on</span>
+    <span class="c">#   what type of request it is.</span>
+    <span class="c">#</span>
+    <span class="c">#   For find() requests, the data_dict will be on the form</span>
+    <span class="c">#   {&quot;sg&quot;: data }, where data is the data returned by the sg API</span>
+    <span class="c">#</span>
+    <span class="c">#   For thumbnail requests, the data dict will be on the form</span>
+    <span class="c">#   {&quot;thumb_path&quot;: path}, where path is a path to a location</span>
+    <span class="c">#   on disk where the thumbnail can be accessed.</span>
+    <span class="n">work_completed</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+
+    <span class="c"># syntax: work_failure(uid, error_message)</span>
+    <span class="c"># - uid is a unique id which matches the unique id</span>
+    <span class="c">#   returned by the corresponding request call.</span>
+    <span class="c"># - error message is an error message string.</span>
+    <span class="n">work_failure</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+
+
+    <span class="c"># Individual task priorities used when adding tasks to the task manager</span>
+    <span class="c"># Note: a higher value means more important and will get run before lower </span>
+    <span class="c"># priority tasks</span>
+
+    <span class="c"># thumbnail checks are local disk checks and very fast.  These </span>
+    <span class="c"># are always carried out before any shotgun calls</span>
+    <span class="n">_CHECK_THUMB_PRIORITY</span>           <span class="o">=</span> <span class="mi">50</span>
+
+    <span class="c"># the shotgun schema is often useful to have as early on as possible,</span>
+    <span class="c"># sometimes other shotgun operations also need the shotgun schema</span>
+    <span class="c"># (and it&#39;s typically also cached) so this call has a higher priority</span>
+    <span class="c"># than the rest of the shotgun calls</span>
+    <span class="n">_SG_DOWNLOAD_SCHEMA_PRIORITY</span>    <span class="o">=</span> <span class="mi">40</span>
+    
+    <span class="c"># next the priority for any other Shotgun calls (e.g. find, create, </span>
+    <span class="c"># update, delete, etc.)</span>
+    <span class="n">_SG_CALL_PRIORITY</span>               <span class="o">=</span> <span class="mi">30</span>
+    
+    <span class="c"># thumbnails are downloaded last as they are considered low-priority </span>
+    <span class="c"># and can take a relatively significant amount of time</span>
+    <span class="n">_DOWNLOAD_THUMB_PRIORITY</span>        <span class="o">=</span> <span class="mi">20</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sg</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param parent: Parent object</span>
+<span class="sd">        :type parent: :class:`~PySide.QtGui.QWidget`</span>
+<span class="sd">        :param sg: Optional Shotgun API Instance</span>
+<span class="sd">        :param bg_task_manager: Optional Task manager</span>
+<span class="sd">        :class bg_task_manager: :class:`~task_manager.BackgroundTaskManager`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_bundle</span><span class="p">()</span>
+
+        <span class="c"># set up the background task manager:</span>
+        <span class="n">task_manager</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s">&quot;task_manager&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span> <span class="o">=</span> <span class="n">bg_task_manager</span> <span class="ow">or</span> <span class="n">task_manager</span><span class="o">.</span><span class="n">BackgroundTaskManager</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_threads</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_owns_task_manager</span> <span class="o">=</span> <span class="p">(</span><span class="n">bg_task_manager</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bg_tasks_group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">next_group_id</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">task_completed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_task_completed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">task_failed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_task_failed</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_task_id_map</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+    <span class="c">############################################################################################################</span>
+    <span class="c"># Public methods</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ShotgunDataRetriever.download_thumbnail"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.download_thumbnail">[docs]</a>    <span class="k">def</span> <span class="nf">download_thumbnail</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convenience and compatibility method for quick and easy synchrnous thumbnail download.</span>
+<span class="sd">        This will retrieve a shotgun thumbnail given a url - if it already exists in the cache,</span>
+<span class="sd">        a path to it will be returned instantly. If not, it will be downloaded from Shotgun,</span>
+<span class="sd">        placed in the standard cache location on disk and its path will be returned.</span>
+
+<span class="sd">        This is a helper method meant to make it easy to port over synchronous legacy</span>
+<span class="sd">        code - for a better solution, we recommend using the thumbnail retrieval</span>
+<span class="sd">        that runs in a background thread.</span>
+
+<span class="sd">        Bcause Shotgun thumbnail urls have an expiry time, make sure to only</span>
+<span class="sd">        pass urls to this method that have been very recently retrieved via a Shotgun find call.</span>
+
+<span class="sd">        :param url: The thumbnail url string that is associated with this thumbnail. This is</span>
+<span class="sd">                    the field value as returned by a Shotgun query.</span>
+<span class="sd">        :param bundle: App, Framework or Engine object requesting the download.</span>
+
+<span class="sd">        :returns: A path to the thumbnail on disk.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">path_to_cached_thumb</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">):</span>
+
+            <span class="c"># create folders on disk</span>
+            <span class="n">bundle</span><span class="o">.</span><span class="n">ensure_folder_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">))</span>
+
+            <span class="c"># download using standard core method. This will ensure that</span>
+            <span class="c"># proxy and connection settings as set in the SG API are used</span>
+            <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span><span class="n">bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">path_to_cached_thumb</span><span class="p">)</span>
+
+            <span class="c"># modify the permissions of the file so it&#39;s writeable by others</span>
+            <span class="n">old_umask</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">,</span> <span class="mo">0666</span><span class="p">)</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">old_umask</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">path_to_cached_thumb</span>
+
+
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.start"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start the retriever thread.</span>
+
+<span class="sd">        :raises:    TankError if there is no :class:`~task_manager.BackgroundTaskManager` associated with this instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TankError</span><span class="p">(</span><span class="s">&quot;Unable to start the ShotgunDataRetriever as it has no BackgroundTaskManager!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">start_processing</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.stop"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gracefully stop the receiver.</span>
+
+<span class="sd">        Once stop() has been called, the object needs to be discarded.</span>
+<span class="sd">        This is a blocking call. It will synchronously wait</span>
+<span class="sd">        until any potential currently processing item has completed.</span>
+
+<span class="sd">        Note that once stopped the data retriever can&#39;t be restarted as the handle to the</span>
+<span class="sd">        :class:`~task_manager.BackgroundTaskManager` instance is released.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_owns_task_manager</span><span class="p">:</span>
+            <span class="c"># we own the task manager so we&#39;ll need to completely shut it down before</span>
+            <span class="c"># returning</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">shut_down</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># we don&#39;t own the task manager so just stop any tasks we might be running </span>
+            <span class="c"># and disconnect from it:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">stop_task_group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bg_tasks_group</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">task_completed</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_task_completed</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">task_failed</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_task_failed</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span> <span class="o">=</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.clear"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clears the queue.</span>
+
+<span class="sd">        Any currently processing item will complete without interruption, and signals will be</span>
+<span class="sd">        sent out for these items.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="c"># stop any tasks running in the task group:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">stop_task_group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bg_tasks_group</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.stop_work"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.stop_work">[docs]</a>    <span class="k">def</span> <span class="nf">stop_work</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop the specified task</span>
+
+<span class="sd">        :param task_id: The task to stop</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="c"># stop the task:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">stop_task</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.get_schema"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.get_schema">[docs]</a>    <span class="k">def</span> <span class="nf">get_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute the schema_read and schema_entity_read methods asynchronously</span>
+
+<span class="sd">        :param project_id:  If specified, the schema listing returned will</span>
+<span class="sd">                            be constrained by the schema settings for </span>
+<span class="sd">                            the given project.</span>
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_get_schema</span><span class="p">,</span> 
+                              <span class="n">priority</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_DOWNLOAD_SCHEMA_PRIORITY</span><span class="p">,</span>
+                              <span class="n">task_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;project_id&quot;</span><span class="p">:</span><span class="n">project_id</span><span class="p">})</span>
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.execute_find"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_find">[docs]</a>    <span class="k">def</span> <span class="nf">execute_find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a Shotgun find query asynchronously.</span>
+
+<span class="sd">        This method takes the same parameters as the Shotgun find() call.</span>
+
+<span class="sd">        The query will be queued up and once processed, either a</span>
+<span class="sd">        work_completed or work_failure signal will be emitted.</span>
+
+<span class="sd">        :param ``*args``:       args to be passed to the Shotgun find() call</span>
+<span class="sd">        :param ``**kwargs``:    Named parameters to be passed to the Shotgun find() call</span>
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_execute_find</span><span class="p">,</span> 
+                              <span class="n">priority</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_CALL_PRIORITY</span><span class="p">,</span>
+                              <span class="n">task_args</span> <span class="o">=</span> <span class="n">args</span><span class="p">,</span>
+                              <span class="n">task_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.execute_update"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_update">[docs]</a>    <span class="k">def</span> <span class="nf">execute_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute a Shotgun update call asynchronously</span>
+
+<span class="sd">        This method takes the same parameters as the Shotgun update() call.</span>
+
+<span class="sd">        The query will be queued up and once processed, either a</span>
+<span class="sd">        work_completed or work_failure signal will be emitted.</span>
+
+<span class="sd">        :param ``*args``:       args to be passed to the Shotgun update() call</span>
+<span class="sd">        :param ``**kwargs``:    Named parameters to be passed to the Shotgun update() call</span>
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_execute_update</span><span class="p">,</span> 
+                              <span class="n">priority</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_CALL_PRIORITY</span><span class="p">,</span>
+                              <span class="n">task_args</span> <span class="o">=</span> <span class="n">args</span><span class="p">,</span>
+                              <span class="n">task_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.execute_create"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_create">[docs]</a>    <span class="k">def</span> <span class="nf">execute_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute a Shotgun create call asynchronously</span>
+
+<span class="sd">        The query will be queued up and once processed, either a</span>
+<span class="sd">        work_completed or work_failure signal will be emitted.</span>
+
+<span class="sd">        This method takes the same parameters as the Shotgun create() call.</span>
+
+<span class="sd">        :param ``*args``:       args to be passed to the Shotgun create() call</span>
+<span class="sd">        :param ``**kwargs``:    Named parameters to be passed to the Shotgun create() call</span>
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_execute_create</span><span class="p">,</span> 
+                              <span class="n">priority</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_CALL_PRIORITY</span><span class="p">,</span>
+                              <span class="n">task_args</span> <span class="o">=</span> <span class="n">args</span><span class="p">,</span>
+                              <span class="n">task_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.execute_delete"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_delete">[docs]</a>    <span class="k">def</span> <span class="nf">execute_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute a Shotgun delete call asynchronously</span>
+
+<span class="sd">        This method takes the same parameters as the Shotgun delete() call.</span>
+
+<span class="sd">        The query will be queued up and once processed, either a</span>
+<span class="sd">        work_completed or work_failure signal will be emitted.</span>
+
+<span class="sd">        :param ``*args``:       args to be passed to the Shotgun delete() call</span>
+<span class="sd">        :param ``**kwargs``:    Named parameters to be passed to the Shotgun delete() call</span>
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_execute_delete</span><span class="p">,</span> 
+                              <span class="n">priority</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_CALL_PRIORITY</span><span class="p">,</span>
+                              <span class="n">task_args</span> <span class="o">=</span> <span class="n">args</span><span class="p">,</span>
+                              <span class="n">task_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.execute_method"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_method">[docs]</a>    <span class="k">def</span> <span class="nf">execute_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a generic execution of a method asynchronously.  This is pretty much a</span>
+<span class="sd">        wrapper for executing a task through the :class:`~task_manager.BackgroundTaskManager`.</span>
+
+<span class="sd">        The specified method will be called on the following form::</span>
+
+<span class="sd">            method(sg, data) </span>
+
+<span class="sd">        Where sg is a shotgun API instance. Data is typically</span>
+<span class="sd">        a dictionary with specific data that the method needs.</span>
+<span class="sd">        The query will be queued up and once processed, either a</span>
+<span class="sd">        work_completed or work_failure signal will be emitted.</span>
+
+<span class="sd">        :param method:      The method that should be executed.</span>
+<span class="sd">        :param ``*args``:       args to be passed to the method</span>
+<span class="sd">        :param ``**kwargs``:    Named parameters to be passed to the method</span>
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># note that as the &#39;task&#39; is actually going to call through to another method, we</span>
+        <span class="c"># encode the method name, args and kwargs in the task&#39;s kwargs dictionary as this</span>
+        <span class="c"># keeps them nicely encapsulated.</span>
+        <span class="n">task_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;method&quot;</span><span class="p">:</span><span class="n">method</span><span class="p">,</span> <span class="s">&quot;method_args&quot;</span><span class="p">:</span><span class="n">args</span><span class="p">,</span> <span class="s">&quot;method_kwargs&quot;</span><span class="p">:</span><span class="n">kwargs</span><span class="p">}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_execute_method</span><span class="p">,</span> 
+                              <span class="n">priority</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_CALL_PRIORITY</span><span class="p">,</span>
+                              <span class="n">task_kwargs</span> <span class="o">=</span> <span class="n">task_kwargs</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_add_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_cb</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">task_args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">task_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Simplified wrapper to add a task to the task manager.  All tasks get added into</span>
+<span class="sd">        the same group (self._bg_tasks_group) and the returned task_id is case to a string</span>
+<span class="sd">        to retain backwards compatibility (it used to return a uuid string).</span>
+
+<span class="sd">        :param task_cb:     The function to execute for the task</span>
+<span class="sd">        :param priority:    The priority the task should be run with</span>
+<span class="sd">        :param task_args:   Arguments that should be passed to the task callback</span>
+<span class="sd">        :param task_kwargs: Named arguments that should be passed to the task callback</span>
+<span class="sd">        :returns:           String representation of the task id</span>
+<span class="sd">        :raises:            TankError if there is no task manager available to add the task to!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TankError</span><span class="p">(</span><span class="s">&quot;Data retriever does not have a task manager to add the task to!&quot;</span><span class="p">)</span>
+
+        <span class="n">task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">task_cb</span><span class="p">,</span> 
+                                              <span class="n">priority</span><span class="p">,</span> 
+                                              <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bg_tasks_group</span><span class="p">,</span>
+                                              <span class="n">task_args</span> <span class="o">=</span> <span class="n">task_args</span><span class="p">,</span>
+                                              <span class="n">task_kwargs</span> <span class="o">=</span> <span class="n">task_kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ShotgunDataRetriever.request_thumbnail"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.request_thumbnail">[docs]</a>    <span class="k">def</span> <span class="nf">request_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">load_image</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Downloads a thumbnail form Shotgun asynchronously or returns a cached thumbnail </span>
+<span class="sd">        if found.  Optionally loads the thumbnail into a QImage.</span>
+
+<span class="sd">        :param url:         The thumbnail url string that is associated with this thumbnail. This is</span>
+<span class="sd">                            the field value as returned by a Shotgun query.</span>
+<span class="sd">        :param entity_type: Shotgun entity type with which the thumb is associated.</span>
+<span class="sd">        :param entity_id:   Shotgun entity id with which the thumb is associated.</span>
+<span class="sd">        :param field:       Thumbnail field. Normally &#39;image&#39; but could also for example be a deep </span>
+<span class="sd">                            link field such as ``sg_sequence.Sequence.image``</span>
+<span class="sd">        :param load_image:  If set to True, the return data structure will contain a QImage object </span>
+<span class="sd">                            with the image data loaded.</span>
+
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c"># always add check for thumbnail already downloaded:</span>
+        <span class="n">check_task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_check_thumbnail</span><span class="p">,</span>
+                                                    <span class="n">priority</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_CHECK_THUMB_PRIORITY</span><span class="p">,</span>
+                                                    <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bg_tasks_group</span><span class="p">,</span>
+                                                    <span class="n">task_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;url&quot;</span><span class="p">:</span><span class="n">url</span><span class="p">,</span> 
+                                                                   <span class="s">&quot;load_image&quot;</span><span class="p">:</span><span class="n">load_image</span><span class="p">})</span>
+
+        <span class="c"># Add download thumbnail task.  This is dependent on the check task above and will be passed</span>
+        <span class="c"># the returned results from that task in addition to the kwargs specified below.  This allows</span>
+        <span class="c"># a task dependency chain to be created with different priorities for the separate tasks.</span>
+        <span class="n">dl_task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_download_thumbnail</span><span class="p">,</span>
+                                                 <span class="n">upstream_task_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">check_task_id</span><span class="p">],</span>
+                                                 <span class="n">priority</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_DOWNLOAD_THUMB_PRIORITY</span><span class="p">,</span>
+                                                 <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bg_tasks_group</span><span class="p">,</span>
+                                                 <span class="n">task_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;url&quot;</span><span class="p">:</span><span class="n">url</span><span class="p">,</span>
+                                                                <span class="s">&quot;entity_type&quot;</span><span class="p">:</span><span class="n">entity_type</span><span class="p">,</span> 
+                                                                <span class="s">&quot;entity_id&quot;</span><span class="p">:</span><span class="n">entity_id</span><span class="p">,</span>
+                                                                <span class="s">&quot;field&quot;</span><span class="p">:</span><span class="n">field</span><span class="p">,</span>
+                                                                <span class="s">&quot;load_image&quot;</span><span class="p">:</span><span class="n">load_image</span>
+                                                                <span class="c">#&quot;thumb_path&quot;:&lt;passed from check task&gt;</span>
+                                                                <span class="c">#&quot;image&quot;:&lt;passed from check task&gt;</span>
+                                                                <span class="p">})</span>
+
+        <span class="c"># all results for requesting a thumbnail should be returned with the same id so use</span>
+        <span class="c"># a mapping to track the &#39;primary&#39; task id:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_task_id_map</span><span class="p">[</span><span class="n">dl_task_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">check_task_id</span>
+
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">check_task_id</span><span class="p">)</span>
+
+
+
+    <span class="c"># ------------------------------------------------------------------------------------------------</span>
+    <span class="c"># Background task management and methods</span>
+</div>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the location on disk suitable for a thumbnail given its url.</span>
+
+<span class="sd">        :param url:     Path to a thumbnail</span>
+<span class="sd">        :param bundle:  App, Engine or Framework instance</span>
+<span class="sd">        :returns:       Path as a string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># hash the path portion of the thumbnail url</span>
+        <span class="n">url_obj</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">url_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
+        <span class="n">url_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">url_obj</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+        <span class="n">hash_str</span> <span class="o">=</span> <span class="n">url_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+        <span class="c"># Now turn this hash into a tree structure. For a discussion about sensible</span>
+        <span class="c"># sharding methodology, see </span>
+        <span class="c"># http://stackoverflow.com/questions/13841931/using-guids-as-folder-names-splitting-up</span>
+        <span class="c">#</span>
+        <span class="c"># From the hash, generate paths on the form C1C2/C3C4/rest_of_hash.jpeg</span>
+        <span class="c"># (where C1 is the first character of the hash.)</span>
+        <span class="c"># for a million evenly distributed items, this means ~15 items per folder</span>
+        <span class="n">first_folder</span> <span class="o">=</span> <span class="n">hash_str</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">second_folder</span> <span class="o">=</span> <span class="n">hash_str</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.jpeg&quot;</span> <span class="o">%</span> <span class="n">hash_str</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+        <span class="n">path_chunks</span> <span class="o">=</span> <span class="p">[</span><span class="n">first_folder</span><span class="p">,</span> <span class="n">second_folder</span><span class="p">,</span> <span class="n">file_name</span><span class="p">]</span>
+
+        <span class="c"># establish the root path</span>
+        <span class="n">cache_path_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">bundle</span><span class="o">.</span><span class="n">cache_location</span><span class="p">,</span> <span class="s">&quot;thumbs&quot;</span><span class="p">]</span>
+        <span class="c"># append the folders</span>
+        <span class="n">cache_path_items</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">path_chunks</span><span class="p">)</span>
+        <span class="c"># join up the path</span>
+        <span class="n">path_to_cached_thumb</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="n">cache_path_items</span><span class="p">)</span>
+
+        <span class="c"># perform a simple migration to check if the old path still exists. In that case, </span>
+        <span class="c"># try to move it across to the new path. This is to help transition from the previous</span>
+        <span class="c"># thumb caching structures and should be removed at some point in the future in order</span>
+        <span class="c"># to avoid I/O operations. </span>
+        <span class="c">#</span>
+        <span class="c"># NOTE! This check means that the _get_thumbnail_path() isn&#39;t </span>
+        <span class="c"># just calculating a path for a thumbnail but may have the side effect that it will</span>
+        <span class="c"># move files around. </span>
+        <span class="n">old_path</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_get_thumbnail_path_old</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">old_path</span><span class="p">):</span>
+            <span class="c"># move the file across</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">old_umask</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">bundle</span><span class="o">.</span><span class="n">ensure_folder_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">))</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">old_path</span><span class="p">,</span> <span class="n">path_to_cached_thumb</span><span class="p">)</span>
+                <span class="k">finally</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">old_umask</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="c"># ignore any errors in the transfer</span>
+                <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="n">path_to_cached_thumb</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_thumbnail_path_old</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        March 2015 - Previous implementation of thumbnail caching logic.</span>
+<span class="sd">        This has now been replaced by a new, improved sharding algorithm.</span>
+<span class="sd">        In the interest of disk management, keep this method around so that</span>
+<span class="sd">        the new logic can attempt to over files over into the new scheme </span>
+<span class="sd">        if at all possible.</span>
+
+<span class="sd">        :param url:     Path to a thumbnail</span>
+<span class="sd">        :param bundle:  App, Engine or Framework instance</span>
+<span class="sd">        :returns:       Path as a string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">url_obj</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">url_path</span> <span class="o">=</span> <span class="n">url_obj</span><span class="o">.</span><span class="n">path</span>
+        <span class="n">path_chunks</span> <span class="o">=</span> <span class="n">url_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">)</span>
+
+        <span class="n">CHUNK_LEN</span> <span class="o">=</span> <span class="mi">16</span>
+
+        <span class="c"># post process the path</span>
+        <span class="c"># old (pre-S3) style result:</span>
+        <span class="c"># path_chunks: [ &quot;&quot;, &quot;thumbs&quot;, &quot;1&quot;, &quot;2&quot;, &quot;2.jpg&quot;]</span>
+
+        <span class="c"># s3 result, form 1:</span>
+        <span class="c"># path_chunks: [u&#39;&#39;,</span>
+        <span class="c">#               u&#39;9902b5f5f336fae2fb248e8a8748fcd9aedd822e&#39;,</span>
+        <span class="c">#               u&#39;be4236b8f198ae84df2366920e7ee327cc0a567e&#39;,</span>
+        <span class="c">#               u&#39;render_0400_t.jpg&#39;]</span>
+
+        <span class="c"># s3 result, form 2:</span>
+        <span class="c"># path_chunks: [u&#39;&#39;, u&#39;thumbnail&#39;, u&#39;api_image&#39;, u&#39;150&#39;]</span>
+
+        <span class="k">def</span> <span class="nf">_to_chunks</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+            <span class="c">#split the string &#39;abcdefghxx&#39; into [&#39;abcdefgh&#39;, &#39;xx&#39;]</span>
+            <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">CHUNK_LEN</span><span class="p">):</span>
+                <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">s</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="n">CHUNK_LEN</span><span class="p">]</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="n">chunks</span>
+
+        <span class="n">new_chunks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">path_chunks</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span> <span class="c"># skip the file name</span>
+            <span class="k">if</span> <span class="n">folder</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">CHUNK_LEN</span><span class="p">:</span>
+                <span class="c"># long url path segment like 9902b5f5f336fae2fb248e8a8748fcd9aedd822e</span>
+                <span class="c"># split it into chunks for 4</span>
+                <span class="n">new_chunks</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">_to_chunks</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+
+        <span class="c"># establish the root path</span>
+        <span class="n">cache_path_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">bundle</span><span class="o">.</span><span class="n">cache_location</span><span class="p">,</span> <span class="s">&quot;thumbnails&quot;</span><span class="p">]</span>
+        <span class="c"># append the folders</span>
+        <span class="n">cache_path_items</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">new_chunks</span><span class="p">)</span>
+        <span class="c"># and append the file name</span>
+        <span class="c"># all sg thumbs are jpegs so append extension too - some url forms don&#39;t have this.</span>
+        <span class="n">cache_path_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">.jpeg&quot;</span> <span class="o">%</span> <span class="n">path_chunks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c"># join up the path</span>
+        <span class="n">path_to_cached_thumb</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="n">cache_path_items</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">path_to_cached_thumb</span>
+
+
+    <span class="k">def</span> <span class="nf">_task_get_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that gets executed in a background task/thread to retrieve the fields</span>
+<span class="sd">        and types schema from Shotgun</span>
+
+<span class="sd">        :param project_id:  The id of the project to query the schema for or None to </span>
+<span class="sd">                            retrieve for all projects</span>
+<span class="sd">        :returns:           Dictionary containing the &#39;action&#39; together with the schema </span>
+<span class="sd">                            fields and types</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">project_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">project</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;type&quot;</span><span class="p">:</span> <span class="s">&quot;Project&quot;</span><span class="p">,</span> <span class="s">&quot;id&quot;</span><span class="p">:</span> <span class="n">project_id</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># read in details about all fields</span>
+        <span class="n">sg_field_schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">schema_read</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+
+        <span class="c"># and read in details about all entity types</span>
+        <span class="n">sg_type_schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">schema_entity_read</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+
+        <span class="c"># need to wrap it in a dict not to confuse pyqt&#39;s signals and type system</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;action&quot;</span><span class="p">:</span><span class="s">&quot;schema&quot;</span><span class="p">,</span> <span class="s">&quot;fields&quot;</span><span class="p">:</span><span class="n">sg_field_schema</span><span class="p">,</span> <span class="s">&quot;types&quot;</span><span class="p">:</span><span class="n">sg_type_schema</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_task_execute_find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
+<span class="sd">        find query</span>
+
+<span class="sd">        :param ``*args``:       Unnamed arguments to be passed to the find() call</span>
+<span class="sd">        :param ``**kwargs``:    Named arguments to be passed to the find() call </span>
+<span class="sd">        :returns:           Dictionary containing the &#39;action&#39; together with result</span>
+<span class="sd">                            returned by the find() call</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sg_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;action&quot;</span><span class="p">:</span><span class="s">&quot;find&quot;</span><span class="p">,</span> <span class="s">&quot;sg_result&quot;</span><span class="p">:</span><span class="n">sg_res</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_task_execute_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
+<span class="sd">        update call</span>
+
+<span class="sd">        :param ``*args``:       Unnamed arguments to be passed to the update() call</span>
+<span class="sd">        :param ``**kwargs``:    Named arguments to be passed to the update() call </span>
+<span class="sd">        :returns:           Dictionary containing the &#39;action&#39; together with result</span>
+<span class="sd">                            returned by the update() call</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sg_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;action&quot;</span><span class="p">:</span><span class="s">&quot;update&quot;</span><span class="p">,</span> <span class="s">&quot;sg_result&quot;</span><span class="p">:</span><span class="n">sg_res</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_task_execute_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
+<span class="sd">        create call</span>
+
+<span class="sd">        :param ``*args``:       Unnamed arguments to be passed to the create() call</span>
+<span class="sd">        :param ``**kwargs``:    Named arguments to be passed to the create() call </span>
+<span class="sd">        :returns:           Dictionary containing the &#39;action&#39; together with result</span>
+<span class="sd">                            returned by the create() call</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sg_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;action&quot;</span><span class="p">:</span><span class="s">&quot;create&quot;</span><span class="p">,</span> <span class="s">&quot;sg_result&quot;</span><span class="p">:</span><span class="n">sg_res</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_task_execute_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
+<span class="sd">        delete call</span>
+
+<span class="sd">        :param ``*args``:       Unnamed arguments to be passed to the delete() call</span>
+<span class="sd">        :param ``**kwargs``:    Named arguments to be passed to the delete() call </span>
+<span class="sd">        :returns:           Dictionary containing the &#39;action&#39; together with result</span>
+<span class="sd">                            returned by the delete() call</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sg_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;action&quot;</span><span class="p">:</span><span class="s">&quot;delete&quot;</span><span class="p">,</span> <span class="s">&quot;sg_result&quot;</span><span class="p">:</span><span class="n">sg_res</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_task_execute_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">method_args</span><span class="p">,</span> <span class="n">method_kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that gets executed in a background task/thread to execute a method</span>
+<span class="sd">        with a thread-specific shotgun connection.</span>
+
+<span class="sd">        :param method:          The method to be run asynchronously</span>
+<span class="sd">        :param method_args:     Arguments to be passed to the method</span>
+<span class="sd">        :param method_kwargs:   Named arguments to be passed to the method </span>
+<span class="sd">        :returns:               Dictionary containing the &#39;action&#39; together with the result</span>
+<span class="sd">                                returned by the method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="o">*</span><span class="n">method_args</span><span class="p">,</span> <span class="o">**</span><span class="n">method_kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;action&quot;</span><span class="p">:</span><span class="s">&quot;method&quot;</span><span class="p">,</span> <span class="s">&quot;result&quot;</span><span class="p">:</span><span class="n">res</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_task_check_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">load_image</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check to see if a thumbnail exists for the specified url.  If it does then it is returned.</span>
+
+<span class="sd">        :param url:         The url to return the cached path for</span>
+<span class="sd">        :param load_image:  If True then if the thumbnail is found in the cache then the file will </span>
+<span class="sd">                            be loaded into a QImage</span>
+<span class="sd">        :returns:           A dictionary containing the cached path for the specified url and a QImage</span>
+<span class="sd">                            if load_image is True and the thumbnail exists in the cache.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># first look up the path in the cache:</span>
+        <span class="n">thumb_path</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="p">)</span>
+        <span class="n">thumb_image</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">thumb_path</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">load_image</span><span class="p">:</span>
+                <span class="c"># load the thumbnail into a QImage:</span>
+                <span class="n">thumb_image</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">()</span>
+                <span class="n">thumb_image</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">thumb_path</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;action&quot;</span><span class="p">:</span><span class="s">&quot;check_thumbnail&quot;</span><span class="p">,</span> <span class="s">&quot;thumb_path&quot;</span><span class="p">:</span><span class="n">thumb_path</span><span class="p">,</span> <span class="s">&quot;image&quot;</span><span class="p">:</span><span class="n">thumb_image</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_task_download_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thumb_path</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">load_image</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Download the thumbnail for the specified entity type, id and field.  This downloads the</span>
+<span class="sd">        thumbnail into the thumbnail cache directory and returns the cached path.</span>
+
+<span class="sd">        If thumb_path already contains a path then this method does nothing and just returns the path </span>
+<span class="sd">        without further checking/work.</span>
+
+<span class="sd">        :param thumb_path:  Path to an existing thumbnail or None.</span>
+<span class="sd">        :param url:         The url for the thumbnail which may or may not still be valid!</span>
+<span class="sd">        :param entity_type: Type of the entity to retrieve the thumbnail for</span>
+<span class="sd">        :param entity_id:   Id of the entity to retrieve the thumbnail for</span>
+<span class="sd">        :param field:       The field on the entity that holds the url for the thumbnail to retrieve</span>
+<span class="sd">        :param load_image:  If True then if the thumbnail is downloaded from Shotgun then the file will </span>
+<span class="sd">                            be loaded into a QImage</span>
+<span class="sd">        :returns:           A dictionary containing the cached path for the specified url and a QImage</span>
+<span class="sd">                            if load_image is True and the thumbnail exists in the cache.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">thumb_path</span><span class="p">:</span>
+            <span class="c"># no need to do anything as the thumbnail was previously</span>
+            <span class="c"># found when we ran the check!</span>
+            <span class="k">return</span> <span class="p">{}</span>
+
+        <span class="c"># download the actual thumbnail. Because of S3, the url</span>
+        <span class="c"># may have expired - in that case fall back, get a fresh url</span>
+        <span class="c"># from shotgun and try again</span>
+        <span class="n">thumb_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">ensure_folder_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">))</span>
+
+        <span class="c"># there may be a case where another process has alrady downloaded the thumbnail for us, so </span>
+        <span class="c"># make sure that we aren&#39;t doing any extra work :)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">):</span>
+
+            <span class="c"># try to download based on the path we have</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">thumb_path</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">TankError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c"># Note: Unfortunately, the download_url will re-cast </span>
+                <span class="c"># all exceptions into tankerrors.</span>
+                <span class="c"># get a fresh url from shotgun and try again</span>
+                <span class="n">sg_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="p">[[</span><span class="s">&quot;id&quot;</span><span class="p">,</span> <span class="s">&quot;is&quot;</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">]],</span> <span class="p">[</span><span class="n">field</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="n">sg_data</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="c"># no thumbnail! This is possible if the thumb has changed</span>
+                    <span class="c"># while we were queueing it for download.</span>
+                    <span class="c"># indicate the fact that the thumbnail no longer exists on the server</span>
+                    <span class="c"># by setting the path to None</span>
+                    <span class="n">thumb_path</span> <span class="o">=</span> <span class="bp">None</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># download from sg</span>
+                    <span class="n">url</span> <span class="o">=</span> <span class="n">sg_data</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+                    <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">thumb_path</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">thumb_path</span><span class="p">:</span>
+                <span class="c"># now we have a thumbnail on disk, either via the direct download, or via the </span>
+                <span class="c"># url-fresh-then-download approach.  Because the file is downloaded with user-only </span>
+                <span class="c"># permissions we have to modify the permissions so that it&#39;s writeable by others</span>
+                <span class="n">old_umask</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">,</span> <span class="mo">0666</span><span class="p">)</span>
+                <span class="k">finally</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">old_umask</span><span class="p">)</span>
+
+        <span class="c"># finally, see if we should also load in the image</span>
+        <span class="n">thumb_image</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">thumb_path</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">load_image</span><span class="p">:</span>
+                <span class="c"># load the thumbnail into a QImage:</span>
+                <span class="n">thumb_image</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">()</span>
+                <span class="n">thumb_image</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">thumb_path</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;action&quot;</span><span class="p">:</span><span class="s">&quot;download_thumbnail&quot;</span><span class="p">,</span> <span class="s">&quot;thumb_path&quot;</span><span class="p">:</span><span class="n">thumb_path</span><span class="p">,</span> <span class="s">&quot;image&quot;</span><span class="p">:</span><span class="n">thumb_image</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_on_task_completed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Slot triggered when a task is completed.</span>
+
+<span class="sd">        :param task_id: The id of the task that has completed</span>
+<span class="sd">        :param group:   The group the task belongs to</span>
+<span class="sd">        :param result:  The task result</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">group</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bg_tasks_group</span><span class="p">:</span>
+            <span class="c"># ignore - it isn&#39;t our task! - this slot will recieve signals for tasks started</span>
+            <span class="c"># by other objects/instances so we need to make sure we filter them out here</span>
+            <span class="k">return</span>
+
+        <span class="n">action</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;action&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;find&quot;</span><span class="p">,</span> <span class="s">&quot;create&quot;</span><span class="p">,</span> <span class="s">&quot;delete&quot;</span><span class="p">,</span> <span class="s">&quot;update&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span> <span class="n">action</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;sg&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s">&quot;sg_result&quot;</span><span class="p">]})</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s">&quot;schema&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span> <span class="s">&quot;schema&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;fields&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s">&quot;fields&quot;</span><span class="p">],</span> <span class="s">&quot;types&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s">&quot;types&quot;</span><span class="p">]})</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s">&quot;method&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span> <span class="s">&quot;method&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;return_value&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s">&quot;result&quot;</span><span class="p">]})</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s">&quot;check_thumbnail&quot;</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;thumb_path&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
+                <span class="c"># check found a thumbnail!</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span> <span class="s">&quot;find&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;thumb_path&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span> <span class="s">&quot;image&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s">&quot;image&quot;</span><span class="p">]})</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s">&quot;download_thumbnail&quot;</span><span class="p">:</span>
+            <span class="c"># look up the primary thumbnail task id in the map:</span>
+            <span class="n">thumb_task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_task_id_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">thumb_task_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_task_id_map</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">thumb_task_id</span><span class="p">),</span> 
+                                         <span class="s">&quot;find&quot;</span><span class="p">,</span> 
+                                         <span class="p">{</span><span class="s">&quot;thumb_path&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s">&quot;thumb_path&quot;</span><span class="p">],</span> <span class="s">&quot;image&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s">&quot;image&quot;</span><span class="p">]})</span>
+
+    <span class="k">def</span> <span class="nf">_on_task_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Slot triggered when a task fails for some reason</span>
+
+<span class="sd">        :param task_id: The id of the task that failed</span>
+<span class="sd">        :param msg:     The error/exception message for the failed task</span>
+<span class="sd">        :param tb:      The stack trace of the exception raised by the failed task</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">group</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bg_tasks_group</span><span class="p">:</span>
+            <span class="c"># ignore - it isn&#39;t our task - this slot will recieve signals for tasks started</span>
+            <span class="c"># by other objects/instances so we need to make sure we filter them out here</span>
+            <span class="k">return</span>
+
+        <span class="c"># remap task ids for thumbnails:</span>
+        <span class="k">if</span> <span class="n">task_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_task_id_map</span><span class="p">:</span>
+            <span class="n">orig_task_id</span> <span class="o">=</span> <span class="n">task_id</span>
+            <span class="n">task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_task_id_map</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_task_id_map</span><span class="p">[</span><span class="n">orig_task_id</span><span class="p">]</span>
+
+        <span class="c"># emit failure signal:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">work_failure</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+</pre></div></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Autodesk.
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'v4.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,787 @@
+
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>task_manager.background_task_manager &mdash; tk-framework-shotgunutils v4.0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="tk-framework-shotgunutils v4.0.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+    <a href='http://developer.shotgunsoftware.com'>
+    
+        <img style='width: 191px;
+                height: 60px; 
+                margin: 2px;
+                border-radius: 0px; 
+                padding: 0px;' 
+            src='./_static/logo@2x.png'/>
+    
+    </a>
+    
+
+          
+            <a href="../../index.html" class="icon icon-home"> tk-framework-shotgunutils
+          
+
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+    
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_model.html">Shotgun Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../task_manager.html">Background Task Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_globals.html">Shotgun Globals Access</a></li>
+</ul>
+
+            
+          
+       
+    <div style='margin-top: 50px;
+                margin-left: 10px;
+                margin-right: 10px;
+                padding: 10px; 
+                color: #b3b3b3; 
+                font-size: 70%;
+                border-radius: 3px;
+                background-color: #444;
+                line-height: 18px;
+                '>    
+    <style>
+        a.custom_post_menu { display: inline; 
+                             padding: 0px; 
+                             text-decoration: underline; }
+    </style>
+
+    <b>tk-framework-shotgunutils</b> v4.0.1.<br>
+    
+        This documentation is part of the Shotgun Pipeline Toolkit.
+    
+    For more information, please visit
+    <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
+    The code associated with this documentation can be found 
+    <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
+
+    </div>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">tk-framework-shotgunutils</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>task_manager.background_task_manager</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for task_manager.background_task_manager</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2015 Shotgun Software Inc.</span>
+<span class="c"># </span>
+<span class="c"># CONFIDENTIAL AND PROPRIETARY</span>
+<span class="c"># </span>
+<span class="c"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit </span>
+<span class="c"># Source Code License included in this distribution package. See LICENSE.</span>
+<span class="c"># By accessing, using, copying or modifying this work you indicate your </span>
+<span class="c"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights </span>
+<span class="c"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
+
+<span class="kn">import</span> <span class="nn">traceback</span>
+
+<span class="kn">import</span> <span class="nn">sgtk</span>
+<span class="kn">from</span> <span class="nn">sgtk.platform.qt</span> <span class="kn">import</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">sgtk</span> <span class="kn">import</span> <span class="n">TankError</span>
+
+<span class="kn">from</span> <span class="nn">.background_task</span> <span class="kn">import</span> <span class="n">BackgroundTask</span>
+<span class="kn">from</span> <span class="nn">.worker_thread</span> <span class="kn">import</span> <span class="n">WorkerThread</span>
+
+<div class="viewcode-block" id="BackgroundTaskManager"><a class="viewcode-back" href="../../task_manager.html#task_manager.BackgroundTaskManager">[docs]</a><span class="k">class</span> <span class="nc">BackgroundTaskManager</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main task manager class. Manages a queue of tasks running them asynchronously through</span>
+<span class="sd">    a pool of worker threads.</span>
+
+<span class="sd">    Note that the BackgroundTaskManager class itself is reentrant but not thread-safe so its methods should only </span>
+<span class="sd">    be called from the thread it is created in. Typically this would be the main thread of the application.</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    :signal task_completed(uid, group, result): Emitted when a task has been completed.</span>
+<span class="sd">        The ``uid`` parameter holds the unique id associated with the task, </span>
+<span class="sd">        the ``group`` is the group that the task is associated with and </span>
+<span class="sd">        the ``result`` is the data returned by the task. </span>
+<span class="sd">    </span>
+<span class="sd">    :signal task_failed(uid, group, message, traceback_str): Emitted when a task fails for some reason.</span>
+<span class="sd">        The ``uid`` parameter holds the unique id associated with the task, </span>
+<span class="sd">        the ``group`` is the group that the task is associated with, </span>
+<span class="sd">        the ``message`` is a short error message and the ``traceback_str``</span>
+<span class="sd">        holds a full traceback.</span>
+<span class="sd">        </span>
+<span class="sd">    :signal task_group_finished(group): Emitted when all tasks in a group have finished.</span>
+<span class="sd">        The ``group`` is the group that has completed.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># signal emitted when a task has been completed</span>
+    <span class="n">task_completed</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="nb">object</span><span class="p">)</span><span class="c"># uid, group, result</span>
+    <span class="c"># signal emitted when a task fails for some reason</span>
+    <span class="n">task_failed</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span><span class="c"># uid, group, msg, traceback</span>
+    <span class="c"># signal emitted when all tasks in a group have finished</span>
+    <span class="n">task_group_finished</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span><span class="c"># group</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">start_processing</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">max_threads</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param parent:              The parent QObject for this instance</span>
+<span class="sd">        :type parent:               :class:`~PySide.QtGui.QWidget`</span>
+<span class="sd">        :param start_processing:    If True then processing of tasks will start immediately</span>
+<span class="sd">        :param max_threads:         The maximum number of threads the task manager will use at any</span>
+<span class="sd">                                    time.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_bundle</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next_task_id</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next_group_id</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_can_process_tasks</span> <span class="o">=</span> <span class="n">start_processing</span>
+
+        <span class="c"># the pending tasks, organized by priority</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pending_tasks_by_priority</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># available threads and running tasks:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_threads</span> <span class="o">=</span> <span class="n">max_threads</span> <span class="ow">or</span> <span class="mi">8</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_all_threads</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_available_threads</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_running_tasks</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># various task look-up maps:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tasks_by_id</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_group_task_map</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># track downstream dependencies for tasks:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upstream_task_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_downstream_task_map</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="BackgroundTaskManager.next_group_id"><a class="viewcode-back" href="../../task_manager.html#task_manager.BackgroundTaskManager.next_group_id">[docs]</a>    <span class="k">def</span> <span class="nf">next_group_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the next available group id</span>
+
+<span class="sd">        :returns:    A unique group id to be used for tasks that belong to the same group.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">group_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_group_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next_group_id</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">group_id</span>
+</div>
+    <span class="k">def</span> <span class="nf">_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper method for logging useful information to debug.</span>
+
+<span class="sd">        :param msg: The message to be logged.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;Task Manager: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BackgroundTaskManager.start_processing"><a class="viewcode-back" href="../../task_manager.html#task_manager.BackgroundTaskManager.start_processing">[docs]</a>    <span class="k">def</span> <span class="nf">start_processing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start processing of tasks</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_can_process_tasks</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_tasks</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="BackgroundTaskManager.pause_processing"><a class="viewcode-back" href="../../task_manager.html#task_manager.BackgroundTaskManager.pause_processing">[docs]</a>    <span class="k">def</span> <span class="nf">pause_processing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pause processing of tasks - any currently running tasks will</span>
+<span class="sd">        complete as normal.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_can_process_tasks</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="c"># and just let the current threads complete...</span>
+</div>
+<div class="viewcode-block" id="BackgroundTaskManager.shut_down"><a class="viewcode-back" href="../../task_manager.html#task_manager.BackgroundTaskManager.shut_down">[docs]</a>    <span class="k">def</span> <span class="nf">shut_down</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shut down the task manager.  This clears the task queue and gracefully stops all running</span>
+<span class="sd">        threads.  Completion/failure of any currently running tasks will be ignored.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="s">&quot;Shutting down...&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_can_process_tasks</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># stop all tasks:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_all_tasks</span><span class="p">()</span>
+
+        <span class="c"># shut down all worker threads:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="s">&quot;Waiting for </span><span class="si">%d</span><span class="s"> background threads to stop...&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_all_threads</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">thread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_threads</span><span class="p">:</span>
+            <span class="n">thread</span><span class="o">.</span><span class="n">shut_down</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_available_threads</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_all_threads</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="s">&quot;Shut down successfully!&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BackgroundTaskManager.add_task"><a class="viewcode-back" href="../../task_manager.html#task_manager.BackgroundTaskManager.add_task">[docs]</a>    <span class="k">def</span> <span class="nf">add_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cbl</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">upstream_task_ids</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">task_args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">task_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a new task to the queue.  A task is a callable method/class together with any arguments that</span>
+<span class="sd">        should be passed to the callable when it is called.</span>
+
+<span class="sd">        :param cbl:                 The callable function/class to call when executing the task</span>
+<span class="sd">        :param priority:            The priority this task should be run with.  Tasks with higher priority</span>
+<span class="sd">                                    are run first.</span>
+<span class="sd">        :param group:               The group this task belongs to.  Task groups can be used to simplify task</span>
+<span class="sd">                                    management (e.g. stop a whole group, be notified when a group is complete)</span>
+<span class="sd">        :param upstream_task_ids:   A list of any upstream tasks that should be completed before this task</span>
+<span class="sd">                                    is run.  The results from any upstream tasks are appended to the kwargs</span>
+<span class="sd">                                    for this task.</span>
+<span class="sd">        :param task_args:           A list of unnamed parameters to be passed to the callable when running the </span>
+<span class="sd">                                    task</span>
+<span class="sd">        :param task_kwargs:         A dictionary of named parameters to be passed to the callable when running </span>
+<span class="sd">                                    the task</span>
+<span class="sd">        :returns:                   A unique id representing the task.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">cbl</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">TankError</span><span class="p">(</span><span class="s">&quot;The task function, method or object &#39;</span><span class="si">%s</span><span class="s">&#39; must be callable!&quot;</span> <span class="o">%</span> <span class="n">cbl</span><span class="p">)</span>
+
+        <span class="n">upstream_task_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">upstream_task_ids</span> <span class="ow">or</span> <span class="p">[])</span>
+
+        <span class="c"># create a new task instance:</span>
+        <span class="n">task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_task_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next_task_id</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">new_task</span> <span class="o">=</span> <span class="n">BackgroundTask</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">cbl</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">task_args</span><span class="p">,</span> <span class="n">task_kwargs</span><span class="p">)</span>
+
+        <span class="c"># add the task to the pending queue:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pending_tasks_by_priority</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">priority</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_task</span><span class="p">)</span>
+
+        <span class="c"># add tasks to various look-ups:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tasks_by_id</span><span class="p">[</span><span class="n">new_task</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_group_task_map</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_task</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
+
+        <span class="c"># keep track of the task dependencies:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upstream_task_map</span><span class="p">[</span><span class="n">new_task</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">upstream_task_ids</span>
+        <span class="k">for</span> <span class="n">us_task_id</span> <span class="ow">in</span> <span class="n">upstream_task_ids</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_downstream_task_map</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">us_task_id</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_task</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="s">&quot;Added Task </span><span class="si">%s</span><span class="s"> to the queue&quot;</span> <span class="o">%</span> <span class="n">new_task</span><span class="p">)</span>
+
+        <span class="c"># and start the next task:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_tasks</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">new_task</span><span class="o">.</span><span class="n">uid</span>
+</div>
+<div class="viewcode-block" id="BackgroundTaskManager.add_pass_through_task"><a class="viewcode-back" href="../../task_manager.html#task_manager.BackgroundTaskManager.add_pass_through_task">[docs]</a>    <span class="k">def</span> <span class="nf">add_pass_through_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">upstream_task_ids</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">task_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a pass-through task to the queue.  A pass-through task doesn&#39;t perform any work but can be useful</span>
+<span class="sd">        when synchronising other tasks (e.g. pulling the results from multiple upstream tasks into a single task)</span>
+
+<span class="sd">        :param priority:            The priority this task should be run with.  Tasks with higher priority</span>
+<span class="sd">                                    are run first.</span>
+<span class="sd">        :param group:               The group this task belongs to.  Task groups can be used to simplify task</span>
+<span class="sd">                                    management (e.g. stop a whole group, be notified when a group is complete).</span>
+<span class="sd">                                    A group is expressed as a string, for example &#39;thumbnails&#39;, &#39;IO&#39; or &#39;shotgun&#39;.</span>
+<span class="sd">        :param upstream_task_ids:   A list of any upstream tasks that should be completed before this task</span>
+<span class="sd">                                    is run.  The results from any upstream tasks are appended to the kwargs</span>
+<span class="sd">                                    for this task.</span>
+<span class="sd">        :param task_kwargs:         A dictionary of named parameters that will be appended to the result of</span>
+<span class="sd">                                    the pass-through task.</span>
+<span class="sd">        :returns:                   A unique id representing the task.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_pass_through</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">upstream_task_ids</span><span class="p">,</span> <span class="n">task_kwargs</span> <span class="o">=</span> <span class="n">task_kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BackgroundTaskManager.stop_task"><a class="viewcode-back" href="../../task_manager.html#task_manager.BackgroundTaskManager.stop_task">[docs]</a>    <span class="k">def</span> <span class="nf">stop_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">stop_upstream</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">stop_downstream</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop the specified task from running.  If the task is already running then it will complete but</span>
+<span class="sd">        the completion/failure signal will be ignored.</span>
+
+<span class="sd">        :param task_id:         The id of the task to stop</span>
+<span class="sd">        :param stop_upstream:   If true then all upstream tasks will also be stopped</span>
+<span class="sd">        :param stop_downstream: If true then all downstream tasks will also be stopped</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tasks_by_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">task</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="s">&quot;Stopping Task </span><span class="si">%s</span><span class="s">...&quot;</span> <span class="o">%</span> <span class="n">task</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stop_tasks</span><span class="p">([</span><span class="n">task</span><span class="p">],</span> <span class="n">stop_upstream</span><span class="p">,</span> <span class="n">stop_downstream</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="s">&quot; &gt; Task </span><span class="si">%s</span><span class="s"> stopped!&quot;</span> <span class="o">%</span> <span class="n">task</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BackgroundTaskManager.stop_task_group"><a class="viewcode-back" href="../../task_manager.html#task_manager.BackgroundTaskManager.stop_task_group">[docs]</a>    <span class="k">def</span> <span class="nf">stop_task_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">stop_upstream</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">stop_downstream</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop all tasks in the specified group from running.  If any tasks are already running then they will </span>
+<span class="sd">        complete but their completion/failure signals will be ignored.</span>
+
+<span class="sd">        :param group:           The task group to stop</span>
+<span class="sd">        :param stop_upstream:   If true then all upstream tasks will also be stopped</span>
+<span class="sd">        :param stop_downstream: If true then all downstream tasks will also be stopped</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">task_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group_task_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">task_ids</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="s">&quot;Stopping Task group </span><span class="si">%s</span><span class="s">...&quot;</span> <span class="o">%</span> <span class="n">group</span><span class="p">)</span>
+
+        <span class="n">tasks_to_stop</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">task_id</span> <span class="ow">in</span> <span class="n">task_ids</span><span class="p">:</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tasks_by_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">task</span><span class="p">:</span>
+                <span class="n">tasks_to_stop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group_task_map</span><span class="p">[</span><span class="n">group</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stop_tasks</span><span class="p">(</span><span class="n">tasks_to_stop</span><span class="p">,</span> <span class="n">stop_upstream</span><span class="p">,</span> <span class="n">stop_downstream</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="s">&quot; &gt; Task group </span><span class="si">%s</span><span class="s"> stopped!&quot;</span> <span class="o">%</span> <span class="n">group</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BackgroundTaskManager.stop_all_tasks"><a class="viewcode-back" href="../../task_manager.html#task_manager.BackgroundTaskManager.stop_all_tasks">[docs]</a>    <span class="k">def</span> <span class="nf">stop_all_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop all currently queued or running tasks.  If any tasks are already running then they will </span>
+<span class="sd">        complete but their completion/failure signals will be ignored.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="s">&quot;Stopping all tasks...&quot;</span><span class="p">)</span>
+
+        <span class="c"># we just need to clear all the lookups:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_running_tasks</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pending_tasks_by_priority</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tasks_by_id</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_group_task_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upstream_task_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_downstream_task_map</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="s">&quot; &gt; All tasks stopped!&quot;</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_stop_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tasks_to_stop</span><span class="p">,</span> <span class="n">stop_upstream</span><span class="p">,</span> <span class="n">stop_downstream</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop the specified list of tasks</span>
+
+<span class="sd">        :param tasks_to_stop:   A list of tasks to stop</span>
+<span class="sd">        :param stop_upstream:   If true then all upstream tasks will also be stopped</span>
+<span class="sd">        :param stop_downstream: If true then all downstream tasks will also be stopped</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tasks_to_stop</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c"># copy the task list as we&#39;ll be modifying it:</span>
+        <span class="n">tasks_to_stop</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tasks_to_stop</span><span class="p">)</span>
+        <span class="c"># and make sure we only stop each task once!!</span>
+        <span class="n">stopped_task_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">task</span><span class="o">.</span><span class="n">uid</span> <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks_to_stop</span><span class="p">])</span>
+
+        <span class="k">while</span> <span class="n">tasks_to_stop</span><span class="p">:</span>
+            <span class="n">task_to_stop</span> <span class="o">=</span> <span class="n">tasks_to_stop</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="c"># get the up &amp; downstream tasks to also stop depending on the flags:</span>
+            <span class="k">if</span> <span class="n">stop_upstream</span> <span class="ow">and</span> <span class="n">task_to_stop</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upstream_task_map</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">us_task_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upstream_task_map</span><span class="p">[</span><span class="n">task_to_stop</span><span class="o">.</span><span class="n">uid</span><span class="p">]:</span>
+                    <span class="n">us_task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tasks_by_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">us_task_id</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">us_task</span> <span class="ow">or</span> <span class="n">us_task</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="n">stopped_task_ids</span><span class="p">:</span>
+                        <span class="c"># no task or already found</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">tasks_to_stop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">us_task</span><span class="p">)</span>
+                    <span class="n">stopped_task_ids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">us_task_id</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">stop_downstream</span> <span class="ow">and</span> <span class="n">task_to_stop</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_downstream_task_map</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">ds_task_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_downstream_task_map</span><span class="p">[</span><span class="n">task_to_stop</span><span class="o">.</span><span class="n">uid</span><span class="p">]:</span>
+                    <span class="n">ds_task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tasks_by_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ds_task_id</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">ds_task</span> <span class="ow">or</span> <span class="n">ds_task</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="n">stopped_task_ids</span><span class="p">:</span>
+                        <span class="c"># no task or already found</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">tasks_to_stop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ds_task</span><span class="p">)</span>
+                    <span class="n">stopped_task_ids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ds_task_id</span><span class="p">)</span>
+
+            <span class="c"># remove the task:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_task</span><span class="p">(</span><span class="n">task_to_stop</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_worker_thread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a worker thread to use.  </span>
+
+<span class="sd">        :returns:   An available worker thread if there is one, a new thread if needed or None if the thread</span>
+<span class="sd">                    limit has been reached.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_available_threads</span><span class="p">:</span>
+            <span class="c"># we can just use one of the available threads:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_available_threads</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+        <span class="c"># no available threads so lets check our thread count:</span>
+        <span class="n">thread_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_all_threads</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">thread_count</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_threads</span><span class="p">:</span>
+            <span class="c"># no available threads left!</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="c"># create a new worker thread - note, there are two different implementations of the WorkerThread class</span>
+        <span class="c"># that use two different recipes.  Although WorkerThreadB is arguably more correct it has some issues</span>
+        <span class="c"># in PyQt so WorkerThread is currently preferred - see the notes in the class above for further details</span>
+        <span class="n">thread</span> <span class="o">=</span> <span class="n">WorkerThread</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thread</span><span class="p">,</span> <span class="n">WorkerThread</span><span class="p">):</span>
+            <span class="c"># for some reason (probably memory corruption somewhere else) I&#39;ve occasionally seen the above</span>
+            <span class="c"># creation of a worker thread return another arbitrary object!  Added this in here so the code</span>
+            <span class="c"># will at least continue correctly and not do unexpected things!</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_error</span><span class="p">(</span><span class="s">&quot;Failed to create background worker thread for task Manager!&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="n">thread</span><span class="o">.</span><span class="n">task_failed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_thread_task_failed</span><span class="p">)</span>
+        <span class="n">thread</span><span class="o">.</span><span class="n">task_completed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_thread_task_completed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_all_threads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thread</span><span class="p">)</span>
+
+        <span class="c"># start the thread - this will just put it into wait mode:</span>
+        <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="c"># log some debug:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="s">&quot;Started new background worker thread (num threads=</span><span class="si">%d</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_all_threads</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">thread</span>
+
+    <span class="k">def</span> <span class="nf">_start_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start any queued tasks that are startable if there are available threads to run them.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># start tasks until we fail to start one for whatever reason:</span>
+        <span class="n">started</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">while</span> <span class="n">started</span><span class="p">:</span>
+            <span class="n">started</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_next_task</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_start_next_task</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start the next task in the queue if there is a task that is startable and there is an </span>
+<span class="sd">        available thread to run it.</span>
+
+<span class="sd">        :returns:    True if a task was started, otherwise False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_can_process_tasks</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># figure out next task to start from the priority queue:</span>
+        <span class="n">task_to_process</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">priorities</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pending_tasks_by_priority</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">priority</span> <span class="ow">in</span> <span class="n">priorities</span><span class="p">:</span>
+            <span class="c"># iterate through the tasks and make sure we aren&#39;t waiting on the</span>
+            <span class="c"># completion of any upstream tasks:</span>
+            <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_tasks_by_priority</span><span class="p">[</span><span class="n">priority</span><span class="p">]:</span>
+                <span class="n">awaiting_upstream_task_completion</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">for</span> <span class="n">us_task_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upstream_task_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="k">if</span> <span class="n">us_task_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tasks_by_id</span><span class="p">:</span>
+                        <span class="c"># if the task is still in the tasks list then we&#39;re still awaiting</span>
+                        <span class="c"># completion of it!</span>
+                        <span class="n">awaiting_upstream_task_completion</span> <span class="o">=</span> <span class="bp">True</span>
+                        <span class="k">break</span>
+                <span class="k">if</span> <span class="n">awaiting_upstream_task_completion</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="c"># ok, we&#39;ve found the next task to process:</span>
+                <span class="n">task_to_process</span> <span class="o">=</span> <span class="n">task</span>
+                <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">task_to_process</span><span class="p">:</span>
+                <span class="c"># no need to look any further!</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">task_to_process</span><span class="p">:</span>
+            <span class="c"># nothing to do!</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># we need a thread to do the work with:</span>
+        <span class="n">thread</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_worker_thread</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">thread</span><span class="p">:</span>
+            <span class="c"># looks like we can&#39;t do anything!</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="s">&quot;Starting task </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">task_to_process</span><span class="p">)</span>
+
+        <span class="c"># ok, we have a thread so lets move the task from the priority queue to the running list:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pending_tasks_by_priority</span><span class="p">[</span><span class="n">priority</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">task_to_process</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_tasks_by_priority</span><span class="p">[</span><span class="n">priority</span><span class="p">]:</span>
+            <span class="c"># no more tasks with this priority so also clean up the list</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_tasks_by_priority</span><span class="p">[</span><span class="n">priority</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_running_tasks</span><span class="p">[</span><span class="n">task_to_process</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">task_to_process</span><span class="p">,</span> <span class="n">thread</span><span class="p">)</span>
+
+        <span class="n">num_tasks_left</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">pending_tasks</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_tasks_by_priority</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">num_tasks_left</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pending_tasks</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="s">&quot; &gt; Currently running tasks: &#39;</span><span class="si">%s</span><span class="s">&#39; - </span><span class="si">%d</span><span class="s"> left in queue&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_running_tasks</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">num_tasks_left</span><span class="p">))</span>
+
+        <span class="c"># and run the task</span>
+        <span class="n">thread</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span><span class="n">task_to_process</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">_on_worker_thread_task_completed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Slot triggered when a task is completed by a worker thread.  This processes the result and emits the </span>
+<span class="sd">        task_completed signal if needed.</span>
+
+<span class="sd">        The worker thread instance that completed the task can be retrieved from self.sender()</span>
+
+<span class="sd">        :param task:    The task that completed</span>
+<span class="sd">        :param result:  The task result</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">worker_thread</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># check that we should process this result:</span>
+            <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_running_tasks</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="s">&quot;Task </span><span class="si">%r</span><span class="s"> - completed&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">task</span><span class="p">))</span>
+
+                <span class="c"># if we have dependent tasks then update them:</span>
+                <span class="k">for</span> <span class="n">ds_task_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_downstream_task_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="n">ds_task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tasks_by_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ds_task_id</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">ds_task</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="c"># update downstream task with result</span>
+                    <span class="n">ds_task</span><span class="o">.</span><span class="n">append_upstream_result</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+                <span class="c"># remove the task:</span>
+                <span class="n">group_finished</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_remove_task</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+
+                <span class="c"># emit signal that this task is completed:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">task_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">task</span><span class="o">.</span><span class="n">group</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">group_finished</span><span class="p">:</span>
+                    <span class="c"># also emit signal that the entire group is completed:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">task_group_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">group</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c"># move this task thread to the available threads list:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_available_threads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">worker_thread</span><span class="p">)</span>
+
+        <span class="c"># start processing of the next task:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_tasks</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_on_worker_thread_task_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Slot triggered when a task being executed in by a worker thread has failed for some reason.  This processes </span>
+<span class="sd">        the task and emits the task_failed signal if needed.</span>
+
+<span class="sd">        The worker thread instance that the task failed in can be retrieved from self.sender()</span>
+
+<span class="sd">        :param task:    The task that failed</span>
+<span class="sd">        :param msg:     The error message for the failed task</span>
+<span class="sd">        :param tb:      The stack-trace for the failed task</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">worker_thread</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># check that we should process this task:</span>
+            <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_running_tasks</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="s">&quot;Task </span><span class="si">%r</span><span class="s"> - failed: </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">tb</span><span class="p">))</span>
+
+                <span class="c"># we need to emit the failed message for this task as well as any that have</span>
+                <span class="c"># upstream dependencies on this task!</span>
+                <span class="n">failed_tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">task</span><span class="p">]</span>
+                <span class="n">failed_task_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">task</span><span class="o">.</span><span class="n">uid</span><span class="p">])</span>
+                <span class="n">finished_groups</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+                <span class="k">while</span> <span class="n">failed_tasks</span><span class="p">:</span>
+                    <span class="n">failed_task</span> <span class="o">=</span> <span class="n">failed_tasks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+                    <span class="c"># find any downstream tasks:</span>
+                    <span class="k">for</span> <span class="n">ds_task_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_downstream_task_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">failed_task</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]:</span>
+                        <span class="n">ds_task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tasks_by_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ds_task_id</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">ds_task</span> <span class="ow">or</span> <span class="n">ds_task</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="n">failed_task_ids</span><span class="p">:</span>
+                            <span class="c"># no task or already found</span>
+                            <span class="k">continue</span>
+                        <span class="n">failed_tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ds_task</span><span class="p">)</span>
+                        <span class="n">failed_task_ids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ds_task</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
+
+                    <span class="c"># remove the task:</span>
+                    <span class="n">group_finished</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_remove_task</span><span class="p">(</span><span class="n">failed_task</span><span class="p">)</span>
+
+                    <span class="c"># emit failed signal for the failed task:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">task_failed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">failed_task</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">failed_task</span><span class="o">.</span><span class="n">group</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">tb</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">group_finished</span> <span class="ow">and</span> <span class="n">failed_task</span><span class="o">.</span><span class="n">group</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">finished_groups</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">task_group_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">failed_task</span><span class="o">.</span><span class="n">group</span><span class="p">)</span>
+                        <span class="n">finished_groups</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">failed_task</span><span class="o">.</span><span class="n">group</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c"># move this task thread to the available threads list:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_available_threads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">worker_thread</span><span class="p">)</span>
+
+        <span class="c"># start processing of the next task:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_tasks</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_remove_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove the specified task from the queue.</span>
+
+<span class="sd">        :param task:    The task to remove from the queue</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">group_completed</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># fist remove from the running tasks - this will stop any signals being handled for this task</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_running_tasks</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_running_tasks</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span>
+
+        <span class="c"># find and remove the task from the pending queue:</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">priority</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_tasks_by_priority</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">p_task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_tasks_by_priority</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span> <span class="p">[]):</span>
+                <span class="k">if</span> <span class="n">p_task</span><span class="o">.</span><span class="n">uid</span> <span class="o">==</span> <span class="n">task</span><span class="o">.</span><span class="n">uid</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_pending_tasks_by_priority</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">priority</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">p_task</span><span class="p">)</span>
+                    <span class="k">break</span> 
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_tasks_by_priority</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">priority</span><span class="p">]:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_tasks_by_priority</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">priority</span><span class="p">]</span>
+
+        <span class="c"># remove this task from all other maps:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group_task_map</span> 
+            <span class="ow">and</span> <span class="n">task</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group_task_map</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">group</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_group_task_map</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group_task_map</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">group</span><span class="p">]:</span>
+                <span class="n">group_completed</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group_task_map</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">group</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tasks_by_id</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tasks_by_id</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upstream_task_map</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upstream_task_map</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_downstream_task_map</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_downstream_task_map</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">group_completed</span>
+
+    <span class="k">def</span> <span class="nf">_task_pass_through</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pass-through task callable.  Simply returns the input kwargs as the result</span>
+
+<span class="sd">        :param **kwargs:    The named arguments for the task</span>
+<span class="sd">        :returns:           A dictionary containing the named input arguments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">kwargs</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Autodesk.
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'v4.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

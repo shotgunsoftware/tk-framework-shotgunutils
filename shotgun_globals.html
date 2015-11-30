@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Globals Access &mdash; tk-framework-shotgunutils v2.5.1 documentation</title>
+  <title>Shotgun Globals Access &mdash; tk-framework-shotgunutils v4.0.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v2.5.1 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.0.1 documentation" href="index.html"/>
         <link rel="prev" title="Shotgun Toolkit QT Settings Wrapper" href="settings.html"/> 
 
   
@@ -49,11 +49,16 @@
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search">
           
-    <img style='width: 191px; 
+    <a href='http://developer.shotgunsoftware.com'>
+    
+        <img style='width: 191px;
                 height: 60px; 
+                margin: 2px;
                 border-radius: 0px; 
                 padding: 0px;' 
-         src='./_static/logo@2x.png'/>
+            src='./_static/logo@2x.png'/>
+    
+    </a>
     
 
           
@@ -86,6 +91,7 @@
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="shotgun_model.html">Shotgun Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_manager.html">Background Task Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Shotgun Globals Access</a></li>
 </ul>
@@ -109,9 +115,11 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v2.5.1.<br>
-    This documentation is part of the Shotgun Pipeline Toolkit. 
-    For more information, please visit 
+    <b>tk-framework-shotgunutils</b> v4.0.1.<br>
+    
+        This documentation is part of the Shotgun Pipeline Toolkit.
+    
+    For more information, please visit
     <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
     The code associated with this documentation can be found 
     <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
@@ -164,47 +172,51 @@ Pass a data retriever object to the module in order for it to pull updates from 
 When you shut down your app or tool, make sure you unregister the data retriever.</p>
 <p>The sample code below shows how you can use the globals in your Toolkit App Code:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">shotgun_globals</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s">&quot;shotgun_globals&quot;</span><span class="p">)</span>
-<span class="n">sg_data</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s">&quot;shotgun_data&quot;</span><span class="p">)</span>
+<span class="n">task_manager</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s">&quot;task_manager&quot;</span><span class="p">)</span>
 
 
 <span class="c"># typically, in your UI or app constructor, create a</span>
-<span class="c"># data retriever and register it</span>
-<span class="n">sg_data</span> <span class="o">=</span> <span class="n">sg_data</span><span class="o">.</span><span class="n">ShotgunDataRetriever</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-<span class="n">shotgun_globals</span><span class="o">.</span><span class="n">register_data_retriever</span><span class="p">(</span><span class="n">sg_data</span><span class="p">)</span>
+<span class="c"># task manager</span>
+<span class="n">task_manager</span> <span class="o">=</span> <span class="n">task_manager</span><span class="o">.</span><span class="n">BackgroundTaskManager</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+<span class="n">task_manager</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<span class="c"># register it with the globals module so that it can</span>
+<span class="c"># use it to fetch data</span>
+<span class="n">shotgun_globals</span><span class="o">.</span><span class="n">register_bg_task_manager</span><span class="p">(</span><span class="n">task_manager</span><span class="p">)</span>
 
 <span class="c"># at runtime, access things</span>
 <span class="n">get_type_display_name</span><span class="p">(</span><span class="s">&quot;CustomEntity01&quot;</span><span class="p">)</span>
 
 <span class="c"># at shutdown time, unregister</span>
-<span class="n">shotgun_globals</span><span class="o">.</span><span class="n">unregister_data_retriever</span><span class="p">(</span><span class="n">sg_data</span><span class="p">)</span>
-<span class="n">sg_data_retriever</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+<span class="n">shotgun_globals</span><span class="o">.</span><span class="n">register_bg_task_manager</span><span class="p">(</span><span class="n">task_manager</span><span class="p">)</span>
+<span class="n">task_manager</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 </pre></div>
 </div>
 <dl class="function">
-<dt id="shotgun_globals.register_data_retriever">
-<code class="descclassname">shotgun_globals.</code><code class="descname">register_data_retriever</code><span class="sig-paren">(</span><em>cls</em>, <em>data_retriever</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.register_data_retriever" title="Permalink to this definition">¶</a></dt>
-<dd><p>Register a data retriever with the singleton.
-Once a data retriever has been registered, the schema singleton
-can refresh its cache.</p>
+<dt id="shotgun_globals.register_bg_task_manager">
+<code class="descclassname">shotgun_globals.</code><code class="descname">register_bg_task_manager</code><span class="sig-paren">(</span><em>cls</em>, <em>task_manager</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.register_bg_task_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a background task manager with the singleton.
+Once a background task manager has been registered, the schema 
+singleton can refresh its cache.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data_retriever</strong> (<a class="reference internal" href="shotgun_data.html#shotgun_data.ShotgunDataRetriever" title="shotgun_data.ShotgunDataRetriever"><code class="xref py py-class docutils literal"><span class="pre">ShotgunDataRetriever</span></code></a>) &#8211; shotgun data retriever object to register</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_manager</strong> (<code class="xref py py-class docutils literal"><span class="pre">task_manager.BackgroundTaskManager</span></code>) &#8211; Background task manager to use</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="shotgun_globals.unregister_data_retriever">
-<code class="descclassname">shotgun_globals.</code><code class="descname">unregister_data_retriever</code><span class="sig-paren">(</span><em>cls</em>, <em>data_retriever</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.unregister_data_retriever" title="Permalink to this definition">¶</a></dt>
+<dt id="shotgun_globals.unregister_bg_task_manager">
+<code class="descclassname">shotgun_globals.</code><code class="descname">unregister_bg_task_manager</code><span class="sig-paren">(</span><em>cls</em>, <em>task_manager</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.unregister_bg_task_manager" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unregister a previously registered data retriever with the singleton.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data_retriever</strong> (<a class="reference internal" href="shotgun_data.html#shotgun_data.ShotgunDataRetriever" title="shotgun_data.ShotgunDataRetriever"><code class="xref py py-class docutils literal"><span class="pre">ShotgunDataRetriever</span></code></a>) &#8211; shotgun data retriever object to unregister</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_manager</strong> (<code class="xref py py-class docutils literal"><span class="pre">task_manager.BackgroundTaskManager</span></code>) &#8211; Background task manager to use</td>
 </tr>
 </tbody>
 </table>
@@ -323,6 +335,41 @@ return valid data.</p>
 </table>
 </dd></dl>
 
+<dl class="function">
+<dt id="shotgun_globals.get_entity_type_icon">
+<code class="descclassname">shotgun_globals.</code><code class="descname">get_entity_type_icon</code><span class="sig-paren">(</span><em>entity_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_globals/icon.html#get_entity_type_icon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_globals.get_entity_type_icon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the icon for the specified entity type if available.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity_type</strong> &#8211; The entity type to retrieve the icon for</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A QIcon if an icon was found for the specified entity
+type, otherwise None.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.get_entity_type_icon_url">
+<code class="descclassname">shotgun_globals.</code><code class="descname">get_entity_type_icon_url</code><span class="sig-paren">(</span><em>entity_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_globals/icon.html#get_entity_type_icon_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_globals.get_entity_type_icon_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the icon resource path for the specified entity type if available.</p>
+<p>This is useful if you want to include an icon in a <code class="docutils literal"><span class="pre">QLabel</span></code> using
+an <code class="docutils literal"><span class="pre">&lt;img&gt;</span></code> html tag.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity_type</strong> &#8211; The entity type to retrieve the icon for</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A string url with a qt resource path</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 
 
@@ -363,7 +410,7 @@ return valid data.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v2.5.1',
+            VERSION:'v4.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -14,6 +14,8 @@ be used independently:
 - An asynchronous Shotgun data receiver which makes it easy to work with background queries
   and thumbnail retrieval.
 
+- A background processing manager to help schedule background worker threads.
+
 - A ``globals`` helper module which provides cached access to various global data
   in Shotgun, including status names, display names for fields and schema data.
 
@@ -28,5 +30,7 @@ Contents:
 
    shotgun_model
    shotgun_data
+   task_manager
    settings
    shotgun_globals
+   
