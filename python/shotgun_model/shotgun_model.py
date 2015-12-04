@@ -922,6 +922,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # check if anything has been deleted or added
             ids_from_shotgun = set([ d.get("id") for d in sg_data ])
             ids_in_tree = set(self.__entity_tree_data.keys())
+
             removed_ids = ids_in_tree.difference(ids_from_shotgun)
 
             if len(removed_ids) > 0:
@@ -1093,50 +1094,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
         if found_item is None:
 
             # didn't find item! So let's create it!
-            found_item = ShotgunStandardItem(field_display_name)
-
-            # keep tabs of which items we are creating
-            found_item.setData(True, self.IS_SG_MODEL_ROLE)
-
-            # keep a reference to this object to make GC happy
-            # (pyside may crash otherwise)
-            self.__all_tree_items.append(found_item)
-
-            # store the actual value we have
-            found_item.setData({"name": field, "value": sg_item[field] }, self.SG_ASSOCIATED_FIELD_ROLE)
-
-            if on_leaf_level:
-                # this is the leaf level!
-                # attach the shotgun data so that we can access it later
-                # note: QT automatically changes everything to be unicode
-                # according to strange rules of its own, so force convert
-                # all shotgun values to be proper unicode prior to setData
-                found_item.setData(sanitize_for_qt_model(sg_item), self.SG_DATA_ROLE)
-
-                # and also populate the id association in our lookup dict
-                self.__entity_tree_data[ sg_item.get("id") ] = found_item
-
-            # now we got the object set up. Now start calling custom methods:
-
-            # set up default thumb
-            self._populate_default_thumbnail(found_item)
-
-            # run the populate item method (only runs at construction, not on cache restore)
-            if on_leaf_level:
-                self._populate_item(found_item, sg_item)
-            else:
-                self._populate_item(found_item, None)
-
-            # run the finalizer (always runs on construction, even via cache)
-            self._finalize_item(found_item)
+            found_item = self.__create_item(field_display_name, field, on_leaf_level, sg_item)
 
             # add it to the tree. At this point QT will fire off various signals to inform views etc.
             root.appendRow(found_item)
-
-            # request thumb
-            if self.__download_thumbs:
-                self.__process_thumbnail_for_item(found_item)
-
 
         if not on_leaf_level:
             # there are more levels that we should recurse down into
@@ -1164,7 +1125,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                                  sg_data.get("type"),
                                                  sg_data.get("id"))
 
-
     def __rebuild_whole_tree_from_sg_data(self, data):
         """
         Clears the tree and rebuilds it from the given shotgun data.
@@ -1174,131 +1134,114 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         # get any external payload from deriving classes
         self._load_external_data()
+        self.__populate_complete_tree(data)
 
+    def __create_item(self, field_display_name, field, is_leaf, sg_item):
+        """
+        Creates a model item for the tree.
+
+        :param field_display_name: Name of the entry in the UI.
+        :param field: Name of the field in the entity dictionary.
+        :param is_leaf: Is this a leaf item?
+        :param sg_item: Entity dictionary.
+
+        :returns: ShotgunStandardItem instance.
+        """
+
+        # construct tree view node object
+        item = ShotgunStandardItem(field_display_name)
+
+        # keep tabs of which items we are creating
+        item.setData(True, self.IS_SG_MODEL_ROLE)
+
+        # keep a reference to this object to make GC happy
+        # (pyside may crash otherwise)
+        self.__all_tree_items.append(item)
+
+        # store the actual value we have
+        item.setData({"name": field, "value": sg_item[field] }, self.SG_ASSOCIATED_FIELD_ROLE)
+
+        if is_leaf:
+            # this is the leaf level!
+            # attach the shotgun data so that we can access it later
+            # note: QT automatically changes everything to be unicode
+            # according to strange rules of its own, so force convert
+            # all shotgun values to be proper unicode prior to setData
+            item.setData(sanitize_for_qt_model(sg_item), self.SG_DATA_ROLE)
+
+            # and also populate the id association in our lookup dict
+            self.__entity_tree_data[sg_item.get("id")] = item
+
+        # now we got the object set up. Now start calling custom methods:
+
+        # set up default thumb
+        self._populate_default_thumbnail(item)
+
+        # run the populate item method (only runs at construction, not on cache restore)
+        if is_leaf:
+            self._populate_item(item, sg_item)
+        else:
+            self._populate_item(item, None)
+
+        # run the finalizer (always runs on construction, even via cache)
+        self._finalize_item(item)
+
+        # request thumb
+        if self.__download_thumbs:
+            self.__process_thumbnail_for_item(item)
+
+        return item
+
+    def _insert_in_order(self, tree):
+
+        children = tree["children"]
+        for child_key in sorted(children.keys(), cmp=lambda x,y: cmp(x.lower(), y.lower())):
+            child = children[child_key]
+            tree["item"].appendRow(child["item"])
+            self._insert_in_order(child)
+
+    def __populate_complete_tree(self, sg_data):
+        """
+        Generate tree model data structure based on Shotgun data.
+
+        :param sg_data: List of shotgun entity dictionairies.
+        """
         # and add the shotgun data
-        root = self.invisibleRootItem()
-        self.__populate_complete_tree_r(data, root, self.__hierarchy, {})
+        tree = {
+            "item": self.invisibleRootItem(),
+            "children": {}
+        }
 
-    def __populate_complete_tree_r(self, sg_data, root, hierarchy, constraints):
-        """
-        Generate tree model data structure based on Shotgun data
-        """
-        # get the next field to display in tree view
-        field = hierarchy[0]
-        # get lower levels of values
-        remaining_fields = hierarchy[1:]
-        # are we at leaf level or not?
-        on_leaf_level = len(remaining_fields) == 0
-
-        # first pass, go through all our data, eliminate by
-        # constraints and get a result set.
-
-        # the filtered_results list will contain a subset of the total data
-        # that is all matching the current constraints
-        filtered_results = list()
-        # maintain a list of unique matches for our current hierarchy field
-        # for example, if the current level of the hierarchy is "asset type",
-        # there will be more than one sg record having asset type = vehicle.
-        discrete_values = {}
-
+        # For each item that need to go inside the tree
         for sg_item in sg_data:
+            sub_tree = tree
 
-            # is this item matching the given constraints?
-            if self.__check_constraints(sg_item, constraints):
-                # add this sg data dictionary to our list of matching results
-                filtered_results.append(sg_item)
+            # Create model items by drilling down the hierarchy
+            for field_name in self.__hierarchy:
+                on_leaf_level = (self.__hierarchy[-1] == field_name)
+                # Get the value of field
+                field_display_name = self._generate_display_name(field_name, sg_item)
 
-                # and store it in our unique dictionary
-                field_display_name = self._generate_display_name(field, sg_item)
-                # and associate the shotgun data so that we can find it later
-
-                if on_leaf_level and field_display_name in discrete_values:
-                    # if we are on the leaf level, we want to make sure all objects
-                    # are displayed! handle duplicates by appending the sg id to the name.
+                # If we are at the leaf and there is already an item with the same name make
+                # this new item unique.
+                if on_leaf_level and field_display_name in sub_tree["children"]:
                     field_display_name = "%s (id %s)" % (field_display_name, sg_item.get("id"))
 
-                discrete_values[ field_display_name ] = sg_item
+                # If this section of the tree has never seen this value
+                if field_display_name not in sub_tree["children"]:
 
-        # process values in alphabetical order by name, case insensitive
-        for dv in sorted(discrete_values.keys(), cmp=lambda x,y: cmp(x.lower(), y.lower()) ):
+                    item = self.__create_item(field_display_name, field_name, on_leaf_level, sg_item)
+                    
+                    sub_tree["children"][field_display_name] = {
+                        "item": item,
+                        "children": {}
+                    }
 
-            # construct tree view node object
-            item = ShotgunStandardItem(dv)
+                # We're moving down the subtree.
+                if not on_leaf_level:
+                    sub_tree = sub_tree["children"][field_display_name]
 
-            # keep tabs of which items we are creating
-            item.setData(True, self.IS_SG_MODEL_ROLE)
-
-            # keep a reference to this object to make GC happy
-            # (pyside may crash otherwise)
-            self.__all_tree_items.append(item)
-
-            # get the full sg data dict that corresponds to this folder item
-            # note that this item may only partially match the sg data
-            # for leaf item, the sg_item completely matches the item
-            # but higher up it will be a subset of the fields only.
-            sg_item = discrete_values[dv]
-
-            # store the actual field value we have for this item
-            item.setData({"name": field, "value": sg_item[field] }, self.SG_ASSOCIATED_FIELD_ROLE)
-
-            if on_leaf_level:
-                # this is the leaf level
-                # attach the shotgun data so that we can access it later
-                # note - pyqt converts everything automatically to unicode,
-                # but using somewhat strange rules, so properly convert
-                # values to unicode prior to insertion
-                item.setData(sanitize_for_qt_model(sg_item), self.SG_DATA_ROLE)
-
-                # and also populate the id association in our lookup dict
-                self.__entity_tree_data[ sg_item.get("id") ] = item
-
-            # now we got the object set up. Now start calling custom methods:
-
-            # set the default thumbnail
-            self._populate_default_thumbnail(item)
-
-            # run the populate item method (only runs at construction, not on cache restore)
-            if on_leaf_level:
-                self._populate_item(item, sg_item)
-            else:
-                self._populate_item(item, None)
-
-            # and run the finalizer (always runs on construction, even via cache)
-            self._finalize_item(item)
-
-            # add it to the tree. At this point QT will fire off various signals to inform views etc.
-            root.appendRow(item)
-
-            # request thumb
-            if self.__download_thumbs:
-                self.__process_thumbnail_for_item(item)
-
-            if not on_leaf_level:
-                # now when we recurse down, we need to add our current constrain
-                # to the list of constraints. For this we need the raw sg value
-                # and now the display name that we used when we constructed the
-                # tree node.
-                new_constraints = {}
-                new_constraints.update(constraints)
-                new_constraints[field] = discrete_values[dv][field]
-
-                # and process subtree
-                self.__populate_complete_tree_r(filtered_results,
-                                               item,
-                                               remaining_fields,
-                                               new_constraints)
-
-
-    def __check_constraints(self, record, constraints):
-        """
-        checks if a particular shotgun record is matching the given
-        constraints dictionary. Returns if the constraints dictionary
-        is not a subset of the record dictionary.
-        """
-        for constraint_field in constraints:
-            if constraints[constraint_field] != record[constraint_field]:
-                return False
-        return True
+        self._insert_in_order(tree)
 
     def _generate_display_name(self, field, sg_data):
         """
