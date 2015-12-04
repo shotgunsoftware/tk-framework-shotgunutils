@@ -1237,9 +1237,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                         "children": {}
                     }
 
-                # We're moving down the subtree.
-                if not on_leaf_level:
-                    sub_tree = sub_tree["children"][field_display_name]
+                sub_tree = sub_tree["children"][field_display_name]
 
         self._insert_in_order(tree)
 
@@ -1370,6 +1368,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         fh = QtCore.QFile(filename)
 
         fh.open(QtCore.QIODevice.ReadOnly)
+
         try:
             in_stream = QtCore.QDataStream(fh)
 
