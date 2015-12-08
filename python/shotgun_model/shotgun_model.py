@@ -301,38 +301,46 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Removes all items (including header items) from the model and 
         sets the number of rows and columns to zero.
         """
-        # note! We are reimplementing this explicitly because the default implementation
-        # results in memory issues - similar to reset(), scenarios where objects are constructed
-        # in python (e.g. qstandarditems) and then handed over to a model and then subsequently 
-        # cleared and deallocated by QT itself (on the C++ side) often results in dangling pointers
-        # across the pyside/QT boundary, ultimately resulting in crashes or instability.
+        # Advertise that the model is about to completely cleared. This is super important because proxy
+        # models usually cache data like indices and these are about to get updated potentially thousands
+        # of times while the tree is being destroyed.
+        self.beginResetModel()
+        try:
+            # note! We are reimplementing this explicitly because the default implementation
+            # results in memory issues - similar to reset(), scenarios where objects are constructed
+            # in python (e.g. qstandarditems) and then handed over to a model and then subsequently 
+            # cleared and deallocated by QT itself (on the C++ side) often results in dangling pointers
+            # across the pyside/QT boundary, ultimately resulting in crashes or instability.
 
-        # clear thumbnail download lookup so we don't process any more results:
-        self.__thumb_map = {}
+            # clear thumbnail download lookup so we don't process any more results:
+            self.__thumb_map = {}
 
-        # we are not looking for any data from the async processor
-        self.__current_work_id = None
+            # we are not looking for any data from the async processor
+            self.__current_work_id = None
 
-        # ask async data retriever to clear its queue of queries and thumb downloads
-        # note that there may still be requests actually running
-        # - these are not cancelled
-        if self.__sg_data_retriever:
-            self.__sg_data_retriever.clear()
+            # ask async data retriever to clear its queue of queries and thumb downloads
+            # note that there may still be requests actually running
+            # - these are not cancelled
+            if self.__sg_data_retriever:
+                self.__sg_data_retriever.clear()
 
-        # model data in alt format
-        self.__entity_tree_data = {}
-        # pyside will crash unless we actively hold a reference
-        # to all items that we create.
-        self.__all_tree_items = []
+            # model data in alt format
+            self.__entity_tree_data = {}
+            # pyside will crash unless we actively hold a reference
+            # to all items that we create.
+            self.__all_tree_items = []
 
-        # lastly, remove all data in the underlying internal data storage
-        # note that we don't cannot clear() here since that causing
-        # crashing in various environments. Also note that we need to do
-        # in a depth-first manner to ensure that there are no
-        # cyclic parent/child dependency cycles, which will cause
-        # a crash in some versions of shiboken
-        # (see https://bugreports.qt-project.org/browse/PYSIDE-158 )
-        self.__do_depth_first_tree_deletion(self.invisibleRootItem())
+            # lastly, remove all data in the underlying internal data storage
+            # note that we don't cannot clear() here since that causing
+            # crashing in various environments. Also note that we need to do
+            # in a depth-first manner to ensure that there are no
+            # cyclic parent/child dependency cycles, which will cause
+            # a crash in some versions of shiboken
+            # (see https://bugreports.qt-project.org/browse/PYSIDE-158 )
+            self.__do_depth_first_tree_deletion(self.invisibleRootItem())
+        finally:
+            # Advertise that we're done resetting.
+            self.endResetModel()
 
     def reset(self):
         """
@@ -1130,6 +1138,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Clears the tree and rebuilds it from the given shotgun data.
         Note that any selection and expansion states in the view will be lost.
         """
+        # clear all internal memory storage
         self.clear()
 
         # get any external payload from deriving classes
@@ -1192,13 +1201,22 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         return item
 
-    def _insert_in_order(self, tree):
+    def __realize_parent_child_hierarchy_r(self, node):
+        """
+        Inserts all children nodes into their parent, recursively.
 
-        children = tree["children"]
+        :param node: Dictionary with keys 'item' and 'children' representing a ShotgunModelItem and a list
+            of ShotgunModelItem to be appended as rows of 'item'.
+        """
+        # If this is a leaf, there are no children.
+        if "children" not in node:
+            return
+
+        children = node["children"]
         for child_key in sorted(children.keys(), cmp=lambda x,y: cmp(x.lower(), y.lower())):
             child = children[child_key]
-            tree["item"].appendRow(child["item"])
-            self._insert_in_order(child)
+            node["item"].appendRow(child["item"])
+            self.__realize_parent_child_hierarchy_r(child)
 
     def __populate_complete_tree(self, sg_data):
         """
@@ -1230,16 +1248,20 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # If this section of the tree has never seen this value
                 if field_display_name not in sub_tree["children"]:
 
+                    # Create the item.
                     item = self.__create_item(field_display_name, field_name, on_leaf_level, sg_item)
-                    
+
                     sub_tree["children"][field_display_name] = {
                         "item": item,
                         "children": {}
                     }
 
-                sub_tree = sub_tree["children"][field_display_name]
+                if not on_leaf_level:
+                    sub_tree = sub_tree["children"][field_display_name]
 
-        self._insert_in_order(tree)
+        # Up to this point the parent child relationship was tracked in a dictionary. Now turn these
+        # loosely coupled ShotgunModelItems into actual parent and child.
+        self.__realize_parent_child_hierarchy_r(tree)
 
     def _generate_display_name(self, field, sg_data):
         """
