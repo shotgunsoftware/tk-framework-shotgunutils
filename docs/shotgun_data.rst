@@ -40,7 +40,7 @@ The sample code below shows how you can use the data retriever in your Toolkit A
             self.__sg_data.work_failure.connect( self.__on_worker_failure)
 
             # and start its thread!
-            self.__sg_data_retriever.start()
+            self.__sg_data.start()
 
             # do an async request
             self._find_uid = self.__sg_data.execute_find("Shot", [], ["code"])
@@ -52,7 +52,7 @@ The sample code below shows how you can use the data retriever in your Toolkit A
             """
             # gracefully stop our data retriever. This call
             # will block util the currently processing request has completed.
-            self.__sg_data_retriever.stop()
+            self.__sg_data.stop()
 
             # okay to close dialog
             event.accept()
