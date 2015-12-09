@@ -59,7 +59,7 @@ class ShotgunDataRetriever(QtCore.QObject):
     #
     # - request_type is a string denoting the type of request
     #   this event is associated with. It can be either "find"
-    #   "update", "create", "delete" "schema" or "thumbnail"
+    #   "find_one", "update", "create", "delete" "schema" or "thumbnail"
     #
     # - data_dict is a dictionary containing the payload
     #   of the request. It will be different depending on
@@ -266,6 +266,28 @@ class ShotgunDataRetriever(QtCore.QObject):
 
         """
         return self._add_task(self._task_execute_find, 
+                              priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
+                              task_args = args,
+                              task_kwargs = kwargs)
+
+    def execute_find_one(self, *args, **kwargs):
+        """
+        Executes a Shotgun find_one query asynchronously.
+
+        This method takes the same parameters as the Shotgun find_one() call.
+
+        The query will be queued up and once processed, either a
+        work_completed or work_failure signal will be emitted.
+
+        :param ``*args``:       args to be passed to the Shotgun find_one() call
+        :param ``**kwargs``:    Named parameters to be passed to the Shotgun find_one() call
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.
+
+        """
+        return self._add_task(self._task_execute_find_one, 
                               priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
                               task_args = args,
                               task_kwargs = kwargs)
@@ -604,6 +626,19 @@ class ShotgunDataRetriever(QtCore.QObject):
         sg_res = self._bundle.shotgun.find(*args, **kwargs)
         return {"action":"find", "sg_result":sg_res}
 
+    def _task_execute_find_one(self, *args, **kwargs):
+        """
+        Method that gets executed in a background task/thread to perform a Shotgun
+        find_one query
+
+        :param ``*args``:       Unnamed arguments to be passed to the find_one() call
+        :param ``**kwargs``:    Named arguments to be passed to the find_one() call 
+        :returns:           Dictionary containing the 'action' together with result
+                            returned by the find_one() call
+        """
+        sg_res = self._bundle.shotgun.find_one(*args, **kwargs)
+        return {"action":"find_one", "sg_result":sg_res}
+
     def _task_execute_update(self, *args, **kwargs):
         """
         Method that gets executed in a background task/thread to perform a Shotgun
@@ -770,7 +805,7 @@ class ShotgunDataRetriever(QtCore.QObject):
             return
 
         action = result.get("action")
-        if action in ["find", "create", "delete", "update"]:
+        if action in ["find", "find_one", "create", "delete", "update"]:
             self.work_completed.emit(str(task_id), action, {"sg":result["sg_result"]})
         elif action == "schema":
             self.work_completed.emit(str(task_id), "schema", {"fields":result["fields"], "types":result["types"]})
