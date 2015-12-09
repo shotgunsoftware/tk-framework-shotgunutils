@@ -1203,16 +1203,18 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
     def __realize_parent_child_hierarchy_r(self, node):
         """
-        Inserts all children nodes into their parent, recursively.
+        Inserts all children nodes alphabetically into their parent, recursively.
 
-        :param node: Dictionary with keys 'item' and 'children' representing a ShotgunModelItem and a list
-            of ShotgunModelItem to be appended as rows of 'item'.
+        :param node: Dictionary with keys 'item' and 'children' representing a ShotgunStandardItem and a list
+            of ShotgunStandardItem to be appended as rows of 'item'.
         """
         # If this is a leaf, there are no children.
         if "children" not in node:
             return
 
         children = node["children"]
+        # process values in alphabetical order by name, case insensitive, so that
+        # children are always sorted alphabetically underneath their parent.
         for child_key in sorted(children.keys(), cmp=lambda x,y: cmp(x.lower(), y.lower())):
             child = children[child_key]
             node["item"].appendRow(child["item"])
@@ -1224,6 +1226,22 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         :param sg_data: List of shotgun entity dictionairies.
         """
+        # The tree is built in a two pass approach. We are first building the
+        # individual ShotgunStandardItems and a tree of dictionaries. Each
+        # dictionary has a key named 'item' which is the ShotgunStandardItem and
+        # another key named 'children' which holds a dictionary of all the direct
+        # children this node has. These children are keyed by their name in the
+        # dictionary. This dictionary of dictionaries approach is recursive from the
+        # root to the leaves. Using a dictionary of children allows us to do a quick
+        # lookup to see if a child node needs to be created or can be reused. We will
+        # be actually parenting the ShotgunStandardItems to other ShotgunStandardItems
+        # in the second pass when we have the complete list of children and can 
+        # proceed on sorting them by name before insertion into the parent.
+        #
+        # Note that in the following algorithm two different non-leaf entities with
+        # the same name will be considered to be the same. Only leaf nodes with the
+        # same name are differentiated by appending an id to their name.
+
         # and add the shotgun data
         tree = {
             "item": self.invisibleRootItem(),
@@ -1259,8 +1277,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 if not on_leaf_level:
                     sub_tree = sub_tree["children"][field_display_name]
 
-        # Up to this point the parent child relationship was tracked in a dictionary. Now turn these
-        # loosely coupled ShotgunModelItems into actual parent and child.
+        # The second pass here consists of actually adding the children ShotgunStandardItem
+        # inside their parent, all sorted by name.
         self.__realize_parent_child_hierarchy_r(tree)
 
     def _generate_display_name(self, field, sg_data):
