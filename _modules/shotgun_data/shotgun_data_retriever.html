@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v4.0.1 documentation</title>
+  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v4.0.3 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.0.1 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.0.3 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -115,7 +115,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.0.1.<br>
+    <b>tk-framework-shotgunutils</b> v4.0.3.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -228,7 +228,7 @@
     <span class="c">#</span>
     <span class="c"># - request_type is a string denoting the type of request</span>
     <span class="c">#   this event is associated with. It can be either &quot;find&quot;</span>
-    <span class="c">#   &quot;update&quot;, &quot;create&quot;, &quot;delete&quot; &quot;schema&quot; or &quot;thumbnail&quot;</span>
+    <span class="c">#   &quot;find_one&quot;, &quot;update&quot;, &quot;create&quot;, &quot;delete&quot; &quot;schema&quot; or &quot;thumbnail&quot;</span>
     <span class="c">#</span>
     <span class="c"># - data_dict is a dictionary containing the payload</span>
     <span class="c">#   of the request. It will be different depending on</span>
@@ -435,6 +435,28 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_execute_find</span><span class="p">,</span> 
+                              <span class="n">priority</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_CALL_PRIORITY</span><span class="p">,</span>
+                              <span class="n">task_args</span> <span class="o">=</span> <span class="n">args</span><span class="p">,</span>
+                              <span class="n">task_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShotgunDataRetriever.execute_find_one"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_find_one">[docs]</a>    <span class="k">def</span> <span class="nf">execute_find_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a Shotgun find_one query asynchronously.</span>
+
+<span class="sd">        This method takes the same parameters as the Shotgun find_one() call.</span>
+
+<span class="sd">        The query will be queued up and once processed, either a</span>
+<span class="sd">        work_completed or work_failure signal will be emitted.</span>
+
+<span class="sd">        :param ``*args``:       args to be passed to the Shotgun find_one() call</span>
+<span class="sd">        :param ``**kwargs``:    Named parameters to be passed to the Shotgun find_one() call</span>
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_execute_find_one</span><span class="p">,</span> 
                               <span class="n">priority</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_CALL_PRIORITY</span><span class="p">,</span>
                               <span class="n">task_args</span> <span class="o">=</span> <span class="n">args</span><span class="p">,</span>
                               <span class="n">task_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">)</span>
@@ -773,6 +795,19 @@
         <span class="n">sg_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;action&quot;</span><span class="p">:</span><span class="s">&quot;find&quot;</span><span class="p">,</span> <span class="s">&quot;sg_result&quot;</span><span class="p">:</span><span class="n">sg_res</span><span class="p">}</span>
 
+    <span class="k">def</span> <span class="nf">_task_execute_find_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
+<span class="sd">        find_one query</span>
+
+<span class="sd">        :param ``*args``:       Unnamed arguments to be passed to the find_one() call</span>
+<span class="sd">        :param ``**kwargs``:    Named arguments to be passed to the find_one() call </span>
+<span class="sd">        :returns:           Dictionary containing the &#39;action&#39; together with result</span>
+<span class="sd">                            returned by the find_one() call</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sg_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;action&quot;</span><span class="p">:</span><span class="s">&quot;find_one&quot;</span><span class="p">,</span> <span class="s">&quot;sg_result&quot;</span><span class="p">:</span><span class="n">sg_res</span><span class="p">}</span>
+
     <span class="k">def</span> <span class="nf">_task_execute_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
@@ -939,7 +974,7 @@
             <span class="k">return</span>
 
         <span class="n">action</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;action&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;find&quot;</span><span class="p">,</span> <span class="s">&quot;create&quot;</span><span class="p">,</span> <span class="s">&quot;delete&quot;</span><span class="p">,</span> <span class="s">&quot;update&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;find&quot;</span><span class="p">,</span> <span class="s">&quot;find_one&quot;</span><span class="p">,</span> <span class="s">&quot;create&quot;</span><span class="p">,</span> <span class="s">&quot;delete&quot;</span><span class="p">,</span> <span class="s">&quot;update&quot;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span> <span class="n">action</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;sg&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s">&quot;sg_result&quot;</span><span class="p">]})</span>
         <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s">&quot;schema&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span> <span class="s">&quot;schema&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;fields&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s">&quot;fields&quot;</span><span class="p">],</span> <span class="s">&quot;types&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s">&quot;types&quot;</span><span class="p">]})</span>
@@ -1012,7 +1047,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v4.0.1',
+            VERSION:'v4.0.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

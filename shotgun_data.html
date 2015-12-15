@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Asynchronous Data Retriever &mdash; tk-framework-shotgunutils v4.0.1 documentation</title>
+  <title>Shotgun Asynchronous Data Retriever &mdash; tk-framework-shotgunutils v4.0.3 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.0.1 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.0.3 documentation" href="index.html"/>
         <link rel="next" title="Background Task Processing" href="task_manager.html"/>
         <link rel="prev" title="Shotgun Model" href="shotgun_model.html"/> 
 
@@ -121,7 +121,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.0.1.<br>
+    <b>tk-framework-shotgunutils</b> v4.0.3.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -205,7 +205,7 @@ always take precedence over shotgun thumbnail downloads.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data</span><span class="o">.</span><span class="n">work_failure</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">__on_worker_failure</span><span class="p">)</span>
 
         <span class="c"># and start its thread!</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retriever</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
         <span class="c"># do an async request</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_find_uid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data</span><span class="o">.</span><span class="n">execute_find</span><span class="p">(</span><span class="s">&quot;Shot&quot;</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[</span><span class="s">&quot;code&quot;</span><span class="p">])</span>
@@ -217,7 +217,7 @@ always take precedence over shotgun thumbnail downloads.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c"># gracefully stop our data retriever. This call</span>
         <span class="c"># will block util the currently processing request has completed.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retriever</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 
         <span class="c"># okay to close dialog</span>
         <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
@@ -405,6 +405,33 @@ work_completed or work_failure signal will be emitted.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>*args</strong> &#8211; args to be passed to the Shotgun find() call</li>
 <li><strong>**kwargs</strong> &#8211; Named parameters to be passed to the Shotgun find() call</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A unique identifier representing this request. This
+identifier is also part of the payload sent via the
+work_completed and work_failure signals, making it
+possible to match them up.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.execute_find_one">
+<code class="descname">execute_find_one</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_find_one"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_find_one" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes a Shotgun find_one query asynchronously.</p>
+<p>This method takes the same parameters as the Shotgun find_one() call.</p>
+<p>The query will be queued up and once processed, either a
+work_completed or work_failure signal will be emitted.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>*args</strong> &#8211; args to be passed to the Shotgun find_one() call</li>
+<li><strong>**kwargs</strong> &#8211; Named parameters to be passed to the Shotgun find_one() call</li>
 </ul>
 </td>
 </tr>
@@ -615,7 +642,7 @@ until any potential currently processing item has completed.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v4.0.1',
+            VERSION:'v4.0.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

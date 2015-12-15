@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Model &mdash; tk-framework-shotgunutils v4.0.1 documentation</title>
+  <title>Shotgun Model &mdash; tk-framework-shotgunutils v4.0.3 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.0.1 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.0.3 documentation" href="index.html"/>
         <link rel="next" title="Shotgun Asynchronous Data Retriever" href="shotgun_data.html"/>
         <link rel="prev" title="The Shotgun Utilities Framework" href="index.html"/> 
 
@@ -130,7 +130,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.0.1.<br>
+    <b>tk-framework-shotgunutils</b> v4.0.3.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -580,6 +580,58 @@ this is None then a task manager will be created as needed.</li>
 </tr>
 </tbody>
 </table>
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel._ShotgunModel__create_item">
+<code class="descname">_ShotgunModel__create_item</code><span class="sig-paren">(</span><em>field_display_name</em>, <em>field</em>, <em>is_leaf</em>, <em>sg_item</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunModel._ShotgunModel__create_item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a model item for the tree.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>field_display_name</strong> &#8211; Name of the entry in the UI.</li>
+<li><strong>field</strong> &#8211; Name of the field in the entity dictionary.</li>
+<li><strong>is_leaf</strong> &#8211; Is this a leaf item?</li>
+<li><strong>sg_item</strong> &#8211; Entity dictionary.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">ShotgunStandardItem instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel._ShotgunModel__populate_complete_tree">
+<code class="descname">_ShotgunModel__populate_complete_tree</code><span class="sig-paren">(</span><em>sg_data</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunModel._ShotgunModel__populate_complete_tree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate tree model data structure based on Shotgun data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sg_data</strong> &#8211; List of shotgun entity dictionairies.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel._ShotgunModel__realize_parent_child_hierarchy_r">
+<code class="descname">_ShotgunModel__realize_parent_child_hierarchy_r</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunModel._ShotgunModel__realize_parent_child_hierarchy_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inserts all children nodes alphabetically into their parent, recursively.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> &#8211; Dictionary with keys &#8216;item&#8217; and &#8216;children&#8217; representing a ShotgunStandardItem and a list
+of ShotgunStandardItem to be appended as rows of &#8216;item&#8217;.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel._before_data_processing">
 <code class="descname">_before_data_processing</code><span class="sig-paren">(</span><em>sg_data_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._before_data_processing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._before_data_processing" title="Permalink to this definition">¶</a></dt>
@@ -1108,7 +1160,7 @@ Returns none if not found.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v4.0.1',
+            VERSION:'v4.0.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
