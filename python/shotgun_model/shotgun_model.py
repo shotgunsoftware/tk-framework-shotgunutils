@@ -29,51 +29,51 @@ class ShotgunModelError(tank.TankError):
 class CacheReadVersionMismatch(ShotgunModelError):
     """Indicates that a cache file is incompatible with this code"""
     pass
-    
+
 
 class ShotgunModel(QtGui.QStandardItemModel):
     """
     A QT Model representing a Shotgun query.
 
-    This class implements a standard  :class:`~PySide.QtCore.QAbstractItemModel` 
-    specialized to hold the contents of a particular Shotgun query. It is cached 
+    This class implements a standard  :class:`~PySide.QtCore.QAbstractItemModel`
+    specialized to hold the contents of a particular Shotgun query. It is cached
     and refreshes its data asynchronously.
 
     In order to use this class, you normally subclass it and implement certain key data
     methods for setting up queries, customizing etc. Then you connect your class to
     a :class:`~PySide.QtGui.QAbstractItemView` of some sort which will display the result. If you need to do manipulations
-    such as sorting or filtering on the data, connect a proxy model (typically :class:`~PySide.QtGui.QSortFilterProxyModel`) 
+    such as sorting or filtering on the data, connect a proxy model (typically :class:`~PySide.QtGui.QSortFilterProxyModel`)
     between your class and the view.
-    
+
     :signal query_changed(): Gets emitted whenever the model's sg query is changed.
         When the query changes, the contents of the model is cleared and the
         loading of new data is initiated.
-        
+
     :signal cache_loaded(): Emitted whenever the model loads cache data.
         This typically follows shortly after a query changed signal, if
         cache data is available.
-    
+
     :signal data_refreshing(): Emitted whenever the model starts to refresh its
-        shotgun data. This is emitted from :meth:`_refresh_data()`.  Useful 
+        shotgun data. This is emitted from :meth:`_refresh_data()`.  Useful
         signal if you want to present a loading indicator of some kind.
-        
+
     :signal data_refreshed(bool): Emitted whenever the model has been updated with fresh
         shotgun data. The boolean indicates that a change in the model data has
         taken place as part of this process. If the refresh fails for some reason,
-        this signal may not be emitted. The synchronous data refresh cycle starts 
-        with a call to :meth:`_refresh_data()` and normally ends with either a 
+        this signal may not be emitted. The synchronous data refresh cycle starts
+        with a call to :meth:`_refresh_data()` and normally ends with either a
         data_refreshed or a data_refresh_fail signal being emitted.
-        
+
     :signal data_refresh_fail(): Emitted in the case the refresh fails for some reason,
         typically due to the absence of an internet connection. This signal could
         for example be used to drive a "retry" button of some kind. The str
         parameter carries an error message with details about why the
         refresh wasn't successful.
 
-    :constant SG_DATA_ROLE: Custom model role that holds the 
+    :constant SG_DATA_ROLE: Custom model role that holds the
         associated value. See :ref:`sg-model-data-items`.
-        
-    :constant SG_ASSOCIATED_FIELD_ROLE: Custom model role that holds the 
+
+    :constant SG_ASSOCIATED_FIELD_ROLE: Custom model role that holds the
         shotgun data payload. See :ref:`sg-model-data-items`.
     """
 
@@ -83,19 +83,19 @@ class ShotgunModel(QtGui.QStandardItemModel):
     # signal which gets emitted whenever the model loads cache data.
     cache_loaded = QtCore.Signal()
 
-    # signal which gets emitted whenever the model starts to refresh its shotgun data. 
+    # signal which gets emitted whenever the model starts to refresh its shotgun data.
     data_refreshing = QtCore.Signal()
 
-    # signal which gets emitted whenever the model has been updated with fresh shotgun data. 
+    # signal which gets emitted whenever the model has been updated with fresh shotgun data.
     data_refreshed = QtCore.Signal(bool)
 
     # signal which gets emitted in the case the refresh fails
     data_refresh_fail = QtCore.Signal(str)
 
-    # Custom model role that holds the shotgun data payload. 
+    # Custom model role that holds the shotgun data payload.
     SG_DATA_ROLE = QtCore.Qt.UserRole + 1
-    
-    # Custom model role that holds the associated value. 
+
+    # Custom model role that holds the associated value.
     SG_ASSOCIATED_FIELD_ROLE = QtCore.Qt.UserRole + 3
 
     # internal constants - please do not access directly but instead use the helper
@@ -116,7 +116,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         :param schema_generation: Schema generation number. Advanced parameter. If your
                                   shotgun model contains logic in subclassed methods
                                   that modify the shotgun data prior to it being put into
-                                  the cache system that the ShotgunModel maintains, you can 
+                                  the cache system that the ShotgunModel maintains, you can
                                   use this option to ensure that different versions of the code
                                   access different caches. If you change your custom business logic
                                   around and update the generation number, both new and old
@@ -235,12 +235,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         If you execute the get_filters() on a status node in the tree, it may return::
 
-            [ 
+            [
               ['sg_sequence', 'is', {'type': 'Sequence', 'id': 123, 'name': 'foo'}],
-              ['sg_status', 'is', 'ip'] 
+              ['sg_status', 'is', 'ip']
             ]
 
-        :param item: One of the :class:`~PySide.QtGui.QStandardItem`s that are 
+        :param item: One of the :class:`~PySide.QtGui.QStandardItem`s that are
                      associated with this model.
         :returns: standard shotgun filter list to represent that item
         """
@@ -298,7 +298,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
     def clear(self):
         """
-        Removes all items (including header items) from the model and 
+        Removes all items (including header items) from the model and
         sets the number of rows and columns to zero.
         """
         # Advertise that the model is about to completely cleared. This is super important because proxy
@@ -308,7 +308,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         try:
             # note! We are reimplementing this explicitly because the default implementation
             # results in memory issues - similar to reset(), scenarios where objects are constructed
-            # in python (e.g. qstandarditems) and then handed over to a model and then subsequently 
+            # in python (e.g. qstandarditems) and then handed over to a model and then subsequently
             # cleared and deallocated by QT itself (on the C++ side) often results in dangling pointers
             # across the pyside/QT boundary, ultimately resulting in crashes or instability.
 
@@ -347,7 +347,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Reimplements QAbstractItemModel:reset() by 'sealing it' so that
         it cannot be executed by calling code easily. This is because the reset method
         often results in crashes and instability because of how PySide/QT manages memory.
-        
+
         For more information, see the clear() method.
         """
         raise NotImplementedError("The QAbstractItemModel::reset method has been explicitly been disabled "
@@ -434,7 +434,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # the file name and path based on several parameters.
         # the path will be on the form CACHE_LOCATION/cached_sg_queries/EntityType/params_hash/filter_hash
         #
-        # params_hash is an md5 hash representing all parameters going into a particular  
+        # params_hash is an md5 hash representing all parameters going into a particular
         # query setup and filters_hash is an md5 hash of the filter conditions.
         #
         # the reason these are split up is because the params tend to be constant and
@@ -450,13 +450,13 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # top level folder containing a series of cache files
         # all for different filters.
         #
-        # the schema generation is used for advanced implementations 
+        # the schema generation is used for advanced implementations
         # See constructor docstring for details.
-        # 
-        # bg_load_thumbs is hashed so that the system can cache 
+        #
+        # bg_load_thumbs is hashed so that the system can cache
         # thumb and non-thumb caches independently. This is because
         # as soon as you start caching thumbnails, qpixmap will be used
-        # internally by the serialization and this means that you get 
+        # internally by the serialization and this means that you get
         # warnings if you try to use those caches in threads. By keeping
         # caches separate, there is no risk that a thumb cache 'pollutes'
         # a non-thumb cache.
@@ -475,19 +475,19 @@ class ShotgunModel(QtGui.QStandardItemModel):
         filter_hash = hashlib.md5()
         filter_hash.update(str(self.__filters))
         params_hash.update(str(seed))
-        
+
         # organize files on disk based on entity type and then filter hash
         # keep extension names etc short in order to stay away from MAX_PATH
         # on windows.
-        self.__full_cache_path = os.path.join(self._bundle.cache_location, 
-                                              "sg", 
+        self.__full_cache_path = os.path.join(self._bundle.cache_location,
+                                              "sg",
                                               self.__entity_type,
                                               params_hash.hexdigest(),
                                               filter_hash.hexdigest())
-        
+
         if sys.platform == "win32" and len(self.__full_cache_path) > 250:
             self.__log_warning("Cache file path may be affected by windows MAX_PATH limitation.")
-        
+
         self.__log_debug("")
         self.__log_debug("Model Reset for %s" % self)
         self.__log_debug("Entity type: %s" % self.__entity_type)
@@ -525,9 +525,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
         The update will be applied whenever the data from Shotgun is returned.
 
         If the model is empty (no cached data) no data will be shown at first
-        while the model fetches data from Shotgun. 
-        
-        As soon as a local cache exists, data is shown straight away and the 
+        while the model fetches data from Shotgun.
+
+        As soon as a local cache exists, data is shown straight away and the
         shotgun update happens silently in the background.
 
         If data has been added, this will be injected into the existing structure.
@@ -544,7 +544,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # Stop any queued work that hasn't completed yet.  Note that we intentionally only stop the
         # find query and not the thumbnail cache/download.  This is because the thumbnails returned
         # are likely to still be valid for the current data in the model and if they are stopped then
-        # the pattern 'create model->load cached->refresh from sg' would result in empty icons being 
+        # the pattern 'create model->load cached->refresh from sg' would result in empty icons being
         # presented to the user until the shotgun query has completed!
         #
         # This may result in unnecessary thumbnail downloads from Shotgun but in all likelihood, the
@@ -605,10 +605,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
         if not self.__sg_data_retriever:
             raise TankError("Data retriever is not available!")
 
-        uid = self.__sg_data_retriever.request_thumbnail(url, 
-                                                         entity_type, 
-                                                         entity_id, 
-                                                         field, 
+        uid = self.__sg_data_retriever.request_thumbnail(url,
+                                                         entity_type,
+                                                         entity_id,
+                                                         field,
                                                          self.__bg_load_thumbs)
 
         # keep tabs of this and call out later - note that we use a weakref to allow
@@ -660,7 +660,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         picked up from local cache if possible). When these real thumbnails arrive, the
         meth:`_populate_thumbnail()` method will be called.
 
-        :param item: :class:`~PySide.QtGui.QStandardItem` that is about to be added to the model. 
+        :param item: :class:`~PySide.QtGui.QStandardItem` that is about to be added to the model.
             This has been primed with the standard settings that the ShotgunModel handles.
         """
         # the default implementation does nothing
@@ -669,15 +669,15 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         Called whenever an item is fully constructed, either because a shotgun query returned it
         or because it was loaded as part of a cache load from disk.
-        
-        .. note:: You can subclass this if you want to run post processing on 
+
+        .. note:: You can subclass this if you want to run post processing on
             the data as it is arriving. For example, if you are showing a list of
-            task statuses in a filter view, you may want to remember which 
+            task statuses in a filter view, you may want to remember which
             statuses a user had checked and unchecked the last time he was running
             the tool. By subclassing this UI you can easily apply those settings
-            before items appear in the UI. 
+            before items appear in the UI.
 
-        :param item: :class:`~PySide.QtGui.QStandardItem` that is about to be added to the model. 
+        :param item: :class:`~PySide.QtGui.QStandardItem` that is about to be added to the model.
             This has been primed with the standard settings that the ShotgunModel handles.
         """
         # the default implementation does nothing
@@ -723,9 +723,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
         when the bg_load_thumbs parameter has been set to true. In this case, no
         loading of thumbnail data from disk is necessary - this has already been
         carried out async and is passed in the form of a QImage object.
-    
+
         For further details, see :meth:`_populate_thumbnail()`
-        
+
         :param item: :class:`~PySide.QtGui.QStandardItem` which is associated with the given thumbnail
         :param field: The Shotgun field which the thumbnail is associated with.
         :param image: QImage object with the thumbnail loaded
@@ -738,13 +738,13 @@ class ShotgunModel(QtGui.QStandardItemModel):
     def _before_data_processing(self, sg_data_list):
         """
         Called just after data has been retrieved from Shotgun but before any processing
-        takes place. 
-        
-        .. note:: You can subclass this if you want to perform summaries, 
-            calculations and other manipulations of the data before it is 
+        takes place.
+
+        .. note:: You can subclass this if you want to perform summaries,
+            calculations and other manipulations of the data before it is
             passed on to the model class. For example, if you request the model
             to retrieve a list of versions from Shotgun given a Shot,
-            you can then subclass this method to cull out the data so that you 
+            you can then subclass this method to cull out the data so that you
             are only left with the latest version for each task. This method
             is often used in conjunction with the order parameter in :meth:`_load_data()`.
 
@@ -757,10 +757,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
     def _load_external_data(self):
         """
         Called whenever the model needs to be rebuilt from scratch. This is called prior
-        to any shotgun data is added to the model. 
-        
-        .. note:: You can subclass this to add custom data to the model in a very 
-            flexible fashion. If you for example are loading published files from 
+        to any shotgun data is added to the model.
+
+        .. note:: You can subclass this to add custom data to the model in a very
+            flexible fashion. If you for example are loading published files from
             Shotgun, you could use this to load up a listing of files on disk,
             resulting in a model that shows both published files and local files.
             External data will not be cached by the ShotgunModel framework.
@@ -1002,14 +1002,14 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Omits thumbnail fields because these change all the time (S3).
         Both inputs are assumed to contain utf-8 encoded data.
         """
-        # handle file attachment data as a special case. If the attachment has been uploaded, 
+        # handle file attachment data as a special case. If the attachment has been uploaded,
         # it will contain an amazon url.
-        #  
+        #
         # example:
         # {'name': 'review_2015-05-13_16-53.mov',
         #  'url': 'https://....',
-        #  'content_type': 'video/quicktime', 
-        #  'type': 'Attachment', 
+        #  'content_type': 'video/quicktime',
+        #  'type': 'Attachment',
         #  'id': 24919,
         #  'link_type': 'upload'}
         #
@@ -1017,7 +1017,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # keep it simple here. if both values are dicts, iterate
             # over each of the keys and compare them separately
             # S3 string equality will be automatically handled by
-            # the logic above. 
+            # the logic above.
             for a_key in a.keys():
                 if not self.__sg_compare_data(a.get(a_key), b.get(a_key)):
                     return False
@@ -1028,7 +1028,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # https://sg-media-usor-01.s3.amazonaws.com/xxx/yyy/filename.ext?lots_of_authentication_headers
         #
         # the query string changes all the times, so when we check if an item is out of date, omit it.
-        elif (isinstance(a, str) and isinstance(b, str) 
+        elif (isinstance(a, str) and isinstance(b, str)
               and a.startswith("http") and b.startswith("http")
               and ("amazonaws" in a or "AccessKeyId" in a)):
             # attempt to parse values are urls and eliminate the querystring
@@ -1078,7 +1078,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             if on_leaf_level:
                 # compare shotgun ids
                 sg_data = child.data(self.SG_DATA_ROLE)
-                
+
                 # #25231 some clients reporting some child items don't have this data attached
                 # this is either because of a bug which we don't yet fully understand or beacuse
                 # of model data injected into the tree which does not have this property set
@@ -1092,7 +1092,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                     if sg_data.get("id") == sg_item.get("id"):
                         found_item = child
                         break
-                
+
             else:
                 # not on leaf level. Just compare names
                 if str(child.text()) == field_display_name:
@@ -1235,7 +1235,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # root to the leaves. Using a dictionary of children allows us to do a quick
         # lookup to see if a child node needs to be created or can be reused. We will
         # be actually parenting the ShotgunStandardItems to other ShotgunStandardItems
-        # in the second pass when we have the complete list of children and can 
+        # in the second pass when we have the complete list of children and can
         # proceed on sorting them by name before insertion into the parent.
         #
         # Note that in the following algorithm two different non-leaf entities with
@@ -1354,7 +1354,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # write a header
                 out_stream.writeInt64(self.FILE_MAGIC_NUMBER)
                 out_stream.writeInt32(self.FILE_VERSION)
-        
+
                 # todo: if it turns out that there are ongoing issues with
                 # md5 cache collisions, we could write the actual query parameters
                 # to the header of the cache file here and compare that against the
