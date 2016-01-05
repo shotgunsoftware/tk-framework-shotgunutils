@@ -21,6 +21,8 @@ import weakref
 from tank.platform.qt import QtCore, QtGui
 from .shotgun_standard_item import ShotgunStandardItem
 from .util import get_sanitized_data, get_sg_data, sanitize_qt, sanitize_for_qt_model
+from ..shotgun_globals import get_field_display_name, get_type_display_name
+
 
 class ShotgunModelError(tank.TankError):
     """Base class for all shotgun model exceptions"""
@@ -682,6 +684,60 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         # the default implementation does nothing
 
+    def _set_tooltip(self, item, sg_item):
+        """
+        Called whenever an item is constructed and needs a tooltip.
+
+        .. note:: You can subclass this if you want to set your own tooltip for the model item. By
+            default, the SG_ASSOCIATED_FIELD_ROLE data is retrieved and the field name is used to
+            determine which field to pick tooltip information from.
+            - If the field is an entity (e.g. entity), then the display name of that entity's type
+              will be used. (1)
+            - If the field is part of a sub-entity (e.g entity.Asset.sg_asset_type), the display
+              name of the sub-entity's type followed by '-' and the sub-entity's field display name
+              will be used. (2)
+            - If the field is part of an entity and not an entity field(e.g. content), the display
+              name of the entity's type will be used. (3)
+            For example:
+            {
+                "type": "Task",
+                "entity": { <-- (1) Tooltip becomes "Asset"
+                    "sg_asset_type: "Character", <-- (2) Tooltip becomes "Asset - Type"
+                    "type": "Asset",
+                    "code": "Alice"
+                },
+                "content": "Art" <-- (3) Tooltip becomes "Task"
+            }
+
+        :param item: Shotgun model item that requires a tooltip.
+        :param sg_item: Dictionary of the entity associated with the Shotgun model item.
+        """
+
+        data = item.data(self.SG_ASSOCIATED_FIELD_ROLE)
+        field = data["name"]
+
+        # We're creating a model item based on a linked field from an entity, so we'll use that linked
+        # item's type as the tooltip for this model item.
+        if isinstance(sg_item[field], dict) and "type" in sg_item[field]:
+            item.setToolTip(get_type_display_name(sg_item[field]["type"]))
+        # If we are creating the model item from the field on the entity itself, we'll also add a tooltip
+        # for it.
+        elif "." not in field:
+            item.setToolTip(get_type_display_name(sg_item["type"]))
+        else:
+            # If we are creating the model item based on the name of a sub entity,
+            # we'll use the field name instead.
+            # For example:
+            # {"type": "Task", "entity": {"type": "Asset", "sg_asset_type": ""}}
+            # This would yield Type, which is the display name of the sg_asset_type column.
+            _, sub_entity_type, sub_entity_field_name = field.split(".")
+            item.setToolTip(
+                "%s - %s" % (
+                    get_type_display_name(sub_entity_type),
+                    get_field_display_name(sub_entity_type, sub_entity_field_name)
+                )
+            )
+
     def _populate_thumbnail(self, item, field, path):
         """
         Called whenever the real thumbnail for an item exists on disk. The following
@@ -1192,6 +1248,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         else:
             self._populate_item(item, None)
 
+        self._set_tooltip(item, sg_item)
+
         # run the finalizer (always runs on construction, even via cache)
         self._finalize_item(item)
 
@@ -1295,15 +1353,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
         value = sg_data.get(field)
 
         if isinstance(value, dict) and "name" in value and "type" in value:
-            # This is a link field, so display it with type
-            # use the display name for the entity type
-            et_display_name = tank.util.get_entity_type_display_name(self._bundle.tank, value["type"])
-
             if value["name"] is None:
-                # "Unnamed Sequence"
-                return "Unnamed %s" % et_display_name
+                return "Unnamed"
             else:
-                return "%s %s" % (et_display_name, value["name"])
+                return value["name"]
 
         elif isinstance(value, list):
             # this is a list of some sort. Loop over all elements and extrat a comma separated list.
@@ -1322,9 +1375,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             return ", ".join(formatted_values)
 
         elif value is None:
-            # this is an empty link field, undefined enum or leaf node which has no value set
-            et_display_name = tank.util.get_entity_type_display_name(self._bundle.tank, sg_data.get("type"))
-            return "Unnamed %s" % et_display_name
+            return "Unnamed"
 
         else:
             # everything else just cast to string
@@ -1454,6 +1505,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # serialized items do not contain a full high rez thumb, so
                 # re-create that. First, set the default thumbnail
                 self._populate_default_thumbnail(item)
+
+                # Since we've written this cached copy of the model the cached schema might have
+                # been updated so recompute the tooltips so they don't stay stuck with the old
+                # values. Otherwise as long as the model is not updated it will show invalid
+                # tooltips.
+                self._set_tooltip(item, sg_data)
 
                 # run the finalize method so that subclasses
                 # can do any setup they need
