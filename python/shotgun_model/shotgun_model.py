@@ -686,7 +686,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
     def _set_tooltip(self, item, sg_item):
         """
-        Called whenever an item is constructed and needs a tooltip.
+        Called when an item is constructed for the first time.
 
         .. note:: You can subclass this if you want to set your own tooltip for the model item. By
             default, the SG_ASSOCIATED_FIELD_ROLE data is retrieved and the field name is used to
@@ -716,20 +716,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
         data = item.data(self.SG_ASSOCIATED_FIELD_ROLE)
         field = data["name"]
 
-        # We're creating a model item based on a linked field from an entity, so we'll use that linked
-        # item's type as the tooltip for this model item.
         if isinstance(sg_item[field], dict) and "type" in sg_item[field]:
+            # This is scenario 1 described above.
             item.setToolTip(get_type_display_name(sg_item[field]["type"]))
-        # If we are creating the model item from the field on the entity itself, we'll also add a tooltip
-        # for it.
-        elif "." not in field:
-            item.setToolTip(get_type_display_name(sg_item["type"]))
-        else:
-            # If we are creating the model item based on the name of a sub entity,
-            # we'll use the field name instead.
-            # For example:
-            # {"type": "Task", "entity": {"type": "Asset", "sg_asset_type": ""}}
-            # This would yield Type, which is the display name of the sg_asset_type column.
+        elif "." in field:
+            # This is scenario 2 described above.
             _, sub_entity_type, sub_entity_field_name = field.split(".")
             item.setToolTip(
                 "%s - %s" % (
@@ -737,6 +728,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
                     get_field_display_name(sub_entity_type, sub_entity_field_name)
                 )
             )
+        else:
+            # This is scenario 3 described above.
+            item.setToolTip(get_type_display_name(sg_item["type"]))
 
     def _populate_thumbnail(self, item, field, path):
         """
@@ -1505,12 +1499,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # serialized items do not contain a full high rez thumb, so
                 # re-create that. First, set the default thumbnail
                 self._populate_default_thumbnail(item)
-
-                # Since we've written this cached copy of the model the cached schema might have
-                # been updated so recompute the tooltips so they don't stay stuck with the old
-                # values. Otherwise as long as the model is not updated it will show invalid
-                # tooltips.
-                self._set_tooltip(item, sg_data)
 
                 # run the finalize method so that subclasses
                 # can do any setup they need
