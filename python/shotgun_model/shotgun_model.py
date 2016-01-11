@@ -686,7 +686,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
     def _set_tooltip(self, item, sg_item):
         """
-        Called when an item is constructed for the first time.
+        Called when an item is created.
 
         .. note:: You can subclass this if you want to set your own tooltip for the model item. By
             default, the SG_ASSOCIATED_FIELD_ROLE data is retrieved and the field name is used to
@@ -701,12 +701,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
             For example:
             {
                 "type": "Task",
-                "entity": { <-- (1) Tooltip becomes "Asset"
-                    "sg_asset_type: "Character", <-- (2) Tooltip becomes "Asset - Type"
+                "entity": { <-- (1) Tooltip becomes "Asset 'Alice'"
+                    "sg_asset_type: "Character", <-- (2) Tooltip becomes "Link > Type 'Character'"
                     "type": "Asset",
                     "code": "Alice"
                 },
-                "content": "Art" <-- (3) Tooltip becomes "Task"
+                "content": "Art" <-- (3) Tooltip becomes "Task 'Art'"
             }
 
         :param item: Shotgun model item that requires a tooltip.
@@ -718,19 +718,30 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         if isinstance(sg_item[field], dict) and "type" in sg_item[field]:
             # This is scenario 1 described above.
-            item.setToolTip(get_type_display_name(sg_item[field]["type"]))
+            item.setToolTip(
+                "%s '%s'" % (
+                    get_type_display_name(sg_item[field]["type"]),
+                    item.text()
+                )
+            )
         elif "." in field:
             # This is scenario 2 described above.
             _, sub_entity_type, sub_entity_field_name = field.split(".")
             item.setToolTip(
-                "%s - %s" % (
+                "%s %s '%s'" % (
                     get_type_display_name(sub_entity_type),
-                    get_field_display_name(sub_entity_type, sub_entity_field_name)
+                    get_field_display_name(sub_entity_type, sub_entity_field_name),
+                    item.text()
                 )
             )
         else:
             # This is scenario 3 described above.
-            item.setToolTip(get_type_display_name(sg_item["type"]))
+            item.setToolTip(
+                "%s '%s'" % (
+                    get_type_display_name(sg_item["type"]),
+                    item.text()
+                )
+            )
 
     def _populate_thumbnail(self, item, field, path):
         """
