@@ -21,7 +21,6 @@ import weakref
 from tank.platform.qt import QtCore, QtGui
 from .shotgun_standard_item import ShotgunStandardItem
 from .util import get_sanitized_data, get_sg_data, sanitize_qt, sanitize_for_qt_model
-from ..shotgun_globals import get_field_display_name, get_type_display_name
 
 
 class ShotgunModelError(tank.TankError):
@@ -131,6 +130,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
         QtGui.QStandardItemModel.__init__(self, parent)
 
         self._bundle = tank.platform.current_bundle()
+
+        # importing locally to not trip sphinx's imports.
+        self._shotgun_globals = self._bundle.import_module("shotgun_globals")
 
         self.__schema_generation = schema_generation
         self.__full_cache_path = None
@@ -691,23 +693,32 @@ class ShotgunModel(QtGui.QStandardItemModel):
         .. note:: You can subclass this if you want to set your own tooltip for the model item. By
             default, the SG_ASSOCIATED_FIELD_ROLE data is retrieved and the field name is used to
             determine which field to pick tooltip information from.
-            - If the field is an entity (e.g. entity), then the display name of that entity's type
-              will be used. (1)
-            - If the field is part of a sub-entity (e.g entity.Asset.sg_asset_type), the display
-              name of the sub-entity's type followed by '-' and the sub-entity's field display name
-              will be used. (2)
-            - If the field is part of an entity and not an entity field(e.g. content), the display
-              name of the entity's type will be used. (3)
-            For example:
-            {
-                "type": "Task",
-                "entity": { <-- (1) Tooltip becomes "Asset 'Alice'"
-                    "sg_asset_type: "Character", <-- (2) Tooltip becomes "Link > Type 'Character'"
-                    "type": "Asset",
-                    "code": "Alice"
-                },
-                "content": "Art" <-- (3) Tooltip becomes "Task 'Art'"
-            }
+
+            For example,
+
+            .. code-block:: python
+
+               {
+                   "type": "Task",
+                   "entity": {                       # (1) Tooltip becomes "Asset 'Alice'"
+                       "sg_asset_type": "Character", # (2) Tooltip becomes "Asset Type 'Character'"
+                       "type": "Asset",
+                       "code": "Alice"
+                   },
+                   "content": "Art"                  # (3) Tooltip becomes "Task 'Art'"
+               }
+
+            1) If the field is an entity (e.g. entity), then the display name of that entity's type
+            will be used.
+
+            2) If the field is part of a sub-entity (e.g entity.Asset.sg_asset_type), the display
+            name of the sub-entity's type followed by a space and the sub-entity's field display name
+            will be used.
+
+            3) If the field is part of an entity and not an entity field(e.g. content), the display
+            name of the entity's type will be used.
+
+            In all cases, the string ends with the quote name of ShotgunStandardItem.
 
         :param item: Shotgun model item that requires a tooltip.
         :param sg_item: Dictionary of the entity associated with the Shotgun model item.
@@ -720,7 +731,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # This is scenario 1 described above.
             item.setToolTip(
                 "%s '%s'" % (
-                    get_type_display_name(sg_item[field]["type"]),
+                    self._shotgun_globals.get_type_display_name(sg_item[field]["type"]),
                     item.text()
                 )
             )
@@ -729,8 +740,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
             _, sub_entity_type, sub_entity_field_name = field.split(".")
             item.setToolTip(
                 "%s %s '%s'" % (
-                    get_type_display_name(sub_entity_type),
-                    get_field_display_name(sub_entity_type, sub_entity_field_name),
+                    self._shotgun_globals.get_type_display_name(sub_entity_type),
+                    self._shotgun_globals.get_field_display_name(sub_entity_type, sub_entity_field_name),
                     item.text()
                 )
             )
@@ -738,7 +749,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # This is scenario 3 described above.
             item.setToolTip(
                 "%s '%s'" % (
-                    get_type_display_name(sg_item["type"]),
+                    self._shotgun_globals.get_type_display_name(sg_item["type"]),
                     item.text()
                 )
             )
