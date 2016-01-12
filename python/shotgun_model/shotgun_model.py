@@ -718,7 +718,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             3) If the field is part of an entity and not an entity field(e.g. content), the display
             name of the entity's type will be used.
 
-            In all cases, the string ends with the quote name of ShotgunStandardItem.
+            In all cases, the string ends with the quoted name of the ShotgunStandardItem.
 
         :param item: Shotgun model item that requires a tooltip.
         :param sg_item: Dictionary of the entity associated with the Shotgun model item.
