@@ -32,9 +32,14 @@ class CachedShotgunSchema(QtCore.QObject):
     further updates. If the cache fails to find a value, the technical 
     name rather than the display name is returned, so there is graceful
     fallback.
+
+    :signal schema_loaded: Fires when the schema has been loaded
+    :signal status_loaded: Fires when the status list has been loaded
     """
     __instance = None
-    
+    schema_loaded = QtCore.Signal()
+    status_loaded = QtCore.Signal()
+
     @classmethod
     def __get_instance(cls):
         """
@@ -64,8 +69,12 @@ class CachedShotgunSchema(QtCore.QObject):
 
         # load cached values from disk
         self._schema_loaded = self._load_cached_schema()
+        if self._schema_loaded:
+            self.schema_loaded.emit()
         self._status_loaded = self._load_cached_status()
-        
+        if self._status_loaded:
+            self.status_loaded.emit()
+
         self._schema_requested = False
         self._status_requested = False        
         
@@ -197,6 +206,8 @@ class CachedShotgunSchema(QtCore.QObject):
             # job done! set our load flags accordingly.
             self._schema_loaded = True
             self._schema_requested = True
+            self.schema_loaded.emit()
+
             # and write out the data to disk
             self._bundle.log_debug("Saving schema to '%s'..." % self._schema_cache_path)
             try:
@@ -215,11 +226,12 @@ class CachedShotgunSchema(QtCore.QObject):
             self._status_data = {}            
             for x in data["sg"]:
                 self._status_data[ x["code"] ] = x
-            
+
             # job done! set our load flags accordingly.
             self._status_loaded = True
             self._status_requested = True
-            
+            self.status_loaded.emit()
+
             # and write out the data to disk
             self._bundle.log_debug("Saving status to '%s'..." % self._status_cache_path)
             try:
@@ -280,6 +292,20 @@ class CachedShotgunSchema(QtCore.QObject):
                 culled_retrievers.append(dr)
 
         self.__sg_data_retrievers = culled_retrievers        
+
+    @classmethod
+    def run_on_schema_loaded(cls, callback):
+        """
+        Run the given callback once the schema is loaded.
+
+        :param callback: Method with no argument to run when the schema is loaded
+        """
+        self = cls.__get_instance()
+
+        if self._schema_loaded:
+            callback()
+        else:
+            self.schema_loaded.connect(callback)
 
     @classmethod
     def get_type_display_name(cls, sg_entity_type):
@@ -359,16 +385,32 @@ class CachedShotgunSchema(QtCore.QObject):
         self._check_schema_refresh(sg_entity_type, field_name)
         
         empty_value = "Not set"
-        
-        if sg_entity_type in self._type_schema and field_name in self._field_schema[sg_entity_type]:        
-            # cache contains our item
-            data = self._field_schema[sg_entity_type][field_name]
-            data_type = data["data_type"]["value"]
-            
+        try:
+            data_type = self.get_data_type(sg_entity_type, field_name)
             if data_type == "Entity":
                 empty_value = "Not set"
+        except Exception:
+            pass
 
         return empty_value
+
+    @classmethod
+    def get_data_type(cls, sg_entity_type, field_name):
+        """
+        Return the data type for the given Shotgun field.
+
+        :param sg_entity_type: Shotgun entity type
+        :param field_name: Shotgun field name
+        :returns: Data type string
+        """
+        self = cls.__get_instance()
+        self._check_schema_refresh(sg_entity_type, field_name)
+
+        if sg_entity_type in self._type_schema and field_name in self._field_schema[sg_entity_type]:
+            data = self._field_schema[sg_entity_type][field_name]
+            return data["data_type"]["value"]
+
+        raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
 
     @classmethod
     def get_status_display_name(cls, status_code):
