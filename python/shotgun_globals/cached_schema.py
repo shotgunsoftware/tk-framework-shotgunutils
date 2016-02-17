@@ -115,7 +115,7 @@ class CachedShotgunSchema(QtCore.QObject):
                                          "file '%s': %s" % (self._schema_cache_path, e))
         return cache_loaded            
             
-    def _check_schema_refresh(self, entity_type, field_name=None):
+    def _check_schema_refresh(self, entity_type=None, field_name=None):
         """
         Check and potentially trigger a cache refresh
         
@@ -307,6 +307,25 @@ class CachedShotgunSchema(QtCore.QObject):
         else:
             self.schema_loaded.connect(callback)
 
+            # kick off full schema loading
+            self._check_schema_refresh()
+
+    @classmethod
+    def get_entity_fields(cls, sg_entity_type):
+        """
+        Returns the fields for a Shotgun entity type.
+
+        :param sg_entity_type: Shotgun entity type
+        :returns: List of field names
+        """
+        self = cls.__get_instance()
+        self._check_schema_refresh(sg_entity_type)
+
+        if sg_entity_type in self._field_schema:
+            return self._field_schema[sg_entity_type].keys()
+        else:
+            return []
+
     @classmethod
     def get_type_display_name(cls, sg_entity_type):
         """
@@ -409,6 +428,29 @@ class CachedShotgunSchema(QtCore.QObject):
         if sg_entity_type in self._type_schema and field_name in self._field_schema[sg_entity_type]:
             data = self._field_schema[sg_entity_type][field_name]
             return data["data_type"]["value"]
+
+        raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
+
+    @classmethod
+    def get_valid_types(cls, sg_entity_type, field_name):
+        """
+        Return the valid entity types that the given Shotgun field can link to.
+
+        :param sg_entity_type: Shotgun entity type
+        :param field_name: Shotgun field name
+        :returns: List of entity types
+        """
+        self = cls.__get_instance()
+        self._check_schema_refresh(sg_entity_type, field_name)
+
+        if sg_entity_type in self._type_schema and field_name in self._field_schema[sg_entity_type]:
+            data = self._field_schema[sg_entity_type][field_name]
+            valid_types = data.get("properties", {}).get("valid_types", {}).get("value")
+
+            if valid_types is None:
+                raise ValueError("The data type for %s.%s does not have valid types" % (sg_entity_type, field_name))
+
+            return valid_types
 
         raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
 
