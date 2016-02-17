@@ -115,7 +115,7 @@ class CachedShotgunSchema(QtCore.QObject):
                                          "file '%s': %s" % (self._schema_cache_path, e))
         return cache_loaded            
             
-    def _check_schema_refresh(self, entity_type, field_name=None):
+    def _check_schema_refresh(self, entity_type=None, field_name=None):
         """
         Check and potentially trigger a cache refresh
         
@@ -306,6 +306,9 @@ class CachedShotgunSchema(QtCore.QObject):
             callback()
         else:
             self.schema_loaded.connect(callback)
+
+            # kick off full schema loading
+            self._check_schema_refresh()
 
     @classmethod
     def get_entity_fields(cls, sg_entity_type):
