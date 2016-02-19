@@ -75,7 +75,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
         associated value. See :ref:`sg-model-data-items`.
 
     :constant SG_ASSOCIATED_FIELD_ROLE: Custom model role that holds the
-        shotgun data payload. See :ref:`sg-model-data-items`.
+        shotgun data payload. See :ref:`sg-model-data-items`.  This role will also hold
+        the field value for the Shotgun entity for any items that are created for additional
+        columns.
     """
 
     # signal which gets emitted whenever the model's sg query is changed.
@@ -107,6 +109,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
     # version of binary format
     FILE_VERSION = 22
 
+    # header value for the first column
+    FIRST_COLUMN_HEADER = "Name"
 
     def __init__(self, parent, download_thumbs=True, schema_generation=0, bg_load_thumbs=True, bg_task_manager=None):
         """
@@ -267,6 +271,17 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         return self.__entity_type
 
+    def get_additional_column_fields(self):
+        """
+        Returns the fields for additional columns and their associated column in the model.
+
+        :returns: A list of dictionaries with the following keys:
+            "field": the requested additional field for the column
+            "column_idx": the column number in the model associated with the additional field
+        """
+        # column is one greater than the index because of the default initial column
+        return [{"column_idx": i+1, "field": field} for (i, field) in enumerate(self.__column_fields)]
+
     def hard_refresh(self):
         """
         Clears any caches on disk, then refreshes the data.
@@ -367,7 +382,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
     ########################################################################################
     # protected methods not meant to be subclassed but meant to be called by subclasses
 
-    def _load_data(self, entity_type, filters, hierarchy, fields, order=None, seed=None, limit=None):
+    def _load_data(self, entity_type, filters, hierarchy, fields, order=None, seed=None, limit=None, columns=None):
         """
         This is the main method to use to configure the model. You basically
         pass a specific find query to the model and it will start tracking
@@ -417,6 +432,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
                           parameter, this can be used to effectively cap the data set that the model
                           is handling, allowing a user to for example show the twenty most recent notes or
                           similar.
+        :param columns:   If columns is specified, then any leaf row in the model will have columns created where
+                          each column in the row contains the value for the corresponding field from columns. This means
+                          that the data from the loaded entity will be available field by field. Subclasses can modify
+                          this behavior by overriding _get_additional_columns.
 
         :returns:         True if cached data was loaded, False if not.
         """
@@ -432,6 +451,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__fields = fields
         self.__order = order or []
         self.__hierarchy = hierarchy
+        self.__column_fields = columns or []
         self.__limit = limit or 0 # 0 means get all matches
 
         # when we cache the data associated with this model, create
@@ -500,6 +520,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__log_debug("Hierarchy: %s" % self.__hierarchy)
         self.__log_debug("Fields: %s" % self.__fields)
         self.__log_debug("Order: %s" % self.__order)
+        self.__log_debug("Columns: %s" % self.__column_fields)
 
         self.__log_debug("First population pass: Calling _load_external_data()")
         self._load_external_data()
@@ -519,6 +540,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
             except Exception, e:
                 self.__log_debug("Couldn't load cache data from disk. Will proceed with "
                                 "full SG load. Error reported: %s" % e)
+
+        # set our headers
+        headers = [self.FIRST_COLUMN_HEADER] + \
+            self._get_additional_column_headers(self.__entity_type, self.__column_fields)
+        self.setHorizontalHeaderLabels(headers)
 
         return loaded_cache_data
 
@@ -567,10 +593,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
             self.__on_sg_data_arrived([])
         else:
             # get data from shotgun - list/set cast to ensure unique fields
+            fields = self.__hierarchy + self.__fields + self.__column_fields
             if self.__download_thumbs:
-                fields = list(set(self.__hierarchy + self.__fields + ["image"]))
-            else:
-                fields = list(set(self.__hierarchy + self.__fields))
+                fields = fields + ["image"]
+            fields = list(set(fields))
 
             self.__current_work_id = self.__sg_data_retriever.execute_find(self.__entity_type,
                                                                            self.__filters,
@@ -840,6 +866,62 @@ class ShotgunModel(QtGui.QStandardItemModel):
         :returns: list of :class:`~PySide.QtGui.QStandardItem`
         """
         pass
+
+    def _get_additional_columns(self, primary_item, is_leaf, columns):
+        """
+        Called when an item is about to be inserted into the model, to get additional items
+        to be included in the same row as the specified item. This provides an opportunity
+        for subclasses to create one or more additional columns for each item in the model.
+
+        Note that this method is always called before inserting an item, even when loading
+        from the cache. Any data that is expensive to compute or query should be added
+        to the ShotgunStandardItem in _populate_item, since column data is not cached.
+        Also note that item population methods (_populate_item, _populate_thumbnail, etc)
+        will not be called on the return columns.
+
+        This method should return a list of QStandardItems, one for each additional column.
+        The original ShotgunStandardItem is always the first item in each row and should
+        NOT be included in the returned list. Any empty value returned by this method
+        is guaranteed to be treated as an empty list (i.e. you may return None).
+
+        This method is called after _finalize_item.
+
+        :param primary_item: :class:`~PySide.QtGui.QStandardItem` that is about to be added to the model
+        :param is_leaf: boolean that is True if the item is a leaf item
+        :param columns: list of Shotgun field names requested as the columns from _load_data
+
+        :returns: list of :class:`~PySide.QtGui.QStandardItem`
+        """
+        # default implementation will create items for the given fields from the item if it is a leaf
+        # with the display role being the string value for the field and the actual data value in
+        # SG_ASSOCIATED_FIELD_ROLE
+        items = []
+
+        if is_leaf and columns:
+            data = get_sg_data(primary_item)
+            for column in columns:
+                # set the display role to the string representation of the value
+                column_item = QtGui.QStandardItem(self._generate_display_name(column, data))
+
+                # set associated field role to be the column value itself
+                value = data.get(column)
+                column_item.setData(sanitize_for_qt_model(value), self.SG_ASSOCIATED_FIELD_ROLE)
+
+                items.append(column_item)
+
+        return items
+
+    def _get_additional_column_headers(self, entity_type, columns):
+        """
+        Called to set the headers for the additional columns requested from _load_data.
+
+        :param entity_type: type name of the entity the columns are for
+        :param columns: list of Shotgun field names requested as the columns from _load_data
+
+        :returns: list of strings to use as the headers
+        """
+        # default implementation will set the headers to the display names for the fields
+        return [self._shotgun_globals.get_field_display_name(entity_type, c) for c in columns]
 
     ########################################################################################
     # private methods
@@ -1176,8 +1258,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # didn't find item! So let's create it!
             found_item = self.__create_item(field_display_name, field, on_leaf_level, sg_item)
 
+            # get a complete row containing all columns for the current item
+            row = self.__get_columns(found_item, on_leaf_level)
+
             # add it to the tree. At this point QT will fire off various signals to inform views etc.
-            root.appendRow(found_item)
+            root.appendRow(row)
 
         if not on_leaf_level:
             # there are more levels that we should recurse down into
@@ -1291,7 +1376,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # children are always sorted alphabetically underneath their parent.
         for child_key in sorted(children.keys(), cmp=lambda x,y: cmp(x.lower(), y.lower())):
             child = children[child_key]
-            node["item"].appendRow(child["item"])
+
+            on_leaf_level = not bool(child.get("children"))
+            row = self.__get_columns(child["item"], on_leaf_level)
+            node["item"].appendRow(row)
             self.__realize_parent_child_hierarchy_r(child)
 
     def __populate_complete_tree(self, sg_data):
@@ -1396,6 +1484,22 @@ class ShotgunModel(QtGui.QStandardItemModel):
         else:
             # everything else just cast to string
             return str(value)
+
+    def __get_columns(self, item, is_leaf):
+        """
+        Returns a row (list of QStandardItems) given an initial QStandardItem.  The item itself
+        is always the first item in the row, but additional columns may be appended.
+
+        :param item: A :class:`~PySide.QtGui.QStandardItem` that is associated with this model.
+        :param is_leaf: A boolean indicating if the item is a leaf item or not
+
+        :returns: A list of :class:`~PySide.QtGui.QStandardItem`s
+        """
+        # the first item in the row is always the standard shotgun model item,
+        # but subclasses may provide additional columns to be appended.
+        row = [item]
+        row.extend(self._get_additional_columns(item, is_leaf, self.__column_fields))
+        return row
 
     ########################################################################################
     # de/serialization of model contents
@@ -1546,8 +1650,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
                             # we reached the root. special case
                             curr_parent = self.invisibleRootItem()
 
+                # get a complete row containing all columns for the current item.
+                row = self.__get_columns(item, bool(sg_data))
+
                 # and attach the node
-                curr_parent.appendRow(item)
+                curr_parent.appendRow(row)
 
                 # request thumb
                 if self.__download_thumbs:

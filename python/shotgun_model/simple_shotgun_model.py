@@ -42,22 +42,35 @@ class SimpleShotgunModel(ShotgunModel):
             bg_load_thumbs=True, 
             bg_task_manager=bg_task_manager)
 
-    def load_data(self, entity_type, filters=None, fields=None):
+    def load_data(self, entity_type, filters=None, fields=None, order=None, limit=None, columns=None):
         """
         Loads shotgun data into the model, using the cache if possible.
         The model is not nested and the first field that is specified
         via the fields parameter (``code`` by default) will be used as the default
-        name for all model items. 
-        
+        name for all model items.
+
         :param entity_type: Shotgun Entity Type to load data for
         :param filters: Shotgun API find-style filter list. If no list is specified, all records
-                        for the given entity type will be retrieved.
+                  for the given entity type will be retrieved.
         :param fields: List of Shotgun fields to retrieve. If not spefified, the 'code' field
-                       will be retrieved.
+                  will be retrieved.
+        :param order: Order clause for the Shotgun data. Standard Shotgun API syntax.
+                  Note that this is an advanced parameter which is meant to be used
+                  in subclassing only. The model itself will be ordered by its
+                  default display name, and if any other type of ordering is desirable,
+                  use for example a QProxyModel to handle this. However, knowing in which
+                  order results will arrive from Shotgun can be beneficial if you are doing
+                  grouping, deferred loading and aggregation of data as part of your
+                  subclassed implementation.
+        :param limit: Limit the number of results returned from Shotgun. In conjunction with the order
+                  parameter, this can be used to effectively cap the data set that the model
+                  is handling, allowing a user to for example show the twenty most recent notes or
+                  similar.
+        :param columns: List of Shotgun fields to use to populate the model columns
         """
         filters = filters or []
         fields = fields or ["code"]
         hierarchy = [fields[0]]
-        ShotgunModel._load_data(self, entity_type, filters, hierarchy, fields)
+        ShotgunModel._load_data(
+            self, entity_type, filters, hierarchy, fields, order=order, limit=limit, columns=columns)
         self._refresh_data()
-        
