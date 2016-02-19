@@ -42,22 +42,22 @@ class SimpleShotgunModel(ShotgunModel):
             bg_load_thumbs=True, 
             bg_task_manager=bg_task_manager)
 
-    def load_data(self, entity_type, filters=None, fields=None):
+    def load_data(self, entity_type, filters=None, fields=None, columns=None):
         """
         Loads shotgun data into the model, using the cache if possible.
         The model is not nested and the first field that is specified
         via the fields parameter (``code`` by default) will be used as the default
-        name for all model items. 
-        
+        name for all model items.
+
         :param entity_type: Shotgun Entity Type to load data for
         :param filters: Shotgun API find-style filter list. If no list is specified, all records
                         for the given entity type will be retrieved.
         :param fields: List of Shotgun fields to retrieve. If not spefified, the 'code' field
                        will be retrieved.
+        :param columns: List of Shotgun fields to use to populate the model columns
         """
         filters = filters or []
         fields = fields or ["code"]
         hierarchy = [fields[0]]
-        ShotgunModel._load_data(self, entity_type, filters, hierarchy, fields)
+        ShotgunModel._load_data(self, entity_type, filters, hierarchy, fields, columns=columns)
         self._refresh_data()
-        
