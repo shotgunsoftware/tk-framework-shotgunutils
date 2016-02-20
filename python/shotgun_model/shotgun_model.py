@@ -75,7 +75,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
         associated value. See :ref:`sg-model-data-items`.
 
     :constant SG_ASSOCIATED_FIELD_ROLE: Custom model role that holds the
-        shotgun data payload. See :ref:`sg-model-data-items`.
+        shotgun data payload. See :ref:`sg-model-data-items`.  This role will also hold
+        the field value for the Shotgun entity for any items that are created for additional
+        columns.
     """
 
     # signal which gets emitted whenever the model's sg query is changed.
@@ -267,6 +269,16 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         return self.__entity_type
 
+    def get_additional_column_fields(self):
+        """
+        Returns the fields for additional columns and their associated column in the model.
+
+        :returns: A list of (column, field) tuples where column is the column number in the
+            model associated with the additional field.
+        """
+        # column is one greater than the index because of the default initial column
+        return [(i+1, field) for (i, field) in enumerate(self.__column_fields)]
+
     def hard_refresh(self):
         """
         Clears any caches on disk, then refreshes the data.
@@ -417,10 +429,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
                           parameter, this can be used to effectively cap the data set that the model
                           is handling, allowing a user to for example show the twenty most recent notes or
                           similar.
-        :param columns:   Normally the model stores the Shotgun data in the SG_DATA_ROLE role.  If columns
-                          is specified, then any leaf row in the model will additionally have columns created
-                          where each item in the row is the value for the corresponding field from columns.
-                          Subclasses can modify this behavior by overriding _get_additional_columns.
+        :param columns:   If columns is specified, then any leaf row in the model will have columns created where
+                          each column in the row contains the value for the corresponding field from columns. This means
+                          that the data from the loaded entity will be available field by field. Subclasses can modify
+                          this behavior by overriding _get_additional_columns.
 
         :returns:         True if cached data was loaded, False if not.
         """
@@ -436,7 +448,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__fields = fields
         self.__order = order or []
         self.__hierarchy = hierarchy
-        self.__columns = columns or []
+        self.__column_fields = columns or []
         self.__limit = limit or 0 # 0 means get all matches
 
         # when we cache the data associated with this model, create
@@ -477,7 +489,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         params_hash.update(str(self.__fields))
         params_hash.update(str(self.__order))
         params_hash.update(str(self.__hierarchy))
-        params_hash.update(str(self.__columns))
+        params_hash.update(str(self.__column_fields))
 
         # now hash up the filter parameters and the seed - these are dynamic
         # values that tend to change and be data driven, so they are handled
@@ -506,7 +518,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__log_debug("Hierarchy: %s" % self.__hierarchy)
         self.__log_debug("Fields: %s" % self.__fields)
         self.__log_debug("Order: %s" % self.__order)
-        self.__log_debug("Columns: %s" % self.__columns)
+        self.__log_debug("Columns: %s" % self.__column_fields)
 
         self.__log_debug("First population pass: Calling _load_external_data()")
         self._load_external_data()
@@ -528,7 +540,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                 "full SG load. Error reported: %s" % e)
 
         # set our headers
-        headers = ["Name"] + self._get_additional_column_headers(self.__entity_type, self.__columns)
+        headers = ["Name"] + self._get_additional_column_headers(self.__entity_type, self.__column_fields)
         if headers:
             self.setHorizontalHeaderLabels(headers)
 
@@ -579,7 +591,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             self.__on_sg_data_arrived([])
         else:
             # get data from shotgun - list/set cast to ensure unique fields
-            fields = self.__hierarchy + self.__fields + self.__columns
+            fields = self.__hierarchy + self.__fields + self.__column_fields
             if self.__download_thumbs:
                 fields = fields + ["image"]
             fields = list(set(fields))
@@ -886,9 +898,13 @@ class ShotgunModel(QtGui.QStandardItemModel):
         if is_leaf and columns:
             data = get_sg_data(item)
             for column in columns:
+                # grab the value from the requested field
                 value = data.get(column)
+
+                # set the display role to the string representation of the value
                 column_item = QtGui.QStandardItem(str(value))
-                item.setData(sanitize_for_qt_model(value), self.SG_ASSOCIATED_FIELD_ROLE)
+                column_item.setData(sanitize_for_qt_model(value), self.SG_ASSOCIATED_FIELD_ROLE)
+
                 items.append(column_item)
 
         return items
@@ -1359,7 +1375,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         for child_key in sorted(children.keys(), cmp=lambda x,y: cmp(x.lower(), y.lower())):
             child = children[child_key]
 
-            on_leaf_level = ("children" not in child)
+            on_leaf_level = not bool(child.get("children"))
             row = self.__get_columns(child["item"], on_leaf_level)
             node["item"].appendRow(row)
             self.__realize_parent_child_hierarchy_r(child)
@@ -1480,7 +1496,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # the first item in the row is always the standard shotgun model item,
         # but subclasses may provide additional columns to be appended.
         row = [item]
-        additional_columns = self._get_additional_columns(item, is_leaf, self.__columns)
+        additional_columns = self._get_additional_columns(item, is_leaf, self.__column_fields)
         if additional_columns:
             row += additional_columns
         return row
