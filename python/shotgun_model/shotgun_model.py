@@ -109,6 +109,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
     # version of binary format
     FILE_VERSION = 22
 
+    # header value for the first column
+    FIRST_COLUMN_HEADER = "Name"
 
     def __init__(self, parent, download_thumbs=True, schema_generation=0, bg_load_thumbs=True, bg_task_manager=None):
         """
@@ -273,11 +275,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         Returns the fields for additional columns and their associated column in the model.
 
-        :returns: A list of (column, field) tuples where column is the column number in the
-            model associated with the additional field.
+        :returns: A list of dictionaries with the following keys:
+            "field": the requested additional field for the column
+            "column_idx": the column number in the model associated with the additional field
         """
         # column is one greater than the index because of the default initial column
-        return [(i+1, field) for (i, field) in enumerate(self.__column_fields)]
+        return [{"column_idx": i+1, "field": field} for (i, field) in enumerate(self.__column_fields)]
 
     def hard_refresh(self):
         """
@@ -489,7 +492,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         params_hash.update(str(self.__fields))
         params_hash.update(str(self.__order))
         params_hash.update(str(self.__hierarchy))
-        params_hash.update(str(self.__column_fields))
 
         # now hash up the filter parameters and the seed - these are dynamic
         # values that tend to change and be data driven, so they are handled
@@ -540,9 +542,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                 "full SG load. Error reported: %s" % e)
 
         # set our headers
-        headers = ["Name"] + self._get_additional_column_headers(self.__entity_type, self.__column_fields)
-        if headers:
-            self.setHorizontalHeaderLabels(headers)
+        headers = [self.FIRST_COLUMN_HEADER] + \
+            self._get_additional_column_headers(self.__entity_type, self.__column_fields)
+        self.setHorizontalHeaderLabels(headers)
 
         return loaded_cache_data
 
@@ -865,7 +867,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         pass
 
-    def _get_additional_columns(self, item, is_leaf, columns):
+    def _get_additional_columns(self, primary_item, is_leaf, columns):
         """
         Called when an item is about to be inserted into the model, to get additional items
         to be included in the same row as the specified item. This provides an opportunity
@@ -884,7 +886,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         This method is called after _finalize_item.
 
-        :param item: :class:`~PySide.QtGui.QStandardItem` that is about to be added to the model
+        :param primary_item: :class:`~PySide.QtGui.QStandardItem` that is about to be added to the model
         :param is_leaf: boolean that is True if the item is a leaf item
         :param columns: list of Shotgun field names requested as the columns from _load_data
 
@@ -896,13 +898,13 @@ class ShotgunModel(QtGui.QStandardItemModel):
         items = []
 
         if is_leaf and columns:
-            data = get_sg_data(item)
+            data = get_sg_data(primary_item)
             for column in columns:
-                # grab the value from the requested field
-                value = data.get(column)
-
                 # set the display role to the string representation of the value
-                column_item = QtGui.QStandardItem(str(value))
+                column_item = QtGui.QStandardItem(self._generate_display_name(column, data))
+
+                # set associated field role to be the column value itself
+                value = data.get(column)
                 column_item.setData(sanitize_for_qt_model(value), self.SG_ASSOCIATED_FIELD_ROLE)
 
                 items.append(column_item)
