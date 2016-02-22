@@ -1498,9 +1498,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # the first item in the row is always the standard shotgun model item,
         # but subclasses may provide additional columns to be appended.
         row = [item]
-        additional_columns = self._get_additional_columns(item, is_leaf, self.__column_fields)
-        if additional_columns:
-            row += additional_columns
+        row.extend(self._get_additional_columns(item, is_leaf, self.__column_fields))
         return row
 
     ########################################################################################
