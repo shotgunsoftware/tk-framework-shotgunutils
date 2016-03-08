@@ -63,7 +63,7 @@ class CachedShotgunSchema(QtCore.QObject):
         
         self._sg_schema_query_id = None
         self._sg_status_query_id = None
-        
+
         self._schema_cache_path = os.path.join(self._bundle.cache_location, "sg_schema.pickle")
         self._status_cache_path = os.path.join(self._bundle.cache_location, "sg_status.pickle")
 
@@ -131,8 +131,16 @@ class CachedShotgunSchema(QtCore.QObject):
         if not self._schema_loaded and not self._schema_requested: 
             # schema is not requested and not loaded.
             # so download it from shotgun!
-            sg_project_id = self._bundle.context.project["id"]
-                    
+
+            if self._bundle.context.project:
+                # we have a project in the context so request a project
+                # specific schema from Shotgun
+                sg_project_id = self._bundle.context.project["id"]
+            else:
+                # the context doesn't have a project associated, so
+                # request the full site-level schema from Shotgun
+                sg_project_id = None
+
             self._bundle.log_debug("Starting to download new metaschema from Shotgun...")
             
             if len(self.__sg_data_retrievers) == 0:
