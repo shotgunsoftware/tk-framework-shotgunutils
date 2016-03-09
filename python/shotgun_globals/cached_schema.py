@@ -131,7 +131,13 @@ class CachedShotgunSchema(QtCore.QObject):
         if not self._schema_loaded and not self._schema_requested: 
             # schema is not requested and not loaded.
             # so download it from shotgun!
-            sg_project_id = self._bundle.context.project["id"]
+            try:
+                sg_project_id = self._bundle.context.project.get("id")
+            except AttributeError:
+                # If there's no project available from the context, then
+                # we have no project ID to work from. We can continue on
+                # without that.
+                sg_project_id = None
                     
             self._bundle.log_debug("Starting to download new metaschema from Shotgun...")
             
