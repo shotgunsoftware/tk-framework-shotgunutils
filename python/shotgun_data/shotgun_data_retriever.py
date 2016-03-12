@@ -474,6 +474,10 @@ class ShotgunDataRetriever(QtCore.QObject):
         :param bundle:  App, Engine or Framework instance
         :returns:       Path as a string.
         """
+        # If we don't have a URL, then we know we don't
+        # have a thumbnail to worry about.
+        if not url:
+            return None
 
         # hash the path portion of the thumbnail url
         url_obj = urlparse.urlparse(url)
@@ -702,6 +706,11 @@ class ShotgunDataRetriever(QtCore.QObject):
         :returns:           A dictionary containing the cached path for the specified url and a QImage
                             if load_image is True and the thumbnail exists in the cache.
         """
+        # If there's no URL then we definitely won't be finding
+        # a thumbnail.
+        if not url:
+            return {"action":"check_thumbnail", "thumb_path":None, "image":None}
+
         # first look up the path in the cache:
         thumb_path = ShotgunDataRetriever._get_thumbnail_path(url, self._bundle)
         thumb_image = None
@@ -742,6 +751,11 @@ class ShotgunDataRetriever(QtCore.QObject):
         # may have expired - in that case fall back, get a fresh url
         # from shotgun and try again
         thumb_path = self._get_thumbnail_path(url, self._bundle)
+
+        # If we have no path, then there's no thumbnail that exists.
+        if not thumb_path:
+            return {}
+
         self._bundle.ensure_folder_exists(os.path.dirname(thumb_path))
 
         # there may be a case where another process has alrady downloaded the thumbnail for us, so 
