@@ -131,7 +131,7 @@ class CachedShotgunSchema(QtCore.QObject):
         if not self._schema_loaded and not self._schema_requested: 
             # schema is not requested and not loaded.
             # so download it from shotgun!
-            sg_project_id = self._bundle.context.project["id"]
+            sg_project_id = self._bundle.context.project and self._bundle.context.project["id"] or None
                     
             self._bundle.log_debug("Starting to download new metaschema from Shotgun...")
             
@@ -451,6 +451,22 @@ class CachedShotgunSchema(QtCore.QObject):
                 raise ValueError("The data type for %s.%s does not have valid types" % (sg_entity_type, field_name))
 
             return valid_types
+
+        raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
+
+    @classmethod
+    def get_valid_values(cls, sg_entity_type, field_name):
+        self = cls.__get_instance()
+        self._check_schema_refresh(sg_entity_type, field_name)
+
+        if sg_entity_type in self._type_schema and field_name in self._field_schema[sg_entity_type]:
+            data = self._field_schema[sg_entity_type][field_name]
+            valid_values = data.get("properties", {}).get("valid_values", {}).get("value")
+
+            if valid_values is None:
+                raise ValueError("The data type for %s.%s does not have valid values" % (sg_entity_type, field_name))
+
+            return valid_values
 
         raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
 

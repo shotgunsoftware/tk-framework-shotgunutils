@@ -24,3 +24,4 @@ get_data_type = _cs.CachedShotgunSchema.get_data_type
 get_status_display_name = _cs.CachedShotgunSchema.get_status_display_name
 get_status_color = _cs.CachedShotgunSchema.get_status_color
 get_valid_types = _cs.CachedShotgunSchema.get_valid_types
+get_valid_values = _cs.CachedShotgunSchema.get_valid_values
