@@ -526,8 +526,9 @@ class BackgroundTaskManager(QtCore.QObject):
 
         The worker thread instance that completed the task can be retrieved from self.sender()
 
-        :param task:    The task that completed
-        :param result:  The task result
+        :param worker_thread: Thread that completed the task.
+        :param task:          The task that completed
+        :param result:        The task result
         """
         try:
             # check that we should process this result:
@@ -566,9 +567,10 @@ class BackgroundTaskManager(QtCore.QObject):
 
         The worker thread instance that the task failed in can be retrieved from self.sender()
 
-        :param task:    The task that failed
-        :param msg:     The error message for the failed task
-        :param tb:      The stack-trace for the failed task
+        :param worker_thread: Thread that completed the task.
+        :param task:          The task that failed
+        :param msg:           The error message for the failed task
+        :param tb:            The stack-trace for the failed task
         """
         try:
             # check that we should process this task:
