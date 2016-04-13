@@ -12,14 +12,13 @@
 Background task manager.
 """
 
+import Queue
 import sgtk
 from sgtk.platform.qt import QtCore
 from sgtk import TankError
 
 from .background_task import BackgroundTask
 from .worker_thread import WorkerThread
-
-import Queue
 
 
 class BackgroundTaskManager(QtCore.QObject):
@@ -46,6 +45,97 @@ class BackgroundTaskManager(QtCore.QObject):
         The ``group`` is the group that has completed.
 
     """
+
+    class _ResultsPoller(QtCore.QObject):
+        """
+        Polls a queue which holds the results posted from the worker threads.
+        """
+
+        # Emitted when a task is completed.
+        task_completed = QtCore.Signal(object, object, object)
+        # Emitted when a task has failed.
+        task_failed = QtCore.Signal(object, object, object, object)
+
+        def __init__(self, parent=None):
+            """
+            Constructor.
+
+            :param parent:  The parent QObject for this thread
+            """
+            QtCore.QObject.__init__(self, parent)
+            # Results queue that will be polled
+            self._results = Queue.Queue()
+            # Create a timer with no interval. This means the timer will be invoked
+            # only when the event queue is empty.
+            self._timer = QtCore.QTimer()
+            self._timer.setInterval(100)
+            # This should be instantiated from the application's thread since we only support
+            # one instance for now.
+            assert(QtCore.QCoreApplication.instance().thread() == self._timer.thread())
+            # Since the event will be invoked as soon as the event queue is empty,
+            # we should process the queue one item at a time to not interfere with the
+            # ui responsivenes
+            self._timer.timeout.connect(self._flush_events)
+            self._bundle = sgtk.platform.current_bundle()
+
+        def start(self):
+            """
+            Start polling for tasks that ended.
+            """
+            self._timer.start()
+
+        def shut_down(self):
+            """
+            Stop polling for tasks that ended.
+            """
+            self._timer.stop()
+
+        def _flush_events(self):
+            """
+            Executes callbacks for each task result.
+            """
+            try:
+                # Get everything until the queue is empty.
+                while True:
+                    cb = self._results.get_nowait()
+                    try:
+                        if len(cb) == 3:
+                            self.task_completed.emit(*cb)
+                        else:
+                            self.task_failed.emit(*cb)
+                    except Exception:
+                        self._bundle.log_exception(
+                            "Exception thrown while reporting completed task."
+                        )
+                        # Do not re-raise, simply process the remaining events.
+            except Queue.Empty:
+                # Queue is empty, nothing to do!
+                pass
+
+        def queue_task_completed(self, worker_thread, task, result):
+            """
+            Called by background threads to notify that a task has completed.
+
+            :param worker_thread: Thread that completed the task.
+            :param task: Task that was completed.
+            :param result: Result produced by the thread.
+            """
+            self._results.put(
+                (worker_thread, task, result)
+            )
+
+        def queue_task_failed(self, worker_thread, task, msg, traceback_):
+            """
+            Called by background threads to notify that a task has failed.
+
+            :param worker_thread: Thread that completed the task.
+            :param task: Task that failed.
+            :param msg: Error message from the task,
+            :param traceback_: Call stack from the task.
+            """
+            self._results.put(
+                (worker_thread, task, msg, traceback_)
+            )
 
     # signal emitted when a task has been completed
     task_completed = QtCore.Signal(int, object, object)# uid, group, result
@@ -88,45 +178,11 @@ class BackgroundTaskManager(QtCore.QObject):
         self._upstream_task_map = {}
         self._downstream_task_map = {}
 
-        # Queue for events being emitted from the background threads.
-        self._bg_thread_task_events = Queue.Queue()
-
-        # Create a timer with no interval. This means the timer will be invoked
-        # only when the event queue is empty.
-        self._timer = QtCore.QTimer()
-        # This should be instantiated from the application's thread since we only support
-        # one instance for now.
-        assert(QtCore.QCoreApplication.instance().thread() == self._timer.thread())
-        # Since the event will be invoked as soon as the event queue is empty,
-        # we should process the queue one item at a time to not interfere with the
-        # ui responsivenes
-        self._timer.timeout.connect(self._execute_one_event)
-        self._timer.start()
-
-    def queue_task_completed(self, worker_thread, task, result):
-        """
-        Called by background threads to notify that a task has completed.
-        """
-        self._bg_thread_task_events.put(
-            lambda: self._on_worker_thread_task_completed(worker_thread, task, result)
-        )
-
-    def queue_task_failed(self, worker_thread, task, msg, callstack):
-        """
-        Called by background threads to notify that a task has failed.
-        """
-        self._bg_thread_task_events.put(
-            lambda: self._on_worker_thread_task_failed(worker_thread, task, msg, callstack)
-        )
-
-    def _execute_one_event(self):
-        try:
-            cb = self._bg_thread_task_events.get_nowait()
-        except Queue.Empty:
-            # Queue is empty, nothing to do!
-            pass
-        else:
-            cb()
+        # Create the task result poller.
+        self._results_poller = BackgroundTaskManager._ResultsPoller(self)
+        self._results_poller.task_completed.connect(self._on_worker_thread_task_completed)
+        self._results_poller.task_failed.connect(self._on_worker_thread_task_failed)
+        self._results_poller.start()
 
     def next_group_id(self):
         """
@@ -166,8 +222,6 @@ class BackgroundTaskManager(QtCore.QObject):
         Shut down the task manager.  This clears the task queue and gracefully stops all running
         threads.  Completion/failure of any currently running tasks will be ignored.
         """
-        self._timer.stop()
-
         self._log("Shutting down...")
         self._can_process_tasks = False
 
@@ -180,6 +234,9 @@ class BackgroundTaskManager(QtCore.QObject):
             thread.shut_down()
         self._available_threads = []
         self._all_threads = []
+
+        self._results_poller.shut_down()
+        self._results_poller = None
         self._log("Shut down successfully!")
 
     def add_task(self, cbl, priority=None, group=None, upstream_task_ids=None, task_args=None, task_kwargs=None):
@@ -372,15 +429,13 @@ class BackgroundTaskManager(QtCore.QObject):
         # create a new worker thread - note, there are two different implementations of the WorkerThread class
         # that use two different recipes.  Although WorkerThreadB is arguably more correct it has some issues
         # in PyQt so WorkerThread is currently preferred - see the notes in the class above for further details
-        thread = WorkerThread(self)
+        thread = WorkerThread(self._results_poller)
         if not isinstance(thread, WorkerThread):
             # for some reason (probably memory corruption somewhere else) I've occasionally seen the above
             # creation of a worker thread return another arbitrary object!  Added this in here so the code
             # will at least continue correctly and not do unexpected things!
             self._bundle.log_error("Failed to create background worker thread for task Manager!")
             return None
-#        thread.task_failed.connect(self._on_worker_thread_task_failed)
-#        thread.task_completed.connect(self._on_worker_thread_task_completed)
         self._all_threads.append(thread)
 
         # start the thread - this will just put it into wait mode:

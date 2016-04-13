@@ -23,15 +23,11 @@ class WorkerThread(QtCore.QThread):
     implements a custom run method that loops over tasks until asked to quit.
     """
 
-    # Signal emitted when a task has completed successfully
-    task_completed = QtCore.Signal(object, object)# task, result
-    # Signal emitted when a task has failed
-    task_failed = QtCore.Signal(object, object, object)# task, message, stacktrace
-
-    def __init__(self, parent=None):
+    def __init__(self, rp, parent=None):
         """
         Construction
 
+        :param trp: Results poller from the background task manager.
         :param parent:  The parent QObject for this thread
         """
         QtCore.QThread.__init__(self, parent)
@@ -41,7 +37,7 @@ class WorkerThread(QtCore.QThread):
         self._mutex = QtCore.QMutex()
         self._wait_condition = QtCore.QWaitCondition()
 
-        self._manager = parent
+        self._result_poller = rp
 
     def run_task(self, task):
         """
@@ -60,7 +56,7 @@ class WorkerThread(QtCore.QThread):
         """
         Shut down the thread and wait for it to exit before returning
         """
-        self._manager = None
+        self._result_poller = None
         self._mutex.lock()
         try:
             self._process_tasks = False
@@ -100,8 +96,7 @@ class WorkerThread(QtCore.QThread):
                     if not self._process_tasks:
                         break
                     # emit the result (non-blocking):
-                    self._manager.queue_task_completed(self, task_to_process, result)
-                    # self.task_completed.emit(task_to_process, result)
+                    self._result_poller.queue_task_completed(self, task_to_process, result)
                 finally:
                     self._mutex.unlock()
             except Exception, e:
@@ -112,8 +107,7 @@ class WorkerThread(QtCore.QThread):
                         break
                     tb = traceback.format_exc()
                     # emit failed signal (non-blocking):
-                    # self.task_failed.emit(task_to_process, str(e), tb)
-                    self._manager.queue_task_failed(self, task_to_process, str(e), tb)
+                    self._result_poller.queue_task_failed(self, task_to_process, str(e), tb)
                 finally:
                     self._mutex.unlock()
 
