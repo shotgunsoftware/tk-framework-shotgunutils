@@ -1,20 +1,20 @@
 # Copyright (c) 2015 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 """
+Worker thread for the background manager.
 """
+
 import traceback
 
-import sgtk
 from sgtk.platform.qt import QtCore
-from sgtk import TankError
 
 
 class WorkerThread(QtCore.QThread):
@@ -22,6 +22,7 @@ class WorkerThread(QtCore.QThread):
     Asynchronous worker thread that can run tasks in a separate thread.  This implementation
     implements a custom run method that loops over tasks until asked to quit.
     """
+
     # Signal emitted when a task has completed successfully
     task_completed = QtCore.Signal(object, object)# task, result
     # Signal emitted when a task has failed
@@ -40,6 +41,8 @@ class WorkerThread(QtCore.QThread):
         self._mutex = QtCore.QMutex()
         self._wait_condition = QtCore.QWaitCondition()
 
+        self._manager = parent
+
     def run_task(self, task):
         """
         Run the specified task
@@ -57,6 +60,7 @@ class WorkerThread(QtCore.QThread):
         """
         Shut down the thread and wait for it to exit before returning
         """
+        self._manager = None
         self._mutex.lock()
         try:
             self._process_tasks = False
@@ -96,7 +100,8 @@ class WorkerThread(QtCore.QThread):
                     if not self._process_tasks:
                         break
                     # emit the result (non-blocking):
-                    self.task_completed.emit(task_to_process, result)
+                    self._manager.queue_task_completed(self, task_to_process, result)
+                    # self.task_completed.emit(task_to_process, result)
                 finally:
                     self._mutex.unlock()
             except Exception, e:
@@ -107,10 +112,10 @@ class WorkerThread(QtCore.QThread):
                         break
                     tb = traceback.format_exc()
                     # emit failed signal (non-blocking):
-                    self.task_failed.emit(task_to_process, str(e), tb)
+                    # self.task_failed.emit(task_to_process, str(e), tb)
+                    self._manager.queue_task_failed(self, task_to_process, str(e), tb)
                 finally:
                     self._mutex.unlock()
-
 
 
 # class WorkerThreadSeparateThread(QtCore.QThread):
@@ -118,16 +123,16 @@ class WorkerThread(QtCore.QThread):
 #     Asynchronous worker thread that can run tasks in a separate thread.  This implementation
 #     uses a separate worker object that exists in the new thread and then uses signals to
 #     communicate back and forth.
-# 
+#
 #     Note, this recipe exhibits odd behaviour in PyQt.  When initially created, the instance returned
 #     in the assignment isn't always of type WorkerThreadB!, e.g.:
-# 
+#
 #         thread = WorkerThreadB()
 #         assert isinstance(thread, WorkerThreadB) # this should never assert!
-# 
+#
 #     Although this recipe is recommended in Qt as it is arguably a more 'correct' use of QThreads, it
 #     is currently advised that the the overridden run recipe (WorkerThreadA) be used instead whilst
-#     Toolkit needs to support PyQt. 
+#     Toolkit needs to support PyQt.
 #     """
 #     class _Worker(QtCore.QObject):
 #         """
@@ -137,13 +142,13 @@ class WorkerThread(QtCore.QThread):
 #         task_completed = QtCore.Signal(object, object)# task, result
 #         # Signal emitted when a task has failed
 #         task_failed = QtCore.Signal(object, object, object)# task, message, stacktrace
-# 
+#
 #         def __init__(self):
 #             """
 #             Construction
 #             """
 #             QtCore.QObject.__init__(self, None)
-# 
+#
 #         def do_task(self, task):
 #             """
 #             Run a single task.
@@ -157,41 +162,41 @@ class WorkerThread(QtCore.QThread):
 #                 # something went wrong so emit failed signal:
 #                 tb = traceback.format_exc()
 #                 self.task_failed.emit(task, str(e), tb)
-# 
+#
 #     # Signal used to tell the worker that a task should be run
 #     work = QtCore.Signal(object)# task
 #     # Signal emitted when a task has completed successfully
 #     task_completed = QtCore.Signal(object, object)# task, result
 #     # Signal emitted when a task has failed
 #     task_failed = QtCore.Signal(object, object, object)# task, message, stacktrace
-# 
+#
 #     def __init__(self, parent=None):
 #         """
 #         Construction
-# 
+#
 #         :param parent:  The parent QObject for this thread
 #         """
 #         QtCore.QThread.__init__(self, parent)
-# 
+#
 #         # create the worker instance:
 #         self._worker = WorkerThreadB._Worker()
-# 
-#         # move the worker to the thread and then connect up the signals 
-#         # that are used to communicate with it: 
+#
+#         # move the worker to the thread and then connect up the signals
+#         # that are used to communicate with it:
 #         self._worker.moveToThread(self)
 #         self.work.connect(self._worker.do_task)
 #         self._worker.task_failed.connect(self.task_failed)
 #         self._worker.task_completed.connect(self.task_completed)
-# 
+#
 #     def run_task(self, task):
 #         """
 #         Run the specified task
-# 
+#
 #         :param task:    The task to run
 #         """
 #         # signal the worker to run the task
 #         self.work.emit(task)
-# 
+#
 #     def shut_down(self):
 #         """
 #         Shut down the thread and wait for it to exit before returning
@@ -202,7 +207,7 @@ class WorkerThread(QtCore.QThread):
 #         # parent it to this thread so that it gets safely cleaned up
 #         self._worker.setParent(self)
 #         self._worker = None
-# 
+#
 #     def run(self):
 #         """
 #         Normally we wouldn't need to override the run method as by default it just runs the event
@@ -211,9 +216,8 @@ class WorkerThread(QtCore.QThread):
 #         """
 #         # run the event loop:
 #         self.exec_()
-# 
+#
 #         # before we quit, we need to move the worker back to the main thread.  This is to work around
 #         # issues with Qt pre-4.8 where any QObject.deleteLater's aren't executed on thread exit
 #         # which would result in the worker not being cleaned up correctly!
 #         self._worker.moveToThread(QtCore.QCoreApplication.instance().thread())
-
