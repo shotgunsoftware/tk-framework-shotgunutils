@@ -1,0 +1,128 @@
+# Copyright (c) 2016 Shotgun Software Inc.
+#
+# CONFIDENTIAL AND PROPRIETARY
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
+# Source Code License included in this distribution package. See LICENSE.
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
+# not expressly granted therein are reserved by Shotgun Software Inc.
+
+"""
+Results queue poller
+"""
+
+import Queue
+from sgtk.platform.qt import QtCore
+import sgtk
+
+
+class ResultsPoller(QtCore.QObject):
+    """
+    Polls a queue which holds the results posted from the worker threads.
+
+    Signalling between two different threads in PySide is broken in several versions
+    of PySide. There are very subtle race conditions that arise when there is a lot
+    of signalling between two threads. Some of these things have been fixed in later
+    versions of PySide, but most hosts integrate PySide 1.2.2 and lower, which are
+    victim of this race condition.
+
+    The background task manager is a heavy user of signals between two threads and
+    was sometimes causing deadlocks in many Toolkit applications between PySide's
+    SignalManager and the GIL that would essential freeze the host application.
+
+    Therefore, this we use this polling system. The worker threads inserts results
+    inside a queue and the main thread will flush the queue at regular intervals.
+
+    Note that because this queue is polled every 100 milliseconds, it means that
+    there will always we at most a latency of ~100 milliseconds (depending on
+    the OS's timer resolution) between two tasks.
+    """
+
+    # Emitted when a task is completed.
+    task_completed = QtCore.Signal(object, object, object)
+    # Emitted when a task has failed.
+    task_failed = QtCore.Signal(object, object, object, object)
+
+    _POLLING_INTERVAL = 100
+
+    def __init__(self, parent=None):
+        """
+        Constructor.
+
+        :param parent:  The parent QObject for this thread
+        """
+        QtCore.QObject.__init__(self, parent)
+        # Results queue that will be polled
+        self._results = Queue.Queue()
+        # Create a timer with no interval. This means the timer will be invoked
+        # only when the event queue is empty.
+        self._timer = QtCore.QTimer()
+        self._timer.setInterval(self._POLLING_INTERVAL)
+        # Since the event will be invoked as soon as the event queue is empty,
+        # we should process the queue one item at a time to not interfere with the
+        # ui responsivenes
+        self._timer.timeout.connect(self._flush_events)
+        self._bundle = sgtk.platform.current_bundle()
+
+    def start(self):
+        """
+        Start polling for tasks that ended.
+        """
+        self._timer.start()
+
+    def shut_down(self):
+        """
+        Stop polling for tasks that ended.
+        """
+        self._timer.stop()
+
+    def _flush_events(self):
+        """
+        Executes callbacks for each task result.
+        """
+        try:
+            # Get everything until the queue is empty.
+            while True:
+                # Get the next result from the queue
+                result_tuple = self._results.get_nowait()
+                try:
+                    # Result tuples with 3 values are coming from succesful tasks.
+                    if len(result_tuple) == 3:
+                        self.task_completed.emit(*result_tuple)
+                    else:
+                        # Result tuples with 4 values are coming from succesful tasks.
+                        self.task_failed.emit(*result_tuple)
+                except Exception:
+                    self._bundle.log_exception(
+                        "Exception thrown while reporting completed task."
+                    )
+                    # Do not re-raise, simply process the remaining events.
+        except Queue.Empty:
+            # Queue is empty, nothing to do!
+            pass
+
+    def queue_task_completed(self, worker_thread, task, result):
+        """
+        Called by background threads to notify that a task has completed.
+
+        :param worker_thread: Thread that completed the task.
+        :param task: Task that was completed.
+        :param result: Result produced by the thread.
+        """
+        self._results.put(
+            (worker_thread, task, result)
+        )
+
+    def queue_task_failed(self, worker_thread, task, msg, traceback_):
+        """
+        Called by background threads to notify that a task has failed.
+
+        :param worker_thread: Thread that completed the task.
+        :param task: Task that failed.
+        :param msg: Error message from the task,
+        :param traceback_: Call stack from the task.
+        """
+        self._results.put(
+            (worker_thread, task, msg, traceback_)
+        )
