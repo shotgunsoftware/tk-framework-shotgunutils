@@ -26,9 +26,26 @@ class BackgroundTaskManager(QtCore.QObject):
     Main task manager class. Manages a queue of tasks running them asynchronously through
     a pool of worker threads.
 
-    Note that the BackgroundTaskManager class itself is reentrant but not thread-safe so its methods should only
+    The BackgroundTaskManager class itself is reentrant but not thread-safe so its methods should only
     be called from the thread it is created in. Typically this would be the main thread of the application.
 
+    .. note::
+        Signalling between two different threads in PySide is broken in several versions
+        of PySide. There are very subtle race conditions that arise when there is a lot
+        of signalling between two threads. Some of these things have been fixed in later
+        versions of PySide, but most hosts integrate PySide 1.2.2 and lower, which are
+        victim of this race condition.
+
+        The background task manager does a lot on inter-threads communications and
+        therefore can easily fall pray to these deadlocks that exist within PySide.
+
+        Therefore, the background task manager uses a polling system to process results
+        from the worker threads. The worker threads inserts results inside a queue and
+        the background manager's thread will flush the queue at 100 milliseconds intervals.
+
+        Also note that because there is a 100 milliseconds interval between two polls,
+        it means that the will automatically be a delay between the end of a task
+        and the beginning of another task.
 
     :signal task_completed(uid, group, result): Emitted when a task has been completed.
         The ``uid`` parameter holds the unique id associated with the task,

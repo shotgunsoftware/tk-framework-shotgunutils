@@ -20,23 +20,6 @@ import sgtk
 class ResultsPoller(QtCore.QObject):
     """
     Polls a queue which holds the results posted from the worker threads.
-
-    Signalling between two different threads in PySide is broken in several versions
-    of PySide. There are very subtle race conditions that arise when there is a lot
-    of signalling between two threads. Some of these things have been fixed in later
-    versions of PySide, but most hosts integrate PySide 1.2.2 and lower, which are
-    victim of this race condition.
-
-    The background task manager is a heavy user of signals between two threads and
-    was sometimes causing deadlocks in many Toolkit applications between PySide's
-    SignalManager and the GIL that would essential freeze the host application.
-
-    Therefore, this we use this polling system. The worker threads inserts results
-    inside a queue and the main thread will flush the queue at regular intervals.
-
-    Note that because this queue is polled every 100 milliseconds, it means that
-    there will always we at most a latency of ~100 milliseconds (depending on
-    the OS's timer resolution) between two tasks.
     """
 
     # Emitted when a task is completed.
