@@ -1,14 +1,16 @@
 # Copyright (c) 2015 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import traceback
+"""
+Background task manager.
+"""
 
 import sgtk
 from sgtk.platform.qt import QtCore
@@ -16,27 +18,46 @@ from sgtk import TankError
 
 from .background_task import BackgroundTask
 from .worker_thread import WorkerThread
+from .results_poller import ResultsPoller
+
 
 class BackgroundTaskManager(QtCore.QObject):
     """
     Main task manager class. Manages a queue of tasks running them asynchronously through
     a pool of worker threads.
 
-    Note that the BackgroundTaskManager class itself is reentrant but not thread-safe so its methods should only 
+    The BackgroundTaskManager class itself is reentrant but not thread-safe so its methods should only
     be called from the thread it is created in. Typically this would be the main thread of the application.
-    
-    
+
+    .. note::
+        Signalling between two different threads in PySide is broken in several versions
+        of PySide. There are very subtle race conditions that arise when there is a lot
+        of signalling between two threads. Some of these things have been fixed in later
+        versions of PySide, but most hosts integrate PySide 1.2.2 and lower, which are
+        victim of this race condition.
+
+        The background task manager does a lot on inter-threads communications and
+        therefore can easily fall pray to these deadlocks that exist within PySide.
+
+        Therefore, the background task manager uses a polling system to process results
+        from the worker threads. The worker threads inserts results inside a queue and
+        the background manager's thread will flush the queue at 100 milliseconds intervals.
+
+        Also note that because there is a 100 milliseconds interval between two polls,
+        it means that the will automatically be a delay between the end of a task
+        and the beginning of another task.
+
     :signal task_completed(uid, group, result): Emitted when a task has been completed.
-        The ``uid`` parameter holds the unique id associated with the task, 
-        the ``group`` is the group that the task is associated with and 
-        the ``result`` is the data returned by the task. 
-    
+        The ``uid`` parameter holds the unique id associated with the task,
+        the ``group`` is the group that the task is associated with and
+        the ``result`` is the data returned by the task.
+
     :signal task_failed(uid, group, message, traceback_str): Emitted when a task fails for some reason.
-        The ``uid`` parameter holds the unique id associated with the task, 
-        the ``group`` is the group that the task is associated with, 
+        The ``uid`` parameter holds the unique id associated with the task,
+        the ``group`` is the group that the task is associated with,
         the ``message`` is a short error message and the ``traceback_str``
         holds a full traceback.
-        
+
     :signal task_group_finished(group): Emitted when all tasks in a group have finished.
         The ``group`` is the group that has completed.
 
@@ -82,6 +103,12 @@ class BackgroundTaskManager(QtCore.QObject):
         # track downstream dependencies for tasks:
         self._upstream_task_map = {}
         self._downstream_task_map = {}
+
+        # Create the task result poller.
+        self._results_poller = ResultsPoller(self)
+        self._results_poller.task_completed.connect(self._on_worker_thread_task_completed)
+        self._results_poller.task_failed.connect(self._on_worker_thread_task_failed)
+        self._results_poller.start()
 
     def next_group_id(self):
         """
@@ -133,6 +160,9 @@ class BackgroundTaskManager(QtCore.QObject):
             thread.shut_down()
         self._available_threads = []
         self._all_threads = []
+
+        # Shut down the poller thread
+        self._results_poller.shut_down()
         self._log("Shut down successfully!")
 
     def add_task(self, cbl, priority=None, group=None, upstream_task_ids=None, task_args=None, task_kwargs=None):
@@ -148,9 +178,9 @@ class BackgroundTaskManager(QtCore.QObject):
         :param upstream_task_ids:   A list of any upstream tasks that should be completed before this task
                                     is run.  The results from any upstream tasks are appended to the kwargs
                                     for this task.
-        :param task_args:           A list of unnamed parameters to be passed to the callable when running the 
+        :param task_args:           A list of unnamed parameters to be passed to the callable when running the
                                     task
-        :param task_kwargs:         A dictionary of named parameters to be passed to the callable when running 
+        :param task_kwargs:         A dictionary of named parameters to be passed to the callable when running
                                     the task
         :returns:                   A unique id representing the task.
         """
@@ -201,7 +231,7 @@ class BackgroundTaskManager(QtCore.QObject):
         :returns:                   A unique id representing the task.
 
         """
-        return self.add_task(self._task_pass_through, priority, group, upstream_task_ids, task_kwargs = task_kwargs)
+        return self.add_task(self._task_pass_through, priority, group, upstream_task_ids, task_kwargs=task_kwargs)
 
     def stop_task(self, task_id, stop_upstream=True, stop_downstream=True):
         """
@@ -222,7 +252,7 @@ class BackgroundTaskManager(QtCore.QObject):
 
     def stop_task_group(self, group, stop_upstream=True, stop_downstream=True):
         """
-        Stop all tasks in the specified group from running.  If any tasks are already running then they will 
+        Stop all tasks in the specified group from running.  If any tasks are already running then they will
         complete but their completion/failure signals will be ignored.
 
         :param group:           The task group to stop
@@ -247,7 +277,7 @@ class BackgroundTaskManager(QtCore.QObject):
 
     def stop_all_tasks(self):
         """
-        Stop all currently queued or running tasks.  If any tasks are already running then they will 
+        Stop all currently queued or running tasks.  If any tasks are already running then they will
         complete but their completion/failure signals will be ignored.
         """
         self._log("Stopping all tasks...")
@@ -307,7 +337,7 @@ class BackgroundTaskManager(QtCore.QObject):
 
     def _get_worker_thread(self):
         """
-        Get a worker thread to use.  
+        Get a worker thread to use.
 
         :returns:   An available worker thread if there is one, a new thread if needed or None if the thread
                     limit has been reached.
@@ -325,15 +355,13 @@ class BackgroundTaskManager(QtCore.QObject):
         # create a new worker thread - note, there are two different implementations of the WorkerThread class
         # that use two different recipes.  Although WorkerThreadB is arguably more correct it has some issues
         # in PyQt so WorkerThread is currently preferred - see the notes in the class above for further details
-        thread = WorkerThread(self)
+        thread = WorkerThread(self._results_poller, self)
         if not isinstance(thread, WorkerThread):
             # for some reason (probably memory corruption somewhere else) I've occasionally seen the above
             # creation of a worker thread return another arbitrary object!  Added this in here so the code
             # will at least continue correctly and not do unexpected things!
             self._bundle.log_error("Failed to create background worker thread for task Manager!")
             return None
-        thread.task_failed.connect(self._on_worker_thread_task_failed)
-        thread.task_completed.connect(self._on_worker_thread_task_completed)
         self._all_threads.append(thread)
 
         # start the thread - this will just put it into wait mode:
@@ -355,7 +383,7 @@ class BackgroundTaskManager(QtCore.QObject):
 
     def _start_next_task(self):
         """
-        Start the next task in the queue if there is a task that is startable and there is an 
+        Start the next task in the queue if there is a task that is startable and there is an
         available thread to run it.
 
         :returns:    True if a task was started, otherwise False
@@ -417,18 +445,17 @@ class BackgroundTaskManager(QtCore.QObject):
 
         return True
 
-    def _on_worker_thread_task_completed(self, task, result):
+    def _on_worker_thread_task_completed(self, worker_thread, task, result):
         """
-        Slot triggered when a task is completed by a worker thread.  This processes the result and emits the 
+        Slot triggered when a task is completed by a worker thread.  This processes the result and emits the
         task_completed signal if needed.
 
         The worker thread instance that completed the task can be retrieved from self.sender()
 
-        :param task:    The task that completed
-        :param result:  The task result
+        :param worker_thread: Thread that completed the task.
+        :param task:          The task that completed
+        :param result:        The task result
         """
-        worker_thread = self.sender()
-
         try:
             # check that we should process this result:
             if task.uid in self._running_tasks:
@@ -459,19 +486,18 @@ class BackgroundTaskManager(QtCore.QObject):
         # start processing of the next task:
         self._start_tasks()
 
-    def _on_worker_thread_task_failed(self, task, msg, tb):
+    def _on_worker_thread_task_failed(self, worker_thread, task, msg, tb):
         """
-        Slot triggered when a task being executed in by a worker thread has failed for some reason.  This processes 
+        Slot triggered when a task being executed in by a worker thread has failed for some reason.  This processes
         the task and emits the task_failed signal if needed.
 
         The worker thread instance that the task failed in can be retrieved from self.sender()
 
-        :param task:    The task that failed
-        :param msg:     The error message for the failed task
-        :param tb:      The stack-trace for the failed task
+        :param worker_thread: Thread that completed the task.
+        :param task:          The task that failed
+        :param msg:           The error message for the failed task
+        :param tb:            The stack-trace for the failed task
         """
-        worker_thread = self.sender()
-
         try:
             # check that we should process this task:
             if task.uid in self._running_tasks:
@@ -527,14 +553,14 @@ class BackgroundTaskManager(QtCore.QObject):
             for p_task in self._pending_tasks_by_priority.get(task.priority, []):
                 if p_task.uid == task.uid:
                     self._pending_tasks_by_priority[task.priority].remove(p_task)
-                    break 
+                    break
 
             if not self._pending_tasks_by_priority[task.priority]:
                 del self._pending_tasks_by_priority[task.priority]
 
         # remove this task from all other maps:
-        if (task.group in self._group_task_map 
-            and task.uid in self._group_task_map[task.group]):
+        if (task.group in self._group_task_map and
+                task.uid in self._group_task_map[task.group]):
             self._group_task_map[task.group].remove(task.uid)
             if not self._group_task_map[task.group]:
                 group_completed = True

@@ -248,7 +248,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
               ['sg_status', 'is', 'ip']
             ]
 
-        :param item: One of the :class:`~PySide.QtGui.QStandardItem`s that are
+        :param item: One of the :class:`~PySide.QtGui.QStandardItem` s that are
                      associated with this model.
         :returns: standard shotgun filter list to represent that item
         """
@@ -1493,7 +1493,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         :param item: A :class:`~PySide.QtGui.QStandardItem` that is associated with this model.
         :param is_leaf: A boolean indicating if the item is a leaf item or not
 
-        :returns: A list of :class:`~PySide.QtGui.QStandardItem`s
+        :returns: A list of :class:`~PySide.QtGui.QStandardItem` s
         """
         # the first item in the row is always the standard shotgun model item,
         # but subclasses may provide additional columns to be appended.
