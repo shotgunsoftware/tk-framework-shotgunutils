@@ -57,7 +57,7 @@ class ResultsPoller(QtCore.QObject):
         self._results = Queue.Queue()
         # Create a timer with no interval. This means the timer will be invoked
         # only when the event queue is empty.
-        self._timer = QtCore.QTimer()
+        self._timer = QtCore.QTimer(parent=self)
         self._timer.setInterval(self._POLLING_INTERVAL)
         # Since the event will be invoked as soon as the event queue is empty,
         # we should process the queue one item at a time to not interfere with the

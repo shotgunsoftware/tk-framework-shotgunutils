@@ -23,11 +23,11 @@ class WorkerThread(QtCore.QThread):
     implements a custom run method that loops over tasks until asked to quit.
     """
 
-    def __init__(self, rp, parent=None):
+    def __init__(self, results_poller, parent=None):
         """
         Construction
 
-        :param rp: Results poller from the background task manager.
+        :param results_poller: Results poller from the background task manager.
         :param parent:  The parent QObject for this thread
         """
         QtCore.QThread.__init__(self, parent)
@@ -36,7 +36,7 @@ class WorkerThread(QtCore.QThread):
         self._process_tasks = True
         self._mutex = QtCore.QMutex()
         self._wait_condition = QtCore.QWaitCondition()
-        self._results_poller = rp
+        self._results_poller = results_poller
 
     def run_task(self, task):
         """
