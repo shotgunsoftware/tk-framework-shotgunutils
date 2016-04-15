@@ -16,6 +16,8 @@ import traceback
 
 from sgtk.platform.qt import QtCore
 
+from .results_poller import TaskCompletedEvent, TaskFailedEvent
+
 
 class WorkerThread(QtCore.QThread):
     """
@@ -23,11 +25,11 @@ class WorkerThread(QtCore.QThread):
     implements a custom run method that loops over tasks until asked to quit.
     """
 
-    def __init__(self, results_poller, parent=None):
+    def __init__(self, results_dispatcher, parent=None):
         """
         Construction
 
-        :param results_poller: Results poller from the background task manager.
+        :param results_dispatcher: Results dispatcher from the background task manager.
         :param parent:  The parent QObject for this thread
         """
         QtCore.QThread.__init__(self, parent)
@@ -36,7 +38,7 @@ class WorkerThread(QtCore.QThread):
         self._process_tasks = True
         self._mutex = QtCore.QMutex()
         self._wait_condition = QtCore.QWaitCondition()
-        self._results_poller = results_poller
+        self._results_dispatcher = results_dispatcher
 
     def run_task(self, task):
         """
@@ -55,7 +57,7 @@ class WorkerThread(QtCore.QThread):
         """
         Shut down the thread and wait for it to exit before returning
         """
-        self._results_poller = None
+        self._results_dispatcher = None
         self._mutex.lock()
         try:
             self._process_tasks = False
@@ -95,10 +97,11 @@ class WorkerThread(QtCore.QThread):
                     if not self._process_tasks:
                         break
                     # emit the result (non-blocking):
-                    self._results_poller.queue_task_completed(self, task_to_process, result)
+                    self._results_dispatcher.produce_event(TaskCompletedEvent(self, task_to_process, result, self._results_dispatcher))
                 finally:
                     self._mutex.unlock()
             except Exception, e:
+                print e
                 # something went wrong so emit failed signal:
                 self._mutex.lock()
                 try:
@@ -106,7 +109,7 @@ class WorkerThread(QtCore.QThread):
                         break
                     tb = traceback.format_exc()
                     # emit failed signal (non-blocking):
-                    self._results_poller.queue_task_failed(self, task_to_process, str(e), tb)
+                    self._results_dispatcher.produce_event(TaskFailedEvent(self, task_to_process, str(e), tb, self._results_dispatcher))
                 finally:
                     self._mutex.unlock()
 
