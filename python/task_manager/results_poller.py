@@ -17,58 +17,42 @@ from sgtk.platform.qt import QtCore
 import sgtk
 
 
-class TaskCompletedEvent(object):
+class _TaskCompletedEvent(object):
     """
     Event sent when a task is succesfully completed.
     """
 
-    def __init__(self, worker_thread, task, result, results_queue):
+    def __init__(self, worker_thread, task, result):
         """
         Constructor.
 
         :param worker_thread: Worker thread that completed sucessfully.
         :param task: Task id of the completed task.
         :param result: Result published by the task.
-        :param results_queue: Results queue to signal task completion.
         """
-        self._worker_thread = worker_thread
-        self._task = task
-        self._result = result
-        self._results_queue = results_queue
-
-    def execute(self):
-        """
-        Signals the task_completed event on the results queue.
-        """
-        self._results_queue.task_completed.emit(self._worker_thread, self._task, self._result)
+        self.worker_thread = worker_thread
+        self.task = task
+        self.result = result
 
 
-class TaskFailedEvent(object):
+class _TaskFailedEvent(object):
     """
     Event sent when a task is succesfully completed.
     """
 
-    def __init__(self, worker_thread, task, msg, traceback_, results_queue):
+    def __init__(self, worker_thread, task, message, traceback):
         """
         Constructor.
 
         :param worker_thread: Worker thread that completed sucessfully.
         :param task: Task id of the completed task.
-        :param msg: Error message from the worker thread.
-        :param traceback_: Traceback from  the worker thread error.
-        :param results_queue: Results queue to signal task failure.
+        :param message: Error message from the worker thread.
+        :param traceback: Traceback from  the worker thread error.
         """
-        self._worker_thread = worker_thread
-        self._task = task
-        self._msg = msg
-        self._traceback = traceback_
-        self._results_queue = results_queue
-
-    def execute(self):
-        """
-        Signals the task_failed event on the results queue.
-        """
-        self._results_queue.task_failed.emit(self._worker_thread, self._task, self._msg, self._traceback)
+        self.worker_thread = worker_thread
+        self.task = task
+        self.message = message
+        self.traceback = traceback
 
 
 class ResultsDispatcher(QtCore.QThread):
@@ -173,15 +157,34 @@ class ResultsDispatcher(QtCore.QThread):
         Executes the event to dispatch.
         """
         try:
-            self._event.execute()
-            self._event
+            event = self._event
+            self._event = None
+            if isinstance(event, _TaskCompletedEvent):
+                self.task_completed.emit(event.worker_thread, event.task, event.result)
+            elif isinstance(event, _TaskFailedEvent):
+                self.task_failed.emit(event.worker_thread, event.task, event.message, event.traceback)
+            else:
+                raise Exception("Unknown event type: %s" % type(event).__name__)
         except Exception:
             self._bundle.log_exception("Exception thrown while reporting ended task.")
 
-    def produce_event(self, event):
+    def emit_completed(self, worker_thread, task, result):
         """
-        Called by background threads to notify that a task has ended.
+        Called by background threads to notify that a task has completed.
 
-        :param event: Event to notify
+        :param worker_thread: Worker thread that completed sucessfully.
+        :param task: Task id of the completed task.
+        :param result: Result published by the ta
         """
-        self._results.put(event)
+        self._results.put(_TaskCompletedEvent(worker_thread, task, result))
+
+    def emit_failure(self, worker_thread, task, msg, traceback):
+        """
+        Called by background threads to notify that a task has completed.
+
+        :param worker_thread: Worker thread that completed sucessfully.
+        :param task: Task id of the completed task.
+        :param msg: Error message from the worker thread.
+        :param traceback: Traceback from  the worker thread error.
+        """
+        self._results.put(_TaskFailedEvent(worker_thread, task, msg, traceback))
