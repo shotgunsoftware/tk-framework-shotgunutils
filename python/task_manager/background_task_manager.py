@@ -18,7 +18,7 @@ from sgtk import TankError
 
 from .background_task import BackgroundTask
 from .worker_thread import WorkerThread
-from .results_poller import ResultsPoller
+from .results_poller import ResultsDispatcher
 
 
 class BackgroundTaskManager(QtCore.QObject):
@@ -28,24 +28,6 @@ class BackgroundTaskManager(QtCore.QObject):
 
     The BackgroundTaskManager class itself is reentrant but not thread-safe so its methods should only
     be called from the thread it is created in. Typically this would be the main thread of the application.
-
-    .. note::
-        Signalling between two different threads in PySide is broken in several versions
-        of PySide. There are very subtle race conditions that arise when there is a lot
-        of signalling between two threads. Some of these things have been fixed in later
-        versions of PySide, but most hosts integrate PySide 1.2.2 and lower, which are
-        victim of this race condition.
-
-        The background task manager does a lot on inter-threads communications and
-        therefore can easily fall pray to these deadlocks that exist within PySide.
-
-        Therefore, the background task manager uses a polling system to process results
-        from the worker threads. The worker threads inserts results inside a queue and
-        the background manager's thread will flush the queue at 100 milliseconds intervals.
-
-        Also note that because there is a 100 milliseconds interval between two polls,
-        it means that the will automatically be a delay between the end of a task
-        and the beginning of another task.
 
     :signal task_completed(uid, group, result): Emitted when a task has been completed.
         The ``uid`` parameter holds the unique id associated with the task,
@@ -104,11 +86,11 @@ class BackgroundTaskManager(QtCore.QObject):
         self._upstream_task_map = {}
         self._downstream_task_map = {}
 
-        # Create the task result poller.
-        self._results_poller = ResultsPoller(self)
-        self._results_poller.task_completed.connect(self._on_worker_thread_task_completed)
-        self._results_poller.task_failed.connect(self._on_worker_thread_task_failed)
-        self._results_poller.start()
+        # Create the results dispatcher
+        self._results_dispatcher = ResultsDispatcher(self)
+        self._results_dispatcher.task_completed.connect(self._on_worker_thread_task_completed)
+        self._results_dispatcher.task_failed.connect(self._on_worker_thread_task_failed)
+        self._results_dispatcher.start()
 
     def next_group_id(self):
         """
@@ -161,8 +143,8 @@ class BackgroundTaskManager(QtCore.QObject):
         self._available_threads = []
         self._all_threads = []
 
-        # Shut down the poller thread
-        self._results_poller.shut_down()
+        # Shut down the dispatcher thread
+        self._results_dispatcher.shut_down()
         self._log("Shut down successfully!")
 
     def add_task(self, cbl, priority=None, group=None, upstream_task_ids=None, task_args=None, task_kwargs=None):
@@ -355,7 +337,7 @@ class BackgroundTaskManager(QtCore.QObject):
         # create a new worker thread - note, there are two different implementations of the WorkerThread class
         # that use two different recipes.  Although WorkerThreadB is arguably more correct it has some issues
         # in PyQt so WorkerThread is currently preferred - see the notes in the class above for further details
-        thread = WorkerThread(self._results_poller, self)
+        thread = WorkerThread(self._results_dispatcher, self)
         if not isinstance(thread, WorkerThread):
             # for some reason (probably memory corruption somewhere else) I've occasionally seen the above
             # creation of a worker thread return another arbitrary object!  Added this in here so the code
