@@ -429,6 +429,13 @@ class CachedShotgunSchema(QtCore.QObject):
         :returns: Data type string
         """
         self = cls.__get_instance()
+
+        # Detect bubble fields. If the field_name is "sg_sequence.Sequence.code"
+        # then we know we want to get the data type of the "code" field on the
+        # "Sequence" entity type.
+        if "." in field_name:
+            (sg_entity_type, field_name) = field_name.split(".")[-2:]
+
         self._check_schema_refresh(sg_entity_type, field_name)
 
         if sg_entity_type in self._type_schema and field_name in self._field_schema[sg_entity_type]:
