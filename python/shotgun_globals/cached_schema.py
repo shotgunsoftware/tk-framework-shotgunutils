@@ -59,7 +59,10 @@ class CachedShotgunSchema(QtCore.QObject):
         self._field_schema = {}
         self._type_schema = {}
         self.__sg_data_retrievers = []
-        self._status_data = {}
+        self._status_data = dict(
+            status_order=[],
+            statuses={},
+        )
         
         self._sg_schema_query_id = None
         self._sg_status_query_id = None
@@ -88,8 +91,14 @@ class CachedShotgunSchema(QtCore.QObject):
             try:
                 self._bundle.log_debug("Loading cached status from '%s'" % self._status_cache_path)
                 with open(self._status_cache_path, "rb") as fh:
-                    self._status_data = pickle.load(fh)
-                    cache_loaded = True
+                    status_data = pickle.load(fh)
+                    # Check to make sure the structure of the data
+                    # is what we expect. If it isn't then we don't
+                    # accept the data which will force it to be
+                    # recached.
+                    if "statuses" in status_data and "status_order" in status_data:
+                        self._status_data = status_data
+                        cache_loaded = True
             except Exception, e:
                 self._bundle.log_warning("Could not open cached status "
                                          "file '%s': %s" % (self._status_cache_path, e))       
@@ -229,9 +238,13 @@ class CachedShotgunSchema(QtCore.QObject):
         elif uid == self._sg_status_query_id:
             self._bundle.log_debug("Status list arrived from Shotgun...")
             # store status in memory
-            self._status_data = {}            
+            self._status_data = dict(
+                status_order=[],
+                statuses={},
+            )
             for x in data["sg"]:
-                self._status_data[ x["code"] ] = x
+                self._status_data["statuses"][x["code"]] = x
+                self._status_data["status_order"].append(x["code"])
 
             # job done! set our load flags accordingly.
             self._status_loaded = True
@@ -486,8 +499,8 @@ class CachedShotgunSchema(QtCore.QObject):
         
         display_name = status_code
         
-        if status_code in self._status_data:
-            data = self._status_data[status_code]
+        if status_code in self._status_data["statuses"]:
+            data = self._status_data["statuses"][status_code]
             display_name = data.get("name") or status_code
         
         return display_name
@@ -512,12 +525,34 @@ class CachedShotgunSchema(QtCore.QObject):
         
         status_color = None
         
-        if status_code in self._status_data:
-            data = self._status_data[status_code]
+        if status_code in self._status_data["statuses"]:
+            data = self._status_data["statuses"][status_code]
             status_color = data.get("bg_color")
             # color is on the form "123,255,10"
         
         return status_color
 
+    @classmethod
+    def get_ordered_status_list(cls, display_names=False):
+        """
+        Returns a list of statuses in their order as defined by the
+        Shotgun site preferences.
 
+        If the data is not present locally, a cache reload
+        will be triggered, meaning that subsequent cache requests may
+        return valid data.
+
+        :param display_names:   If True, returns status display names. If
+                                False, status codes are returned. Default is
+                                False.
+        :returns:               list of string display names in order
+        """
+        self = cls.__get_instance()
+        self._check_status_refresh()
+        statuses = self._status_data["statuses"]
+
+        if display_names:
+            return [cls.get_status_display_name(s) for s in self._status_data["status_order"]]
+        else:
+            return self._status_data["status_order"]
 
