@@ -71,7 +71,7 @@ class SimpleShotgunModel(ShotgunModel):
                   similar.
         :param columns: List of Shotgun fields to use to populate the model columns
         :param additional_filter_presets: List of Shotgun filter presets to apply, e.g.
-                  [{"preset_name": "LATEST", "latest_by": "BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT" }]
+                  [{"preset_name":"LATEST","latest_by":"BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT"}]
         """
         filters = filters or []
         fields = fields or ["code"]

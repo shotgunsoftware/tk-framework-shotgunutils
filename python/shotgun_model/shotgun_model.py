@@ -441,7 +441,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                           that the data from the loaded entity will be available field by field. Subclasses can modify
                                           this behavior by overriding _get_additional_columns.
         :param additional_filter_presets: List of Shotgun filter presets to apply, e.g.
-                                          [{"preset_name": "LATEST", "latest_by": "BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT" }]
+                                          [{"preset_name":"LATEST","latest_by":"BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT"}]
 
         :returns:                         True if cached data was loaded, False if not.
         """
@@ -499,13 +499,13 @@ class ShotgunModel(QtGui.QStandardItemModel):
         params_hash.update(str(self.__fields))
         params_hash.update(str(self.__order))
         params_hash.update(str(self.__hierarchy))
-        params_hash.update(str(self.__additional_filter_presets))
 
         # now hash up the filter parameters and the seed - these are dynamic
         # values that tend to change and be data driven, so they are handled
         # on a different level in the path
         filter_hash = hashlib.md5()
         filter_hash.update(str(self.__filters))
+        filter_hash.update(str(self.__additional_filter_presets))
         params_hash.update(str(seed))
 
         # organize files on disk based on entity type and then filter hash
