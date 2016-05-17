@@ -432,8 +432,6 @@ class BackgroundTaskManager(QtCore.QObject):
         Slot triggered when a task is completed by a worker thread.  This processes the result and emits the
         task_completed signal if needed.
 
-        The worker thread instance that completed the task can be retrieved from self.sender()
-
         :param worker_thread: Thread that completed the task.
         :param task:          The task that completed
         :param result:        The task result
@@ -472,8 +470,6 @@ class BackgroundTaskManager(QtCore.QObject):
         """
         Slot triggered when a task being executed in by a worker thread has failed for some reason.  This processes
         the task and emits the task_failed signal if needed.
-
-        The worker thread instance that the task failed in can be retrieved from self.sender()
 
         :param worker_thread: Thread that completed the task.
         :param task:          The task that failed
