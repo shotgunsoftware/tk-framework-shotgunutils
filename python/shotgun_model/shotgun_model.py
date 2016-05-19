@@ -609,13 +609,22 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 fields = fields + ["image"]
             fields = list(set(fields))
 
+            find_kwargs = dict(
+                limit=self.__limit,
+            )
+
+            # We only want to include the filter presets kwarg if it was explicitly asked
+            # for. The reason for this is that it's a Shotgun 7.0 feature server side, and
+            # we don't want to break backwards compatibility with older versions of Shotgun.
+            if self__additional_filter_presets:
+                find_kwargs["additional_filter_presets"] = self.__additional_filter_presets
+
             self.__current_work_id = self.__sg_data_retriever.execute_find(
                 self.__entity_type,
                 self.__filters,
                 fields,
                 self.__order,
-                limit=self.__limit,
-                additional_filter_presets=self.__additional_filter_presets,
+                **find_kwargs
             )
 
 
