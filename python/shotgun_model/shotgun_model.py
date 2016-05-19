@@ -382,7 +382,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
     ########################################################################################
     # protected methods not meant to be subclassed but meant to be called by subclasses
 
-    def _load_data(self, entity_type, filters, hierarchy, fields, order=None, seed=None, limit=None, columns=None):
+    def _load_data(
+        self, entity_type, filters, hierarchy, fields, order=None, seed=None, limit=None,
+        columns=None, additional_filter_presets=None
+    ):
         """
         This is the main method to use to configure the model. You basically
         pass a specific find query to the model and it will start tracking
@@ -397,47 +400,50 @@ class ShotgunModel(QtGui.QStandardItemModel):
         If you want to refresh the data contained in the model (which you typically
         want to), call the :meth:`_refresh_data()` method.
 
-        :param entity_type: Shotgun entity type to download
-        :param filters:   List of Shotgun filters. Standard Shotgun syntax. Passing None instead of a list of
-                          filters indicates that no shotgun data should be retrieved and no API calls will be made.
-        :param hierarchy: List of grouping fields. These should be names of Shotgun
-                          fields. If you for example want to create a list of items,
-                          the value ``["code"]`` will be suitable. This will generate a data
-                          model which is flat and where each item's default name is the
-                          Shotgun name field. If you want to generate a tree where assets
-                          are broken down by asset type, you could instead specify
-                          ``["sg_asset_type", "code"]``.
-        :param fields:    Fields to retrieve from Shotgun (in addition to the ones specified
-                          in the hierarchy parameter). Standard Shotgun API syntax. If you
-                          specify None for this parameter, Shotgun will not be called when
-                          the _refresh_data() method is being executed.
-        :param order:     Order clause for the Shotgun data. Standard Shotgun API syntax.
-                          Note that this is an advanced parameter which is meant to be used
-                          in subclassing only. The model itself will be ordered by its
-                          default display name, and if any other type of ordering is desirable,
-                          use for example a QProxyModel to handle this. However, knowing in which
-                          order results will arrive from Shotgun can be beneficial if you are doing
-                          grouping, deferred loading and aggregation of data as part of your
-                          subclassed implementation, typically via the :meth:`_before_data_processing()` method.
-        :param seed:      Advanced parameter. With each shotgun query being cached on disk, the model
-                          generates a cache seed which it is using to store data on disk. Since the cache
-                          data on disk is a reflection of a particular shotgun query, this seed is typically
-                          generated from the various query and field parameters passed to this method. However,
-                          in some cases when you are doing advanced subclassing, for example when you are culling
-                          out data based on some external state, the model state does not solely depend on the
-                          shotgun query parameters. It may also depend on some external factors. In this case,
-                          the cache seed should also be influenced by those parameters and you can pass
-                          an external string via this parameter which will be added to the seed.
-        :param limit:     Limit the number of results returned from Shotgun. In conjunction with the order
-                          parameter, this can be used to effectively cap the data set that the model
-                          is handling, allowing a user to for example show the twenty most recent notes or
-                          similar.
-        :param columns:   If columns is specified, then any leaf row in the model will have columns created where
-                          each column in the row contains the value for the corresponding field from columns. This means
-                          that the data from the loaded entity will be available field by field. Subclasses can modify
-                          this behavior by overriding _get_additional_columns.
+        :param entity_type:               Shotgun entity type to download
+        :param filters:                   List of Shotgun filters. Standard Shotgun syntax. Passing None instead
+                                          of a list of filters indicates that no shotgun data should be retrieved
+                                          and no API calls will be made.
+        :param hierarchy:                 List of grouping fields. These should be names of Shotgun
+                                          fields. If you for example want to create a list of items,
+                                          the value ``["code"]`` will be suitable. This will generate a data
+                                          model which is flat and where each item's default name is the
+                                          Shotgun name field. If you want to generate a tree where assets
+                                          are broken down by asset type, you could instead specify
+                                          ``["sg_asset_type", "code"]``.
+        :param fields:                    Fields to retrieve from Shotgun (in addition to the ones specified
+                                          in the hierarchy parameter). Standard Shotgun API syntax. If you
+                                          specify None for this parameter, Shotgun will not be called when
+                                          the _refresh_data() method is being executed.
+        :param order:                     Order clause for the Shotgun data. Standard Shotgun API syntax.
+                                          Note that this is an advanced parameter which is meant to be used
+                                          in subclassing only. The model itself will be ordered by its
+                                          default display name, and if any other type of ordering is desirable,
+                                          use for example a QProxyModel to handle this. However, knowing in which
+                                          order results will arrive from Shotgun can be beneficial if you are doing
+                                          grouping, deferred loading and aggregation of data as part of your
+                                          subclassed implementation, typically via the :meth:`_before_data_processing()` method.
+        :param seed:                      Advanced parameter. With each shotgun query being cached on disk, the model
+                                          generates a cache seed which it is using to store data on disk. Since the cache
+                                          data on disk is a reflection of a particular shotgun query, this seed is typically
+                                          generated from the various query and field parameters passed to this method. However,
+                                          in some cases when you are doing advanced subclassing, for example when you are culling
+                                          out data based on some external state, the model state does not solely depend on the
+                                          shotgun query parameters. It may also depend on some external factors. In this case,
+                                          the cache seed should also be influenced by those parameters and you can pass
+                                          an external string via this parameter which will be added to the seed.
+        :param limit:                     Limit the number of results returned from Shotgun. In conjunction with the order
+                                          parameter, this can be used to effectively cap the data set that the model
+                                          is handling, allowing a user to for example show the twenty most recent notes or
+                                          similar.
+        :param columns:                   If columns is specified, then any leaf row in the model will have columns created where
+                                          each column in the row contains the value for the corresponding field from columns. This means
+                                          that the data from the loaded entity will be available field by field. Subclasses can modify
+                                          this behavior by overriding _get_additional_columns.
+        :param additional_filter_presets: List of Shotgun filter presets to apply, e.g.
+                                          ``[{"preset_name":"LATEST","latest_by":"BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT"}]``
 
-        :returns:         True if cached data was loaded, False if not.
+        :returns:                         True if cached data was loaded, False if not.
         """
         # we are changing the query
         self.query_changed.emit()
@@ -453,6 +459,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__hierarchy = hierarchy
         self.__column_fields = columns or []
         self.__limit = limit or 0 # 0 means get all matches
+        self.__additional_filter_presets = additional_filter_presets
 
         # when we cache the data associated with this model, create
         # the file name and path based on several parameters.
@@ -498,6 +505,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # on a different level in the path
         filter_hash = hashlib.md5()
         filter_hash.update(str(self.__filters))
+        filter_hash.update(str(self.__additional_filter_presets))
         params_hash.update(str(seed))
 
         # organize files on disk based on entity type and then filter hash
@@ -521,6 +529,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__log_debug("Fields: %s" % self.__fields)
         self.__log_debug("Order: %s" % self.__order)
         self.__log_debug("Columns: %s" % self.__column_fields)
+        self.__log_debug("Filter Presets: %s" % self.__additional_filter_presets)
 
         self.__log_debug("First population pass: Calling _load_external_data()")
         self._load_external_data()
@@ -542,8 +551,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                 "full SG load. Error reported: %s" % e)
 
         # set our headers
-        headers = [self.FIRST_COLUMN_HEADER] + \
-            self._get_additional_column_headers(self.__entity_type, self.__column_fields)
+        headers = [self.FIRST_COLUMN_HEADER] + self._get_additional_column_headers(
+            self.__entity_type,
+            self.__column_fields,
+        )
         self.setHorizontalHeaderLabels(headers)
 
         return loaded_cache_data
@@ -598,11 +609,23 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 fields = fields + ["image"]
             fields = list(set(fields))
 
-            self.__current_work_id = self.__sg_data_retriever.execute_find(self.__entity_type,
-                                                                           self.__filters,
-                                                                           fields,
-                                                                           self.__order,
-                                                                           limit=self.__limit)
+            find_kwargs = dict(
+                limit=self.__limit,
+            )
+
+            # We only want to include the filter presets kwarg if it was explicitly asked
+            # for. The reason for this is that it's a Shotgun 7.0 feature server side, and
+            # we don't want to break backwards compatibility with older versions of Shotgun.
+            if self__additional_filter_presets:
+                find_kwargs["additional_filter_presets"] = self.__additional_filter_presets
+
+            self.__current_work_id = self.__sg_data_retriever.execute_find(
+                self.__entity_type,
+                self.__filters,
+                fields,
+                self.__order,
+                **find_kwargs
+            )
 
 
     def _request_thumbnail_download(self, item, field, url, entity_type, entity_id):
