@@ -456,6 +456,17 @@ class CachedShotgunSchema(QtCore.QObject):
 
     @classmethod
     def get_valid_values(cls, sg_entity_type, field_name):
+        """
+        Returns valid values for fields with a list of choices.
+
+        :param str sg_entity_type: The entity type.
+        :param str field_name: The name of the field on the entity
+
+        :return: A :obj:`list` of valid values defined by the schema
+        :rtype list:
+
+        :raises: ``ValueError`` if the field has no valid values.
+        """
         self = cls.__get_instance()
         self._check_schema_refresh(sg_entity_type, field_name)
 
@@ -528,8 +539,11 @@ class CachedShotgunSchema(QtCore.QObject):
         """
         Returns a boolean identifying the editability of the entity's field.
 
-        :param sg_entity_type: the entity type
-        :param field_name: the field name to check editibility
+        :param str sg_entity_type: the entity type
+        :param str field_name: the field name to check editibility
+
+        :returns: ``True`` if the field is ediable, ``False`` otherwise.
+        :rtype: :obj:`bool`
         """
         self = cls.__get_instance()
         self._check_schema_refresh(sg_entity_type, field_name)
@@ -547,6 +561,9 @@ class CachedShotgunSchema(QtCore.QObject):
 
         :param sg_entity_type: the entity type
         :param field_name: the field name to check visibility
+
+        :returns: ``True`` if the field is visible, ``False`` otherwise.
+        :rtype: :obj:`bool`
         """
         self = cls.__get_instance()
         self._check_schema_refresh(sg_entity_type, field_name)
@@ -556,3 +573,4 @@ class CachedShotgunSchema(QtCore.QObject):
             return data.get("visible", {}).get("value", True)
 
         raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
+
