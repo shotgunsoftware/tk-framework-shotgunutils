@@ -821,7 +821,7 @@ class ShotgunDataRetriever(QtCore.QObject):
             thumb_task_id = self._thumb_task_id_map.get(task_id)
             if thumb_task_id is not None:
                 del self._thumb_task_id_map[task_id]
-                self.work_completed.emit(str(thumb_task_id), 
+                self.work_completed.emit(str(thumb_task_id),
                                          "find", 
                                          {"thumb_path": result["thumb_path"], "image":result["image"]})
 

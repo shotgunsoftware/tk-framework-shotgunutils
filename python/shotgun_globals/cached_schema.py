@@ -523,4 +523,36 @@ class CachedShotgunSchema(QtCore.QObject):
         return status_color
 
 
+    @classmethod
+    def field_is_editable(cls, sg_entity_type, field_name):
+        """
+        Returns a boolean identifying the editability of the entity's field.
 
+        :param sg_entity_type: the entity type
+        :param field_name: the field name to check editibility
+        """
+        self = cls.__get_instance()
+        self._check_schema_refresh(sg_entity_type, field_name)
+
+        if sg_entity_type in self._type_schema and field_name in self._field_schema[sg_entity_type]:
+            data = self._field_schema[sg_entity_type][field_name]
+            return data.get("editable", {}).get("value", False)
+
+        raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
+
+    @classmethod
+    def field_is_visible(cls, sg_entity_type, field_name):
+        """
+        Returns a boolean identifying the visibility of the entity's field.
+
+        :param sg_entity_type: the entity type
+        :param field_name: the field name to check visibility
+        """
+        self = cls.__get_instance()
+        self._check_schema_refresh(sg_entity_type, field_name)
+
+        if sg_entity_type in self._type_schema and field_name in self._field_schema[sg_entity_type]:
+            data = self._field_schema[sg_entity_type][field_name]
+            return data.get("visible", {}).get("value", True)
+
+        raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
