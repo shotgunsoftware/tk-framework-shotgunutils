@@ -13,7 +13,6 @@ from __future__ import with_statement
 
 import os
 import sgtk
-from sgtk import TankError
 from sgtk.platform.qt import QtCore, QtGui
 import cPickle as pickle
 
@@ -481,6 +480,33 @@ class CachedShotgunSchema(QtCore.QObject):
         raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
 
     @classmethod
+    def get_valid_values(cls, sg_entity_type, field_name):
+        """
+        Returns valid values for fields with a list of choices.
+
+        :param str sg_entity_type: The entity type.
+        :param str field_name: The name of the field on the entity
+
+        :return: A :obj:`list` of valid values defined by the schema
+        :rtype list:
+
+        :raises: ``ValueError`` if the field has no valid values.
+        """
+        self = cls.__get_instance()
+        self._check_schema_refresh(sg_entity_type, field_name)
+
+        if sg_entity_type in self._type_schema and field_name in self._field_schema[sg_entity_type]:
+            data = self._field_schema[sg_entity_type][field_name]
+            valid_values = data.get("properties", {}).get("valid_values", {}).get("value")
+
+            if valid_values is None:
+                raise ValueError("The data type for %s.%s does not have valid values" % (sg_entity_type, field_name))
+
+            return valid_values
+
+        raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
+
+    @classmethod
     def get_status_display_name(cls, status_code):
         """
         Returns the display name for a given status code.
@@ -555,4 +581,51 @@ class CachedShotgunSchema(QtCore.QObject):
             return [cls.get_status_display_name(s) for s in self._status_data["status_order"]]
         else:
             return self._status_data["status_order"]
+
+    @classmethod
+    def field_is_editable(cls, sg_entity_type, field_name):
+        """
+        Returns a boolean identifying the editability of the entity's field.
+
+        :param str sg_entity_type: the entity type
+        :param str field_name: the field name to check editibility
+
+        :returns: ``True`` if the field is ediable, ``False`` otherwise.
+        :rtype: :obj:`bool`
+        """
+        self = cls.__get_instance()
+        self._check_schema_refresh(sg_entity_type, field_name)
+
+        if sg_entity_type in self._type_schema and field_name in self._field_schema[sg_entity_type]:
+            data = self._field_schema[sg_entity_type][field_name]
+            try:
+                return data["editable"]["value"]
+            except KeyError:
+                raise ValueError("Could not determine editability from the schema.")
+
+
+        raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
+
+    @classmethod
+    def field_is_visible(cls, sg_entity_type, field_name):
+        """
+        Returns a boolean identifying the visibility of the entity's field.
+
+        :param sg_entity_type: the entity type
+        :param field_name: the field name to check visibility
+
+        :returns: ``True`` if the field is visible, ``False`` otherwise.
+        :rtype: :obj:`bool`
+        """
+        self = cls.__get_instance()
+        self._check_schema_refresh(sg_entity_type, field_name)
+
+        if sg_entity_type in self._type_schema and field_name in self._field_schema[sg_entity_type]:
+            data = self._field_schema[sg_entity_type][field_name]
+            try:
+                return data["visible"]["value"]
+            except KeyError:
+                raise ValueError("Could not determine visibility from the schema.")
+
+        raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
 
