@@ -10,7 +10,7 @@
 
 import datetime
 
-def create_human_readable_date(self, date):
+def create_human_readable_date(date):
     """
     Return the date represented by the argument as a string, displaying recent
     dates as "Yesterday", "Today", or "Tomorrow".
