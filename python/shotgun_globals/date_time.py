@@ -10,6 +10,32 @@
 
 import datetime
 
+def create_human_readable_date(self, date):
+    """
+    Return the date represented by the argument as a string, displaying recent
+    dates as "Yesterday", "Today", or "Tomorrow".
+
+    :param date: The date convert to a string
+    :type date: :class:`datetime.date`
+
+    :returns: A String representing date appropriate for display
+    """
+
+    # get the delta and components
+    delta = datetime.date.today() - date
+
+    if delta.days == 1:
+        date_str = "Yesterday"
+    elif delta.days == 0:
+        date_str = "Today"
+    elif delta.days == -1:
+        date_str = "Tomorrow"
+    else:
+        # use the date formatting associated with the current locale
+        date_str = date.strftime("%x")
+
+    return date_str
+
 def create_human_readable_timestamp(dt, postfix=""):
     """
     Return the time represented by the argument as a string where the date portion is
