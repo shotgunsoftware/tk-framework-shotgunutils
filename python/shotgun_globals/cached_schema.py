@@ -13,7 +13,6 @@ from __future__ import with_statement
 
 import os
 import sgtk
-from sgtk import TankError
 from sgtk.platform.qt import QtCore, QtGui
 import cPickle as pickle
 
@@ -550,7 +549,11 @@ class CachedShotgunSchema(QtCore.QObject):
 
         if sg_entity_type in self._type_schema and field_name in self._field_schema[sg_entity_type]:
             data = self._field_schema[sg_entity_type][field_name]
-            return data.get("editable", {}).get("value", False)
+            try:
+                return data["editable"]["value"]
+            except KeyError:
+                raise ValueError("Could not determine editability from the schema.")
+
 
         raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
 
@@ -570,7 +573,10 @@ class CachedShotgunSchema(QtCore.QObject):
 
         if sg_entity_type in self._type_schema and field_name in self._field_schema[sg_entity_type]:
             data = self._field_schema[sg_entity_type][field_name]
-            return data.get("visible", {}).get("value", True)
+            try:
+                return data["visible"]["value"]
+            except KeyError:
+                raise ValueError("Could not determine visibility from the schema.")
 
         raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
 
