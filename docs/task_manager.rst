@@ -10,7 +10,7 @@ In order to build responsive Toolkit apps, work needs to be scheduled to run
 in background threads. The :class:`BackgroundTaskManager` handles generic
 background processing and is used by many of the Toolkit frameworks.
 
-When using a :class:~shotgun_model.ShotgunModel, for example, the model
+When using a :class:`~shotgun_model.ShotgunModel`, for example, the model
 will internally create a :class:`~shotgun_data.ShotgunDataRetriever` to handle
 background communication with Shotgun. The :class:`~shotgun_data.ShotgunDataRetriever`
 in turn uses threads to handle its
@@ -33,8 +33,8 @@ thread safe.
     background processing.
 
 In these situations, you can maintain a single :class:`BackgroundTaskManager`
-for your app and supply it to your :class:~shotgun_model.ShotgunModel and 
-:class:~shotgun_data.ShotgunDataRetriever instances when creating them.
+for your app and supply it to your :class:`~shotgun_model.ShotgunModel` and
+:class:`~shotgun_data.ShotgunDataRetriever` instances when creating them.
 This allows for a setup where all threaded work
 is handled by a single thread pool and allows for efficient control and
 prioritization of the work that needs to be carried out.
