@@ -49,7 +49,7 @@ class UserSettings(object):
         # now organize various keys
         
         # studio level settings - base it on the server host name
-        _, sg_hostname, _, _, _ = urlparse.urlsplit(self.__fw.shotgun.base_url)
+        _, sg_hostname, _, _, _ = urlparse.urlsplit(self.__fw.sgtk.shotgun_url)
         self.__site_key = sg_hostname
         
         # project level settings
