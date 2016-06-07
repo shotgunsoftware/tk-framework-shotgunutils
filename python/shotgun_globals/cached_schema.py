@@ -129,7 +129,20 @@ class CachedShotgunSchema(QtCore.QObject):
         if project_id is None:
             return self._bundle.cache_location
         else:
-            return self._bundle.get_project_cache_location(project_id)
+            # Backwards compatible here with pre-v0.18.1 tk-core. If we don't
+            # have access to the get_project_cache_location method on the bundle,
+            # then we just get the current project's cache location and suffer
+            # the minor consequences. This is unlikely to happen, because apps
+            # that make use of the project_id feature are almost certainly going
+            # to also require a modern version of core.
+            try:
+                return self._bundle.get_project_cache_location(project_id)
+            except AttributeError:
+                self._bundle.log_warning(
+                    "Bundle.get_project_cache_location() is not available. "
+                    "Falling back on Bundle.cache_location instead."
+                )
+                return self._bundle.cache_location
 
     def _get_schema_cache_path(self, project_id=None):
         """
