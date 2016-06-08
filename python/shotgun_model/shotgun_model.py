@@ -791,8 +791,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 )
             )
         elif "." in field:
-            # This is scenario 2 described above.
-            _, sub_entity_type, sub_entity_field_name = field.split(".")
+            # This is scenario 2 described above. We only want to get the last entity and field.
+            _, sub_entity_type, sub_entity_field_name = field.rsplit(".", 2)
             item.setToolTip(
                 "%s %s '%s'" % (
                     self._shotgun_globals.get_type_display_name(sub_entity_type),
