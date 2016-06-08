@@ -499,6 +499,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
         params_hash.update(str(self.__fields))
         params_hash.update(str(self.__order))
         params_hash.update(str(self.__hierarchy))
+        # If this value changes over time (like between Qt4 and Qt5), we need to
+        # assume our previous user roles are invalid since Qt might have taken over
+        # it. If role's value is 32, don't add it to the hash so we don't
+        # invalidate PySide/PyQt4 caches.
+        if QtCore.Qt.UserRole != 32:
+            params_hash.update(str(QtCore.Qt.UserRole))
 
         # now hash up the filter parameters and the seed - these are dynamic
         # values that tend to change and be data driven, so they are handled
