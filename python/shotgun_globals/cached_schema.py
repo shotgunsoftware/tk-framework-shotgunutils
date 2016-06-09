@@ -650,7 +650,6 @@ class CachedShotgunSchema(QtCore.QObject):
                                     If None, the current context's project will be used.
 
         :return:                    A :obj:`list` of valid values defined by the schema
-        :rtype list:
 
         :raises: ``ValueError`` if the field has no valid values.
         """
@@ -747,7 +746,6 @@ class CachedShotgunSchema(QtCore.QObject):
         :param str field_name: the field name to check editibility
 
         :returns: ``True`` if the field is ediable, ``False`` otherwise.
-        :rtype: :obj:`bool`
         """
         self = cls.__get_instance()
         self._check_schema_refresh(sg_entity_type, field_name)
@@ -771,7 +769,6 @@ class CachedShotgunSchema(QtCore.QObject):
         :param field_name: the field name to check visibility
 
         :returns: ``True`` if the field is visible, ``False`` otherwise.
-        :rtype: :obj:`bool`
         """
         self = cls.__get_instance()
         self._check_schema_refresh(sg_entity_type, field_name)
