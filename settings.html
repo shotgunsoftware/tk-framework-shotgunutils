@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Toolkit QT Settings Wrapper &mdash; tk-framework-shotgunutils v4.0.3 documentation</title>
+  <title>Shotgun Toolkit QT Settings Wrapper &mdash; tk-framework-shotgunutils v4.2.3 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.0.3 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.2.3 documentation" href="index.html"/>
         <link rel="next" title="Shotgun Globals Access" href="shotgun_globals.html"/>
         <link rel="prev" title="Background Task Processing" href="task_manager.html"/> 
 
@@ -57,7 +57,7 @@
                 margin: 2px;
                 border-radius: 0px; 
                 padding: 0px;' 
-            src='./_static/logo@2x.png'/>
+            src='_static/logo@2x.png'/>
     
     </a>
     
@@ -93,7 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="shotgun_model.html">Shotgun Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_manager.html">Background Task Processing</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Shotgun Toolkit QT Settings Wrapper</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Shotgun Toolkit QT Settings Wrapper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="shotgun_globals.html">Shotgun Globals Access</a></li>
 </ul>
 
@@ -116,7 +116,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.0.3.<br>
+    <b>tk-framework-shotgunutils</b> v4.2.3.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -145,7 +145,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -194,31 +194,31 @@ that remembers if a &#8220;welcome screen&#8221; for your app has been displayed
 once in Maya, once in Nuke etc.</li>
 </ul>
 <p>The following code illustrates typical use of the settings module:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="c"># example of how the settings module can be used within your app code</span>
-<span class="c"># import the module - note that this is using the special</span>
-<span class="c"># import_framework code so it won&#39;t work outside an app</span>
-<span class="n">settings</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s">&quot;settings&quot;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># example of how the settings module can be used within your app code</span>
+<span class="c1"># import the module - note that this is using the special</span>
+<span class="c1"># import_framework code so it won&#39;t work outside an app</span>
+<span class="n">settings</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s2">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s2">&quot;settings&quot;</span><span class="p">)</span>
 
-<span class="c"># typically in the constructor of your main dialog or in the app, create a settings object:</span>
+<span class="c1"># typically in the constructor of your main dialog or in the app, create a settings object:</span>
 <span class="bp">self</span><span class="o">.</span><span class="n">_settings_manager</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">UserSettings</span><span class="p">(</span><span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_bundle</span><span class="p">())</span>
 
-<span class="c"># the settings system will handle serialization and management of data types</span>
-<span class="c"># so you can pass simple types such as strings, ints and lists and dicts of these.</span>
-<span class="c">#</span>
-<span class="c"># retrieve a settings value and default to a value if no settings was found</span>
-<span class="n">scale_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings_manager</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="s">&quot;thumb_size_scale&quot;</span><span class="p">,</span> <span class="mi">140</span><span class="p">)</span>
+<span class="c1"># the settings system will handle serialization and management of data types</span>
+<span class="c1"># so you can pass simple types such as strings, ints and lists and dicts of these.</span>
+<span class="c1">#</span>
+<span class="c1"># retrieve a settings value and default to a value if no settings was found</span>
+<span class="n">scale_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings_manager</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="s2">&quot;thumb_size_scale&quot;</span><span class="p">,</span> <span class="mi">140</span><span class="p">)</span>
 
-<span class="c"># or store the same value</span>
-<span class="bp">self</span><span class="o">.</span><span class="n">_settings_manager</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="s">&quot;thumb_size_scale&quot;</span><span class="p">,</span> <span class="mi">140</span><span class="p">)</span>
+<span class="c1"># or store the same value</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_settings_manager</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="s2">&quot;thumb_size_scale&quot;</span><span class="p">,</span> <span class="mi">140</span><span class="p">)</span>
 
-<span class="c"># by default, things are scoped with `SCOPE_GLOBAL`.</span>
-<span class="c"># If you want to specify another scope, add a scope parameter.</span>
+<span class="c1"># by default, things are scoped with `SCOPE_GLOBAL`.</span>
+<span class="c1"># If you want to specify another scope, add a scope parameter.</span>
 
-<span class="c"># Fetch a preference with a specific scope</span>
-<span class="n">ui_launched</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings_manager</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="s">&quot;ui_launched&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings_manager</span><span class="o">.</span><span class="n">SCOPE_ENGINE</span><span class="p">)</span>
+<span class="c1"># Fetch a preference with a specific scope</span>
+<span class="n">ui_launched</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings_manager</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="s2">&quot;ui_launched&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings_manager</span><span class="o">.</span><span class="n">SCOPE_ENGINE</span><span class="p">)</span>
 
-<span class="c"># And store a preference with a specific scope</span>
-<span class="bp">self</span><span class="o">.</span><span class="n">_settings_manager</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="s">&quot;ui_launched&quot;</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings_manager</span><span class="o">.</span><span class="n">SCOPE_ENGINE</span><span class="p">)</span>
+<span class="c1"># And store a preference with a specific scope</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_settings_manager</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="s2">&quot;ui_launched&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings_manager</span><span class="o">.</span><span class="n">SCOPE_ENGINE</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -242,7 +242,7 @@ once in Maya, once in Nuke etc.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2015, Autodesk.
+        &copy; Copyright 2016, Autodesk.
 
     </p>
   </div> 
@@ -263,7 +263,7 @@ once in Maya, once in Nuke etc.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v4.0.3',
+            VERSION:'v4.2.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

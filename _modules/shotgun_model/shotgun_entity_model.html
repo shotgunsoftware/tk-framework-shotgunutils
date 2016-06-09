@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_entity_model &mdash; tk-framework-shotgunutils v4.0.3 documentation</title>
+  <title>shotgun_model.shotgun_entity_model &mdash; tk-framework-shotgunutils v4.2.3 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.0.3 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.2.3 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -56,7 +56,7 @@
                 margin: 2px;
                 border-radius: 0px; 
                 padding: 0px;' 
-            src='./_static/logo@2x.png'/>
+            src='../../_static/logo@2x.png'/>
     
     </a>
     
@@ -115,7 +115,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.0.3.<br>
+    <b>tk-framework-shotgunutils</b> v4.2.3.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -167,15 +167,15 @@
            <div itemprop="articleBody">
             
   <h1>Source code for shotgun_model.shotgun_entity_model</h1><div class="highlight"><pre>
-<span class="c"># Copyright (c) 2013 Shotgun Software Inc.</span>
-<span class="c"># </span>
-<span class="c"># CONFIDENTIAL AND PROPRIETARY</span>
-<span class="c"># </span>
-<span class="c"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit </span>
-<span class="c"># Source Code License included in this distribution package. See LICENSE.</span>
-<span class="c"># By accessing, using, copying or modifying this work you indicate your </span>
-<span class="c"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights </span>
-<span class="c"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
+<span></span><span class="c1"># Copyright (c) 2013 Shotgun Software Inc.</span>
+<span class="c1"># </span>
+<span class="c1"># CONFIDENTIAL AND PROPRIETARY</span>
+<span class="c1"># </span>
+<span class="c1"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit </span>
+<span class="c1"># Source Code License included in this distribution package. See LICENSE.</span>
+<span class="c1"># By accessing, using, copying or modifying this work you indicate your </span>
+<span class="c1"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights </span>
+<span class="c1"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
 
 <span class="kn">import</span> <span class="nn">sgtk</span>
 <span class="kn">from</span> <span class="nn">sgtk.platform.qt</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
@@ -191,7 +191,7 @@
 <span class="sd">    For Step entities, the icon will be a colour swatch based on the Step color field</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c"># global cache of step colours - avoids querying from Shotgun multiple times!</span>
+    <span class="c1"># global cache of step colours - avoids querying from Shotgun multiple times!</span>
     <span class="n">_SG_STEP_COLOURS</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">hierarchy</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> 
@@ -222,11 +222,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_step_swatch_icons</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c"># make sure fields is valid:</span>
+        <span class="c1"># make sure fields is valid:</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="n">fields</span> <span class="ow">or</span> <span class="p">[]</span>
 
-        <span class="c"># default icon</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_default_icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="s">&quot;:/tk-framework-shotgunutils/icon_Folder.png&quot;</span><span class="p">))</span>
+        <span class="c1"># default icon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_default_icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="s2">&quot;:/tk-framework-shotgunutils/icon_Folder.png&quot;</span><span class="p">))</span>
 
         <span class="n">ShotgunModel</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                               <span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span><span class="p">,</span>
@@ -235,7 +235,7 @@
                               <span class="n">bg_load_thumbs</span> <span class="o">=</span> <span class="n">bg_load_thumbs</span><span class="p">,</span>
                               <span class="n">bg_task_manager</span> <span class="o">=</span> <span class="n">bg_task_manager</span><span class="p">)</span>
 
-        <span class="c"># load the data from the cache:</span>
+        <span class="c1"># load the data from the cache:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">hierarchy</span><span class="p">,</span> <span class="n">fields</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -254,9 +254,9 @@
 <span class="sd">        :returns:           A QIcon if an icon was found for the specified entity</span>
 <span class="sd">                            type, otherwise None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">shotgun_globals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s">&quot;shotgun_globals&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">shotgun_globals</span><span class="o">.</span><span class="n">get_entity_type_icon</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)</span>
-</div>
+        <span class="n">shotgun_globals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;shotgun_globals&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">shotgun_globals</span><span class="o">.</span><span class="n">get_entity_type_icon</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="ShotgunEntityModel.get_entities"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel.get_entities">[docs]</a>    <span class="k">def</span> <span class="nf">get_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get entities for the current item by traversing up the tree and pulling entity information </span>
@@ -280,8 +280,8 @@
                 <span class="n">entities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_entity</span><span class="p">)</span>
             <span class="n">current_item</span> <span class="o">=</span> <span class="n">current_item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">entities</span>
-</div>
+        <span class="k">return</span> <span class="n">entities</span></div>
+
 <div class="viewcode-block" id="ShotgunEntityModel.get_entity"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel.get_entity">[docs]</a>    <span class="k">def</span> <span class="nf">get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the Shotgun entity details for the specified model item.</span>
@@ -293,28 +293,28 @@
 <span class="sd">                        which is usually determined by the list of fields passed during construction plus</span>
 <span class="sd">                        name/code, type and id.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c"># first, if this is a leaf item then it will represent an entity:</span>
+        <span class="c1"># first, if this is a leaf item then it will represent an entity:</span>
         <span class="n">sg_data</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get_sg_data</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">sg_data</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">sg_data</span>
 
-        <span class="c"># item doesn&#39;t represent an entity directly so look for an entity in the field data instead:</span>
+        <span class="c1"># item doesn&#39;t represent an entity directly so look for an entity in the field data instead:</span>
         <span class="n">field_data</span> <span class="o">=</span> <span class="n">get_sanitized_data</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SG_ASSOCIATED_FIELD_ROLE</span><span class="p">)</span>
-        <span class="n">field_value</span> <span class="o">=</span> <span class="n">field_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">)</span>
+        <span class="n">field_value</span> <span class="o">=</span> <span class="n">field_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">field_value</span> 
             <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> 
-            <span class="ow">and</span> <span class="s">&quot;id&quot;</span> <span class="ow">in</span> <span class="n">field_value</span> 
-            <span class="ow">and</span> <span class="s">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">field_value</span><span class="p">):</span>
+            <span class="ow">and</span> <span class="s2">&quot;id&quot;</span> <span class="ow">in</span> <span class="n">field_value</span> 
+            <span class="ow">and</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">field_value</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">field_value</span>
 
-        <span class="k">return</span> <span class="bp">None</span>
-</div>
+        <span class="k">return</span> <span class="bp">None</span></div>
+
 <div class="viewcode-block" id="ShotgunEntityModel.async_refresh"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel.async_refresh">[docs]</a>    <span class="k">def</span> <span class="nf">async_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Trigger an asynchronous refresh of the model</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_data</span><span class="p">()</span>
-</div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_data</span><span class="p">()</span></div>
+
     <span class="k">def</span> <span class="nf">_populate_default_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Whenever an item is constructed, this methods is called. It allows subclasses to intercept</span>
@@ -328,23 +328,23 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">found_icon</span> <span class="o">=</span> <span class="bp">False</span>
 
-        <span class="c"># get the associated field data with this node</span>
+        <span class="c1"># get the associated field data with this node</span>
         <span class="n">field_data</span> <span class="o">=</span> <span class="n">get_sanitized_data</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SG_ASSOCIATED_FIELD_ROLE</span><span class="p">)</span>
-        <span class="c"># get the full sg data for this node (leafs only)</span>
+        <span class="c1"># get the full sg data for this node (leafs only)</span>
         <span class="n">sg_data</span> <span class="o">=</span> <span class="n">get_sg_data</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
-        <span class="c"># {&#39;name&#39;: &#39;sg_sequence&#39;, &#39;value&#39;: {&#39;type&#39;: &#39;Sequence&#39;, &#39;id&#39;: 11, &#39;name&#39;: &#39;bunny_080&#39;}}</span>
-        <span class="n">field_value</span> <span class="o">=</span> <span class="n">field_data</span><span class="p">[</span><span class="s">&quot;value&quot;</span><span class="p">]</span>
+        <span class="c1"># {&#39;name&#39;: &#39;sg_sequence&#39;, &#39;value&#39;: {&#39;type&#39;: &#39;Sequence&#39;, &#39;id&#39;: 11, &#39;name&#39;: &#39;bunny_080&#39;}}</span>
+        <span class="n">field_value</span> <span class="o">=</span> <span class="n">field_data</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
 
         <span class="n">entity_icon</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">field_value</span> <span class="ow">and</span> <span class="s">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">field_value</span><span class="p">:</span>
-            <span class="c"># this is an intermediate node which is an entity type link</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">field_value</span> <span class="ow">and</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">field_value</span><span class="p">:</span>
+            <span class="c1"># this is an intermediate node which is an entity type link</span>
             <span class="n">entity_icon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_default_thumbnail</span><span class="p">(</span><span class="n">field_value</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">sg_data</span><span class="p">:</span>
-            <span class="c"># this is a leaf node!</span>
+            <span class="c1"># this is a leaf node!</span>
             <span class="n">entity_icon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_default_thumbnail</span><span class="p">(</span><span class="n">sg_data</span><span class="p">)</span>
 
-        <span class="c"># update item icon</span>
+        <span class="c1"># update item icon</span>
         <span class="n">item</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">entity_icon</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_icon</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_default_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sg_entity</span><span class="p">):</span>
@@ -357,32 +357,32 @@
 <span class="sd">                            representing the step colour is returned.  If no icon is available </span>
 <span class="sd">                            for the entity type then the default icon is returned</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">sg_entity</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s">&quot;Step&quot;</span><span class="p">:</span>
-            <span class="c"># special case handling for steps to return a colour swatch:</span>
-            <span class="n">step_id</span> <span class="o">=</span> <span class="n">sg_entity</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sg_entity</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;Step&quot;</span><span class="p">:</span>
+            <span class="c1"># special case handling for steps to return a colour swatch:</span>
+            <span class="n">step_id</span> <span class="o">=</span> <span class="n">sg_entity</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">step_id</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="c"># get the colour from the cache:</span>
+                <span class="c1"># get the colour from the cache:</span>
                 <span class="k">if</span> <span class="n">step_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ShotgunEntityModel</span><span class="o">.</span><span class="n">_SG_STEP_COLOURS</span><span class="p">:</span>
                     <span class="n">ShotgunEntityModel</span><span class="o">.</span><span class="n">_SG_STEP_COLOURS</span><span class="p">[</span><span class="n">step_id</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
-                    <span class="c"># refresh cache:</span>
+                    <span class="c1"># refresh cache:</span>
                     <span class="n">bundle</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_bundle</span><span class="p">()</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">sg_steps</span> <span class="o">=</span> <span class="n">bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&quot;Step&quot;</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[</span><span class="s">&quot;color&quot;</span><span class="p">])</span>
+                        <span class="n">sg_steps</span> <span class="o">=</span> <span class="n">bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Step&quot;</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">])</span>
                         <span class="k">for</span> <span class="n">sg_step</span> <span class="ow">in</span> <span class="n">sg_steps</span><span class="p">:</span>
                             <span class="n">colour</span> <span class="o">=</span> <span class="bp">None</span>
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="n">colour</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">sg_step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;color&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;,&quot;</span><span class="p">)])</span>
+                                <span class="n">colour</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">sg_step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)])</span>
                             <span class="k">except</span><span class="p">:</span>
                                 <span class="k">pass</span>
-                            <span class="n">ShotgunEntityModel</span><span class="o">.</span><span class="n">_SG_STEP_COLOURS</span><span class="p">[</span><span class="n">sg_step</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">colour</span>  
+                            <span class="n">ShotgunEntityModel</span><span class="o">.</span><span class="n">_SG_STEP_COLOURS</span><span class="p">[</span><span class="n">sg_step</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">colour</span>  
                     <span class="k">except</span><span class="p">:</span>
                         <span class="k">pass</span>
                 <span class="n">colour</span> <span class="o">=</span> <span class="n">ShotgunEntityModel</span><span class="o">.</span><span class="n">_SG_STEP_COLOURS</span><span class="p">[</span><span class="n">step_id</span><span class="p">]</span>
 
                 <span class="k">if</span> <span class="n">colour</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">colour</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">colour</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                    <span class="c"># get the icon for this colour from the cache:</span>
+                    <span class="c1"># get the icon for this colour from the cache:</span>
                     <span class="k">if</span> <span class="n">colour</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_swatch_icons</span><span class="p">:</span>
-                        <span class="c"># build icon and add to cache:</span>
+                        <span class="c1"># build icon and add to cache:</span>
                         <span class="n">pm</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
                         <span class="n">pm</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">transparent</span><span class="p">)</span>
                         <span class="n">painter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="n">pm</span><span class="p">)</span>
@@ -394,12 +394,13 @@
                             <span class="n">painter</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_step_swatch_icons</span><span class="p">[</span><span class="n">colour</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">pm</span><span class="p">)</span>
 
-                    <span class="c"># return the icon:</span>
+                    <span class="c1"># return the icon:</span>
                     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_swatch_icons</span><span class="p">[</span><span class="n">colour</span><span class="p">]</span>
 
-        <span class="c"># just return the entity icon or the default icon if there is no entity icon:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_entity_icon</span><span class="p">(</span><span class="n">sg_entity</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">))</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_icon</span>
-</pre></div></div>
+        <span class="c1"># just return the entity icon or the default icon if there is no entity icon:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_entity_icon</span><span class="p">(</span><span class="n">sg_entity</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">))</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_icon</span></div>
+
+</pre></div>
 
            </div>
           </div>
@@ -410,7 +411,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2015, Autodesk.
+        &copy; Copyright 2016, Autodesk.
 
     </p>
   </div> 
@@ -431,7 +432,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v4.0.3',
+            VERSION:'v4.2.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

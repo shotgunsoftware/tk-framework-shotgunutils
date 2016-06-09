@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.simple_shotgun_model &mdash; tk-framework-shotgunutils v4.0.3 documentation</title>
+  <title>shotgun_model.simple_shotgun_model &mdash; tk-framework-shotgunutils v4.2.3 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.0.3 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.2.3 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -56,7 +56,7 @@
                 margin: 2px;
                 border-radius: 0px; 
                 padding: 0px;' 
-            src='./_static/logo@2x.png'/>
+            src='../../_static/logo@2x.png'/>
     
     </a>
     
@@ -115,7 +115,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.0.3.<br>
+    <b>tk-framework-shotgunutils</b> v4.2.3.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -167,15 +167,15 @@
            <div itemprop="articleBody">
             
   <h1>Source code for shotgun_model.simple_shotgun_model</h1><div class="highlight"><pre>
-<span class="c"># Copyright (c) 2013 Shotgun Software Inc.</span>
-<span class="c"># </span>
-<span class="c"># CONFIDENTIAL AND PROPRIETARY</span>
-<span class="c"># </span>
-<span class="c"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit </span>
-<span class="c"># Source Code License included in this distribution package. See LICENSE.</span>
-<span class="c"># By accessing, using, copying or modifying this work you indicate your </span>
-<span class="c"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights </span>
-<span class="c"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
+<span></span><span class="c1"># Copyright (c) 2013 Shotgun Software Inc.</span>
+<span class="c1"># </span>
+<span class="c1"># CONFIDENTIAL AND PROPRIETARY</span>
+<span class="c1"># </span>
+<span class="c1"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit </span>
+<span class="c1"># Source Code License included in this distribution package. See LICENSE.</span>
+<span class="c1"># By accessing, using, copying or modifying this work you indicate your </span>
+<span class="c1"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights </span>
+<span class="c1"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
 
 <span class="kn">import</span> <span class="nn">sgtk</span>
 <span class="kn">from</span> <span class="nn">.shotgun_model</span> <span class="kn">import</span> <span class="n">ShotgunModel</span>
@@ -211,25 +211,52 @@
             <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> 
             <span class="n">bg_task_manager</span><span class="o">=</span><span class="n">bg_task_manager</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SimpleShotgunModel.load_data"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.SimpleShotgunModel.load_data">[docs]</a>    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="SimpleShotgunModel.load_data"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.SimpleShotgunModel.load_data">[docs]</a>    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">columns</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">additional_filter_presets</span><span class="o">=</span><span class="bp">None</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Loads shotgun data into the model, using the cache if possible.</span>
 <span class="sd">        The model is not nested and the first field that is specified</span>
 <span class="sd">        via the fields parameter (``code`` by default) will be used as the default</span>
-<span class="sd">        name for all model items. </span>
-<span class="sd">        </span>
+<span class="sd">        name for all model items.</span>
+
 <span class="sd">        :param entity_type: Shotgun Entity Type to load data for</span>
 <span class="sd">        :param filters: Shotgun API find-style filter list. If no list is specified, all records</span>
-<span class="sd">                        for the given entity type will be retrieved.</span>
+<span class="sd">                  for the given entity type will be retrieved.</span>
 <span class="sd">        :param fields: List of Shotgun fields to retrieve. If not spefified, the &#39;code&#39; field</span>
-<span class="sd">                       will be retrieved.</span>
+<span class="sd">                  will be retrieved.</span>
+<span class="sd">        :param order: Order clause for the Shotgun data. Standard Shotgun API syntax.</span>
+<span class="sd">                  Note that this is an advanced parameter which is meant to be used</span>
+<span class="sd">                  in subclassing only. The model itself will be ordered by its</span>
+<span class="sd">                  default display name, and if any other type of ordering is desirable,</span>
+<span class="sd">                  use for example a QProxyModel to handle this. However, knowing in which</span>
+<span class="sd">                  order results will arrive from Shotgun can be beneficial if you are doing</span>
+<span class="sd">                  grouping, deferred loading and aggregation of data as part of your</span>
+<span class="sd">                  subclassed implementation.</span>
+<span class="sd">        :param limit: Limit the number of results returned from Shotgun. In conjunction with the order</span>
+<span class="sd">                  parameter, this can be used to effectively cap the data set that the model</span>
+<span class="sd">                  is handling, allowing a user to for example show the twenty most recent notes or</span>
+<span class="sd">                  similar.</span>
+<span class="sd">        :param columns: List of Shotgun fields to use to populate the model columns</span>
+<span class="sd">        :param additional_filter_presets: List of Shotgun filter presets to apply, e.g.</span>
+<span class="sd">                  ``[{&quot;preset_name&quot;:&quot;LATEST&quot;,&quot;latest_by&quot;:&quot;BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT&quot;}]``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span> <span class="ow">or</span> <span class="p">[]</span>
-        <span class="n">fields</span> <span class="o">=</span> <span class="n">fields</span> <span class="ow">or</span> <span class="p">[</span><span class="s">&quot;code&quot;</span><span class="p">]</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">fields</span> <span class="ow">or</span> <span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">]</span>
         <span class="n">hierarchy</span> <span class="o">=</span> <span class="p">[</span><span class="n">fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-        <span class="n">ShotgunModel</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">hierarchy</span><span class="p">,</span> <span class="n">fields</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_data</span><span class="p">()</span>
-        </div></div>
+        <span class="n">ShotgunModel</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">entity_type</span><span class="p">,</span>
+            <span class="n">filters</span><span class="p">,</span>
+            <span class="n">hierarchy</span><span class="p">,</span>
+            <span class="n">fields</span><span class="p">,</span>
+            <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
+            <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+            <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span>
+            <span class="n">additional_filter_presets</span><span class="o">=</span><span class="n">additional_filter_presets</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_data</span><span class="p">()</span></div></div>
 </pre></div>
 
            </div>
@@ -241,7 +268,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2015, Autodesk.
+        &copy; Copyright 2016, Autodesk.
 
     </p>
   </div> 
@@ -262,7 +289,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v4.0.3',
+            VERSION:'v4.2.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

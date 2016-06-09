@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Globals Access &mdash; tk-framework-shotgunutils v4.0.3 documentation</title>
+  <title>Shotgun Globals Access &mdash; tk-framework-shotgunutils v4.2.3 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.0.3 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.2.3 documentation" href="index.html"/>
         <link rel="prev" title="Shotgun Toolkit QT Settings Wrapper" href="settings.html"/> 
 
   
@@ -56,7 +56,7 @@
                 margin: 2px;
                 border-radius: 0px; 
                 padding: 0px;' 
-            src='./_static/logo@2x.png'/>
+            src='_static/logo@2x.png'/>
     
     </a>
     
@@ -93,7 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_manager.html">Background Task Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Shotgun Globals Access</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Shotgun Globals Access</a></li>
 </ul>
 
             
@@ -115,7 +115,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.0.3.<br>
+    <b>tk-framework-shotgunutils</b> v4.2.3.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -144,7 +144,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -171,23 +171,23 @@ The globals are cached locally for fast access and updated in a background worke
 Pass a data retriever object to the module in order for it to pull updates from Shotgun.
 When you shut down your app or tool, make sure you unregister the data retriever.</p>
 <p>The sample code below shows how you can use the globals in your Toolkit App Code:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">shotgun_globals</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s">&quot;shotgun_globals&quot;</span><span class="p">)</span>
-<span class="n">task_manager</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s">&quot;task_manager&quot;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">shotgun_globals</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s2">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s2">&quot;shotgun_globals&quot;</span><span class="p">)</span>
+<span class="n">task_manager</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s2">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s2">&quot;task_manager&quot;</span><span class="p">)</span>
 
 
-<span class="c"># typically, in your UI or app constructor, create a</span>
-<span class="c"># task manager</span>
+<span class="c1"># typically, in your UI or app constructor, create a</span>
+<span class="c1"># task manager</span>
 <span class="n">task_manager</span> <span class="o">=</span> <span class="n">task_manager</span><span class="o">.</span><span class="n">BackgroundTaskManager</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 <span class="n">task_manager</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
-<span class="c"># register it with the globals module so that it can</span>
-<span class="c"># use it to fetch data</span>
+<span class="c1"># register it with the globals module so that it can</span>
+<span class="c1"># use it to fetch data</span>
 <span class="n">shotgun_globals</span><span class="o">.</span><span class="n">register_bg_task_manager</span><span class="p">(</span><span class="n">task_manager</span><span class="p">)</span>
 
-<span class="c"># at runtime, access things</span>
-<span class="n">get_type_display_name</span><span class="p">(</span><span class="s">&quot;CustomEntity01&quot;</span><span class="p">)</span>
+<span class="c1"># at runtime, access things</span>
+<span class="n">get_type_display_name</span><span class="p">(</span><span class="s2">&quot;CustomEntity01&quot;</span><span class="p">)</span>
 
-<span class="c"># at shutdown time, unregister</span>
+<span class="c1"># at shutdown time, unregister</span>
 <span class="n">shotgun_globals</span><span class="o">.</span><span class="n">register_bg_task_manager</span><span class="p">(</span><span class="n">task_manager</span><span class="p">)</span>
 <span class="n">task_manager</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 </pre></div>
@@ -389,7 +389,7 @@ an <code class="docutils literal"><span class="pre">&lt;img&gt;</span></code> ht
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2015, Autodesk.
+        &copy; Copyright 2016, Autodesk.
 
     </p>
   </div> 
@@ -410,7 +410,7 @@ an <code class="docutils literal"><span class="pre">&lt;img&gt;</span></code> ht
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v4.0.3',
+            VERSION:'v4.2.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
