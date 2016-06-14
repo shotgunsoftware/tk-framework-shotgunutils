@@ -141,7 +141,7 @@ class CachedShotgunSchema(QtCore.QObject):
             try:
                 return self._bundle.get_project_cache_location(project_id)
             except AttributeError:
-                self._bundle.log_warning(
+                self._bundle.log_debug(
                     "Bundle.get_project_cache_location() is not available. "
                     "Falling back on Bundle.cache_location instead."
                 )
