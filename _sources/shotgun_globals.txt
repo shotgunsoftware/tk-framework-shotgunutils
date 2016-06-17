@@ -25,7 +25,7 @@ The sample code below shows how you can use the globals in your Toolkit App Code
     get_type_display_name("CustomEntity01")
 
     # at shutdown time, unregister
-    shotgun_globals.register_bg_task_manager(task_manager)
+    shotgun_globals.unregister_bg_task_manager(task_manager)
     task_manager.stop()
 
 
@@ -41,3 +41,7 @@ The sample code below shows how you can use the globals in your Toolkit App Code
 .. autofunction:: get_status_color
 .. autofunction:: get_entity_type_icon
 .. autofunction:: get_entity_type_icon_url
+.. autofunction:: get_valid_values
+.. autofunction:: field_is_editable
+.. autofunction:: field_is_visible
+.. autofunction:: create_human_readable_date

@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_globals.icon &mdash; tk-framework-shotgunutils v4.3.1 documentation</title>
+  <title>shotgun_globals.date_time &mdash; tk-framework-shotgunutils v4.3.1 documentation</title>
   
 
   
@@ -154,7 +154,7 @@
       
           <li><a href="../index.html">Module code</a> &raquo;</li>
       
-    <li>shotgun_globals.icon</li>
+    <li>shotgun_globals.date_time</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -166,8 +166,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for shotgun_globals.icon</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Copyright (c) 2015 Shotgun Software Inc.</span>
+  <h1>Source code for shotgun_globals.date_time</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2016 Shotgun Software Inc.</span>
 <span class="c1"># </span>
 <span class="c1"># CONFIDENTIAL AND PROPRIETARY</span>
 <span class="c1"># </span>
@@ -177,68 +177,62 @@
 <span class="c1"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights </span>
 <span class="c1"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
 
-<span class="kn">from</span> <span class="nn">sgtk.platform.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
-<span class="kn">from</span> <span class="nn">.ui</span> <span class="kn">import</span> <span class="n">resources_rc</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
 
-<span class="c1"># list of all entity types for which an icon exists</span>
-<span class="n">_entity_types_with_icons</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Asset&quot;</span><span class="p">,</span> 
-                           <span class="s2">&quot;ClientUser&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;EventLogEntry&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;Group&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;HumanUser&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;PublishedFile&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;TankPublishedFile&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;Note&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;Playlist&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;Project&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;Sequence&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;Shot&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;Task&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;Ticket&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;Version&quot;</span><span class="p">,</span>
-                           <span class="p">]</span>
-
-<span class="n">_cached_entity_icons</span> <span class="o">=</span> <span class="p">{}</span>
-
-
-<div class="viewcode-block" id="get_entity_type_icon_url"><a class="viewcode-back" href="../../shotgun_globals.html#shotgun_globals.get_entity_type_icon_url">[docs]</a><span class="k">def</span> <span class="nf">get_entity_type_icon_url</span><span class="p">(</span><span class="n">entity_type</span><span class="p">):</span>
+<div class="viewcode-block" id="create_human_readable_date"><a class="viewcode-back" href="../../shotgun_globals.html#shotgun_globals.create_human_readable_date">[docs]</a><span class="k">def</span> <span class="nf">create_human_readable_date</span><span class="p">(</span><span class="n">dt</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Retrieve the icon resource path for the specified entity type if available.</span>
-<span class="sd">    </span>
-<span class="sd">    This is useful if you want to include an icon in a ``QLabel`` using</span>
-<span class="sd">    an ``&lt;img&gt;`` html tag.</span>
+<span class="sd">    Return the date represented by the argument as a string, displaying recent</span>
+<span class="sd">    dates as &quot;Yesterday&quot;, &quot;Today&quot;, or &quot;Tomorrow&quot;.</span>
 
-<span class="sd">    :param entity_type: The entity type to retrieve the icon for</span>
-<span class="sd">    :returns:           A string url with a qt resource path</span>
+<span class="sd">    :param dt: The date convert to a string</span>
+<span class="sd">    :type dt: :class:`datetime.date` or :class:`datetime.datetime`</span>
+
+<span class="sd">    :returns: A String representing date appropriate for display</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">entity_type</span> <span class="ow">in</span> <span class="n">_entity_types_with_icons</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;:/tk-framework-shotgunutils/icon_</span><span class="si">%s</span><span class="s2">_dark.png&quot;</span> <span class="o">%</span> <span class="n">entity_type</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">tzinfo</span><span class="p">)</span> <span class="o">-</span> <span class="n">dt</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">):</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span> <span class="o">-</span> <span class="n">dt</span>
+
+    <span class="k">if</span> <span class="n">delta</span><span class="o">.</span><span class="n">days</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">date_str</span> <span class="o">=</span> <span class="s2">&quot;Yesterday&quot;</span>
+    <span class="k">elif</span> <span class="n">delta</span><span class="o">.</span><span class="n">days</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">date_str</span> <span class="o">=</span> <span class="s2">&quot;Today&quot;</span>
+    <span class="k">elif</span> <span class="n">delta</span><span class="o">.</span><span class="n">days</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">date_str</span> <span class="o">=</span> <span class="s2">&quot;Tomorrow&quot;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span></div>
+        <span class="c1"># use the locale appropriate date representation</span>
+        <span class="n">date_str</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%x</span><span class="s2">&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="get_entity_type_icon"><a class="viewcode-back" href="../../shotgun_globals.html#shotgun_globals.get_entity_type_icon">[docs]</a><span class="k">def</span> <span class="nf">get_entity_type_icon</span><span class="p">(</span><span class="n">entity_type</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">date_str</span></div>
+
+<span class="k">def</span> <span class="nf">create_human_readable_timestamp</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">postfix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Retrieve the icon for the specified entity type if available.</span>
+<span class="sd">    Return the time represented by the argument as a string where the date portion is</span>
+<span class="sd">    displayed as &quot;Yesterday&quot;, &quot;Today&quot;, or &quot;Tomorrow&quot; if appropriate.</span>
 
-<span class="sd">    :param entity_type: The entity type to retrieve the icon for</span>
-<span class="sd">    :returns:           A QIcon if an icon was found for the specified entity</span>
-<span class="sd">                        type, otherwise None.</span>
+<span class="sd">    By default just the date is displayed, but additional formatting can be appended</span>
+<span class="sd">    by using the postfix argument.</span>
+
+<span class="sd">    :param dt: The date and time to convert to a string</span>
+<span class="sd">    :type dt: :class:`datetime.datetime` or float</span>
+
+<span class="sd">    :param postfix: What will be displayed after the date portion of the dt argument</span>
+<span class="sd">    :type postfix: A strftime style String</span>
+
+<span class="sd">    :returns: A String representing dt appropriate for display</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">global</span> <span class="n">_cached_entity_icons</span>
-    <span class="k">if</span> <span class="n">entity_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_cached_entity_icons</span><span class="p">:</span>
-        <span class="c1"># not yet cached</span>
-        <span class="n">icon</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="n">url</span> <span class="o">=</span> <span class="n">get_entity_type_icon_url</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)</span> 
-        <span class="k">if</span> <span class="n">url</span><span class="p">:</span>
-            <span class="c1"># create a QIcon for it</span>
-            <span class="n">icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
-        <span class="c1"># cache it</span>
-        <span class="n">_cached_entity_icons</span><span class="p">[</span><span class="n">entity_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">icon</span>
-        
-    <span class="c1"># we&#39;ve previously asked for the icon</span>
-    <span class="k">return</span> <span class="n">_cached_entity_icons</span><span class="p">[</span><span class="n">entity_type</span><span class="p">]</span></div>
-    
+    <span class="c1"># shotgun_model converts datetimes to floats representing unix time so</span>
+    <span class="c1"># handle that as a valid value as well</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
 
+    <span class="c1"># get a relative date_str</span>
+    <span class="n">date_str</span> <span class="o">=</span> <span class="n">create_human_readable_date</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">time_format</span> <span class="o">=</span> <span class="n">date_str</span> <span class="o">+</span> <span class="n">postfix</span>
+
+    <span class="k">return</span> <span class="n">dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">time_format</span><span class="p">)</span>
 
 </pre></div>
 
