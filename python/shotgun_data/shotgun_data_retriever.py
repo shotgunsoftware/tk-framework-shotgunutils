@@ -87,6 +87,7 @@ class ShotgunDataRetriever(QtCore.QObject):
     # thumbnail checks are local disk checks and very fast.  These 
     # are always carried out before any shotgun calls
     _CHECK_THUMB_PRIORITY           = 50
+    _CHECK_ATTACHMENT_PRIORITY      = 50
 
     # the shotgun schema is often useful to have as early on as possible,
     # sometimes other shotgun operations also need the shotgun schema
@@ -101,6 +102,7 @@ class ShotgunDataRetriever(QtCore.QObject):
     # thumbnails are downloaded last as they are considered low-priority 
     # and can take a relatively significant amount of time
     _DOWNLOAD_THUMB_PRIORITY        = 20
+    _DOWNLOAD_ATTACHMENT_PRIORITY   = 20
 
 
     def __init__(self, parent=None, sg=None, bg_task_manager=None):
@@ -123,6 +125,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         self._task_manager.task_failed.connect(self._on_task_failed)
 
         self._thumb_task_id_map = {}
+        self._attachment_task_id_map = {}
 
 
     ############################################################################################################
@@ -408,10 +411,45 @@ class ShotgunDataRetriever(QtCore.QObject):
                                               task_kwargs = task_kwargs)
         return str(task_id)
 
+    def request_attachment(self, attachment_entity):
+        """
+        Downloads an attachment from Shotgun asynchronously or returns a cached
+        file path if found.
+
+        :param dict attachment_entity: The Attachment entity to download data from.
+
+        :returns: A unique identifier representing this request.
+        """
+        if not self._task_manager:
+            return
+
+        # always add check for attachments already downloaded:
+        check_task_id = self._task_manager.add_task(
+            self._task_check_attachment,
+            priority=self._CHECK_ATTACHMENT_PRIORITY,
+            group=self._bg_tasks_group,
+            task_kwargs=dict(attachment_entity=attachment_entity),
+        )
+
+        # Add download thumbnail task.  This is dependent on the check task above and will be passed
+        # the returned results from that task in addition to the kwargs specified below.  This allows
+        # a task dependency chain to be created with different priorities for the separate tasks.
+        dl_task_id = self._task_manager.add_task(
+            self._task_download_attachment,
+            upstream_task_ids=[check_task_id],
+            priority=self._DOWNLOAD_ATTACHMENT_PRIORITY,
+            group=self._bg_tasks_group,
+            task_kwargs=dict(attachment_entity=attachment_entity),
+        )
+
+        # all results for requesting a thumbnail should be returned with the same id so use
+        # a mapping to track the 'primary' task id:
+        self._attachment_task_id_map[dl_task_id] = check_task_id
+        return str(check_task_id)
 
     def request_thumbnail(self, url, entity_type, entity_id, field, load_image=False):
         """
-        Downloads a thumbnail form Shotgun asynchronously or returns a cached thumbnail 
+        Downloads a thumbnail from Shotgun asynchronously or returns a cached thumbnail 
         if found.  Optionally loads the thumbnail into a QImage.
 
         :param url:         The thumbnail url string that is associated with this thumbnail. This is
@@ -433,7 +471,7 @@ class ShotgunDataRetriever(QtCore.QObject):
 
         # always add check for thumbnail already downloaded:
         check_task_id = self._task_manager.add_task(self._task_check_thumbnail,
-                                                    priority = ShotgunDataRetriever._CHECK_THUMB_PRIORITY,
+                                                    priority = self._CHECK_THUMB_PRIORITY,
                                                     group = self._bg_tasks_group,
                                                     task_kwargs = {"url":url, 
                                                                    "load_image":load_image})
@@ -443,7 +481,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         # a task dependency chain to be created with different priorities for the separate tasks.
         dl_task_id = self._task_manager.add_task(self._task_download_thumbnail,
                                                  upstream_task_ids = [check_task_id],
-                                                 priority = ShotgunDataRetriever._DOWNLOAD_THUMB_PRIORITY,
+                                                 priority = self._DOWNLOAD_THUMB_PRIORITY,
                                                  group = self._bg_tasks_group,
                                                  task_kwargs = {"url":url,
                                                                 "entity_type":entity_type, 
@@ -460,19 +498,94 @@ class ShotgunDataRetriever(QtCore.QObject):
 
         return str(check_task_id)
 
-
-
     # ------------------------------------------------------------------------------------------------
     # Background task management and methods
 
+    def _download_url(self, file_path, url, entity_type, entity_id, field):
+        """
+        Downloads a file located at the given url to the provided file path.
+
+        :param str file_path: The target path.
+        :param str url: The url location of the file to download.
+        :param str entity_type: The Shotgun entity type that the url is
+                                associated with. In the event that the
+                                provided url has expired, the entity
+                                type and id provided will be used to query
+                                a fresh url.
+        :param int entity_id: The Shotgun entity id that the url is
+                              associated with. In the event that the
+                              provided url has expired, the entity type and
+                              id provided will be used to query a fresh url.
+        :param str field: The name of the field that contains the url. If
+                          the url needs to be requeried, this field will be
+                          where the fresh url is pulled from.
+        """
+        try:
+            sgtk.util.download_url(self._bundle.shotgun, url, file_path)
+        except TankError, e:
+            sg_data = self._bundle.shotgun.find_one(
+                entity_type,
+                [["id", "is", entity_id]],
+                [field],
+            )
+
+            if sg_data is None or sg_data.get(field) is None:
+                # This means there's nothing in Shotgun for this field, which
+                # means we can't download anything.
+                raise IOError(
+                    "Field %s does not contain data for %s (id=%s)." % (
+                        field,
+                        entity_type,
+                        entity_id,
+                    )
+                )
+            else:
+                url = sg_data[field]
+                sgtk.util.download_url(self._bundle.shotgun, url, file_path)
+
+        # now we have a thumbnail on disk, either via the direct download, or via the 
+        # url-fresh-then-download approach.  Because the file is downloaded with user-only 
+        # permissions we have to modify the permissions so that it's writeable by others
+        old_umask = os.umask(0)
+        try:
+            os.chmod(file_path, 0666)
+        finally:
+            os.umask(old_umask)
+
     @staticmethod
-    def _get_thumbnail_path(url, bundle):
+    def _get_attachment_path(attachment_entity, bundle):
+        """
+        Returns the location on disk suitable for an attachment file.
+
+        :param dict attachment_entity: The Attachment entity definition.
+        :param bundle: App, Engine or Framework instance
+
+        :returns: Path as a string.
+        """
+        url = attachment_entity["this_file"]["url"]
+        file_name = attachment_entity["this_file"]["name"]
+
+        directory_path = ShotgunDataRetriever._get_thumbnail_path(
+            url,
+            bundle,
+            directory_only=True,
+        )
+
+        return os.path.join(directory_path, file_name)
+
+    @staticmethod
+    def _get_thumbnail_path(url, bundle, directory_only=False):
         """
         Returns the location on disk suitable for a thumbnail given its url.
 
-        :param url:     Path to a thumbnail
-        :param bundle:  App, Engine or Framework instance
-        :returns:       Path as a string.
+        :param str url: Path to a thumbnail
+        :param bundle: App, Engine or Framework instance
+        :param bool directory_only: Whether to return a directory path or a
+                                    full file path. Default is False, which
+                                    indicates a full file path, including
+                                    file name, will be returned.
+
+        :returns: Path as a string.
         """
         # If we don't have a URL, then we know we don't
         # have a thumbnail to worry about.
@@ -494,8 +607,12 @@ class ShotgunDataRetriever(QtCore.QObject):
         # for a million evenly distributed items, this means ~15 items per folder
         first_folder = hash_str[0:2]
         second_folder = hash_str[2:4]
-        file_name = "%s.jpeg" % hash_str[4:]
-        path_chunks = [first_folder, second_folder, file_name]
+        path_chunks = [first_folder, second_folder]
+
+        # If we were only asked to give back a directory path then we can
+        # skip building and appending a file name.
+        if not directory_only:
+            path_chunks.append("%s.jpeg" % hash_str[4:])
 
         # establish the root path
         cache_path_items = [bundle.cache_location, "thumbs"]
@@ -696,6 +813,34 @@ class ShotgunDataRetriever(QtCore.QObject):
         res = method(self._bundle.shotgun, *method_args, **method_kwargs)
         return {"action":"method", "result":res}
 
+    def _task_check_attachment(self, attachment_entity):
+        """
+        Check to see if an attachment file exists for the specified Attachment
+        entity.
+
+        :param dict attachment_entity: The Attachment entity definition.
+
+        :returns: A dictionary containing the cached path for the specified
+                  Attachment entity.
+        """
+        url = attachment_entity["this_file"]["url"]
+        file_name = attachment_entity["this_file"]["name"]
+
+        data = dict(action="check_attachment", file_path=None)
+
+        if not url or not file_name:
+            return data
+
+        file_path = self._get_attachment_path(
+            attachment_entity,
+            self._bundle,
+        )
+
+        if file_path and os.path.exists(file_path):
+            data["file_path"] = file_path
+
+        return data
+
     def _task_check_thumbnail(self, url, load_image):
         """
         Check to see if a thumbnail exists for the specified url.  If it does then it is returned.
@@ -723,6 +868,41 @@ class ShotgunDataRetriever(QtCore.QObject):
             thumb_path = None
 
         return {"action":"check_thumbnail", "thumb_path":thumb_path, "image":thumb_image}
+
+    def _task_download_attachment(self, file_path, attachment_entity, **kwargs):
+        """
+        Download the specified attachment. This downloads the file associated with
+        the provided Attachment entity into the framework's cache directory structure
+        and returns the cached path.
+
+        :param str file_path: The target file path to download to.
+        :param dict attachment_entity: The Attachment entity definition.
+
+        :returns: A dictionary containing the cached path for the specified
+                  Attachment entity, as well as an action identifier that
+                  marks the data as having come from a "download_attachment"
+                  task.
+        """
+        if file_path:
+            return {}
+
+        file_path = self._get_attachment_path(attachment_entity, self._bundle)
+
+        if not file_path:
+            return {}
+
+        self._bundle.ensure_folder_exists(os.path.dirname(file_path))
+
+        if not os.path.exists(file_path):
+            self._bundle.shotgun.download_attachment(
+                attachment=attachment_entity,
+                file_path=file_path,
+            )
+
+        return dict(
+            action="download_attachment",
+            file_path=file_path,
+        )
 
     def _task_download_thumbnail(self, thumb_path, url, entity_type, entity_id, field, load_image, **kwargs):
         """
@@ -764,34 +944,9 @@ class ShotgunDataRetriever(QtCore.QObject):
 
             # try to download based on the path we have
             try:
-                sgtk.util.download_url(self._bundle.shotgun, url, thumb_path)
-            except TankError, e:
-                # Note: Unfortunately, the download_url will re-cast 
-                # all exceptions into tankerrors.
-                # get a fresh url from shotgun and try again
-                sg_data = self._bundle.shotgun.find_one(entity_type, [["id", "is", entity_id]], [field])
-
-                if sg_data is None or sg_data.get(field) is None:
-                    # no thumbnail! This is possible if the thumb has changed
-                    # while we were queueing it for download.
-                    # indicate the fact that the thumbnail no longer exists on the server
-                    # by setting the path to None
-                    thumb_path = None
-
-                else:
-                    # download from sg
-                    url = sg_data[field]
-                    sgtk.util.download_url(self._bundle.shotgun, url, thumb_path)
-
-            if thumb_path:
-                # now we have a thumbnail on disk, either via the direct download, or via the 
-                # url-fresh-then-download approach.  Because the file is downloaded with user-only 
-                # permissions we have to modify the permissions so that it's writeable by others
-                old_umask = os.umask(0)
-                try:
-                    os.chmod(thumb_path, 0666)
-                finally:
-                    os.umask(old_umask)
+                self._download_url(thumb_path, url, entity_type, entity_id, field)
+            except IOError:
+                thumb_path = None
 
         # finally, see if we should also load in the image
         thumb_image = None
@@ -803,7 +958,11 @@ class ShotgunDataRetriever(QtCore.QObject):
         else:
             thumb_path = None
 
-        return {"action":"download_thumbnail", "thumb_path":thumb_path, "image":thumb_image}
+        return dict(
+            action="download_thumbnail",
+            thumb_path=thumb_path,
+            image=thumb_image,
+        )
 
     def _on_task_completed(self, task_id, group, result):
         """
@@ -829,15 +988,44 @@ class ShotgunDataRetriever(QtCore.QObject):
             path = result.get("thumb_path", "")
             if path:
                 # check found a thumbnail!
-                self.work_completed.emit(str(task_id), "find", {"thumb_path": path, "image":result["image"]})
+                self.work_completed.emit(
+                    str(task_id),
+                    "find",
+                    dict(
+                        thumb_path=path,
+                        image=result["image"],
+                    ),
+                )
         elif action == "download_thumbnail":
             # look up the primary thumbnail task id in the map:
             thumb_task_id = self._thumb_task_id_map.get(task_id)
             if thumb_task_id is not None:
                 del self._thumb_task_id_map[task_id]
-                self.work_completed.emit(str(thumb_task_id),
-                                         "find", 
-                                         {"thumb_path": result["thumb_path"], "image":result["image"]})
+                self.work_completed.emit(
+                    str(thumb_task_id),
+                    "find", 
+                    dict(
+                        thumb_path=result["thumb_path"],
+                        image=result["image"],
+                    ),
+                )
+        elif action == "check_attachment":
+            path = result.get("file_path", "")
+            if path:
+                self.work_completed.emit(
+                    str(task_id),
+                    "find",
+                    dict(file_path=path),
+                )
+        elif action == "download_attachment":
+            attachment_task_id = self._attachment_task_id_map.get(task_id)
+            if attachment_task_id is not None:
+                del self.__attachment_task_id_map[task_id]
+                self.work_completed.emit(
+                    str(attachment_task_id),
+                    "find",
+                    dict(file_path=result["file_path"]),
+                )
 
     def _on_task_failed(self, task_id, group, msg, tb):
         """
