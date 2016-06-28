@@ -84,10 +84,14 @@ class ShotgunDataRetriever(QtCore.QObject):
     # Note: a higher value means more important and will get run before lower 
     # priority tasks
 
+    # Attachment checks and downloads are more important than thumbnails,
+    # as having access to that data will often be required instead of as
+    # a nice-to-have. As a result, this gets a bit more priority.
+    _CHECK_ATTACHMENT_PRIORITY      = 55
+
     # thumbnail checks are local disk checks and very fast.  These 
     # are always carried out before any shotgun calls
     _CHECK_THUMB_PRIORITY           = 50
-    _CHECK_ATTACHMENT_PRIORITY      = 50
 
     # the shotgun schema is often useful to have as early on as possible,
     # sometimes other shotgun operations also need the shotgun schema
@@ -98,11 +102,15 @@ class ShotgunDataRetriever(QtCore.QObject):
     # next the priority for any other Shotgun calls (e.g. find, create, 
     # update, delete, etc.)
     _SG_CALL_PRIORITY               = 30
-    
+
+    # Attachment downloads are not necessarily fast (but might be), but unlike
+    # thumbnails they will be required for functionality in the calling code.
+    # As such, we'll give these downloads a bit more priority.
+    _DOWNLOAD_ATTACHMENT_PRIORITY   = 25
+
     # thumbnails are downloaded last as they are considered low-priority 
     # and can take a relatively significant amount of time
     _DOWNLOAD_THUMB_PRIORITY        = 20
-    _DOWNLOAD_ATTACHMENT_PRIORITY   = 20
 
 
     def __init__(self, parent=None, sg=None, bg_task_manager=None):
@@ -416,11 +424,27 @@ class ShotgunDataRetriever(QtCore.QObject):
         Downloads an attachment from Shotgun asynchronously or returns a cached
         file path if found.
 
+        .. note:: The provided Attachment entity definition must contain, at a
+                  minimum, the "this_file" substructure.
+
+        .. example:: {'id': 597,
+                      'this_file': {'content_type': 'image/png',
+                                    'id': 597,
+                                    'link_type': 'upload',
+                                    'name': 'test.png',
+                                    'type': 'Attachment',
+                                    'url': 'https://abc.shotgunstudio.com/file_serve/attachment/597'},
+                      'type': 'Attachment'}
+
         :param dict attachment_entity: The Attachment entity to download data from.
 
         :returns: A unique identifier representing this request.
         """
         if not self._task_manager:
+            self._bundle.log_warning(
+                "No task manager has been associated with this data retriever. "
+                "Unable to request attachment."
+            )
             return
 
         # always add check for attachments already downloaded:
@@ -467,6 +491,10 @@ class ShotgunDataRetriever(QtCore.QObject):
                   possible to match them up.
         """
         if not self._task_manager:
+            self._bundle.log_warning(
+                "No task manager has been associated with this data retriever. "
+                "Unable to request thumbnail."
+            )
             return
 
         # always add check for thumbnail already downloaded:
