@@ -384,7 +384,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
     def _load_data(
         self, entity_type, filters, hierarchy, fields, order=None, seed=None, limit=None,
-        columns=None, additional_filter_presets=None
+        columns=None, editable_columns=None, additional_filter_presets=None
     ):
         """
         This is the main method to use to configure the model. You basically
@@ -440,6 +440,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                           each column in the row contains the value for the corresponding field from columns. This means
                                           that the data from the loaded entity will be available field by field. Subclasses can modify
                                           this behavior by overriding _get_additional_columns.
+        :param editable_columns:          A subset of ``columns`` that will be editable in views that use this model.
         :param additional_filter_presets: List of Shotgun filter presets to apply, e.g.
                                           ``[{"preset_name":"LATEST","latest_by":"BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT"}]``
 
@@ -458,6 +459,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__order = order or []
         self.__hierarchy = hierarchy
         self.__column_fields = columns or []
+        self.__editable_fields = editable_columns or []
         self.__limit = limit or 0 # 0 means get all matches
         self.__additional_filter_presets = additional_filter_presets
 
@@ -529,6 +531,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__log_debug("Fields: %s" % self.__fields)
         self.__log_debug("Order: %s" % self.__order)
         self.__log_debug("Columns: %s" % self.__column_fields)
+        self.__log_debug("Editable Columns: %s" % self.__editable_fields)
         self.__log_debug("Filter Presets: %s" % self.__additional_filter_presets)
 
         self.__log_debug("First population pass: Calling _load_external_data()")
@@ -924,7 +927,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
             data = get_sg_data(primary_item)
             for column in columns:
                 # set the display role to the string representation of the value
-                column_item = QtGui.QStandardItem(self._generate_display_name(column, data))
+                column_item = ShotgunStandardItem(self._generate_display_name(column, data))
+                column_item.setEditable(column in self.__editable_fields)
 
                 # set associated field role to be the column value itself
                 value = data.get(column)
@@ -1339,6 +1343,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         # construct tree view node object
         item = ShotgunStandardItem(field_display_name)
+        item.setEditable(field in self.__editable_fields)
 
         # keep tabs of which items we are creating
         item.setData(True, self.IS_SG_MODEL_ROLE)
@@ -1597,6 +1602,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         :returns: Number of items loaded
         """
+
         num_items_loaded = 0
 
         fh = QtCore.QFile(filename)

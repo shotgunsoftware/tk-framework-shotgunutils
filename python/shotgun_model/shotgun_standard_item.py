@@ -23,7 +23,7 @@ class ShotgunStandardItem(QtGui.QStandardItem):
 
     ########################################################################################
     # helper methods
-    
+
     def get_sg_data(self):
         """
         Retrieves the shotgun data associated with this item.

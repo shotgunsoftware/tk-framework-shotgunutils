@@ -7,7 +7,7 @@ Introduction
 ======================================
 
 The shotgun data model helps you build responsive, data rich applications quickly and leverage
-QT's build in model/view framework
+QT's built-in model/view framework
 
 .. image:: images/model_overview.png
 
