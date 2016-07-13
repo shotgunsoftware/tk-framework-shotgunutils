@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v4.3.1 documentation</title>
+  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v4.4.0 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.3.1 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.4.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -115,7 +115,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.3.1.<br>
+    <b>tk-framework-shotgunutils</b> v4.4.0.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -253,6 +253,11 @@
     <span class="c1"># Note: a higher value means more important and will get run before lower </span>
     <span class="c1"># priority tasks</span>
 
+    <span class="c1"># Attachment checks and downloads are more important than thumbnails,</span>
+    <span class="c1"># as having access to that data will often be required instead of as</span>
+    <span class="c1"># a nice-to-have. As a result, this gets a bit more priority.</span>
+    <span class="n">_CHECK_ATTACHMENT_PRIORITY</span>      <span class="o">=</span> <span class="mi">55</span>
+
     <span class="c1"># thumbnail checks are local disk checks and very fast.  These </span>
     <span class="c1"># are always carried out before any shotgun calls</span>
     <span class="n">_CHECK_THUMB_PRIORITY</span>           <span class="o">=</span> <span class="mi">50</span>
@@ -266,7 +271,12 @@
     <span class="c1"># next the priority for any other Shotgun calls (e.g. find, create, </span>
     <span class="c1"># update, delete, etc.)</span>
     <span class="n">_SG_CALL_PRIORITY</span>               <span class="o">=</span> <span class="mi">30</span>
-    
+
+    <span class="c1"># Attachment downloads are not necessarily fast (but might be), but unlike</span>
+    <span class="c1"># thumbnails they will be required for functionality in the calling code.</span>
+    <span class="c1"># As such, we&#39;ll give these downloads a bit more priority.</span>
+    <span class="n">_DOWNLOAD_ATTACHMENT_PRIORITY</span>   <span class="o">=</span> <span class="mi">25</span>
+
     <span class="c1"># thumbnails are downloaded last as they are considered low-priority </span>
     <span class="c1"># and can take a relatively significant amount of time</span>
     <span class="n">_DOWNLOAD_THUMB_PRIORITY</span>        <span class="o">=</span> <span class="mi">20</span>
@@ -292,6 +302,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">task_failed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_task_failed</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_task_id_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_attachment_task_id_map</span> <span class="o">=</span> <span class="p">{}</span>
 
 
     <span class="c1">############################################################################################################</span>
@@ -577,10 +588,61 @@
                                               <span class="n">task_kwargs</span> <span class="o">=</span> <span class="n">task_kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
 
+<div class="viewcode-block" id="ShotgunDataRetriever.request_attachment"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.request_attachment">[docs]</a>    <span class="k">def</span> <span class="nf">request_attachment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attachment_entity</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Downloads an attachment from Shotgun asynchronously or returns a cached</span>
+<span class="sd">        file path if found.</span>
+
+<span class="sd">        .. note:: The provided Attachment entity definition must contain, at a</span>
+<span class="sd">                  minimum, the &quot;this_file&quot; substructure.</span>
+
+<span class="sd">        .. example:: {&#39;id&#39;: 597,</span>
+<span class="sd">                      &#39;this_file&#39;: {&#39;content_type&#39;: &#39;image/png&#39;,</span>
+<span class="sd">                                    &#39;id&#39;: 597,</span>
+<span class="sd">                                    &#39;link_type&#39;: &#39;upload&#39;,</span>
+<span class="sd">                                    &#39;name&#39;: &#39;test.png&#39;,</span>
+<span class="sd">                                    &#39;type&#39;: &#39;Attachment&#39;,</span>
+<span class="sd">                                    &#39;url&#39;: &#39;https://abc.shotgunstudio.com/file_serve/attachment/597&#39;},</span>
+<span class="sd">                      &#39;type&#39;: &#39;Attachment&#39;}</span>
+
+<span class="sd">        :param dict attachment_entity: The Attachment entity to download data from.</span>
+
+<span class="sd">        :returns: A unique identifier representing this request.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span>
+                <span class="s2">&quot;No task manager has been associated with this data retriever. &quot;</span>
+                <span class="s2">&quot;Unable to request attachment.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># always add check for attachments already downloaded:</span>
+        <span class="n">check_task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_task_check_attachment</span><span class="p">,</span>
+            <span class="n">priority</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_CHECK_ATTACHMENT_PRIORITY</span><span class="p">,</span>
+            <span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bg_tasks_group</span><span class="p">,</span>
+            <span class="n">task_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">attachment_entity</span><span class="o">=</span><span class="n">attachment_entity</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Add download thumbnail task.  This is dependent on the check task above and will be passed</span>
+        <span class="c1"># the returned results from that task in addition to the kwargs specified below.  This allows</span>
+        <span class="c1"># a task dependency chain to be created with different priorities for the separate tasks.</span>
+        <span class="n">dl_task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_task_download_attachment</span><span class="p">,</span>
+            <span class="n">upstream_task_ids</span><span class="o">=</span><span class="p">[</span><span class="n">check_task_id</span><span class="p">],</span>
+            <span class="n">priority</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_DOWNLOAD_ATTACHMENT_PRIORITY</span><span class="p">,</span>
+            <span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bg_tasks_group</span><span class="p">,</span>
+            <span class="n">task_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">attachment_entity</span><span class="o">=</span><span class="n">attachment_entity</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># all results for requesting a thumbnail should be returned with the same id so use</span>
+        <span class="c1"># a mapping to track the &#39;primary&#39; task id:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_attachment_task_id_map</span><span class="p">[</span><span class="n">dl_task_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">check_task_id</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">check_task_id</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.request_thumbnail"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.request_thumbnail">[docs]</a>    <span class="k">def</span> <span class="nf">request_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">load_image</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Downloads a thumbnail form Shotgun asynchronously or returns a cached thumbnail </span>
+<span class="sd">        Downloads a thumbnail from Shotgun asynchronously or returns a cached thumbnail </span>
 <span class="sd">        if found.  Optionally loads the thumbnail into a QImage.</span>
 
 <span class="sd">        :param url:         The thumbnail url string that is associated with this thumbnail. This is</span>
@@ -598,11 +660,15 @@
 <span class="sd">                  possible to match them up.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span>
+                <span class="s2">&quot;No task manager has been associated with this data retriever. &quot;</span>
+                <span class="s2">&quot;Unable to request thumbnail.&quot;</span>
+            <span class="p">)</span>
             <span class="k">return</span>
 
         <span class="c1"># always add check for thumbnail already downloaded:</span>
         <span class="n">check_task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_check_thumbnail</span><span class="p">,</span>
-                                                    <span class="n">priority</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_CHECK_THUMB_PRIORITY</span><span class="p">,</span>
+                                                    <span class="n">priority</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_CHECK_THUMB_PRIORITY</span><span class="p">,</span>
                                                     <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bg_tasks_group</span><span class="p">,</span>
                                                     <span class="n">task_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span><span class="n">url</span><span class="p">,</span> 
                                                                    <span class="s2">&quot;load_image&quot;</span><span class="p">:</span><span class="n">load_image</span><span class="p">})</span>
@@ -612,7 +678,7 @@
         <span class="c1"># a task dependency chain to be created with different priorities for the separate tasks.</span>
         <span class="n">dl_task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_download_thumbnail</span><span class="p">,</span>
                                                  <span class="n">upstream_task_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">check_task_id</span><span class="p">],</span>
-                                                 <span class="n">priority</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_DOWNLOAD_THUMB_PRIORITY</span><span class="p">,</span>
+                                                 <span class="n">priority</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DOWNLOAD_THUMB_PRIORITY</span><span class="p">,</span>
                                                  <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bg_tasks_group</span><span class="p">,</span>
                                                  <span class="n">task_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span><span class="n">url</span><span class="p">,</span>
                                                                 <span class="s2">&quot;entity_type&quot;</span><span class="p">:</span><span class="n">entity_type</span><span class="p">,</span> 
@@ -629,19 +695,94 @@
 
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">check_task_id</span><span class="p">)</span></div>
 
-
-
     <span class="c1"># ------------------------------------------------------------------------------------------------</span>
     <span class="c1"># Background task management and methods</span>
 
+    <span class="k">def</span> <span class="nf">_download_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Downloads a file located at the given url to the provided file path.</span>
+
+<span class="sd">        :param str file_path: The target path.</span>
+<span class="sd">        :param str url: The url location of the file to download.</span>
+<span class="sd">        :param str entity_type: The Shotgun entity type that the url is</span>
+<span class="sd">                                associated with. In the event that the</span>
+<span class="sd">                                provided url has expired, the entity</span>
+<span class="sd">                                type and id provided will be used to query</span>
+<span class="sd">                                a fresh url.</span>
+<span class="sd">        :param int entity_id: The Shotgun entity id that the url is</span>
+<span class="sd">                              associated with. In the event that the</span>
+<span class="sd">                              provided url has expired, the entity type and</span>
+<span class="sd">                              id provided will be used to query a fresh url.</span>
+<span class="sd">        :param str field: The name of the field that contains the url. If</span>
+<span class="sd">                          the url needs to be requeried, this field will be</span>
+<span class="sd">                          where the fresh url is pulled from.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">TankError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">sg_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span>
+                <span class="n">entity_type</span><span class="p">,</span>
+                <span class="p">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;is&quot;</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">]],</span>
+                <span class="p">[</span><span class="n">field</span><span class="p">],</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">sg_data</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c1"># This means there&#39;s nothing in Shotgun for this field, which</span>
+                <span class="c1"># means we can&#39;t download anything.</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span>
+                    <span class="s2">&quot;Field </span><span class="si">%s</span><span class="s2"> does not contain data for </span><span class="si">%s</span><span class="s2"> (id=</span><span class="si">%s</span><span class="s2">).&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">field</span><span class="p">,</span>
+                        <span class="n">entity_type</span><span class="p">,</span>
+                        <span class="n">entity_id</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="n">sg_data</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+                <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+
+        <span class="c1"># now we have a thumbnail on disk, either via the direct download, or via the </span>
+        <span class="c1"># url-fresh-then-download approach.  Because the file is downloaded with user-only </span>
+        <span class="c1"># permissions we have to modify the permissions so that it&#39;s writeable by others</span>
+        <span class="n">old_umask</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="mo">0666</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">old_umask</span><span class="p">)</span>
+
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_get_attachment_path</span><span class="p">(</span><span class="n">attachment_entity</span><span class="p">,</span> <span class="n">bundle</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the location on disk suitable for an attachment file.</span>
+
+<span class="sd">        :param dict attachment_entity: The Attachment entity definition.</span>
+<span class="sd">        :param bundle: App, Engine or Framework instance</span>
+
+<span class="sd">        :returns: Path as a string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">attachment_entity</span><span class="p">[</span><span class="s2">&quot;this_file&quot;</span><span class="p">][</span><span class="s2">&quot;url&quot;</span><span class="p">]</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="n">attachment_entity</span><span class="p">[</span><span class="s2">&quot;this_file&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+
+        <span class="n">directory_path</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_get_thumbnail_path</span><span class="p">(</span>
+            <span class="n">url</span><span class="p">,</span>
+            <span class="n">bundle</span><span class="p">,</span>
+            <span class="n">directory_only</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory_path</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">,</span> <span class="n">directory_only</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the location on disk suitable for a thumbnail given its url.</span>
 
-<span class="sd">        :param url:     Path to a thumbnail</span>
-<span class="sd">        :param bundle:  App, Engine or Framework instance</span>
-<span class="sd">        :returns:       Path as a string.</span>
+<span class="sd">        :param str url: Path to a thumbnail</span>
+<span class="sd">        :param bundle: App, Engine or Framework instance</span>
+<span class="sd">        :param bool directory_only: Whether to return a directory path or a</span>
+<span class="sd">                                    full file path. Default is False, which</span>
+<span class="sd">                                    indicates a full file path, including</span>
+<span class="sd">                                    file name, will be returned.</span>
+
+<span class="sd">        :returns: Path as a string.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># If we don&#39;t have a URL, then we know we don&#39;t</span>
         <span class="c1"># have a thumbnail to worry about.</span>
@@ -663,8 +804,12 @@
         <span class="c1"># for a million evenly distributed items, this means ~15 items per folder</span>
         <span class="n">first_folder</span> <span class="o">=</span> <span class="n">hash_str</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
         <span class="n">second_folder</span> <span class="o">=</span> <span class="n">hash_str</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
-        <span class="n">file_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.jpeg&quot;</span> <span class="o">%</span> <span class="n">hash_str</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
-        <span class="n">path_chunks</span> <span class="o">=</span> <span class="p">[</span><span class="n">first_folder</span><span class="p">,</span> <span class="n">second_folder</span><span class="p">,</span> <span class="n">file_name</span><span class="p">]</span>
+        <span class="n">path_chunks</span> <span class="o">=</span> <span class="p">[</span><span class="n">first_folder</span><span class="p">,</span> <span class="n">second_folder</span><span class="p">]</span>
+
+        <span class="c1"># If we were only asked to give back a directory path then we can</span>
+        <span class="c1"># skip building and appending a file name.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">directory_only</span><span class="p">:</span>
+            <span class="n">path_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.jpeg&quot;</span> <span class="o">%</span> <span class="n">hash_str</span><span class="p">[</span><span class="mi">4</span><span class="p">:])</span>
 
         <span class="c1"># establish the root path</span>
         <span class="n">cache_path_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">bundle</span><span class="o">.</span><span class="n">cache_location</span><span class="p">,</span> <span class="s2">&quot;thumbs&quot;</span><span class="p">]</span>
@@ -865,6 +1010,34 @@
         <span class="n">res</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="o">*</span><span class="n">method_args</span><span class="p">,</span> <span class="o">**</span><span class="n">method_kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span><span class="s2">&quot;method&quot;</span><span class="p">,</span> <span class="s2">&quot;result&quot;</span><span class="p">:</span><span class="n">res</span><span class="p">}</span>
 
+    <span class="k">def</span> <span class="nf">_task_check_attachment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attachment_entity</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check to see if an attachment file exists for the specified Attachment</span>
+<span class="sd">        entity.</span>
+
+<span class="sd">        :param dict attachment_entity: The Attachment entity definition.</span>
+
+<span class="sd">        :returns: A dictionary containing the cached path for the specified</span>
+<span class="sd">                  Attachment entity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">attachment_entity</span><span class="p">[</span><span class="s2">&quot;this_file&quot;</span><span class="p">][</span><span class="s2">&quot;url&quot;</span><span class="p">]</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="n">attachment_entity</span><span class="p">[</span><span class="s2">&quot;this_file&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s2">&quot;check_attachment&quot;</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span>
+
+        <span class="n">file_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_attachment_path</span><span class="p">(</span>
+            <span class="n">attachment_entity</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">file_path</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;file_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">file_path</span>
+
+        <span class="k">return</span> <span class="n">data</span>
+
     <span class="k">def</span> <span class="nf">_task_check_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">load_image</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check to see if a thumbnail exists for the specified url.  If it does then it is returned.</span>
@@ -892,6 +1065,41 @@
             <span class="n">thumb_path</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span><span class="s2">&quot;check_thumbnail&quot;</span><span class="p">,</span> <span class="s2">&quot;thumb_path&quot;</span><span class="p">:</span><span class="n">thumb_path</span><span class="p">,</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span><span class="n">thumb_image</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_task_download_attachment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">attachment_entity</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Download the specified attachment. This downloads the file associated with</span>
+<span class="sd">        the provided Attachment entity into the framework&#39;s cache directory structure</span>
+<span class="sd">        and returns the cached path.</span>
+
+<span class="sd">        :param str file_path: The target file path to download to.</span>
+<span class="sd">        :param dict attachment_entity: The Attachment entity definition.</span>
+
+<span class="sd">        :returns: A dictionary containing the cached path for the specified</span>
+<span class="sd">                  Attachment entity, as well as an action identifier that</span>
+<span class="sd">                  marks the data as having come from a &quot;download_attachment&quot;</span>
+<span class="sd">                  task.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">file_path</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>
+
+        <span class="n">file_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_attachment_path</span><span class="p">(</span><span class="n">attachment_entity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_path</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">ensure_folder_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file_path</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">download_attachment</span><span class="p">(</span>
+                <span class="n">attachment</span><span class="o">=</span><span class="n">attachment_entity</span><span class="p">,</span>
+                <span class="n">file_path</span><span class="o">=</span><span class="n">file_path</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">action</span><span class="o">=</span><span class="s2">&quot;download_attachment&quot;</span><span class="p">,</span>
+            <span class="n">file_path</span><span class="o">=</span><span class="n">file_path</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_task_download_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thumb_path</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">load_image</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -933,34 +1141,9 @@
 
             <span class="c1"># try to download based on the path we have</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">thumb_path</span><span class="p">)</span>
-            <span class="k">except</span> <span class="n">TankError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
-                <span class="c1"># Note: Unfortunately, the download_url will re-cast </span>
-                <span class="c1"># all exceptions into tankerrors.</span>
-                <span class="c1"># get a fresh url from shotgun and try again</span>
-                <span class="n">sg_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="p">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;is&quot;</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">]],</span> <span class="p">[</span><span class="n">field</span><span class="p">])</span>
-
-                <span class="k">if</span> <span class="n">sg_data</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="c1"># no thumbnail! This is possible if the thumb has changed</span>
-                    <span class="c1"># while we were queueing it for download.</span>
-                    <span class="c1"># indicate the fact that the thumbnail no longer exists on the server</span>
-                    <span class="c1"># by setting the path to None</span>
-                    <span class="n">thumb_path</span> <span class="o">=</span> <span class="bp">None</span>
-
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="c1"># download from sg</span>
-                    <span class="n">url</span> <span class="o">=</span> <span class="n">sg_data</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
-                    <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">thumb_path</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">thumb_path</span><span class="p">:</span>
-                <span class="c1"># now we have a thumbnail on disk, either via the direct download, or via the </span>
-                <span class="c1"># url-fresh-then-download approach.  Because the file is downloaded with user-only </span>
-                <span class="c1"># permissions we have to modify the permissions so that it&#39;s writeable by others</span>
-                <span class="n">old_umask</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">,</span> <span class="mo">0666</span><span class="p">)</span>
-                <span class="k">finally</span><span class="p">:</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">old_umask</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_download_url</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+                <span class="n">thumb_path</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="c1"># finally, see if we should also load in the image</span>
         <span class="n">thumb_image</span> <span class="o">=</span> <span class="bp">None</span>
@@ -972,7 +1155,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">thumb_path</span> <span class="o">=</span> <span class="bp">None</span>
 
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span><span class="s2">&quot;download_thumbnail&quot;</span><span class="p">,</span> <span class="s2">&quot;thumb_path&quot;</span><span class="p">:</span><span class="n">thumb_path</span><span class="p">,</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span><span class="n">thumb_image</span><span class="p">}</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">action</span><span class="o">=</span><span class="s2">&quot;download_thumbnail&quot;</span><span class="p">,</span>
+            <span class="n">thumb_path</span><span class="o">=</span><span class="n">thumb_path</span><span class="p">,</span>
+            <span class="n">image</span><span class="o">=</span><span class="n">thumb_image</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_on_task_completed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -998,15 +1185,44 @@
             <span class="n">path</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;thumb_path&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
                 <span class="c1"># check found a thumbnail!</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span> <span class="s2">&quot;find&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;thumb_path&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]})</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span>
+                    <span class="s2">&quot;find&quot;</span><span class="p">,</span>
+                    <span class="nb">dict</span><span class="p">(</span>
+                        <span class="n">thumb_path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
+                        <span class="n">image</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">],</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
         <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;download_thumbnail&quot;</span><span class="p">:</span>
             <span class="c1"># look up the primary thumbnail task id in the map:</span>
             <span class="n">thumb_task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_task_id_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">thumb_task_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_task_id_map</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">thumb_task_id</span><span class="p">),</span>
-                                         <span class="s2">&quot;find&quot;</span><span class="p">,</span> 
-                                         <span class="p">{</span><span class="s2">&quot;thumb_path&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;thumb_path&quot;</span><span class="p">],</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]})</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">thumb_task_id</span><span class="p">),</span>
+                    <span class="s2">&quot;find&quot;</span><span class="p">,</span> 
+                    <span class="nb">dict</span><span class="p">(</span>
+                        <span class="n">thumb_path</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;thumb_path&quot;</span><span class="p">],</span>
+                        <span class="n">image</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">],</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;check_attachment&quot;</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;file_path&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span>
+                    <span class="s2">&quot;find&quot;</span><span class="p">,</span>
+                    <span class="nb">dict</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="n">path</span><span class="p">),</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;download_attachment&quot;</span><span class="p">:</span>
+            <span class="n">attachment_task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attachment_task_id_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">attachment_task_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__attachment_task_id_map</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">attachment_task_id</span><span class="p">),</span>
+                    <span class="s2">&quot;find&quot;</span><span class="p">,</span>
+                    <span class="nb">dict</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;file_path&quot;</span><span class="p">]),</span>
+                <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_on_task_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1062,7 +1278,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v4.3.1',
+            VERSION:'v4.4.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
