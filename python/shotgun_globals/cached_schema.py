@@ -61,9 +61,6 @@ class CachedShotgunSchema(QtCore.QObject):
         self._type_schema = {}
         self.__sg_data_retrievers = []
         
-        self._schema_cache_path = os.path.join(self._bundle.cache_location, "sg_schema.pickle")
-        self._status_cache_path = os.path.join(self._bundle.cache_location, "sg_status.pickle")
-
         self._status_data = {}
 
         self._sg_schema_query_ids = {}
@@ -191,8 +188,8 @@ class CachedShotgunSchema(QtCore.QObject):
 
         if os.path.exists(status_cache_path):
             try:
-                self._bundle.log_debug("Loading cached status from '%s'" % self._status_cache_path)
-                with open(self._status_cache_path, "rb") as fh:
+                self._bundle.log_debug("Loading cached status from '%s'" % status_cache_path)
+                with open(status_cache_path, "rb") as fh:
                     status_data = pickle.load(fh)
                     # Check to make sure the structure of the data
                     # is what we expect. If it isn't then we don't
