@@ -2,6 +2,7 @@
   <qresource prefix="tk-framework-shotgunutils">
     <file>icon_Asset_dark.png</file>
     <file>icon_EventLogEntry_dark.png</file>
+    <file>icon_None.png</file>
     <file>icon_Folder.png</file>
     <file>icon_Group_dark.png</file>
     <file>icon_HumanUser_dark.png</file>

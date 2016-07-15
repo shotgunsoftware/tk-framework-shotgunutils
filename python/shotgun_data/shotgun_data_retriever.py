@@ -59,7 +59,8 @@ class ShotgunDataRetriever(QtCore.QObject):
     #
     # - request_type is a string denoting the type of request
     #   this event is associated with. It can be either "find"
-    #   "find_one", "update", "create", "delete" "schema" or "thumbnail"
+    #   "find_one", "update", "create", "delete", "schema", "expand_nav"
+    #   or "thumbnail"
     #
     # - data_dict is a dictionary containing the payload
     #   of the request. It will be different depending on
@@ -395,6 +396,29 @@ class ShotgunDataRetriever(QtCore.QObject):
         return self._add_task(self._task_execute_method, 
                               priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
                               task_kwargs = task_kwargs)
+
+    def execute_nav_expand(self, *args, **kwargs):
+        """
+        Executes a Shotgun ``nav_expand`` query asynchronously.
+
+        This method takes the same parameters as the Shotgun ``nav_expand()`` call.
+
+        The query will be queued up and once processed, either a
+        work_completed or work_failure signal will be emitted.
+
+        :param ``*args``: args to be passed to the Shotgun ``nav_expand()`` call
+        :param ``**kwargs``: Named parameters to be passed to the Shotgun ``nav_expand()`` call
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.
+        """
+        return self._add_task(
+            self._task_execute_nav_expand,
+            priority=ShotgunDataRetriever._SG_CALL_PRIORITY,
+            task_args=args,
+            task_kwargs=kwargs
+        )
 
     def _add_task(self, task_cb, priority, task_args=None, task_kwargs=None):
         """
@@ -841,6 +865,19 @@ class ShotgunDataRetriever(QtCore.QObject):
         res = method(self._bundle.shotgun, *method_args, **method_kwargs)
         return {"action":"method", "result":res}
 
+    def _task_execute_nav_expand(self, *args, **kwargs):
+        """
+        Method that gets executed in a background task/thread to perform a Shotgun
+        ``nav_expand`` query
+
+        :param ``*args``: Unnamed arguments to be passed to the ``nav_expand()`` call
+        :param ``**kwargs``: Named arguments to be passed to the ``nav_expand()`` call
+        :returns: Dictionary containing the 'action' together with result
+            returned by the find() call
+        """
+        sg_res = self._bundle.shotgun.nav_expand(*args, **kwargs)
+        return {"action":"nav_expand", "nav_result":sg_res}
+
     def _task_check_attachment(self, attachment_entity):
         """
         Check to see if an attachment file exists for the specified Attachment
@@ -1008,6 +1045,8 @@ class ShotgunDataRetriever(QtCore.QObject):
         action = result.get("action")
         if action in ["find", "find_one", "create", "delete", "update"]:
             self.work_completed.emit(str(task_id), action, {"sg":result["sg_result"]})
+        elif action == "nav_expand":
+            self.work_completed.emit(str(task_id), "nav_expand", {"nav":result["nav_result"]})
         elif action == "schema":
             self.work_completed.emit(str(task_id), "schema", {"fields":result["fields"], "types":result["types"]})
         elif action == "method":

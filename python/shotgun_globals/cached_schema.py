@@ -427,6 +427,7 @@ class CachedShotgunSchema(QtCore.QObject):
         :param project_id:  The id of the project entity to load the schema for. If
                             None, the current context's project will be used.
         """
+
         self = cls.__get_instance()
 
         if self._is_schema_loaded(project_id=project_id):
@@ -659,7 +660,8 @@ class CachedShotgunSchema(QtCore.QObject):
             project_id=project_id,
         )
 
-        if sg_entity_type in self._type_schema and field_name in self._field_schema[project_id][sg_entity_type]:
+        if (sg_entity_type in self._type_schema[project_id] and
+            field_name in self._field_schema[project_id][sg_entity_type]):
             data = self._field_schema[project_id][sg_entity_type][field_name]
             valid_values = data.get("properties", {}).get("valid_values", {}).get("value")
 
@@ -735,43 +737,50 @@ class CachedShotgunSchema(QtCore.QObject):
         return status_color
 
     @classmethod
-    def field_is_editable(cls, sg_entity_type, field_name):
+    def field_is_editable(cls, sg_entity_type, field_name, project_id=None):
         """
         Returns a boolean identifying the editability of the entity's field.
 
         :param str sg_entity_type: the entity type
         :param str field_name: the field name to check editibility
+        :param project_id:  The id of the project.
+                            If None, the current context's project will be used.
 
         :returns: ``True`` if the field is ediable, ``False`` otherwise.
         """
         self = cls.__get_instance()
-        self._check_schema_refresh(sg_entity_type, field_name)
+        project_id = project_id or self._get_current_project_id()
+        self._check_schema_refresh(sg_entity_type, field_name, project_id=project_id)
 
-        if sg_entity_type in self._type_schema and field_name in self._field_schema[sg_entity_type]:
-            data = self._field_schema[sg_entity_type][field_name]
+        if (sg_entity_type in self._type_schema[project_id] and
+            field_name in self._field_schema[project_id][sg_entity_type]):
+            data = self._field_schema[project_id][sg_entity_type][field_name]
             try:
                 return data["editable"]["value"]
             except KeyError:
                 raise ValueError("Could not determine editability from the schema.")
 
-
         raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
 
     @classmethod
-    def field_is_visible(cls, sg_entity_type, field_name):
+    def field_is_visible(cls, sg_entity_type, field_name, project_id=None):
         """
         Returns a boolean identifying the visibility of the entity's field.
 
         :param sg_entity_type: the entity type
         :param field_name: the field name to check visibility
+        :param project_id:  The id of the project.
+                            If None, the current context's project will be used.
 
         :returns: ``True`` if the field is visible, ``False`` otherwise.
         """
         self = cls.__get_instance()
-        self._check_schema_refresh(sg_entity_type, field_name)
+        project_id = project_id or self._get_current_project_id()
+        self._check_schema_refresh(sg_entity_type, field_name, project_id=project_id)
 
-        if sg_entity_type in self._type_schema and field_name in self._field_schema[sg_entity_type]:
-            data = self._field_schema[sg_entity_type][field_name]
+        if (sg_entity_type in self._type_schema[project_id] and
+            field_name in self._field_schema[project_id][sg_entity_type]):
+            data = self._field_schema[project_id][sg_entity_type][field_name]
             try:
                 return data["visible"]["value"]
             except KeyError:

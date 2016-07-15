@@ -8,7 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import tank
+import sgtk
 import copy
 import os
 import sys
@@ -18,12 +18,12 @@ import datetime
 import time
 import weakref
 
-from tank.platform.qt import QtCore, QtGui
+from sgtk.platform.qt import QtCore, QtGui
 from .shotgun_standard_item import ShotgunStandardItem
 from .util import get_sanitized_data, get_sg_data, sanitize_qt, sanitize_for_qt_model
 
 
-class ShotgunModelError(tank.TankError):
+class ShotgunModelError(sgtk.TankError):
     """Base class for all shotgun model exceptions"""
     pass
 
@@ -133,7 +133,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         QtGui.QStandardItemModel.__init__(self, parent)
 
-        self._bundle = tank.platform.current_bundle()
+        self._bundle = sgtk.platform.current_bundle()
 
         # importing locally to not trip sphinx's imports.
         self._shotgun_globals = self._bundle.import_module("shotgun_globals")
@@ -248,7 +248,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
               ['sg_status', 'is', 'ip']
             ]
 
-        :param item: One of the :class:`~PySide.QtGui.QStandardItem` s that are
+        :param item: One of the :class:`~PySide.QtGui.QStandardItem`s that are
                      associated with this model.
         :returns: standard shotgun filter list to represent that item
         """
@@ -369,7 +369,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         For more information, see the clear() method.
         """
-        raise NotImplementedError("The QAbstractItemModel::reset method has been explicitly been disabled "
+        raise NotImplementedError("The QAbstractItemModel::reset method has explicitly been disabled "
                                   "because memory is not correctly freed up across C++/Python when "
                                   "executed, sometimes resulting in runtime instability. For an "
                                   "semi-equivalent method, use clear(), however keep in mind that "
@@ -608,7 +608,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         states such as selection.
         """
         if not self.__sg_data_retriever:
-            raise TankError("Data retriever is not available!")
+            raise sgtk.TankError("Data retriever is not available!")
 
         # Stop any queued work that hasn't completed yet.  Note that we intentionally only stop the
         # find query and not the thumbnail cache/download.  This is because the thumbnails returned
@@ -684,7 +684,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             return
 
         if not self.__sg_data_retriever:
-            raise TankError("Data retriever is not available!")
+            raise sgtk.TankError("Data retriever is not available!")
 
         uid = self.__sg_data_retriever.request_thumbnail(url,
                                                          entity_type,
@@ -898,7 +898,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             is often used in conjunction with the order parameter in :meth:`_load_data()`.
 
         :param sg_data_list: list of shotgun dictionaries, as retunrned by the find() call.
-        :returns: should return a list of shotgun dictionaries, on the same form as the input.
+        :returns: should return a list of shotgun dictionaries, of the same form as the input.
         """
         # default implementation is a passthrough
         return sg_data_list
@@ -1047,7 +1047,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__log_debug("Received worker payload of type %s" % request_type)
 
         if self.__current_work_id == uid:
-            # our publish data has arrived from sg!
+            # our data has arrived from sg!
             # process the data
             self.__current_work_id = None
             sg_data = data["sg"]
@@ -1197,7 +1197,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         # and emit completion signal
         self.data_refreshed.emit(modifications_made)
-
 
     ########################################################################################
     # shotgun data processing and tree building
