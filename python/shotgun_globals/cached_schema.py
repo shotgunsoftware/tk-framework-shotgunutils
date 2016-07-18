@@ -744,8 +744,10 @@ class CachedShotgunSchema(QtCore.QObject):
 
         :param str sg_entity_type: the entity type
         :param str field_name: the field name to check editibility
-        :param project_id:  The id of the project.
-                            If None, the current context's project will be used.
+        :param project_id:  The project Entity id. If None, the current
+                            context's project will be used, or the "site"
+                            cache location will be returned if the current
+                            context does not have an associated project.
 
         :returns: ``True`` if the field is ediable, ``False`` otherwise.
         """
@@ -777,8 +779,10 @@ class CachedShotgunSchema(QtCore.QObject):
 
         :param sg_entity_type: the entity type
         :param field_name: the field name to check visibility
-        :param project_id:  The id of the project.
-                            If None, the current context's project will be used.
+        :param project_id:  The project Entity id. If None, the current
+                            context's project will be used, or the "site"
+                            cache location will be returned if the current
+                            context does not have an associated project.
 
         :returns: ``True`` if the field is visible, ``False`` otherwise.
         """
