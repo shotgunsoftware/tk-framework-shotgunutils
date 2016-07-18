@@ -384,7 +384,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
     def _load_data(
         self, entity_type, filters, hierarchy, fields, order=None, seed=None, limit=None,
-        columns=None, editable_columns=None, additional_filter_presets=None
+        columns=None, additional_filter_presets=None, editable_columns=None
     ):
         """
         This is the main method to use to configure the model. You basically
@@ -436,13 +436,13 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                           parameter, this can be used to effectively cap the data set that the model
                                           is handling, allowing a user to for example show the twenty most recent notes or
                                           similar.
-        :param columns:                   If columns is specified, then any leaf row in the model will have columns created where
+        :param list columns:              If columns is specified, then any leaf row in the model will have columns created where
                                           each column in the row contains the value for the corresponding field from columns. This means
                                           that the data from the loaded entity will be available field by field. Subclasses can modify
                                           this behavior by overriding _get_additional_columns.
-        :param editable_columns:          A subset of ``columns`` that will be editable in views that use this model.
         :param additional_filter_presets: List of Shotgun filter presets to apply, e.g.
                                           ``[{"preset_name":"LATEST","latest_by":"BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT"}]``
+        :param list editable_columns:     A subset of ``columns`` that will be editable in views that use this model.
 
         :returns:                         True if cached data was loaded, False if not.
         """
@@ -462,6 +462,11 @@ class ShotgunModel(QtGui.QStandardItemModel):
         self.__editable_fields = editable_columns or []
         self.__limit = limit or 0 # 0 means get all matches
         self.__additional_filter_presets = additional_filter_presets
+
+        # make sure `editable_fields` is a subset of `column_fields`
+        if not set(self.__editable_fields).issubset(set(self.__column_fields)):
+            raise tank.TankError(
+                "The `editable_fields` argument is not a subset of `column_fields`.")
 
         # when we cache the data associated with this model, create
         # the file name and path based on several parameters.
