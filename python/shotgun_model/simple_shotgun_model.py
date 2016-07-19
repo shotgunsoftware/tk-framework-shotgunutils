@@ -44,7 +44,7 @@ class SimpleShotgunModel(ShotgunModel):
 
     def load_data(
         self, entity_type, filters=None, fields=None, order=None, limit=None,
-        columns=None, additional_filter_presets=None
+        columns=None, additional_filter_presets=None, editable_columns=None
     ):
         """
         Loads shotgun data into the model, using the cache if possible.
@@ -69,9 +69,10 @@ class SimpleShotgunModel(ShotgunModel):
                   parameter, this can be used to effectively cap the data set that the model
                   is handling, allowing a user to for example show the twenty most recent notes or
                   similar.
-        :param columns: List of Shotgun fields to use to populate the model columns
+        :param list columns: List of Shotgun fields names to use to populate the model columns
         :param additional_filter_presets: List of Shotgun filter presets to apply, e.g.
                   ``[{"preset_name":"LATEST","latest_by":"BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT"}]``
+        :param list editable_columns: A subset of ``columns`` that will be editable in views that use this model.
         """
         filters = filters or []
         fields = fields or ["code"]
@@ -86,5 +87,6 @@ class SimpleShotgunModel(ShotgunModel):
             limit=limit,
             columns=columns,
             additional_filter_presets=additional_filter_presets,
+            editable_columns=editable_columns,
         )
         self._refresh_data()
