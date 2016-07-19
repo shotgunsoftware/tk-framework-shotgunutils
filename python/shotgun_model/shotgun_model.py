@@ -400,6 +400,20 @@ class ShotgunModel(QtGui.QStandardItemModel):
         If you want to refresh the data contained in the model (which you typically
         want to), call the :meth:`_refresh_data()` method.
 
+        .. code-block:: python
+
+            # Example call from a subclass of ShotgunModel that displays assets.
+            # Additional "code" and " description" columns will be displayed,
+            # and the "description" column will be editable.
+            self._load_data(
+                "Asset",                            # entity_type
+                [],                                 # filters
+                ["sg_asset_type", "code"],          # hierarchy
+                ["description"],                    # fields
+                columns=["code", "description"],    # additional columns to display
+                editable_columns=["description"],
+            )
+
         :param entity_type:               Shotgun entity type to download
         :param filters:                   List of Shotgun filters. Standard Shotgun syntax. Passing None instead
                                           of a list of filters indicates that no shotgun data should be retrieved
