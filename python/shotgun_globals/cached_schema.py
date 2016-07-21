@@ -749,11 +749,18 @@ class CachedShotgunSchema(QtCore.QObject):
         :returns: ``True`` if the field is ediable, ``False`` otherwise.
         """
         self = cls.__get_instance()
+
         project_id = project_id or self._get_current_project_id()
         self._check_schema_refresh(sg_entity_type, field_name, project_id=project_id)
 
-        if (sg_entity_type in self._type_schema[project_id] and
+        # make sure the project id is found in each of the type and file schemas
+        # and that the entity type and field name are found in their respective
+        # project caches
+        if (project_id in self._type_schema and
+            project_id in self._field_schema and
+            sg_entity_type in self._type_schema[project_id] and
             field_name in self._field_schema[project_id][sg_entity_type]):
+
             data = self._field_schema[project_id][sg_entity_type][field_name]
             try:
                 return data["editable"]["value"]
@@ -778,8 +785,14 @@ class CachedShotgunSchema(QtCore.QObject):
         project_id = project_id or self._get_current_project_id()
         self._check_schema_refresh(sg_entity_type, field_name, project_id=project_id)
 
-        if (sg_entity_type in self._type_schema[project_id] and
+        # make sure the project id is found in each of the type and file schemas
+        # and that the entity type and field name are found in their respective
+        # project caches
+        if (project_id in self._type_schema and
+            project_id in self._field_schema and
+            sg_entity_type in self._type_schema[project_id] and
             field_name in self._field_schema[project_id][sg_entity_type]):
+
             data = self._field_schema[project_id][sg_entity_type][field_name]
             try:
                 return data["visible"]["value"]
