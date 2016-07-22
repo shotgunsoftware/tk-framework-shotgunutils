@@ -20,6 +20,11 @@ from .background_task import BackgroundTask
 from .worker_thread import WorkerThread
 from .results_poller import ResultsDispatcher
 
+# Set to True to enable extensive debug logging.
+# Useful for debugging concurrency issues.
+# Do not release with this setting set to True!
+ENABLE_DETAILED_DEBUG = False
+
 
 class BackgroundTaskManager(QtCore.QObject):
     """
@@ -102,7 +107,21 @@ class BackgroundTaskManager(QtCore.QObject):
         self._next_group_id += 1
         return group_id
 
-    def _log(self, msg):
+    def _low_level_debug_log(self, msg):
+        """
+        Wrapper method for logging *detailed* info
+        to debug. This is disabled by default but can
+        be useful to enable for example when debugging
+        issues around concurrency. In order to enable it,
+        set the ENABLE_DETAILED_DEBUG constant at the top
+        of this file to True.
+
+        :param msg: The message to be logged.
+        """
+        if ENABLE_DETAILED_DEBUG:
+            self._debug_log(msg)
+
+    def _debug_log(self, msg):
         """
         Wrapper method for logging useful information to debug.
 
@@ -130,14 +149,14 @@ class BackgroundTaskManager(QtCore.QObject):
         Shut down the task manager.  This clears the task queue and gracefully stops all running
         threads.  Completion/failure of any currently running tasks will be ignored.
         """
-        self._log("Shutting down...")
+        self._debug_log("Shutting down...")
         self._can_process_tasks = False
 
         # stop all tasks:
         self.stop_all_tasks()
 
         # shut down all worker threads:
-        self._log("Waiting for %d background threads to stop..." % len(self._all_threads))
+        self._debug_log("Waiting for %d background threads to stop..." % len(self._all_threads))
         for thread in self._all_threads:
             thread.shut_down()
         self._available_threads = []
@@ -145,7 +164,7 @@ class BackgroundTaskManager(QtCore.QObject):
 
         # Shut down the dispatcher thread
         self._results_dispatcher.shut_down()
-        self._log("Shut down successfully!")
+        self._debug_log("Shut down successfully!")
 
     def add_task(self, cbl, priority=None, group=None, upstream_task_ids=None, task_args=None, task_kwargs=None):
         """
@@ -188,7 +207,7 @@ class BackgroundTaskManager(QtCore.QObject):
         for us_task_id in upstream_task_ids:
             self._downstream_task_map.setdefault(us_task_id, set()).add(new_task.uid)
 
-        self._log("Added Task %s to the queue" % new_task)
+        self._low_level_debug_log("Added Task %s to the queue" % new_task)
 
         # and start the next task:
         self._start_tasks()
@@ -228,9 +247,9 @@ class BackgroundTaskManager(QtCore.QObject):
         if task is None:
             return
 
-        self._log("Stopping Task %s..." % task)
+        self._low_level_debug_log("Stopping Task %s..." % task)
         self._stop_tasks([task], stop_upstream, stop_downstream)
-        self._log(" > Task %s stopped!" % task)
+        self._low_level_debug_log(" > Task %s stopped!" % task)
 
     def stop_task_group(self, group, stop_upstream=True, stop_downstream=True):
         """
@@ -245,7 +264,7 @@ class BackgroundTaskManager(QtCore.QObject):
         if task_ids is None:
             return
 
-        self._log("Stopping Task group %s..." % group)
+        self._low_level_debug_log("Stopping Task group %s..." % group)
 
         tasks_to_stop = []
         for task_id in task_ids:
@@ -255,14 +274,14 @@ class BackgroundTaskManager(QtCore.QObject):
         del self._group_task_map[group]
         self._stop_tasks(tasks_to_stop, stop_upstream, stop_downstream)
 
-        self._log(" > Task group %s stopped!" % group)
+        self._low_level_debug_log(" > Task group %s stopped!" % group)
 
     def stop_all_tasks(self):
         """
         Stop all currently queued or running tasks.  If any tasks are already running then they will
         complete but their completion/failure signals will be ignored.
         """
-        self._log("Stopping all tasks...")
+        self._debug_log("Stopping all tasks...")
 
         # we just need to clear all the lookups:
         self._running_tasks = {}
@@ -272,7 +291,7 @@ class BackgroundTaskManager(QtCore.QObject):
         self._upstream_task_map = {}
         self._downstream_task_map = {}
 
-        self._log(" > All tasks stopped!")
+        self._debug_log(" > All tasks stopped!")
 
     def _stop_tasks(self, tasks_to_stop, stop_upstream, stop_downstream):
         """
@@ -350,7 +369,7 @@ class BackgroundTaskManager(QtCore.QObject):
         thread.start()
 
         # log some debug:
-        self._log("Started new background worker thread (num threads=%d)" % len(self._all_threads))
+        self._debug_log("Started new background worker thread (num threads=%d)" % len(self._all_threads))
 
         return thread
 
@@ -408,7 +427,7 @@ class BackgroundTaskManager(QtCore.QObject):
             # looks like we can't do anything!
             return False
 
-        self._log("Starting task %r" % task_to_process)
+        self._low_level_debug_log("Starting task %r" % task_to_process)
 
         # ok, we have a thread so lets move the task from the priority queue to the running list:
         self._pending_tasks_by_priority[priority].remove(task_to_process)
@@ -420,7 +439,10 @@ class BackgroundTaskManager(QtCore.QObject):
         num_tasks_left = 0
         for pending_tasks in self._pending_tasks_by_priority.itervalues():
             num_tasks_left += len(pending_tasks)
-        self._log(" > Currently running tasks: '%s' - %d left in queue" % (self._running_tasks.keys(), num_tasks_left))
+
+        self._low_level_debug_log(
+            " > Currently running tasks: '%s' - %d left in queue" % (self._running_tasks.keys(), num_tasks_left)
+        )
 
         # and run the task
         thread.run_task(task_to_process)
@@ -439,7 +461,8 @@ class BackgroundTaskManager(QtCore.QObject):
         try:
             # check that we should process this result:
             if task.uid in self._running_tasks:
-                self._log("Task %r - completed" % (task))
+
+                self._low_level_debug_log("Task %r - completed" % (task))
 
                 # if we have dependent tasks then update them:
                 for ds_task_id in self._downstream_task_map.get(task.uid, []):
@@ -479,7 +502,7 @@ class BackgroundTaskManager(QtCore.QObject):
         try:
             # check that we should process this task:
             if task.uid in self._running_tasks:
-                self._log("Task %r - failed: %s\n%s" % (task, msg, tb))
+                self._debug_log("Task %r - failed: %s\n%s" % (task, msg, tb))
 
                 # we need to emit the failed message for this task as well as any that have
                 # upstream dependencies on this task!
