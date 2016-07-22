@@ -103,16 +103,17 @@ class CachedShotgunSchema(QtCore.QObject):
 
     def _get_current_project_id(self):
         """
-        Gets the project id associated with the current context, or 0
-        if operating in a site-level context.
+        Return the id of the current project.
 
-        :returns:   int
+        :returns: The project id associated with the current context, or ``None``
+            if operating in a site-level context.
+        :rtype: ``int`` or ``None``
         """
-        # The project id is going to be passed around by signals, as
-        # well as being passed to a core hook in some situations. As
-        # a result, we need it to always be an int value.
+
         if self._bundle.tank.pipeline_configuration.is_site_configuration():
-            project_id = 0
+            # site configuration (no project id). Return None which is
+            # consistent with core.
+            project_id = None
         else:
             project_id = self._bundle.tank.pipeline_configuration.get_project_id()
 
