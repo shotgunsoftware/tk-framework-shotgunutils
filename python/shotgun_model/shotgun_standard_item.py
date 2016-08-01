@@ -8,17 +8,23 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-from .shotgun_standard_item_base import ShotgunStandardItemBase
+
+from tank.platform.qt import QtGui
+
+from .util import sanitize_qt
 from .util import get_sg_data as util_get_sg_data
 
-
-class ShotgunStandardItem(ShotgunStandardItemBase):
+class ShotgunStandardItem(QtGui.QStandardItem):
     """
-    Simple subclass of the standard item base that exposes a method to return
-    the SG data for this item in the model.
-
-    Do not construct this object directly - instead use the ShotgunModel.create_item() method.
+    Special implementation of StandardItem which bridges PyQt and PySide.
     """
+
+    def __repr__(self):
+        """
+        Create a string representation of this instance
+        :returns: A string representation of this instance
+        """
+        return "<%s %s>" % (self.__class__.__name__, self.text())
 
     def get_sg_data(self):
         """
@@ -30,3 +36,54 @@ class ShotgunStandardItem(ShotgunStandardItemBase):
         """
         return util_get_sg_data(self)
 
+    ########################################################################################
+    # overridden methods
+
+    def statusTip(self, *args, **kwargs):
+        """
+        Base class override which runs sanitize_qt() on the returned data
+        """
+        val = super(ShotgunStandardItem, self).statusTip(*args, **kwargs)
+        return sanitize_qt(val)
+
+    def text(self, *args, **kwargs):
+        """
+        Base class override which runs sanitize_qt() on the returned data
+        """
+        val = super(ShotgunStandardItem, self).text(*args, **kwargs)
+        return sanitize_qt(val)
+
+    def toolTip(self, *args, **kwargs):
+        """
+        Base class override which runs sanitize_qt() on the returned data
+        """
+        val = super(ShotgunStandardItem, self).toolTip(*args, **kwargs)
+        return sanitize_qt(val)
+
+    def whatsThis(self, *args, **kwargs):
+        """
+        Base class override which runs sanitize_qt() on the returned data
+        """
+        val = super(ShotgunStandardItem, self).whatsThis(*args, **kwargs)
+        return sanitize_qt(val)
+
+    def accessibleDescription(self, *args, **kwargs):
+        """
+        Base class override which runs sanitize_qt() on the returned data
+        """
+        val = super(ShotgunStandardItem, self).accessibleDescription(*args, **kwargs)
+        return sanitize_qt(val)
+
+    def accessibleText(self, *args, **kwargs):
+        """
+        Base class override which runs sanitize_qt() on the returned data
+        """
+        val = super(ShotgunStandardItem, self).accessibleText(*args, **kwargs)
+        return sanitize_qt(val)
+
+    def data(self, *args, **kwargs):
+        """
+        Base class override which runs sanitize_qt() on the returned data
+        """
+        val = super(ShotgunStandardItem, self).data(*args, **kwargs)
+        return sanitize_qt(val)

@@ -18,7 +18,6 @@ import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 
 # framework imports
-from .shotgun_hierarchy_item import ShotgunHierarchyItem
 from .shotgun_query_model import ShotgunQueryModel
 from .util import get_sg_data, sanitize_qt, sanitize_for_qt_model
 from ..util import color_mix
@@ -45,9 +44,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     hierarchy mimics what is found in Shotgun as configured in each project's
     *Tracking Settings*.
     """
-
-    # Use this class when deserializing items from disk
-    SG_QUERY_MODEL_ITEM_CLASS = ShotgunHierarchyItem
 
     # data field that uniquely identifies an entity
     SG_DATA_UNIQUE_ID_FIELD = "url"
@@ -256,7 +252,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         if data.get("ref", {}).get("kind") == "root":
             return self.invisibleRootItem()
 
-        item = ShotgunHierarchyItem(data["label"])
+        item = self.SG_QUERY_MODEL_ITEM_CLASS(data["label"])
         item.setEditable(False)
 
         # keep tabs of which items we are creating

@@ -18,6 +18,7 @@ import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 
 from .shotgun_model_errors import ShotgunModelError, CacheReadVersionMismatch
+from .shotgun_standard_item import ShotgunStandardItem
 from .util import get_sg_data
 
 # logger for this module
@@ -73,9 +74,11 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     Class Members
     -------------
 
-    Subclasses must define a ``SG_QUERY_MODEL_ITEM_CLASS`` class member that
+    Subclasses can set a ``SG_QUERY_MODEL_ITEM_CLASS`` class member that
     identifies the class of item to use when constructing the model. This is
-    used during deserialization to create model items. Example::
+    also used during deserialization to create model items. The default is
+    the ``ShotgunStandardItem``. If overriding, the class must subclass from
+    ``ShotgunStandardItem``.
 
         SG_QUERY_MODEL_ITEM_CLASS = ShotgunStandardItem
 
@@ -118,7 +121,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     SG_DATA_UNIQUE_ID_FIELD = None
 
     # subclasses should define the class to use when loading items from disk
-    SG_QUERY_MODEL_ITEM_CLASS = None
+    SG_QUERY_MODEL_ITEM_CLASS = ShotgunStandardItem
 
     # ---- caching/serialization related costants
 
@@ -155,11 +158,6 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             raise ShotgunModelError(
                 "ShotgunQueryModel subclass does not define the instance attr: "
                 "`SG_DATA_UNIQUE_ID_FIELD`"
-            )
-        elif not self.SG_QUERY_MODEL_ITEM_CLASS:
-            raise ShotgunModelError(
-                "ShotgunQueryModel subclass does not define the instance attr: "
-                "`SG_QUERY_MODEL_ITEM_CLASS`"
             )
 
         # intialize the Qt base class

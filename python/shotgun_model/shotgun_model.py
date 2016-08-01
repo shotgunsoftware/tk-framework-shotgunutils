@@ -16,14 +16,13 @@ import hashlib
 import weakref
 
 from sgtk.platform.qt import QtCore, QtGui
-from .shotgun_standard_item import ShotgunStandardItem
+
 from .shotgun_query_model import ShotgunQueryModel
 from .util import get_sanitized_data, get_sg_data, sanitize_qt, sanitize_for_qt_model
 
 # logger for this module
 logger = sgtk.platform.get_logger(__name__)
 
-# XXX ensure no API changes for single "_" methods
 
 class ShotgunModel(ShotgunQueryModel):
     """
@@ -40,9 +39,6 @@ class ShotgunModel(ShotgunQueryModel):
     between your class and the view.
 
     """
-
-    # Use this class when deserializing items from disk.
-    SG_QUERY_MODEL_ITEM_CLASS = ShotgunStandardItem
 
     # data field that uniquely identifies an entity
     SG_DATA_UNIQUE_ID_FIELD = "id"
