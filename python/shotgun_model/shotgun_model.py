@@ -700,7 +700,7 @@ class ShotgunModel(ShotgunQueryModel):
             data = get_sg_data(primary_item)
             for column in columns:
                 # set the display role to the string representation of the value
-                column_item = ShotgunStandardItem(self._generate_display_name(column, data))
+                column_item = self.SG_QUERY_MODEL_ITEM_CLASS(self._generate_display_name(column, data))
                 column_item.setEditable(column in self.__editable_fields)
 
                 # set associated field role to be the column value itself
@@ -1035,7 +1035,7 @@ class ShotgunModel(ShotgunQueryModel):
         """
 
         # construct tree view node object
-        item = ShotgunStandardItem(field_display_name)
+        item = self.SG_QUERY_MODEL_ITEM_CLASS(field_display_name)
         item.setEditable(field in self.__editable_fields)
 
         # keep tabs of which items we are creating
