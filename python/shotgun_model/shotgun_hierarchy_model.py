@@ -448,16 +448,19 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             This corresponds to the ``path`` argument of the ``nav_expand()``
             api method. For example, ``/Project/65`` would correspond to a
             project on you shotgun site with id of ``65``.
+
         :param str seed_entity_field: This is a string that corresponds to the
             field on an entity used to seed the hierarchy. For example, a value
             of ``Version.entity`` would cause the model to display a hierarchy
             where the leaves match the entity value of Version entities.
+
         :param dict entity_fields: A dictionary that identifies what fields to
             include on returned entities. Since the hierarchy can include any
             entity structure, this argument allows for specification of
             additional fields to include as these entities are returned. The
             dict's keys correspond to the entity type and the value is a list
             of field names to return.
+
         :param cache_seed:
             Advanced parameter. With each shotgun query being cached on disk,
             the model generates a cache seed which it is using to store data on
@@ -530,7 +533,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         url = self._running_query_lookup[uid]
 
         # query is done. clear it out
-        self._running_query_lookup[uid] = None
+        del self._running_query_lookup[uid]
 
         full_msg = (
             "Error retrieving data from Shotgun."
@@ -560,7 +563,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             return
 
         # query is done. clear it out
-        self._running_query_lookup[uid] = None
+        del self._running_query_lookup[uid]
 
         nav_data = data["nav"]
         self._on_nav_data_arrived(nav_data)
@@ -631,8 +634,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             except Exception, e:
                 logger.warning("Couldn't save cache data to disk: %s" % e)
 
-        # and emit completion signal
-        self.data_refreshed.emit(modifications_made)
+        if not self._running_query_lookup.keys():
+            # no more data queries running. all data refreshed
+            self.data_refreshed.emit(modifications_made)
 
     def _populate_default_thumbnail(self, item):
         """
@@ -691,7 +695,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             self._sg_data_retriever.stop_work(worker_id)
 
             # forget about the old query
-            self._running_query_lookup[worker_id] = None
+            del self._running_query_lookup[worker_id]
 
         self.data_refreshing.emit()
 
