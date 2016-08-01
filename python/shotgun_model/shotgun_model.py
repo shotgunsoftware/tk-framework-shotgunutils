@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Shotgun Software Inc.
+# Copyright (c) 2016 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -13,26 +13,19 @@ import copy
 import os
 import sys
 import hashlib
-import urlparse
-import datetime
-import time
 import weakref
 
 from sgtk.platform.qt import QtCore, QtGui
 from .shotgun_standard_item import ShotgunStandardItem
+from .shotgun_query_model import ShotgunQueryModel
 from .util import get_sanitized_data, get_sg_data, sanitize_qt, sanitize_for_qt_model
 
+# logger for this module
+logger = sgtk.platform.get_logger(__name__)
 
-class ShotgunModelError(sgtk.TankError):
-    """Base class for all shotgun model exceptions"""
-    pass
+# XXX ensure no API changes for single "_" methods
 
-class CacheReadVersionMismatch(ShotgunModelError):
-    """Indicates that a cache file is incompatible with this code"""
-    pass
-
-
-class ShotgunModel(QtGui.QStandardItemModel):
+class ShotgunModel(ShotgunQueryModel):
     """
     A QT Model representing a Shotgun query.
 
@@ -46,68 +39,16 @@ class ShotgunModel(QtGui.QStandardItemModel):
     such as sorting or filtering on the data, connect a proxy model (typically :class:`~PySide.QtGui.QSortFilterProxyModel`)
     between your class and the view.
 
-    :signal query_changed(): Gets emitted whenever the model's sg query is changed.
-        When the query changes, the contents of the model is cleared and the
-        loading of new data is initiated.
-
-    :signal cache_loaded(): Emitted whenever the model loads cache data.
-        This typically follows shortly after a query changed signal, if
-        cache data is available.
-
-    :signal data_refreshing(): Emitted whenever the model starts to refresh its
-        shotgun data. This is emitted from :meth:`_refresh_data()`.  Useful
-        signal if you want to present a loading indicator of some kind.
-
-    :signal data_refreshed(bool): Emitted whenever the model has been updated with fresh
-        shotgun data. The boolean indicates that a change in the model data has
-        taken place as part of this process. If the refresh fails for some reason,
-        this signal may not be emitted. The synchronous data refresh cycle starts
-        with a call to :meth:`_refresh_data()` and normally ends with either a
-        data_refreshed or a data_refresh_fail signal being emitted.
-
-    :signal data_refresh_fail(): Emitted in the case the refresh fails for some reason,
-        typically due to the absence of an internet connection. This signal could
-        for example be used to drive a "retry" button of some kind. The str
-        parameter carries an error message with details about why the
-        refresh wasn't successful.
-
-    :constant SG_DATA_ROLE: Custom model role that holds the
-        associated value. See :ref:`sg-model-data-items`.
-
-    :constant SG_ASSOCIATED_FIELD_ROLE: Custom model role that holds the
-        shotgun data payload. See :ref:`sg-model-data-items`.  This role will also hold
-        the field value for the Shotgun entity for any items that are created for additional
-        columns.
     """
 
-    # signal which gets emitted whenever the model's sg query is changed.
-    query_changed = QtCore.Signal()
+    # Use this class when deserializing items from disk.
+    SG_QUERY_MODEL_ITEM_CLASS = ShotgunStandardItem
 
-    # signal which gets emitted whenever the model loads cache data.
-    cache_loaded = QtCore.Signal()
+    # data field that uniquely identifies an entity
+    SG_DATA_UNIQUE_ID_FIELD = "id"
 
-    # signal which gets emitted whenever the model starts to refresh its shotgun data.
-    data_refreshing = QtCore.Signal()
-
-    # signal which gets emitted whenever the model has been updated with fresh shotgun data.
-    data_refreshed = QtCore.Signal(bool)
-
-    # signal which gets emitted in the case the refresh fails
-    data_refresh_fail = QtCore.Signal(str)
-
-    # Custom model role that holds the shotgun data payload.
-    SG_DATA_ROLE = QtCore.Qt.UserRole + 1
-
-    # Custom model role that holds the associated value.
+    # Custom model role that holds the associated value
     SG_ASSOCIATED_FIELD_ROLE = QtCore.Qt.UserRole + 3
-
-    # internal constants - please do not access directly but instead use the helper
-    # methods provided! We may change these constants without prior notice.
-    IS_SG_MODEL_ROLE = QtCore.Qt.UserRole + 2
-    # magic number for IO streams
-    FILE_MAGIC_NUMBER = 0xDEADBEEF
-    # version of binary format
-    FILE_VERSION = 22
 
     # header value for the first column
     FIRST_COLUMN_HEADER = "Name"
@@ -131,15 +72,9 @@ class ShotgunModel(QtGui.QStandardItemModel):
                                  this is None then a task manager will be created as needed.
         :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         """
-        QtGui.QStandardItemModel.__init__(self, parent)
-
-        self._bundle = sgtk.platform.current_bundle()
-
-        # importing locally to not trip sphinx's imports.
-        self._shotgun_globals = self._bundle.import_module("shotgun_globals")
+        super(ShotgunModel, self).__init__(parent, bg_task_manager)
 
         self.__schema_generation = schema_generation
-        self.__full_cache_path = None
 
         # is the model set up with a query?
         self.__has_query = False
@@ -147,24 +82,12 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # flag to indicate a full refresh
         self._request_full_refresh = False
 
-        # keep various references to all items that the model holds.
-        # some of these data structures are to keep the GC
-        # happy, others to hold alternative access methods to the data.
-        self.__all_tree_items = []
-        self.__entity_tree_data = {}
-
         # keep track of info for thumbnail download/load
         self.__download_thumbs = download_thumbs
         self.__bg_load_thumbs = bg_load_thumbs
         self.__thumb_map = {}
 
-        # set up data retriever and start work:
-        shotgun_data = self._bundle.import_module("shotgun_data")
-        self.__sg_data_retriever = shotgun_data.ShotgunDataRetriever(parent=self, bg_task_manager=bg_task_manager)
-        self.__sg_data_retriever.work_completed.connect(self._on_data_retriever_work_completed)
-        self.__sg_data_retriever.work_failure.connect(self._on_data_retriever_work_failure)
         self.__current_work_id = None
-        self.__sg_data_retriever.start()
 
     ########################################################################################
     # public methods
@@ -174,7 +97,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         Returns a list of entity ids that are part of this model.
         """
-        return self.__entity_tree_data.keys()
+        return self._get_all_item_unique_ids()
 
     def destroy(self):
         """
@@ -183,19 +106,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         self.__current_work_id = None
         self.__thumb_map = {}
-        # gracefully stop the data retriever:
-        self.__sg_data_retriever.stop()
-        self.__sg_data_retriever = None
 
-        # block all signals before we clear the model otherwise downstream
-        # proxy objects could cause crashes.
-        signals_blocked = self.blockSignals(True)
-        try:
-            # clear all internal memory storage
-            self.clear()
-        finally:
-            # reset the stage of signal blocking:
-            self.blockSignals(signals_blocked)
+        super(ShotgunModel, self).destroy()
 
     def item_from_entity(self, entity_type, entity_id):
         """
@@ -208,9 +120,8 @@ class ShotgunModel(QtGui.QStandardItemModel):
         """
         if entity_type != self.__entity_type:
             return None
-        if entity_id not in self.__entity_tree_data:
-            return None
-        return self.__entity_tree_data[entity_id]
+
+        return self._get_item_by_unique_id(entity_id)
 
     def index_from_entity(self, entity_type, entity_id):
         """
@@ -293,24 +204,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # when data arrives, force full rebuild
         self._request_full_refresh = True
 
-        # delete cache file
-        if self.__full_cache_path and os.path.exists(self.__full_cache_path):
-            try:
-                os.remove(self.__full_cache_path)
-                self.__log_debug("Removed cache file '%s' from disk." % self.__full_cache_path)
-            except Exception, e:
-                self.__log_warning("clear_caches method could not remove cache file '%s' "
-                                   "from disk. Details: %s" % (self.__full_cache_path, e))
-        # refresh
-        self._refresh_data()
-
-    def is_data_cached(self):
-        """
-        Determine if the model has any cached data
-
-        :returns:    True if cached data exists for the model, otherwise False
-        """
-        return self.__full_cache_path and os.path.exists(self.__full_cache_path)
+        super(ShotgunModel, self).hard_refresh()
 
     ########################################################################################
     # methods overridden from the base class.
@@ -320,64 +214,14 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Removes all items (including header items) from the model and
         sets the number of rows and columns to zero.
         """
-        # Advertise that the model is about to completely cleared. This is super important because proxy
-        # models usually cache data like indices and these are about to get updated potentially thousands
-        # of times while the tree is being destroyed.
-        self.beginResetModel()
-        try:
-            # note! We are reimplementing this explicitly because the default implementation
-            # results in memory issues - similar to reset(), scenarios where objects are constructed
-            # in python (e.g. qstandarditems) and then handed over to a model and then subsequently
-            # cleared and deallocated by QT itself (on the C++ side) often results in dangling pointers
-            # across the pyside/QT boundary, ultimately resulting in crashes or instability.
 
-            # clear thumbnail download lookup so we don't process any more results:
-            self.__thumb_map = {}
+       # clear thumbnail download lookup so we don't process any more results:
+        self.__thumb_map = {}
 
-            # we are not looking for any data from the async processor
-            self.__current_work_id = None
+        # we are not looking for any data from the async processor
+        self.__current_work_id = None
 
-            # ask async data retriever to clear its queue of queries and thumb downloads
-            # note that there may still be requests actually running
-            # - these are not cancelled
-            if self.__sg_data_retriever:
-                self.__sg_data_retriever.clear()
-
-            # model data in alt format
-            self.__entity_tree_data = {}
-            # pyside will crash unless we actively hold a reference
-            # to all items that we create.
-            self.__all_tree_items = []
-
-            # lastly, remove all data in the underlying internal data storage
-            # note that we don't cannot clear() here since that causing
-            # crashing in various environments. Also note that we need to do
-            # in a depth-first manner to ensure that there are no
-            # cyclic parent/child dependency cycles, which will cause
-            # a crash in some versions of shiboken
-            # (see https://bugreports.qt-project.org/browse/PYSIDE-158 )
-            self.__do_depth_first_tree_deletion(self.invisibleRootItem())
-        finally:
-            # Advertise that we're done resetting.
-            self.endResetModel()
-
-    def reset(self):
-        """
-        Reimplements QAbstractItemModel:reset() by 'sealing it' so that
-        it cannot be executed by calling code easily. This is because the reset method
-        often results in crashes and instability because of how PySide/QT manages memory.
-
-        For more information, see the clear() method.
-        """
-        raise NotImplementedError("The QAbstractItemModel::reset method has explicitly been disabled "
-                                  "because memory is not correctly freed up across C++/Python when "
-                                  "executed, sometimes resulting in runtime instability. For an "
-                                  "semi-equivalent method, use clear(), however keep in mind that "
-                                  "this method will not emit the standard before/after reset signals. "
-                                  "It is possible that this method may be implemented in later versions "
-                                  "of the framework. For more information, please "
-                                  "email support@shotgunsoftware.com." )
-
+        super(ShotgunModel, self).clear()
 
     ########################################################################################
     # protected methods not meant to be subclassed but meant to be called by subclasses
@@ -391,7 +235,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         pass a specific find query to the model and it will start tracking
         this particular set of filter and hierarchy parameters.
 
-        Any existing data in contained in the model will be cleared.
+        Any existing data contained in the model will be cleared.
 
         This method will not call the Shotgun API. If cached data is available,
         this will be immediately loaded (this operation is very fast even for
@@ -479,8 +323,47 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         # make sure `editable_fields` is a subset of `column_fields`
         if not set(self.__editable_fields).issubset(set(self.__column_fields)):
-            raise tank.TankError(
-                "The `editable_fields` argument is not a subset of `column_fields`.")
+            raise sgtk.TankError(
+                "The `editable_fields` argument is not a subset of "
+                "`column_fields`."
+            )
+
+        # get the cache path based on these new data query parameters
+        self._cache_path = self._get_data_cache_path(seed)
+
+        logger.debug("")
+        logger.debug("Model Reset for %s" % self)
+        logger.debug("Entity type: %s" % self.__entity_type)
+        logger.debug("Filters: %s" % self.__filters)
+        logger.debug("Hierarchy: %s" % self.__hierarchy)
+        logger.debug("Fields: %s" % self.__fields)
+        logger.debug("Order: %s" % self.__order)
+        logger.debug("Columns: %s" % self.__column_fields)
+        logger.debug("Editable Columns: %s" % self.__editable_fields)
+        logger.debug("Filter Presets: %s" % self.__additional_filter_presets)
+
+        logger.debug("First population pass: Calling _load_external_data()")
+        self._load_external_data()
+        logger.debug("External data population done.")
+
+        # set our headers
+        headers = [self.FIRST_COLUMN_HEADER] + self._get_additional_column_headers(
+            self.__entity_type,
+            self.__column_fields,
+        )
+        self.setHorizontalHeaderLabels(headers)
+
+        return self._load_cached_data()
+
+    def _get_data_cache_path(self, cache_seed=None):
+        """
+        Calculates and returns a cache path to use for this instance's query.
+
+        :param cache_seed: Cache seed supplied to the ``__init__`` method.
+
+        :return: The path to use when caching the model data.
+        :rtype: str
+        """
 
         # when we cache the data associated with this model, create
         # the file name and path based on several parameters.
@@ -533,59 +416,26 @@ class ShotgunModel(QtGui.QStandardItemModel):
         filter_hash = hashlib.md5()
         filter_hash.update(str(self.__filters))
         filter_hash.update(str(self.__additional_filter_presets))
-        params_hash.update(str(seed))
+        params_hash.update(str(cache_seed))
 
         # organize files on disk based on entity type and then filter hash
         # keep extension names etc short in order to stay away from MAX_PATH
         # on windows.
-        self.__full_cache_path = os.path.join(self._bundle.cache_location,
-                                              "sg",
-                                              self.__entity_type,
-                                              params_hash.hexdigest(),
-                                              filter_hash.hexdigest())
-
-        if sys.platform == "win32" and len(self.__full_cache_path) > 250:
-            self.__log_warning("Cache file path may be affected by windows MAX_PATH limitation.")
-
-        self.__log_debug("")
-        self.__log_debug("Model Reset for %s" % self)
-        self.__log_debug("Entity type: %s" % self.__entity_type)
-        self.__log_debug("Cache path: %s" % self.__full_cache_path)
-        self.__log_debug("Filters: %s" % self.__filters)
-        self.__log_debug("Hierarchy: %s" % self.__hierarchy)
-        self.__log_debug("Fields: %s" % self.__fields)
-        self.__log_debug("Order: %s" % self.__order)
-        self.__log_debug("Columns: %s" % self.__column_fields)
-        self.__log_debug("Editable Columns: %s" % self.__editable_fields)
-        self.__log_debug("Filter Presets: %s" % self.__additional_filter_presets)
-
-        self.__log_debug("First population pass: Calling _load_external_data()")
-        self._load_external_data()
-        self.__log_debug("External data population done.")
-
-        loaded_cache_data = False
-        if os.path.exists(self.__full_cache_path):
-            # first see if we need to load in any overlay data from deriving classes
-            self.__log_debug("Now loading cached data %s..." % self.__full_cache_path)
-            try:
-                time_before = time.time()
-                num_items = self.__load_from_disk(self.__full_cache_path)
-                time_diff = (time.time() - time_before)
-                self.__log_debug("...loading complete! %s items loaded in %4fs" % (num_items, time_diff))
-                loaded_cache_data = True
-                self.cache_loaded.emit()
-            except Exception, e:
-                self.__log_debug("Couldn't load cache data from disk. Will proceed with "
-                                "full SG load. Error reported: %s" % e)
-
-        # set our headers
-        headers = [self.FIRST_COLUMN_HEADER] + self._get_additional_column_headers(
+        data_cache_path = os.path.join(
+            self._bundle.cache_location,
+            "sg",
             self.__entity_type,
-            self.__column_fields,
+            params_hash.hexdigest(),
+            filter_hash.hexdigest()
         )
-        self.setHorizontalHeaderLabels(headers)
 
-        return loaded_cache_data
+        if sys.platform == "win32" and len(data_cache_path) > 250:
+            logger.warning(
+                "Shotgun model data cache file path may be affected by windows "
+                "windows MAX_PATH limitation."
+            )
+
+        return data_cache_path
 
     def _refresh_data(self):
         """
@@ -607,7 +457,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         all existing items from the model are removed. This does affect view related
         states such as selection.
         """
-        if not self.__sg_data_retriever:
+        if not self._sg_data_retriever:
             raise sgtk.TankError("Data retriever is not available!")
 
         # Stop any queued work that hasn't completed yet.  Note that we intentionally only stop the
@@ -620,7 +470,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # thumbnails are going to be the same before and after the refresh and any additional overhead
         # should be weighed against a cleaner user experience
         if self.__current_work_id is not None:
-            self.__sg_data_retriever.stop_work(self.__current_work_id)
+            self._sg_data_retriever.stop_work(self.__current_work_id)
             self.__current_work_id = None
 
         # emit that the data is refreshing.
@@ -647,14 +497,13 @@ class ShotgunModel(QtGui.QStandardItemModel):
             if self.__additional_filter_presets:
                 find_kwargs["additional_filter_presets"] = self.__additional_filter_presets
 
-            self.__current_work_id = self.__sg_data_retriever.execute_find(
+            self.__current_work_id = self._sg_data_retriever.execute_find(
                 self.__entity_type,
                 self.__filters,
                 fields,
                 self.__order,
                 **find_kwargs
             )
-
 
     def _request_thumbnail_download(self, item, field, url, entity_type, entity_id):
         """
@@ -683,10 +532,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # nothing to download. bad input. gracefully ignore this request.
             return
 
-        if not self.__sg_data_retriever:
+        if not self._sg_data_retriever:
             raise sgtk.TankError("Data retriever is not available!")
 
-        uid = self.__sg_data_retriever.request_thumbnail(url,
+        uid = self._sg_data_retriever.request_thumbnail(url,
                                                          entity_type,
                                                          entity_id,
                                                          field,
@@ -699,69 +548,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
     ########################################################################################
     # methods to be implemented by subclasses
-
-    def _populate_item(self, item, sg_data):
-        """
-        Whenever an item is downloaded from Shotgun, this method is called. It allows subclasses to intercept
-        the construction of a :class:`~PySide.QtGui.QStandardItem` and add additional metadata or make other changes
-        that may be useful. Nothing needs to be returned.
-
-        This method is called before the item is added into the model tree. At the point when
-        the item is added into the tree, various signals will fire, informing views and proxy
-        models that a new item has been added. This methods allows a subclassing object to
-        add custom data prior to this.
-
-        .. note:: When an item is fetched from the cache, this method is *not* called, it will
-            only be called when shotgun data initially arrives from a Shotgun API query.
-
-        .. note:: This is typically subclassed if you retrieve additional fields alongside the standard "name" field
-            and you want to put those into various custom data roles. These custom fields on the item
-            can later on be picked up by custom (delegate) rendering code in the view.
-
-        :param item: :class:`~PySide.QtGui.QStandardItem` that is about to be added to the model. This has been primed
-                     with the standard settings that the ShotgunModel handles.
-        :param sg_data: Shotgun data dictionary that was received from Shotgun given the fields
-                        and other settings specified in _load_data()
-        """
-        # default implementation does nothing
-
-    def _populate_default_thumbnail(self, item):
-        """
-        Called whenever an item is constructed and needs to be associated with a default thumbnail.
-        In the current implementation, thumbnails are not cached in the same way as the rest of
-        the model data, meaning that this method is executed each time an item is constructed,
-        regardless of if it came from an asynchronous shotgun query or a cache fetch.
-
-        The purpose of this method is that you can subclass it if you want to ensure that items
-        have an associated thumbnail directly when they are first created.
-
-        Later on in the data load cycle, if the model was instantiated with the
-        `download_thumbs` parameter set to True,
-        the standard Shotgun ``image`` field thumbnail will be automatically downloaded for all items (or
-        picked up from local cache if possible). When these real thumbnails arrive, the
-        meth:`_populate_thumbnail()` method will be called.
-
-        :param item: :class:`~PySide.QtGui.QStandardItem` that is about to be added to the model.
-            This has been primed with the standard settings that the ShotgunModel handles.
-        """
-        # the default implementation does nothing
-
-    def _finalize_item(self, item):
-        """
-        Called whenever an item is fully constructed, either because a shotgun query returned it
-        or because it was loaded as part of a cache load from disk.
-
-        .. note:: You can subclass this if you want to run post processing on
-            the data as it is arriving. For example, if you are showing a list of
-            task statuses in a filter view, you may want to remember which
-            statuses a user had checked and unchecked the last time he was running
-            the tool. By subclassing this UI you can easily apply those settings
-            before items appear in the UI.
-
-        :param item: :class:`~PySide.QtGui.QStandardItem` that is about to be added to the model.
-            This has been primed with the standard settings that the ShotgunModel handles.
-        """
-        # the default implementation does nothing
 
     def _set_tooltip(self, item, sg_item):
         """
@@ -884,40 +670,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         thumb = QtGui.QPixmap.fromImage(image)
         item.setIcon(thumb)
 
-    def _before_data_processing(self, sg_data_list):
-        """
-        Called just after data has been retrieved from Shotgun but before any processing
-        takes place.
-
-        .. note:: You can subclass this if you want to perform summaries,
-            calculations and other manipulations of the data before it is
-            passed on to the model class. For example, if you request the model
-            to retrieve a list of versions from Shotgun given a Shot,
-            you can then subclass this method to cull out the data so that you
-            are only left with the latest version for each task. This method
-            is often used in conjunction with the order parameter in :meth:`_load_data()`.
-
-        :param sg_data_list: list of shotgun dictionaries, as retunrned by the find() call.
-        :returns: should return a list of shotgun dictionaries, of the same form as the input.
-        """
-        # default implementation is a passthrough
-        return sg_data_list
-
-    def _load_external_data(self):
-        """
-        Called whenever the model needs to be rebuilt from scratch. This is called prior
-        to any shotgun data is added to the model.
-
-        .. note:: You can subclass this to add custom data to the model in a very
-            flexible fashion. If you for example are loading published files from
-            Shotgun, you could use this to load up a listing of files on disk,
-            resulting in a model that shows both published files and local files.
-            External data will not be cached by the ShotgunModel framework.
-
-        :returns: list of :class:`~PySide.QtGui.QStandardItem`
-        """
-        pass
-
     def _get_additional_columns(self, primary_item, is_leaf, columns):
         """
         Called when an item is about to be inserted into the model, to get additional items
@@ -978,39 +730,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
     ########################################################################################
     # private methods
 
-    def __log_debug(self, msg):
-        """
-        Convenience wrapper around debug logging
-
-        :param msg: debug message
-        """
-        self._bundle.log_debug("[Toolkit SG Model] %s" % msg)
-
-    def __log_warning(self, msg):
-        """
-        Convenience wrapper around warning logging
-
-        :param msg: debug message
-        """
-        self._bundle.log_warning("[Toolkit SG Model] %s" % msg)
-
-    def __do_depth_first_tree_deletion(self, node):
-        """
-        Depth first interation and deletion of all child nodes
-
-        :param node: :class:`~PySide.QtGui.QStandardItem` tree node
-        """
-
-        # cleanup children
-        for idx in xrange(node.rowCount()):
-            child_node = node.child(idx)
-            self.__do_depth_first_tree_deletion(child_node)
-
-        # delete of children
-        for idx in range(node.rowCount())[::-1]:
-            node.removeRow(idx)
-
-
     def _on_data_retriever_work_failure(self, uid, msg):
         """
         Asynchronous callback - the data retriever failed to do some work
@@ -1023,13 +742,13 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         if self.__current_work_id != uid:
             # not our job. ignore
-            self.__log_debug("Retrieved error from data worker: %s" % msg)
+            logger.debug("Retrieved error from data worker: %s" % msg)
             return
         self.__current_work_id = None
 
         full_msg = "Error retrieving data from Shotgun: %s" % msg
         self.data_refresh_fail.emit(full_msg)
-        self.__log_warning(full_msg)
+        logger.warning(full_msg)
 
     def _on_data_retriever_work_completed(self, uid, request_type, data):
         """
@@ -1044,7 +763,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
         uid = sanitize_qt(uid) # qstring on pyqt, str on pyside
         data = sanitize_qt(data)
 
-        self.__log_debug("Received worker payload of type %s" % request_type)
+        logger.debug("Received worker payload of type %s" % request_type)
 
         if self.__current_work_id == uid:
             # our data has arrived from sg!
@@ -1086,43 +805,25 @@ class ShotgunModel(QtGui.QStandardItemModel):
         Handle asynchronous shotgun data arriving after a find request.
         """
 
-        self.__log_debug("--> Shotgun data arrived. (%s records)" % len(sg_data))
+        logger.debug("--> Shotgun data arrived. (%s records)" % len(sg_data))
 
         # pre-process data
         sg_data = self._before_data_processing(sg_data)
 
-        # QT is struggling to handle the special timezone class that the shotgun API returns.
-        # in fact, on linux it is struggling to serialize any complex object via QDataStream.
-        #
-        # Convert time stamps to unix time. Unix time is a number representing the timestamp
-        # in the number of seconds since 1 Jan 1970 in the UTC timezone. So a unix timestamp
-        # is universal across time zones and DST changes.
-        #
-        # When you are pulling data from the shotgun model and want to convert this unix timestamp
-        # to a *local* timezone object, which is typically what you want when you are
-        # displaying a value on screen, use the following code:
-        # >>> local_datetime = datetime.fromtimestamp(unix_time)
-        #
-        # furthermore, if you want to turn that into a nicely formatted string:
-        # >>> local_datetime.strftime('%Y-%m-%d %H:%M')
-        #
-        for idx in range(len(sg_data)):
-            for k in sg_data[idx]:
-                if isinstance(sg_data[idx][k], datetime.datetime):
-                    # convert to unix timestamp, local time zone
-                    sg_data[idx][k] = time.mktime(sg_data[idx][k].timetuple())
+        sg_data = self._sg_clean_data(sg_data)
 
         modifications_made = False
 
-        if len(self.__entity_tree_data) == 0 or self._request_full_refresh:
+        if len(self._get_all_item_unique_ids()) == 0 or self._request_full_refresh:
+            # no items in the tree or full refresh requested.
 
             if len(sg_data) != 0:
                 # we have an empty tree and incoming sg data.
                 # Run the full recursive tree generation for performance.
                 self._request_full_refresh = False # reset flag for next request
-                self.__log_debug("No cached items in tree! Creating full tree from Shotgun data...")
+                logger.debug("No cached items in tree! Creating full tree from Shotgun data...")
                 self.__rebuild_whole_tree_from_sg_data(sg_data)
-                self.__log_debug("...done!")
+                logger.debug("...done!")
                 modifications_made = True
             else:
                 # no data coming in from shotgun, so no need to rebuild the tree
@@ -1135,26 +836,26 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
             # check if anything has been deleted or added
             ids_from_shotgun = set([ d.get("id") for d in sg_data ])
-            ids_in_tree = set(self.__entity_tree_data.keys())
+            ids_in_tree = set(self._get_all_item_unique_ids())
 
             removed_ids = ids_in_tree.difference(ids_from_shotgun)
 
             if len(removed_ids) > 0:
-                self.__log_debug("Detected deleted items %s. Rebuilding tree..." % removed_ids)
+                logger.debug("Detected deleted items %s. Rebuilding tree..." % removed_ids)
                 self.__rebuild_whole_tree_from_sg_data(sg_data)
-                self.__log_debug("...done!")
+                logger.debug("...done!")
                 modifications_made = True
 
             else:
                 added_ids = ids_from_shotgun.difference(ids_in_tree)
                 if len(added_ids) > 0:
                     # wedge in the new items
-                    self.__log_debug("Detected added items. Adding them in-situ to tree...")
+                    logger.debug("Detected added items. Adding them in-situ to tree...")
                     for d in sg_data:
                         if d.get("id") in added_ids:
-                            self.__log_debug("Adding %s to tree" % d )
+                            logger.debug("Adding %s to tree" % d )
                             self.__add_sg_item_to_tree(d)
-                    self.__log_debug("...done!")
+                    logger.debug("...done!")
                     modifications_made = True
 
             # check for modifications. At this point, the number of items in the tree and
@@ -1164,92 +865,43 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # Also note that we need to exclude any S3 urls from the comparison as these change
             # all the time
             #
-            self.__log_debug("Checking for modifications...")
+            logger.debug("Checking for modifications...")
             detected_changes = False
             for d in sg_data:
                 # if there are modifications of any kind, we just rebuild the tree at the moment
                 try:
-                    existing_sg_data = get_sg_data(self.__entity_tree_data[ d.get("id") ])
-                    if not self.__sg_compare_data(d, existing_sg_data):
+                    item = self._get_item_by_unique_id(d.get("id"))
+                    existing_sg_data = get_sg_data(item)
+                    if not self._sg_compare_data(d, existing_sg_data):
                         # shotgun data has changed for this item! Rebuild the tree
-                        self.__log_debug("SG data change: %s --> %s" % (existing_sg_data, d))
+                        logger.debug("SG data change: %s --> %s" % (existing_sg_data, d))
                         detected_changes = True
                 except KeyError, e:
-                    self.__log_warning("Shotgun item %s not appearing in tree - most likely because "
+                    logger.warning("Shotgun item %s not appearing in tree - most likely because "
                                           "there is another object in Shotgun with the same name." % d)
 
             if detected_changes:
-                self.__log_debug("Detected modifications. Rebuilding tree...")
+                logger.debug("Detected modifications. Rebuilding tree...")
                 self.__rebuild_whole_tree_from_sg_data(sg_data)
-                self.__log_debug("...done!")
+                logger.debug("...done!")
                 modifications_made = True
             else:
-                self.__log_debug("...no modifications found.")
+                logger.debug("...no modifications found.")
 
         # last step - save our tree to disk for fast caching next time!
         if modifications_made:
-            self.__log_debug("Saving tree to disk %s..." % self.__full_cache_path)
+            logger.debug("Saving tree to disk %s..." % self._cache_path)
             try:
-                self.__save_to_disk(self.__full_cache_path)
-                self.__log_debug("...saving complete!")
+                self._save_to_disk()
+                logger.debug("...saving complete!")
             except Exception, e:
-                self.__log_warning("Couldn't save cache data to disk: %s" % e)
+                logger.warning("Couldn't save cache data to disk: %s" % e)
 
         # and emit completion signal
         self.data_refreshed.emit(modifications_made)
 
     ########################################################################################
     # shotgun data processing and tree building
-
-    def __sg_compare_data(self, a, b):
-        """
-        Compares two sg dicts, assumes the same set of keys in both.
-        Omits thumbnail fields because these change all the time (S3).
-        Both inputs are assumed to contain utf-8 encoded data.
-        """
-        # handle file attachment data as a special case. If the attachment has been uploaded,
-        # it will contain an amazon url.
-        #
-        # example:
-        # {'name': 'review_2015-05-13_16-53.mov',
-        #  'url': 'https://....',
-        #  'content_type': 'video/quicktime',
-        #  'type': 'Attachment',
-        #  'id': 24919,
-        #  'link_type': 'upload'}
-        #
-        if isinstance(a, dict) and isinstance(b, dict):
-            # keep it simple here. if both values are dicts, iterate
-            # over each of the keys and compare them separately
-            # S3 string equality will be automatically handled by
-            # the logic above.
-            for a_key in a.keys():
-                if not self.__sg_compare_data(a.get(a_key), b.get(a_key)):
-                    return False
-
-        # handle thumbnail fields as a special case
-        # thumbnail urls are (typically, there seem to be several standards!)
-        # on the form:
-        # https://sg-media-usor-01.s3.amazonaws.com/xxx/yyy/filename.ext?lots_of_authentication_headers
-        #
-        # the query string changes all the times, so when we check if an item is out of date, omit it.
-        elif (isinstance(a, str) and isinstance(b, str)
-              and a.startswith("http") and b.startswith("http")
-              and ("amazonaws" in a or "AccessKeyId" in a)):
-            # attempt to parse values are urls and eliminate the querystring
-            # compare hostname + path only
-            url_obj_a = urlparse.urlparse(a)
-            url_obj_b = urlparse.urlparse(b)
-            compare_str_a = "%s/%s" % (url_obj_a.netloc, url_obj_a.path)
-            compare_str_b = "%s/%s" % (url_obj_b.netloc, url_obj_b.path)
-            if compare_str_a != compare_str_b:
-                # url has changed
-                return False
-
-        elif a != b:
-            return False
-
-        return True
 
     def __add_sg_item_to_tree(self, sg_item):
         """
@@ -1289,10 +941,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
                 # of model data injected into the tree which does not have this property set
                 # so double check that the data actually is present.
                 if sg_data is None:
-                    self.__log_warning("Found cached leaf node in tree with a missing SG_DATA_ROLE. Please report "
+                    logger.warning("Found cached leaf node in tree with a missing SG_DATA_ROLE. Please report "
                                        "to support on support@shotgunsoftware.com. If possible, please "
                                        "make a copy of the file '%s' and attach that with the support request. "
-                                       "Affected Node name: '%s'. " % (self.__full_cache_path, child.text()))
+                                       "Affected Node name: '%s'. " % (self._cache_path, child.text()))
                 else:
                     if sg_data.get("id") == sg_item.get("id"):
                         found_item = child
@@ -1310,7 +962,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             found_item = self.__create_item(field_display_name, field, on_leaf_level, sg_item)
 
             # get a complete row containing all columns for the current item
-            row = self.__get_columns(found_item, on_leaf_level)
+            row = self._get_columns(found_item, on_leaf_level)
 
             # add it to the tree. At this point QT will fire off various signals to inform views etc.
             root.appendRow(row)
@@ -1319,6 +971,27 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # there are more levels that we should recurse down into
             self.__add_sg_item_to_tree_r(sg_item, found_item, remaining_fields)
 
+    def _item_created(self, item):
+        """
+        Called when an item is created, before it is added to the model.
+
+        .. warning:: This base class implementation must be called in any
+            subclasses overriding this behavior. Failure to do so will result in
+            unexpected behavior.
+
+        This base class implementation handles storing item lookups for
+        efficiency as well as to prevent issues with garbage collection.
+
+        :param item: The item that was just created.
+        :type item: :class:`~PySide.QtGui.QStandardItem`
+        """
+
+        # as per docs, call the base implementation
+        super(ShotgunModel, self)._item_created(item)
+
+        # request thumb
+        if self.__download_thumbs:
+            self.__process_thumbnail_for_item(item)
 
     def __process_thumbnail_for_item(self, item):
         """
@@ -1372,10 +1045,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
         # keep tabs of which items we are creating
         item.setData(True, self.IS_SG_MODEL_ROLE)
 
-        # keep a reference to this object to make GC happy
-        # (pyside may crash otherwise)
-        self.__all_tree_items.append(item)
-
         # store the actual value we have
         item.setData({"name": field, "value": sg_item[field] }, self.SG_ASSOCIATED_FIELD_ROLE)
 
@@ -1387,10 +1056,10 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # all shotgun values to be proper unicode prior to setData
             item.setData(sanitize_for_qt_model(sg_item), self.SG_DATA_ROLE)
 
-            # and also populate the id association in our lookup dict
-            self.__entity_tree_data[sg_item.get("id")] = item
+        # ---- now we got the object set up. Now start calling custom methods:
 
-        # now we got the object set up. Now start calling custom methods:
+        # allow item customization prior to adding to model
+        self._item_created(item)
 
         # set up default thumb
         self._populate_default_thumbnail(item)
@@ -1405,10 +1074,6 @@ class ShotgunModel(QtGui.QStandardItemModel):
 
         # run the finalizer (always runs on construction, even via cache)
         self._finalize_item(item)
-
-        # request thumb
-        if self.__download_thumbs:
-            self.__process_thumbnail_for_item(item)
 
         return item
 
@@ -1430,7 +1095,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             child = children[child_key]
 
             on_leaf_level = not bool(child.get("children"))
-            row = self.__get_columns(child["item"], on_leaf_level)
+            row = self._get_columns(child["item"], on_leaf_level)
             node["item"].appendRow(row)
             self.__realize_parent_child_hierarchy_r(child)
 
@@ -1537,7 +1202,7 @@ class ShotgunModel(QtGui.QStandardItemModel):
             # everything else just cast to string
             return str(value)
 
-    def __get_columns(self, item, is_leaf):
+    def _get_columns(self, item, is_leaf):
         """
         Returns a row (list of QStandardItems) given an initial QStandardItem.  The item itself
         is always the first item in the row, but additional columns may be appended.
@@ -1553,168 +1218,3 @@ class ShotgunModel(QtGui.QStandardItemModel):
         row.extend(self._get_additional_columns(item, is_leaf, self.__column_fields))
         return row
 
-    ########################################################################################
-    # de/serialization of model contents
-
-    def __save_to_disk(self, filename):
-        """
-        Save the model to disk using QDataStream serialization.
-        This all happens on the C++ side and is very fast.
-        """
-        old_umask = os.umask(0)
-        try:
-            # try to create the cache folder with as open permissions as possible
-            cache_dir = os.path.dirname(filename)
-            if not os.path.exists(cache_dir):
-                os.makedirs(cache_dir, 0777)
-
-            # write cache file
-            fh = QtCore.QFile(filename)
-            fh.open(QtCore.QIODevice.WriteOnly)
-            try:
-                out_stream = QtCore.QDataStream(fh)
-
-                # write a header
-                out_stream.writeInt64(self.FILE_MAGIC_NUMBER)
-                out_stream.writeInt32(self.FILE_VERSION)
-
-                # todo: if it turns out that there are ongoing issues with
-                # md5 cache collisions, we could write the actual query parameters
-                # to the header of the cache file here and compare that against the
-                # desired query info just to be confident we are getting a correct cache...
-
-                # tell which serialization dialect to use
-                out_stream.setVersion(QtCore.QDataStream.Qt_4_0)
-
-                root = self.invisibleRootItem()
-                self.__save_to_disk_r(out_stream, root, 0)
-
-            finally:
-                fh.close()
-
-            # and ensure the cache file has got open permissions
-            os.chmod(filename, 0666)
-
-        except Exception, e:
-            self.__log_warning("Could not write cache file '%s' to disk: %s" % (filename, e))
-
-        finally:
-            os.umask(old_umask)
-
-    def __save_to_disk_r(self, stream, item, depth):
-        """
-        Recursive tree writer
-        """
-        num_rows = item.rowCount()
-        for row in range(num_rows):
-            # write this
-            child = item.child(row)
-            # only write shotgun data!
-            # data from external sources is never serialized
-            if child.data(self.IS_SG_MODEL_ROLE):
-                child.write(stream)
-                stream.writeInt32(depth)
-
-            if child.hasChildren():
-                # write children
-                self.__save_to_disk_r(stream, child, depth+1)
-
-
-    def __load_from_disk(self, filename):
-        """
-        Load a serialized model from disk.
-
-        :returns: Number of items loaded
-        """
-
-        num_items_loaded = 0
-
-        fh = QtCore.QFile(filename)
-
-        fh.open(QtCore.QIODevice.ReadOnly)
-
-        try:
-            in_stream = QtCore.QDataStream(fh)
-
-            magic = in_stream.readInt64()
-            if magic != self.FILE_MAGIC_NUMBER:
-                raise Exception("Invalid file magic number!")
-
-            version = in_stream.readInt32()
-            if version != self.FILE_VERSION:
-                raise CacheReadVersionMismatch("Cache file version %s, "
-                                               "expected version %s" % (version, self.FILE_VERSION))
-
-            # tell which deserialization dialect to use
-            in_stream.setVersion(QtCore.QDataStream.Qt_4_0)
-
-            curr_parent = self.invisibleRootItem()
-            prev_node = None
-            curr_depth = 0
-
-            while not in_stream.atEnd():
-                # read data
-                item = ShotgunStandardItem()
-                num_items_loaded += 1
-                # keep a reference to this object to make GC happy
-                # (pyside may crash otherwise)
-                self.__all_tree_items.append(item)
-                item.read(in_stream)
-                node_depth = in_stream.readInt32()
-
-                # all leaf nodes have an sg id stored in their metadata
-                # the role data accessible via item.data() contains the sg id for this item
-                # if there is a sg id associated with this node
-                sg_data = get_sg_data(item)
-                if sg_data:
-                    # add the model item to our tree data dict keyed by id
-                    self.__entity_tree_data[ sg_data.get("id") ] = item
-
-                # serialized items contain some sort of strange
-                # low-rez thumb data which we cannot use. Make
-                # sure that is all cleared.
-                item.setIcon(QtGui.QIcon())
-
-                # serialized items do not contain a full high rez thumb, so
-                # re-create that. First, set the default thumbnail
-                self._populate_default_thumbnail(item)
-
-                # run the finalize method so that subclasses
-                # can do any setup they need
-                self._finalize_item(item)
-
-                if node_depth == curr_depth + 1:
-                    # this new node is a child of the previous node
-                    curr_parent = prev_node
-                    if prev_node is None:
-                        raise Exception("File integrity issues!")
-                    curr_depth = node_depth
-
-                elif node_depth > curr_depth + 1:
-                    # something's wrong!
-                    raise Exception("File integrity issues!")
-
-                elif node_depth < curr_depth:
-                    # we are going back up to parent level
-                    while curr_depth > node_depth:
-                        curr_depth = curr_depth -1
-                        curr_parent = curr_parent.parent()
-                        if curr_parent is None:
-                            # we reached the root. special case
-                            curr_parent = self.invisibleRootItem()
-
-                # get a complete row containing all columns for the current item.
-                row = self.__get_columns(item, bool(sg_data))
-
-                # and attach the node
-                curr_parent.appendRow(row)
-
-                # request thumb
-                if self.__download_thumbs:
-                    self.__process_thumbnail_for_item(item)
-
-                prev_node = item
-        finally:
-            fh.close()
-
-        return num_items_loaded
