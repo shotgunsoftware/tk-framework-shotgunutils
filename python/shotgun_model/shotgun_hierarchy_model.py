@@ -700,7 +700,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         self.data_refreshing.emit()
 
-        logger.debug("** Querying hierarchy item: %s" % (path,))
+        logger.debug("Querying hierarchy item: %s" % (path,))
 
         worker_id = self._sg_data_retriever.execute_nav_expand(
             path, seed_entity_field, entity_fields)
