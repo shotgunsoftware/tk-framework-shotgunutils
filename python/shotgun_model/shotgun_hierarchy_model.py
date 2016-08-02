@@ -232,7 +232,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     ############################################################################
     # protected methods
 
-    def _create_item(self, data, parent=None):
+    def _create_item(self, data, parent=None, row=None):
         """
         Creates a model item given the supplied data and optional parent.
 
@@ -243,6 +243,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         :param dict data: The hierarchy data to use when creating the item.
         :param parent: Optional :class:`~PySide.QtGui.QStandardItem` instance
             to parent the created item to.
+        :param int row: If supplied, insert the new item at the specified
+            row of the parent. Otherwise, append it to the list of children.
 
         :return: The new :class:`~PySide.QtGui.QStandardItem` instance.
         """
@@ -283,8 +285,11 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         parent = parent or self.item_from_url(data.get("parent_url")) or \
             self.invisibleRootItem()
 
-        # example of using sort/filter proxy model
-        parent.appendRow(item)
+        if row is not None:
+            parent.insertRow(row, item)
+        else:
+            # example of using sort/filter proxy model
+            parent.appendRow(item)
 
         return item
 
@@ -823,6 +828,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
                 item.removeRow(row)
                 subtree_updated = True
 
+        new_children = []
+
         # add/update the children for the supplied item
         for (row, child_data) in enumerate(children_data):
             child_url = child_data["url"]
@@ -833,8 +840,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
                 subtree_updated = self._update_item(child_item, child_data) \
                     or subtree_updated
             else:
-                # child item does not exist, create it
-                self._create_item(child_data, parent=item)
+                # child item does not exist, create it at the specified row
+                self._create_item(child_data, parent=item, row=row)
                 subtree_updated = True
 
         return subtree_updated
