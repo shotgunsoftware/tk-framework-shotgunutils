@@ -660,20 +660,21 @@ class CachedShotgunSchema(QtCore.QObject):
             project_id=project_id,
         )
 
-        if sg_entity_type in self._type_schema and field_name in self._field_schema[project_id][sg_entity_type]:
-            data = self._field_schema[project_id][sg_entity_type][field_name]
-            valid_values = data.get("properties", {}).get("valid_values", {}).get("value")
+        if project_id in self._type_schema and project_id in self._field_schema:
+            if sg_entity_type in self._type_schema[project_id]:
+                if field_name in self._field_schema[project_id][sg_entity_type]:
+                    data = self._field_schema[project_id][sg_entity_type][field_name]
+                    valid_values = data.get("properties", {}).get("valid_values", {}).get("value")
 
-            if valid_values is None:
-                raise ValueError(
-                    "The data type for %s.%s does not have valid values" % (
-                        sg_entity_type,
-                        field_name
-                    )
-                )
+                    if valid_values is None:
+                        raise ValueError(
+                            "The data type for %s.%s does not have valid values" % (
+                                sg_entity_type,
+                                field_name
+                            )
+                        )
 
-            return valid_values
-
+                    return valid_values
         raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
 
     @classmethod
