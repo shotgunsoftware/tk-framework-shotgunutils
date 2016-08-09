@@ -18,6 +18,7 @@ import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 
 # framework imports
+from .shotgun_hierarchy_item import ShotgunHierarchyItem
 from .shotgun_query_model import ShotgunQueryModel
 from .util import get_sg_data, sanitize_qt, sanitize_for_qt_model
 from ..utils import color_mix
@@ -50,6 +51,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
     # data role used to track whether more data has been fetched for items
     SG_ITEM_FETCHED_MORE = QtCore.Qt.UserRole + 3
+
+    # use hierarchy items when building the model
+    SG_QUERY_MODEL_ITEM_CLASS = ShotgunHierarchyItem
 
     def __init__(self, parent, schema_generation=0, bg_task_manager=None):
         """
