@@ -183,6 +183,7 @@ class CachedShotgunSchema(QtCore.QObject):
 
         :param project_id:  The project Entity id. If None, the current
                             context's project will be used.
+        :returns bool: True if loaded, False if not.
         """
         project_id = project_id or self._get_current_project_id()
         status_cache_path = self._get_status_cache_path(project_id)
@@ -203,6 +204,9 @@ class CachedShotgunSchema(QtCore.QObject):
                                          "file '%s': %s" % (status_cache_path, e))
             else:
                 self.status_loaded.emit(project_id)
+                return True
+
+        return False
         
     def _load_cached_schema(self, project_id=None):
         """
@@ -210,6 +214,7 @@ class CachedShotgunSchema(QtCore.QObject):
 
         :param project_id:  The project Entity id. If None, the current
                             context's project will be used.
+        :returns bool: True if loaded, False if not.
         """
         project_id = project_id or self._get_current_project_id()
         schema_cache_path = self._get_schema_cache_path(project_id)
@@ -226,17 +231,21 @@ class CachedShotgunSchema(QtCore.QObject):
                                          "file '%s': %s" % (schema_cache_path, e))
             else:
                 self.schema_loaded.emit(project_id)
+                return True
+
+        return False
             
     def _check_schema_refresh(self, entity_type=None, field_name=None, project_id=None):
         """
         Check and potentially trigger a cache refresh.
         
-        :param entity_type: Shotgun entity type
-        :param field_name:  Shotgun field name
-        :param project_id:  The project Entity id. If None, the current
-                            context's project will be used.
+        :param str entity_type: Shotgun entity type
+        :param str field_name: Shotgun field name
+        :param int project_id: The project Entity id. If None, the current
+                               context's project will be used.
         """
-        project_id = project_id or self._get_current_project_id()
+        current_project_id = self._get_current_project_id()
+        project_id = project_id or current_project_id
 
         # TODO: currently, this only checks if there is a full cache in memory
         # or not. Later on, when we have the ability to check the current 
@@ -244,6 +253,15 @@ class CachedShotgunSchema(QtCore.QObject):
         # more graceful fashion.
         if not self._is_schema_loaded(project_id) and project_id not in self._sg_schema_query_ids.values():
             # schema is not requested and not loaded.
+            # If a schema was requested for a project that isn't the current project, then
+            # let's check to see if we can get it from disk before we resort to going to
+            # Shotgun.
+            if project_id != current_project_id:
+                if self._load_cached_status(project_id=project_id):
+                    # If we were able to load the cached schema from disk then we don't
+                    # have anything else to do.
+                    return
+
             # so download it from shotgun!
             self._bundle.log_debug("Starting to download new metaschema from Shotgun...")
 
@@ -260,12 +278,22 @@ class CachedShotgunSchema(QtCore.QObject):
         """
         Request status data from Shotgun.
 
-        :param project_id:  The project Entity id. If None, the current
-                            context's project will be used.
+        :param int project_id: The project Entity id. If None, the current
+                               context's project will be used.
         """
-        project_id = project_id or self._get_current_project_id()
+        current_project_id = self._get_current_project_id()
+        project_id = project_id or current_project_id
 
         if not self._is_status_loaded(project_id) and project_id not in self._sg_status_query_ids.values():
+            # If statuses were requested for a project that isn't the current project, then
+            # let's check to see if we can get it from disk before we resort to going to
+            # Shotgun.
+            if project_id != current_project_id:
+                if self._load_cached_schema(project_id=project_id):
+                    # If we were able to load the cached schema from disk then we don't
+                    # have anything else to do.
+                    return
+
             fields = ["bg_color", "code", "name"]
             self._bundle.log_debug("Starting to download status list from Shotgun...")
             
