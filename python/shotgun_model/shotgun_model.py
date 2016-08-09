@@ -663,6 +663,22 @@ class ShotgunModel(ShotgunQueryModel):
         # default implementation will set the headers to the display names for the fields
         return [self._shotgun_globals.get_field_display_name(entity_type, c) for c in columns]
 
+    def _get_columns(self, item, is_leaf):
+        """
+        Returns a row (list of QStandardItems) given an initial QStandardItem.  The item itself
+        is always the first item in the row, but additional columns may be appended.
+
+        :param item: A :class:`~PySide.QtGui.QStandardItem` that is associated with this model.
+        :param is_leaf: A boolean indicating if the item is a leaf item or not
+
+        :returns: A list of :class:`~PySide.QtGui.QStandardItem` s
+        """
+        # the first item in the row is always the standard shotgun model item,
+        # but subclasses may provide additional columns to be appended.
+        row = [item]
+        row.extend(self._get_additional_columns(item, is_leaf, self.__column_fields))
+        return row
+
     def _on_data_retriever_work_failure(self, uid, msg):
         """
         Asynchronous callback - the data retriever failed to do some work
@@ -978,7 +994,7 @@ class ShotgunModel(ShotgunQueryModel):
             found_item = self.__create_item(field_display_name, field, on_leaf_level, sg_item)
 
             # get a complete row containing all columns for the current item
-            row = self.__get_columns(found_item, on_leaf_level)
+            row = self._get_columns(found_item, on_leaf_level)
 
             # add it to the tree. At this point QT will fire off various signals to inform views etc.
             root.appendRow(row)
@@ -1089,7 +1105,7 @@ class ShotgunModel(ShotgunQueryModel):
             child = children[child_key]
 
             on_leaf_level = not bool(child.get("children"))
-            row = self.__get_columns(child["item"], on_leaf_level)
+            row = self._get_columns(child["item"], on_leaf_level)
             node["item"].appendRow(row)
             self.__realize_parent_child_hierarchy_r(child)
 
@@ -1195,20 +1211,4 @@ class ShotgunModel(ShotgunQueryModel):
         else:
             # everything else just cast to string
             return str(value)
-
-    def __get_columns(self, item, is_leaf):
-        """
-        Returns a row (list of QStandardItems) given an initial QStandardItem.  The item itself
-        is always the first item in the row, but additional columns may be appended.
-
-        :param item: A :class:`~PySide.QtGui.QStandardItem` that is associated with this model.
-        :param is_leaf: A boolean indicating if the item is a leaf item or not
-
-        :returns: A list of :class:`~PySide.QtGui.QStandardItem` s
-        """
-        # the first item in the row is always the standard shotgun model item,
-        # but subclasses may provide additional columns to be appended.
-        row = [item]
-        row.extend(self._get_additional_columns(item, is_leaf, self.__column_fields))
-        return row
 
