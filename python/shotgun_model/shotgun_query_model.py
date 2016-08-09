@@ -17,7 +17,7 @@ import time
 import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 
-from .shotgun_model_errors import ShotgunModelError, CacheReadVersionMismatch
+from .errors import ShotgunModelError, CacheReadVersionMismatch
 from .shotgun_standard_item import ShotgunStandardItem
 from .util import get_sg_data
 
@@ -131,12 +131,17 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     # version of binary format
     _FILE_VERSION = 22
 
-    def __init__(self, parent, bg_task_manager=0):
+    def __init__(self, parent, bg_task_manager=None):
         """
         Initializes the model and provides some default convenience members.
 
         :param parent: The model's parent.
         :type parent: :class:`~PySide.QtGui.QObject`
+
+        :param bg_task_manager: Background task manager to use for any
+            asynchronous work. If this is None then a task manager will be
+            created as needed.
+        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
 
         The following instance members are created for use in subclasses:
 
@@ -318,15 +323,13 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     ############################################################################
     # protected properties
 
-    @property
-    def _cache_path(self):
+    def _get_cache_path(self):
         """
         Returns the cache path on disk for this instance.
         """
         return self._full_cache_path
 
-    @_cache_path.setter
-    def _cache_path(self, path):
+    def _set_cache_path(self, path):
         """
         Set the cache path for this instance.
 
@@ -335,6 +338,9 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         logger.debug("Cache path set to: %s" % (path,))
         self._full_cache_path = path
+
+    # define the property for python 2.5 and older
+    _cache_path = property(_get_cache_path, _set_cache_path)
 
     ############################################################################
     # abstract, protected slots. these methods are connected to the internal
@@ -692,7 +698,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         try:
             time_before = time.time()
-            num_items = self._load_from_disk()
+            num_items = self.__load_from_disk()
             time_diff = (time.time() - time_before)
             logger.debug(
                 "Loading finished! Loaded %s items in %4fs" %
@@ -707,48 +713,6 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                 "Error reported: %s" % (e,)
             )
             return False
-
-    def _sg_clean_data(self, sg_data):
-        """
-        Recursively clean the supplied SG data for use by clients.
-
-        This method currently handles:
-
-            - Converting datetime objects to universal time stamps.
-
-        :param sg_data:
-        :return:
-        """
-
-        # QT is struggling to handle the special timezone class that the
-        # shotgun API returns. in fact, on linux it is struggling to serialize
-        # any complex object via QDataStream.
-        #
-        # Convert time stamps to unix time. Unix time is a number representing
-        # the timestamp in the number of seconds since 1 Jan 1970 in the UTC
-        # timezone. So a unix timestamp is universal across time zones and DST
-        # changes.
-        #
-        # When you are pulling data from the shotgun model and want to convert
-        # this unix timestamp to a *local* timezone object, which is typically
-        # what you want when you are displaying a value on screen, use the
-        # following code:
-        # >>> local_datetime = datetime.fromtimestamp(unix_time)
-        #
-        # furthermore, if you want to turn that into a nicely formatted string:
-        # >>> local_datetime.strftime('%Y-%m-%d %H:%M')
-
-        if isinstance(sg_data, dict):
-            for k in sg_data.keys():
-                sg_data[k] = self._sg_clean_data(sg_data[k])
-        elif isinstance(sg_data, list):
-            for i in range(len(sg_data)):
-                sg_data[i] = self._sg_clean_data(sg_data[i])
-        elif isinstance(sg_data, datetime.datetime):
-            # convert to unix timestamp, local time zone
-            sg_data = time.mktime(sg_data.timetuple())
-
-        return sg_data
 
     def _sg_compare_data(self, a, b):
         """
@@ -805,7 +769,79 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     ############################################################################
     # additional method used during de/serialization of model contents
 
-    def _load_from_disk(self):
+    def _save_to_disk(self):
+        """
+        Save the model to disk using QDataStream serialization.
+        This all happens on the C++ side and is very fast.
+        """
+
+        filename = self._cache_path
+
+        old_umask = os.umask(0)
+        try:
+            # try to create the cache folder with as open permissions as
+            # possible
+            cache_dir = os.path.dirname(filename)
+            if not os.path.exists(cache_dir):
+                os.makedirs(cache_dir, 0777)
+
+            # write cache file
+            fh = QtCore.QFile(filename)
+            fh.open(QtCore.QIODevice.WriteOnly)
+            try:
+                out_stream = QtCore.QDataStream(fh)
+
+                # write a header
+                out_stream.writeInt64(self._FILE_MAGIC_NUMBER)
+                out_stream.writeInt32(self._FILE_VERSION)
+
+                # todo: if it turns out that there are ongoing issues with
+                # md5 cache collisions, we could write the actual query
+                # parameters to the header of the cache file here and compare
+                # that against the desired query info just to be confident we
+                # are getting a correct cache...
+
+                # tell which serialization dialect to use
+                out_stream.setVersion(QtCore.QDataStream.Qt_4_0)
+
+                root = self.invisibleRootItem()
+                self._save_to_disk_r(out_stream, root, 0)
+
+            finally:
+                fh.close()
+
+            # and ensure the cache file has got open permissions
+            os.chmod(filename, 0666)
+
+        except Exception, e:
+            logger.warning(
+                "Could not write cache file '%s' to disk: %s" % (filename, e))
+
+        finally:
+            os.umask(old_umask)
+
+    def _save_to_disk_r(self, stream, item, depth):
+        """
+        Recursive tree writer
+        """
+        num_rows = item.rowCount()
+        for row in range(num_rows):
+            # write this
+            child = item.child(row)
+            # only write shotgun data!
+            # data from external sources is never serialized
+            if child.data(self.IS_SG_MODEL_ROLE):
+                child.write(stream)
+                stream.writeInt32(depth)
+
+            if child.hasChildren():
+                # write children
+                self._save_to_disk_r(stream, child, depth+1)
+
+    ############################################################################
+    # private methods
+
+    def __load_from_disk(self):
         """
         Load a serialized model from disk.
 
@@ -909,71 +945,3 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         return num_items_loaded
 
-    def _save_to_disk(self):
-        """
-        Save the model to disk using QDataStream serialization.
-        This all happens on the C++ side and is very fast.
-        """
-
-        filename = self._cache_path
-
-        old_umask = os.umask(0)
-        try:
-            # try to create the cache folder with as open permissions as
-            # possible
-            cache_dir = os.path.dirname(filename)
-            if not os.path.exists(cache_dir):
-                os.makedirs(cache_dir, 0777)
-
-            # write cache file
-            fh = QtCore.QFile(filename)
-            fh.open(QtCore.QIODevice.WriteOnly)
-            try:
-                out_stream = QtCore.QDataStream(fh)
-
-                # write a header
-                out_stream.writeInt64(self._FILE_MAGIC_NUMBER)
-                out_stream.writeInt32(self._FILE_VERSION)
-
-                # todo: if it turns out that there are ongoing issues with
-                # md5 cache collisions, we could write the actual query
-                # parameters to the header of the cache file here and compare
-                # that against the desired query info just to be confident we
-                # are getting a correct cache...
-
-                # tell which serialization dialect to use
-                out_stream.setVersion(QtCore.QDataStream.Qt_4_0)
-
-                root = self.invisibleRootItem()
-                self._save_to_disk_r(out_stream, root, 0)
-
-            finally:
-                fh.close()
-
-            # and ensure the cache file has got open permissions
-            os.chmod(filename, 0666)
-
-        except Exception, e:
-            logger.warning(
-                "Could not write cache file '%s' to disk: %s" % (filename, e))
-
-        finally:
-            os.umask(old_umask)
-
-    def _save_to_disk_r(self, stream, item, depth):
-        """
-        Recursive tree writer
-        """
-        num_rows = item.rowCount()
-        for row in range(num_rows):
-            # write this
-            child = item.child(row)
-            # only write shotgun data!
-            # data from external sources is never serialized
-            if child.data(self.IS_SG_MODEL_ROLE):
-                child.write(stream)
-                stream.writeInt32(depth)
-
-            if child.hasChildren():
-                # write children
-                self._save_to_disk_r(stream, child, depth+1)

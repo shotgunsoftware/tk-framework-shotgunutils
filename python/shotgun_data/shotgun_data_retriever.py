@@ -217,8 +217,17 @@ class ShotgunDataRetriever(QtCore.QObject):
             # we don't own the task manager so just stop any tasks we might be running 
             # and disconnect from it:
             self._task_manager.stop_task_group(self._bg_tasks_group)
-            self._task_manager.task_completed.disconnect(self._on_task_completed)
-            self._task_manager.task_failed.disconnect(self._on_task_failed)
+            # make sure we don't get exceptions trying to disconnect if the
+            # signals were never connected.
+            try:
+                self._task_manager.task_completed.disconnect(self._on_task_completed)
+            except (TypeError, RuntimeError):  # was never connected
+                pass
+            try:
+                self._task_manager.task_failed.disconnect(self._on_task_failed)
+            except (TypeError, RuntimeError):  # was never connected
+                pass
+
             self._task_manager = None
 
     def clear(self):

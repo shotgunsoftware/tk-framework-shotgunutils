@@ -410,9 +410,18 @@ class CachedShotgunSchema(QtCore.QObject):
                 self._bundle.log_debug("Unregistering %r from schema manager" % task_manager)
                 data_retriever = dr["data_retriever"]
                 data_retriever.stop()
-                data_retriever.work_completed.disconnect(self._on_worker_signal)
-                data_retriever.work_failure.disconnect(self._on_worker_failure)
-                
+
+                # make sure we don't get exceptions trying to disconnect if the
+                # signals were never connected.
+                try:
+                    data_retriever.work_completed.disconnect(self._on_worker_signal)
+                except (TypeError, RuntimeError):  # was never connected
+                    pass
+
+                try:
+                    data_retriever.work_failure.disconnect(self._on_worker_failure)
+                except (TypeError, RuntimeError):  # was never connected
+                    pass
             else:
                 culled_retrievers.append(dr)
 

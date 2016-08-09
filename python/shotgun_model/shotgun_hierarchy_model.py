@@ -20,7 +20,7 @@ from sgtk.platform.qt import QtCore, QtGui
 # framework imports
 from .shotgun_query_model import ShotgunQueryModel
 from .util import get_sg_data, sanitize_qt, sanitize_for_qt_model
-from ..util import color_mix
+from ..utils import color_mix
 
 # logger for this module
 logger = sgtk.platform.get_logger(__name__)
@@ -78,7 +78,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         self._folder_icon = QtGui.QIcon(
             ":tk-framework-shotgunutils/icon_Folder.png")
         self._none_icon = QtGui.QIcon(
-            ":tk-framework-shotgunutils/icon_None.png")
+            ":tk-framework-shotgunutils/icon_None_dark.png")
 
         # Define the foreground color of "empty" items.
         # These special items are used as placeholders in the tree where the
@@ -232,128 +232,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     ############################################################################
     # protected methods
 
-    def _create_item(self, data, parent=None, row=None):
-        """
-        Creates a model item given the supplied data and optional parent.
-
-        The supplied ``data`` corresponds to the results of a call to the
-        ``nav_expand()`` api method. The data will be stored on the new item via
-        the ``SG_DATA_ROLE``.
-
-        :param dict data: The hierarchy data to use when creating the item.
-        :param parent: Optional :class:`~PySide.QtGui.QStandardItem` instance
-            to parent the created item to.
-        :param int row: If supplied, insert the new item at the specified
-            row of the parent. Otherwise, append it to the list of children.
-
-        :return: The new :class:`~PySide.QtGui.QStandardItem` instance.
-        """
-
-        # if this is the root item, just return the invisible root item that
-        # comes with the model
-        if data.get("ref", {}).get("kind") == "root":
-            return self.invisibleRootItem()
-
-        item = self.SG_QUERY_MODEL_ITEM_CLASS(data["label"])
-        item.setEditable(False)
-
-        # keep tabs of which items we are creating
-        item.setData(True, self.IS_SG_MODEL_ROLE)
-
-        # we have not fetched more data for this item yet
-        item.setData(False, self.SG_ITEM_FETCHED_MORE)
-
-        # attach the nav data for access later
-        self._update_item(item, data)
-
-        # allow item customization prior to adding to model
-        self._item_created(item)
-
-        # set up default thumb
-        self._populate_default_thumbnail(item)
-
-        self._populate_item(item, data)
-
-        self._set_tooltip(item, data)
-
-        # run the finalizer (always runs on construction, even via cache)
-        self._finalize_item(item)
-
-        # identify a parent if none supplied. could be found via the
-        # `parent_url` supplied in the data or the root if no parent item
-        # exists.
-        parent = parent or self.item_from_url(data.get("parent_url")) or \
-            self.invisibleRootItem()
-
-        if row is not None:
-            parent.insertRow(row, item)
-        else:
-            # example of using sort/filter proxy model
-            parent.appendRow(item)
-
-        return item
-
-    def _get_data_cache_path(self, cache_seed=None):
-        """
-        Calculates and returns a cache path to use for this instance's query.
-
-        :param cache_seed: Cache seed supplied to the ``__init__`` method.
-
-        :return: The path to use when caching the model data.
-        :rtype: str
-        """
-
-        # hashes to use to generate the cache path
-        params_hash = hashlib.md5()
-        entity_field_hash = hashlib.md5()
-
-        # even though the navigation path provides a nice organizational
-        # structure for caching, it can get long. to avoid MAX_PATH issues on
-        # windows, just hash it
-        params_hash.update(str(self._path))
-
-        # include the schema generation number for clients
-        params_hash.update(str(self._schema_generation))
-
-        # If this value changes over time (like between Qt4 and Qt5), we need to
-        # assume our previous user roles are invalid since Qt might have taken
-        # it over. If role's value is 32, don't add it to the hash so we don't
-        # invalidate PySide/PyQt4 caches.
-        if QtCore.Qt.UserRole != 32:
-            params_hash.update(str(QtCore.Qt.UserRole))
-
-        # include the cache_seed for additional user control over external state
-        params_hash.update(str(cache_seed))
-
-        # iterate through the sorted entity fields to ensure consistent order
-        for (entity_type, fields) in sorted(self._entity_fields.iteritems()):
-            for field in fields:
-                entity_field_hash.update("%s.%s" % (entity_type, field))
-
-        # convert the seed entity field into a path segment.
-        # example: Version.entity => Version/entity
-        seed_entity_field_path = os.path.join(
-            *self._seed_entity_field.split("."))
-
-        # organize files on disk based on the seed_entity field path segment and
-        # then param and entity field hashes
-        data_cache_path = os.path.join(
-            self._bundle.cache_location,
-            "sg_nav",
-            seed_entity_field_path,
-            params_hash.hexdigest(),
-            entity_field_hash.hexdigest(),
-        )
-
-        # warn if the path is longer than the windows max path limitation
-        if sys.platform == "win32" and len(data_cache_path) > 250:
-            logger.warning(
-                "Shotgun hierarchy data cache file path may be affected by "
-                "windows MAX_PATH limitation."
-            )
-
-        return data_cache_path
-
     def _get_queried_urls_r(self, item):
         """
         Returns a list of previously queried urls for items under the supplied
@@ -405,7 +283,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             call to ``nav_expand``.
         """
 
-        item = self._create_item(nav_data)
+        item = self.__create_item(nav_data)
         self._update_subtree(item, nav_data)
 
     def _item_created(self, item):
@@ -496,7 +374,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         self._entity_fields = entity_fields or {}
 
         # get the cache path based on these new data query parameters
-        self._cache_path = self._get_data_cache_path(cache_seed)
+        self._cache_path = self.__get_data_cache_path(cache_seed)
 
         # print some debug info
         logger.debug("")
@@ -537,9 +415,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         del self._running_query_lookup[uid]
 
         full_msg = (
-            "Error retrieving data from Shotgun."
-            "  URL: %s"
-            "  Error: %s"
+            "Error retrieving data from Shotgun.\n"
+            "  URL: %s\n"
+            "  Error: %s\n"
         ) % (url, msg)
         self.data_refresh_fail.emit(full_msg)
         logger.warning(full_msg)
@@ -567,77 +445,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         del self._running_query_lookup[uid]
 
         nav_data = data["nav"]
-        self._on_nav_data_arrived(nav_data)
-
-    def _on_nav_data_arrived(self, nav_data):
-        """
-        Handle asynchronous navigation data arriving after a nav_expand request.
-
-        :param dict nav_data: The data returned from the api call.
-        """
-
-        logger.debug("--> Shotgun data arrived. (%s records)" % len(nav_data))
-
-        # pre-process data
-        nav_data = self._before_data_processing(nav_data)
-
-        if self._request_full_refresh:
-            # full refresh requested
-
-            # reset flag for next request
-            self._request_full_refresh = False
-
-            logger.debug("Rebuilding tree...")
-            self.clear()
-            self._load_external_data()
-            self._insert_subtree(nav_data)
-            logger.debug("...done!")
-
-            modifications_made = True
-
-        else:
-
-            # ensure we have a url for the item
-            item_url = nav_data.get("url", None)
-            logger.debug("Got hierarchy data for url: %s" % (item_url,))
-
-            if not item_url:
-                raise sgtk.TankError(
-                    "Unexpected error occured. Could not determine the url "
-                    "from the queried hierarchy item."
-                )
-
-            # see if we have an item for the url
-            item = self.item_from_url(item_url)
-
-            if item:
-                # check item and children to see if data has been updated
-                logger.debug(
-                    "Item exists in tree. Ensuring up-to-date...")
-                modifications_made = self._update_subtree(item, nav_data)
-                logger.debug("...done!")
-
-            else:
-                logger.debug("Detected new item. Adding in-situ to tree...")
-                self._insert_subtree(nav_data)
-                logger.debug("...done!")
-                modifications_made = True
-
-        # last step - save our tree to disk for fast caching next time!
-        # todo: the hierarchy data is queried lazily. so this implies a
-        # write to disk each time the user expands and item. consider the
-        # performance of this setup and whether this logic should be altered.
-        if modifications_made:
-            logger.debug("Saving tree to disk %s..." % self._cache_path)
-            try:
-                self._save_to_disk()
-                logger.debug("...saving complete!")
-            except Exception, e:
-                logger.warning("Couldn't save cache data to disk: %s" % e)
-
-        if not self._running_query_lookup.keys():
-            # no more data queries running. all data refreshed
-            self.data_refreshed.emit(modifications_made)
+        self.__on_nav_data_arrived(nav_data)
 
     def _populate_default_thumbnail(self, item):
         """
@@ -761,9 +569,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         if "children" in data.keys():
             del new_item_data["children"]
 
-        # make sure the data is clean
-        new_item_data = self._sg_clean_data(new_item_data)
-
         # compare with the item's existing data
         old_item_data = get_sg_data(item)
         if self._sg_compare_data(old_item_data, new_item_data):
@@ -772,6 +577,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         # data differs. set the new data
         item.setData(sanitize_for_qt_model(new_item_data), self.SG_DATA_ROLE)
+
+        # ensure the label is updated
+        item.setText(data["label"])
 
         return True
 
@@ -841,7 +649,203 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
                     or subtree_updated
             else:
                 # child item does not exist, create it at the specified row
-                self._create_item(child_data, parent=item, row=row)
+                self.__create_item(child_data, parent=item, row=row)
                 subtree_updated = True
 
         return subtree_updated
+
+    ############################################################################
+    # private methods
+
+    def __create_item(self, data, parent=None, row=None):
+        """
+        Creates a model item given the supplied data and optional parent.
+
+        The supplied ``data`` corresponds to the results of a call to the
+        ``nav_expand()`` api method. The data will be stored on the new item via
+        the ``SG_DATA_ROLE``.
+
+        :param dict data: The hierarchy data to use when creating the item.
+        :param parent: Optional :class:`~PySide.QtGui.QStandardItem` instance
+            to parent the created item to.
+        :param int row: If supplied, insert the new item at the specified
+            row of the parent. Otherwise, append it to the list of children.
+
+        :return: The new :class:`~PySide.QtGui.QStandardItem` instance.
+        """
+
+        # if this is the root item, just return the invisible root item that
+        # comes with the model
+        if data.get("ref", {}).get("kind") == "root":
+            return self.invisibleRootItem()
+
+        item = self.SG_QUERY_MODEL_ITEM_CLASS(data["label"])
+        item.setEditable(False)
+
+        # keep tabs of which items we are creating
+        item.setData(True, self.IS_SG_MODEL_ROLE)
+
+        # we have not fetched more data for this item yet
+        item.setData(False, self.SG_ITEM_FETCHED_MORE)
+
+        # attach the nav data for access later
+        self._update_item(item, data)
+
+        # allow item customization prior to adding to model
+        self._item_created(item)
+
+        # set up default thumb
+        self._populate_default_thumbnail(item)
+
+        self._populate_item(item, data)
+
+        self._set_tooltip(item, data)
+
+        # run the finalizer (always runs on construction, even via cache)
+        self._finalize_item(item)
+
+        # identify a parent if none supplied. could be found via the
+        # `parent_url` supplied in the data or the root if no parent item
+        # exists.
+        parent = parent or self.item_from_url(data.get("parent_url")) or \
+            self.invisibleRootItem()
+
+        if row is not None:
+            parent.insertRow(row, item)
+        else:
+            # example of using sort/filter proxy model
+            parent.appendRow(item)
+
+        return item
+
+    def __get_data_cache_path(self, cache_seed=None):
+        """
+        Calculates and returns a cache path to use for this instance's query.
+
+        :param cache_seed: Cache seed supplied to the ``__init__`` method.
+
+        :return: The path to use when caching the model data.
+        :rtype: str
+        """
+
+        # hashes to use to generate the cache path
+        params_hash = hashlib.md5()
+        entity_field_hash = hashlib.md5()
+
+        # even though the navigation path provides a nice organizational
+        # structure for caching, it can get long. to avoid MAX_PATH issues on
+        # windows, just hash it
+        params_hash.update(str(self._path))
+
+        # include the schema generation number for clients
+        params_hash.update(str(self._schema_generation))
+
+        # If this value changes over time (like between Qt4 and Qt5), we need to
+        # assume our previous user roles are invalid since Qt might have taken
+        # it over. If role's value is 32, don't add it to the hash so we don't
+        # invalidate PySide/PyQt4 caches.
+        if QtCore.Qt.UserRole != 32:
+            params_hash.update(str(QtCore.Qt.UserRole))
+
+        # include the cache_seed for additional user control over external state
+        params_hash.update(str(cache_seed))
+
+        # iterate through the sorted entity fields to ensure consistent order
+        for (entity_type, fields) in sorted(self._entity_fields.iteritems()):
+            for field in fields:
+                entity_field_hash.update("%s.%s" % (entity_type, field))
+
+        # convert the seed entity field into a path segment.
+        # example: Version.entity => Version/entity
+        seed_entity_field_path = os.path.join(
+            *self._seed_entity_field.split("."))
+
+        # organize files on disk based on the seed_entity field path segment and
+        # then param and entity field hashes
+        data_cache_path = os.path.join(
+            self._bundle.cache_location,
+            "sg_nav",
+            seed_entity_field_path,
+            params_hash.hexdigest(),
+            entity_field_hash.hexdigest(),
+        )
+
+        # warn if the path is longer than the windows max path limitation
+        if sys.platform == "win32" and len(data_cache_path) > 250:
+            logger.warning(
+                "Shotgun hierarchy data cache file path may be affected by "
+                "windows MAX_PATH limitation."
+            )
+
+        return data_cache_path
+
+
+    def __on_nav_data_arrived(self, nav_data):
+        """
+        Handle asynchronous navigation data arriving after a nav_expand request.
+
+        :param dict nav_data: The data returned from the api call.
+        """
+
+        logger.debug("--> Shotgun data arrived. (%s records)" % len(nav_data))
+
+        # pre-process data
+        nav_data = self._before_data_processing(nav_data)
+
+        if self._request_full_refresh:
+            # full refresh requested
+
+            # reset flag for next request
+            self._request_full_refresh = False
+
+            logger.debug("Rebuilding tree...")
+            self.clear()
+            self._load_external_data()
+            self._insert_subtree(nav_data)
+            logger.debug("...done!")
+
+            modifications_made = True
+
+        else:
+
+            # ensure we have a url for the item
+            item_url = nav_data.get("url", None)
+            logger.debug("Got hierarchy data for url: %s" % (item_url,))
+
+            if not item_url:
+                raise sgtk.TankError(
+                    "Unexpected error occured. Could not determine the url "
+                    "from the queried hierarchy item."
+                )
+
+            # see if we have an item for the url
+            item = self.item_from_url(item_url)
+
+            if item:
+                # check item and children to see if data has been updated
+                logger.debug(
+                    "Item exists in tree. Ensuring up-to-date...")
+                modifications_made = self._update_subtree(item, nav_data)
+                logger.debug("...done!")
+
+            else:
+                logger.debug("Detected new item. Adding in-situ to tree...")
+                self._insert_subtree(nav_data)
+                logger.debug("...done!")
+                modifications_made = True
+
+        # last step - save our tree to disk for fast caching next time!
+        # todo: the hierarchy data is queried lazily. so this implies a
+        # write to disk each time the user expands and item. consider the
+        # performance of this setup and whether this logic should be altered.
+        if modifications_made:
+            logger.debug("Saving tree to disk %s..." % self._cache_path)
+            try:
+                self._save_to_disk()
+                logger.debug("...saving complete!")
+            except Exception, e:
+                logger.warning("Couldn't save cache data to disk: %s" % e)
+
+        if not self._running_query_lookup.keys():
+            # no more data queries running. all data refreshed
+            self.data_refreshed.emit(modifications_made)

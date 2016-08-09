@@ -325,7 +325,7 @@ class ShotgunModel(ShotgunQueryModel):
             )
 
         # get the cache path based on these new data query parameters
-        self._cache_path = self._get_data_cache_path(seed)
+        self._cache_path = self.__get_data_cache_path(seed)
 
         logger.debug("")
         logger.debug("Model Reset for %s" % self)
@@ -350,88 +350,6 @@ class ShotgunModel(ShotgunQueryModel):
         self.setHorizontalHeaderLabels(headers)
 
         return self._load_cached_data()
-
-    def _get_data_cache_path(self, cache_seed=None):
-        """
-        Calculates and returns a cache path to use for this instance's query.
-
-        :param cache_seed: Cache seed supplied to the ``__init__`` method.
-
-        :return: The path to use when caching the model data.
-        :rtype: str
-        """
-
-        # when we cache the data associated with this model, create
-        # the file name and path based on several parameters.
-        # the path will be on the form CACHE_LOCATION/cached_sg_queries/EntityType/params_hash/filter_hash
-        #
-        # params_hash is an md5 hash representing all parameters going into a particular
-        # query setup and filters_hash is an md5 hash of the filter conditions.
-        #
-        # the reason these are split up is because the params tend to be constant and
-        # the filters keep varying depending on user input.
-        #
-        # some comment regarding the fields that make up the hash
-        #
-        # fields, order, hierarchy are all coming from Shotgun
-        # and are used to uniquely identify the cache file. Typically,
-        # code using the shotgun model will keep these fields constant
-        # while varying filters. With the filters hashed separately,
-        # this typically generates a folder structure where there is one
-        # top level folder containing a series of cache files
-        # all for different filters.
-        #
-        # the schema generation is used for advanced implementations
-        # See constructor docstring for details.
-        #
-        # bg_load_thumbs is hashed so that the system can cache
-        # thumb and non-thumb caches independently. This is because
-        # as soon as you start caching thumbnails, qpixmap will be used
-        # internally by the serialization and this means that you get
-        # warnings if you try to use those caches in threads. By keeping
-        # caches separate, there is no risk that a thumb cache 'pollutes'
-        # a non-thumb cache.
-        #
-        # now hash up the rest of the parameters and make that the filename
-        params_hash = hashlib.md5()
-        params_hash.update(str(self.__schema_generation))
-        params_hash.update(str(self.__bg_load_thumbs))
-        params_hash.update(str(self.__fields))
-        params_hash.update(str(self.__order))
-        params_hash.update(str(self.__hierarchy))
-        # If this value changes over time (like between Qt4 and Qt5), we need to
-        # assume our previous user roles are invalid since Qt might have taken over
-        # it. If role's value is 32, don't add it to the hash so we don't
-        # invalidate PySide/PyQt4 caches.
-        if QtCore.Qt.UserRole != 32:
-            params_hash.update(str(QtCore.Qt.UserRole))
-
-        # now hash up the filter parameters and the seed - these are dynamic
-        # values that tend to change and be data driven, so they are handled
-        # on a different level in the path
-        filter_hash = hashlib.md5()
-        filter_hash.update(str(self.__filters))
-        filter_hash.update(str(self.__additional_filter_presets))
-        params_hash.update(str(cache_seed))
-
-        # organize files on disk based on entity type and then filter hash
-        # keep extension names etc short in order to stay away from MAX_PATH
-        # on windows.
-        data_cache_path = os.path.join(
-            self._bundle.cache_location,
-            "sg",
-            self.__entity_type,
-            params_hash.hexdigest(),
-            filter_hash.hexdigest()
-        )
-
-        if sys.platform == "win32" and len(data_cache_path) > 250:
-            logger.warning(
-                "Shotgun model data cache file path may be affected by windows "
-                "windows MAX_PATH limitation."
-            )
-
-        return data_cache_path
 
     def _refresh_data(self):
         """
@@ -544,6 +462,28 @@ class ShotgunModel(ShotgunQueryModel):
 
     ########################################################################################
     # methods to be implemented by subclasses
+
+    def _item_created(self, item):
+        """
+        Called when an item is created, before it is added to the model.
+
+        .. warning:: This base class implementation must be called in any
+            subclasses overriding this behavior. Failure to do so will result in
+            unexpected behavior.
+
+        This base class implementation handles storing item lookups for
+        efficiency as well as to prevent issues with garbage collection.
+
+        :param item: The item that was just created.
+        :type item: :class:`~PySide.QtGui.QStandardItem`
+        """
+
+        # as per docs, call the base implementation
+        super(ShotgunModel, self)._item_created(item)
+
+        # request thumb
+        if self.__download_thumbs:
+            self.__process_thumbnail_for_item(item)
 
     def _set_tooltip(self, item, sg_item):
         """
@@ -700,7 +640,7 @@ class ShotgunModel(ShotgunQueryModel):
             data = get_sg_data(primary_item)
             for column in columns:
                 # set the display role to the string representation of the value
-                column_item = self.SG_QUERY_MODEL_ITEM_CLASS(self._generate_display_name(column, data))
+                column_item = self.SG_QUERY_MODEL_ITEM_CLASS(self.__generate_display_name(column, data))
                 column_item.setEditable(column in self.__editable_fields)
 
                 # set associated field role to be the column value itself
@@ -722,9 +662,6 @@ class ShotgunModel(ShotgunQueryModel):
         """
         # default implementation will set the headers to the display names for the fields
         return [self._shotgun_globals.get_field_display_name(entity_type, c) for c in columns]
-
-    ########################################################################################
-    # private methods
 
     def _on_data_retriever_work_failure(self, uid, msg):
         """
@@ -796,6 +733,9 @@ class ShotgunModel(ShotgunQueryModel):
                     # call method to populate it
                     self._populate_thumbnail(item, sg_field, thumbnail_path)
 
+    ########################################################################################
+    # private methods
+
     def __on_sg_data_arrived(self, sg_data):
         """
         Handle asynchronous shotgun data arriving after a find request.
@@ -805,8 +745,6 @@ class ShotgunModel(ShotgunQueryModel):
 
         # pre-process data
         sg_data = self._before_data_processing(sg_data)
-
-        sg_data = self._sg_clean_data(sg_data)
 
         modifications_made = False
 
@@ -896,6 +834,88 @@ class ShotgunModel(ShotgunQueryModel):
         # and emit completion signal
         self.data_refreshed.emit(modifications_made)
 
+    def __get_data_cache_path(self, cache_seed=None):
+        """
+        Calculates and returns a cache path to use for this instance's query.
+
+        :param cache_seed: Cache seed supplied to the ``__init__`` method.
+
+        :return: The path to use when caching the model data.
+        :rtype: str
+        """
+
+        # when we cache the data associated with this model, create
+        # the file name and path based on several parameters.
+        # the path will be on the form CACHE_LOCATION/cached_sg_queries/EntityType/params_hash/filter_hash
+        #
+        # params_hash is an md5 hash representing all parameters going into a particular
+        # query setup and filters_hash is an md5 hash of the filter conditions.
+        #
+        # the reason these are split up is because the params tend to be constant and
+        # the filters keep varying depending on user input.
+        #
+        # some comment regarding the fields that make up the hash
+        #
+        # fields, order, hierarchy are all coming from Shotgun
+        # and are used to uniquely identify the cache file. Typically,
+        # code using the shotgun model will keep these fields constant
+        # while varying filters. With the filters hashed separately,
+        # this typically generates a folder structure where there is one
+        # top level folder containing a series of cache files
+        # all for different filters.
+        #
+        # the schema generation is used for advanced implementations
+        # See constructor docstring for details.
+        #
+        # bg_load_thumbs is hashed so that the system can cache
+        # thumb and non-thumb caches independently. This is because
+        # as soon as you start caching thumbnails, qpixmap will be used
+        # internally by the serialization and this means that you get
+        # warnings if you try to use those caches in threads. By keeping
+        # caches separate, there is no risk that a thumb cache 'pollutes'
+        # a non-thumb cache.
+        #
+        # now hash up the rest of the parameters and make that the filename
+        params_hash = hashlib.md5()
+        params_hash.update(str(self.__schema_generation))
+        params_hash.update(str(self.__bg_load_thumbs))
+        params_hash.update(str(self.__fields))
+        params_hash.update(str(self.__order))
+        params_hash.update(str(self.__hierarchy))
+        # If this value changes over time (like between Qt4 and Qt5), we need to
+        # assume our previous user roles are invalid since Qt might have taken over
+        # it. If role's value is 32, don't add it to the hash so we don't
+        # invalidate PySide/PyQt4 caches.
+        if QtCore.Qt.UserRole != 32:
+            params_hash.update(str(QtCore.Qt.UserRole))
+
+        # now hash up the filter parameters and the seed - these are dynamic
+        # values that tend to change and be data driven, so they are handled
+        # on a different level in the path
+        filter_hash = hashlib.md5()
+        filter_hash.update(str(self.__filters))
+        filter_hash.update(str(self.__additional_filter_presets))
+        params_hash.update(str(cache_seed))
+
+        # organize files on disk based on entity type and then filter hash
+        # keep extension names etc short in order to stay away from MAX_PATH
+        # on windows.
+        data_cache_path = os.path.join(
+            self._bundle.cache_location,
+            "sg",
+            self.__entity_type,
+            params_hash.hexdigest(),
+            filter_hash.hexdigest()
+        )
+
+        if sys.platform == "win32" and len(data_cache_path) > 250:
+            logger.warning(
+                "Shotgun model data cache file path may be affected by windows "
+                "windows MAX_PATH limitation."
+            )
+
+        return data_cache_path
+
     ########################################################################################
     # shotgun data processing and tree building
 
@@ -923,7 +943,7 @@ class ShotgunModel(ShotgunQueryModel):
         on_leaf_level = len(remaining_fields) == 0
 
         # get the item we need at this level. Create it if not found.
-        field_display_name = self._generate_display_name(field, sg_item)
+        field_display_name = self.__generate_display_name(field, sg_item)
         found_item = None
         for row_index in range(root.rowCount()):
             child = root.child(row_index)
@@ -958,7 +978,7 @@ class ShotgunModel(ShotgunQueryModel):
             found_item = self.__create_item(field_display_name, field, on_leaf_level, sg_item)
 
             # get a complete row containing all columns for the current item
-            row = self._get_columns(found_item, on_leaf_level)
+            row = self.__get_columns(found_item, on_leaf_level)
 
             # add it to the tree. At this point QT will fire off various signals to inform views etc.
             root.appendRow(row)
@@ -966,28 +986,6 @@ class ShotgunModel(ShotgunQueryModel):
         if not on_leaf_level:
             # there are more levels that we should recurse down into
             self.__add_sg_item_to_tree_r(sg_item, found_item, remaining_fields)
-
-    def _item_created(self, item):
-        """
-        Called when an item is created, before it is added to the model.
-
-        .. warning:: This base class implementation must be called in any
-            subclasses overriding this behavior. Failure to do so will result in
-            unexpected behavior.
-
-        This base class implementation handles storing item lookups for
-        efficiency as well as to prevent issues with garbage collection.
-
-        :param item: The item that was just created.
-        :type item: :class:`~PySide.QtGui.QStandardItem`
-        """
-
-        # as per docs, call the base implementation
-        super(ShotgunModel, self)._item_created(item)
-
-        # request thumb
-        if self.__download_thumbs:
-            self.__process_thumbnail_for_item(item)
 
     def __process_thumbnail_for_item(self, item):
         """
@@ -1091,7 +1089,7 @@ class ShotgunModel(ShotgunQueryModel):
             child = children[child_key]
 
             on_leaf_level = not bool(child.get("children"))
-            row = self._get_columns(child["item"], on_leaf_level)
+            row = self.__get_columns(child["item"], on_leaf_level)
             node["item"].appendRow(row)
             self.__realize_parent_child_hierarchy_r(child)
 
@@ -1131,7 +1129,7 @@ class ShotgunModel(ShotgunQueryModel):
             for field_name in self.__hierarchy:
                 on_leaf_level = (self.__hierarchy[-1] == field_name)
                 # Get the value of field
-                field_display_name = self._generate_display_name(field_name, sg_item)
+                field_display_name = self.__generate_display_name(field_name, sg_item)
 
                 # If we are at the leaf and there is already an item with the same name make
                 # this new item unique.
@@ -1156,7 +1154,7 @@ class ShotgunModel(ShotgunQueryModel):
         # inside their parent, all sorted by name.
         self.__realize_parent_child_hierarchy_r(tree)
 
-    def _generate_display_name(self, field, sg_data):
+    def __generate_display_name(self, field, sg_data):
         """
         Generates a name from a shotgun field.
         For non-nested structures, this is typically just "code".
@@ -1198,7 +1196,7 @@ class ShotgunModel(ShotgunQueryModel):
             # everything else just cast to string
             return str(value)
 
-    def _get_columns(self, item, is_leaf):
+    def __get_columns(self, item, is_leaf):
         """
         Returns a row (list of QStandardItems) given an initial QStandardItem.  The item itself
         is always the first item in the row, but additional columns may be appended.
