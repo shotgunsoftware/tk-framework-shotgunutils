@@ -520,7 +520,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         # try to retrieve the uniqe identifier for this item via the data
         data = get_sg_data(item)
-        if self.SG_DATA_UNIQUE_ID_FIELD in data:
+        if data and self.SG_DATA_UNIQUE_ID_FIELD in data:
             # found the field in the data. store the item in the lookup
             uid = data[self.SG_DATA_UNIQUE_ID_FIELD]
             self._tree_data[uid] = item
