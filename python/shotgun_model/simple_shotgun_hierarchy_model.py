@@ -33,7 +33,7 @@ class SimpleShotgunHierarchyModel(ShotgunHierarchyModel):
         """
         Loads shotgun data into the model, using the cache if possible.
 
-        :param str path: The path (url) to the root of the hierarchy to display.
+        :param str path: The path to the root of the hierarchy to display.
             This corresponds to the ``path`` argument of the ``nav_expand()``
             api method. For example, ``/Project/65`` would correspond to a
             project on you shotgun site with id of ``65``.

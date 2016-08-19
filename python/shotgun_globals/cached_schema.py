@@ -412,16 +412,22 @@ class CachedShotgunSchema(QtCore.QObject):
                 data_retriever.stop()
 
                 # make sure we don't get exceptions trying to disconnect if the
-                # signals were never connected.
+                # signals were never connected or somehow disconnected externally
                 try:
                     data_retriever.work_completed.disconnect(self._on_worker_signal)
-                except (TypeError, RuntimeError):  # was never connected
-                    pass
+                except (TypeError, RuntimeError), e:  # was never connected
+                    self._bundle.log_warning(
+                        "Could not disconnect '_on_worker_signal' slot from "
+                        "the task manager's 'work_completed' signal: %s" % (e,)
+                    )
 
                 try:
                     data_retriever.work_failure.disconnect(self._on_worker_failure)
-                except (TypeError, RuntimeError):  # was never connected
-                    pass
+                except (TypeError, RuntimeError), e:  # was never connected
+                    self._bundle.log_warning(
+                        "Could not disconnect '_on_worker_failure' slot from "
+                        "the task manager's 'work_failure' signal: %s" % (e,)
+                    )
             else:
                 culled_retrievers.append(dr)
 

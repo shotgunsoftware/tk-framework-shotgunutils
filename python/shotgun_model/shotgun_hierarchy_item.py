@@ -17,7 +17,95 @@ class ShotgunHierarchyItem(ShotgunStandardItem):
     """
     A subclass of ``ShotgunStandardItem`` with access to data provided via
     the ``nav_expand()`` python API calls.
+
+    .. warning:: Do *NOT* construct instances of this class and then manually
+        them to an existing ``ShotgunHierarchyModel``. Doing so will likely
+        causes memory issues or issues centered around garbage collection as
+        the model class takes a lot of care to know exactly which items exist,
+        when they're added/removed etc.
     """
+
+    # constant values to refer to the fields where the paths are stored in the
+    # returned navigation data.
+    SG_PATH_FIELD = "url"
+
+    def has_children(self):
+        """
+        Returns ``True`` if the item has children, ``False`` otherwise.
+
+        :rtype: `bool`
+        """
+
+        data = self.data()
+        if not data:
+            return False
+
+        return data.get("has_children", False)
+
+    def is_entity_related(self):
+        """
+        Returns ``True`` if the item is entity related, ``False`` otherwise.
+
+        Being "entity related" means it represents an entity, an entity type,
+        a list of entities, or a generic container for entities.
+
+        Some items returned from the SG hierarchy are merely placeholders that
+        tell the user that there are no associated entities. For these items,
+        this method will return ``False``.
+
+        :return: ``True`` if entity related, ``False`` otherwise.
+        :rtype: ``bool``
+        """
+        return self.kind() is not None
+
+    def kind(self):
+        """
+        Returns the "kind" of the item.
+
+        The current "kinds" are:
+
+        * "entity": A concrete entity instance
+        * "entity_type": A container for the type of entity (ex: "Asset", "Shot",
+            etc)
+        * "list": A container for other items
+        * "no_entity": A container for items with no parent entity (ex: "Shots
+            with no Sequence")
+        * None: A placeholder that represents no items (ex: "No Shots")
+
+        :rtype: `str` or `None`
+        """
+
+        data = self.data()
+        if not data:
+            return None
+
+        # the "ref" should always be populated, and there should always be a
+        # "kind". If not, just default to `None`.
+        return data.get("ref", {}).get("kind", None)
+
+    def path(self):
+        """Returns the path for this item in the hierarchy.
+
+        May return ``None`` if the item has no data or does not have
+        a ``path``.
+
+        Most items in the model will store a ``path`` which identifies their
+        location in the hierarchy. This is the same value used by
+        ``nav_expand()`` in the python-api to query a Shotgun hierarchy.
+
+        An example path::
+
+            'path': '/Project/65/Asset/sg_asset_type/Character',
+        """
+
+        data = self.data()
+        if not data or not self.kind():
+            return None
+
+        # The results from the API call is a field called `url`. Ideally we'd be
+        # consistent here. There's an internal ticket to make it so, but for
+        # now we pull the "url".
+        return data.get(self.SG_PATH_FIELD)
 
     def target_entities(self):
         """
@@ -55,54 +143,45 @@ class ShotgunHierarchyItem(ShotgunStandardItem):
         """
 
         data = self.data()
-        if not data or self.__kind() == "empty":
+        if not data or not self.kind():
             return None
 
         return data.get("target_entities")
 
-    def url(self):
-        """Returns the url for this item in the hierarchy.
-
-        May return ``None`` if the item has no data or does not have
-        a ``url``.
-
-        Most items in the model will store a ``url`` which identifies their
-        location in the hierarchy. This is the same value used by
-        ``nav_expand()`` in the python-api to query a Shotgun hierarchy.
-
-        An example url::
-
-            'url': '/Project/65/Asset/sg_asset_type/Character',
+    def entity_type(self):
         """
+        Returns the entity type of the item.
 
-        data = self.data()
-        if not data or self.__kind() == "empty":
-            return None
+        There are two kinds of items that are associated with entity types.
 
-        return data.get("url")
+        The first is the actual "entity_type" item. These are typically parent
+        items in the hierarchy like `Shots` or `Assets` which have children
+        that correspond to actual entities.
 
-    # --------------------------------------------------------------------------
+        The entity items themselves also have an entity type.
 
-    def __kind(self):
-        """
-        Returns the "kind" of the item.
+        This method will return the entity type for either of these kinds of
+        items. To find out the kind of the item, use the ``kind()`` method.
 
-        This is currenlty internal to this class until there's justification for
-        making this information public.
+        If the item has no associated entity type, ``None`` will be returned.
 
-        The current "kinds" are:
-
-        * entity: A concrete entity instance
-        * entity_type: A container for the type of entity (ex: "Asset", "Shot",
-            etc)
-        * list: A container for other items
-        * no_entity: A container for items with no parent entity (ex: "Shots
-            with no Sequence")
-        * empty: A placeholder that represents no items (ex: "No Shots")
+        :rtype: `str` or `None`
         """
 
         data = self.data()
         if not data:
-            return "empty"
+            return None
 
-        return data.get("ref", {}).get("kind", "empty")
+        ref = data.get("ref") or {}
+
+        entity_type = None
+
+        if self.kind() == "entity":
+            if ref.get("value"):
+                entity_type = ref.get("value").get("type")
+        elif self.kind() == "entity_type":
+            return data.get("value")
+
+        return entity_type
+
+

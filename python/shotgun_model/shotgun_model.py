@@ -49,6 +49,14 @@ class ShotgunModel(ShotgunQueryModel):
     # header value for the first column
     FIRST_COLUMN_HEADER = "Name"
 
+    def __repr__(self):
+        """
+        Create a string representation of this instance
+        :returns: A string representation of this instance
+        """
+        return "<%s entity_type:%s>" % (
+            self.__class__.__name__, self.__entity_type)
+
     def __init__(self, parent, download_thumbs=True, schema_generation=0, bg_load_thumbs=True, bg_task_manager=None):
         """
         :param parent: Parent object.
@@ -69,6 +77,9 @@ class ShotgunModel(ShotgunQueryModel):
         :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         """
         super(ShotgunModel, self).__init__(parent, bg_task_manager)
+
+        # default value so that __repr__ can be used before load_data
+        self.__entity_type = None
 
         self.__schema_generation = schema_generation
 

@@ -25,7 +25,7 @@ class ShotgunEntityModel(ShotgunModel):
     # global cache of step colours - avoids querying from Shotgun multiple times!
     _SG_STEP_COLOURS = {}
 
-    def __init__(self, entity_type, filters, hierarchy, fields, parent, 
+    def __init__(self, entity_type, filters, hierarchy, fields, parent,
                  download_thumbs=False, schema_generation=0, bg_load_thumbs=True,
                  bg_task_manager=None):
         """

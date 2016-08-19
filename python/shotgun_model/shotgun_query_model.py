@@ -8,7 +8,6 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import datetime
 import os
 import urlparse
 import time
@@ -16,6 +15,7 @@ import time
 # toolkit imports
 import sgtk
 from sgtk.platform.qt import QtCore, QtGui
+from sgtk.util import filesystem
 
 from .errors import ShotgunModelError, CacheReadVersionMismatch
 from .shotgun_standard_item import ShotgunStandardItem
@@ -172,7 +172,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         self._bundle = sgtk.platform.current_bundle()
 
         # path to this instance's cache on disk
-        self._full_cache_path = None
+        self.__full_cache_path = None
 
         # importing these locally to not trip sphinx's imports
         # shotgun_globals is often used for accessing cached schema information
@@ -183,8 +183,8 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         # keep various references to all items that the model holds.
         # some of these data structures are to keep the GC
         # happy, others to hold alternative access methods to the data.
-        self._all_tree_items = []
-        self._tree_data = {}
+        self.__all_tree_items = []
+        self.__tree_data = {}
 
         # set up data retriever and start work:
         self._sg_data_retriever = self._shotgun_data.ShotgunDataRetriever(
@@ -227,11 +227,11 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                 self._sg_data_retriever.clear()
 
             # model data in alt format
-            self._tree_data = {}
+            self.__tree_data = {}
 
             # pyside will crash unless we actively hold a reference
             # to all items that we create.
-            self._all_tree_items = []
+            self.__all_tree_items = []
 
             # lastly, remove all data in the underlying internal data storage
             # note that we don't cannot clear() here since that causing
@@ -240,7 +240,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             # cyclic parent/child dependency cycles, which will cause
             # a crash in some versions of shiboken
             # (see https://bugreports.qt-project.org/browse/PYSIDE-158 )
-            self._do_depth_first_tree_deletion(self.invisibleRootItem())
+            self.__do_depth_first_tree_deletion(self.invisibleRootItem())
         finally:
             # Advertise that we're done resetting.
             self.endResetModel()
@@ -327,7 +327,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         """
         Returns the cache path on disk for this instance.
         """
-        return self._full_cache_path
+        return self.__full_cache_path
 
     def _set_cache_path(self, path):
         """
@@ -337,7 +337,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         """
 
         logger.debug("Cache path set to: %s" % (path,))
-        self._full_cache_path = path
+        self.__full_cache_path = path
 
     # define the property for python 2.5 and older
     _cache_path = property(_get_cache_path, _set_cache_path)
@@ -477,7 +477,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         if data and self.SG_DATA_UNIQUE_ID_FIELD in data:
             uid = data.get(self.SG_DATA_UNIQUE_ID_FIELD)
             # remove the item from the tree data lookup
-            del self._tree_data[uid]
+            del self.__tree_data[uid]
 
     def _finalize_item(self, item):
         """
@@ -516,14 +516,14 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         # keep a reference to this object to make GC happy
         # (pyside may crash otherwise)
-        self._all_tree_items.append(item)
+        self.__all_tree_items.append(item)
 
         # try to retrieve the uniqe identifier for this item via the data
         data = get_sg_data(item)
         if data and self.SG_DATA_UNIQUE_ID_FIELD in data:
             # found the field in the data. store the item in the lookup
             uid = data[self.SG_DATA_UNIQUE_ID_FIELD]
-            self._tree_data[uid] = item
+            self.__tree_data[uid] = item
 
         return item
 
@@ -627,22 +627,6 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     # protected convenience methods. these methods can be used by subclasses
     # to manipulate and manage data returned from Shotgun.
 
-    def _do_depth_first_tree_deletion(self, node):
-        """
-        Depth first interation and deletion of all child nodes
-
-        :param node: :class:`~PySide.QtGui.QStandardItem` tree node
-        """
-
-        # depth first traversal
-        for index in xrange(node.rowCount()):
-            child_node = node.child(index)
-            self._do_depth_first_tree_deletion(child_node)
-
-        # delete the child leaves
-        for index in range(node.rowCount())[::-1]:
-            node.removeRow(index)
-
     def _get_all_item_unique_ids(self):
         """
         Conveneince method. Returns the unique IDs of all items in the model.
@@ -654,7 +638,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         :rtype: ``list``
         """
 
-        return self._tree_data.keys()
+        return self.__tree_data.keys()
 
     def _get_item_by_unique_id(self, uid):
         """
@@ -669,10 +653,10 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         :rtype: :class:`~PySide.QtGui.QStandardItem`
         """
 
-        if uid not in self._tree_data:
+        if uid not in self.__tree_data:
             return None
 
-        return self._tree_data[uid]
+        return self.__tree_data[uid]
 
     def _load_cached_data(self):
         """
@@ -769,6 +753,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     ############################################################################
     # additional method used during de/serialization of model contents
 
+    @filesystem.with_cleared_umask
     def _save_to_disk(self):
         """
         Save the model to disk using QDataStream serialization.
@@ -777,13 +762,11 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         filename = self._cache_path
 
-        old_umask = os.umask(0)
         try:
             # try to create the cache folder with as open permissions as
             # possible
             cache_dir = os.path.dirname(filename)
-            if not os.path.exists(cache_dir):
-                os.makedirs(cache_dir, 0777)
+            filesystem.ensure_folder_exists(cache_dir, 0777)
 
             # write cache file
             fh = QtCore.QFile(filename)
@@ -805,7 +788,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                 out_stream.setVersion(QtCore.QDataStream.Qt_4_0)
 
                 root = self.invisibleRootItem()
-                self._save_to_disk_r(out_stream, root, 0)
+                self.__save_to_disk_r(out_stream, root, 0)
 
             finally:
                 fh.close()
@@ -817,33 +800,28 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             logger.warning(
                 "Could not write cache file '%s' to disk: %s" % (filename, e))
 
-        finally:
-            os.umask(old_umask)
-
-    def _save_to_disk_r(self, stream, item, depth):
-        """
-        Recursive tree writer
-        """
-        num_rows = item.rowCount()
-        for row in range(num_rows):
-            # write this
-            child = item.child(row)
-            # only write shotgun data!
-            # data from external sources is never serialized
-            if child.data(self.IS_SG_MODEL_ROLE):
-                child.write(stream)
-                stream.writeInt32(depth)
-
-            if child.hasChildren():
-                # write children
-                self._save_to_disk_r(stream, child, depth+1)
-
     ############################################################################
     # private methods
 
+    def __do_depth_first_tree_deletion(self, node):
+        """
+        Depth first interation and deletion of all child nodes
+
+        :param node: :class:`~PySide.QtGui.QStandardItem` tree node
+        """
+
+        # depth first traversal
+        for index in xrange(node.rowCount()):
+            child_node = node.child(index)
+            self.__do_depth_first_tree_deletion(child_node)
+
+        # delete the child leaves
+        for index in range(node.rowCount())[::-1]:
+            node.removeRow(index)
+
     def __load_from_disk(self):
         """
-        Load a serialized model from disk.
+        Load a serialized model from disk./
 
         :returns: Number of items loaded
         """
@@ -882,7 +860,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
                 # keep a reference to this object to make GC happy (pyside may
                 # crash otherwise)
-                self._all_tree_items.append(item)
+                self.__all_tree_items.append(item)
                 item.read(in_stream)
                 node_depth = in_stream.readInt32()
 
@@ -896,7 +874,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                     # unique identifier
                     uid = sg_data.get(self.SG_DATA_UNIQUE_ID_FIELD)
                     if uid:
-                        self._tree_data[uid] = item
+                        self.__tree_data[uid] = item
 
                 # serialized items contain some sort of strange low-rez thumb
                 # data which we cannot use. Make sure that is all cleared.
@@ -944,4 +922,29 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             fh.close()
 
         return num_items_loaded
+
+    def __save_to_disk_r(self, stream, item, depth):
+        """
+        Recursive tree writer.
+
+        Recursively writes the item and its children to the supplied stream.
+
+        :param stream: A ``QtCore.QDataStream`` for serializing the items
+        :param item: The item to serialize recursively
+        :param int depth: The current depth
+        """
+        num_rows = item.rowCount()
+        for row in range(num_rows):
+            # write this
+            child = item.child(row)
+            # only write shotgun data!
+            # data from external sources is never serialized
+            if child.data(self.IS_SG_MODEL_ROLE):
+                child.write(stream)
+                stream.writeInt32(depth)
+
+            if child.hasChildren():
+                # write children
+                self.__save_to_disk_r(stream, child, depth+1)
+
 

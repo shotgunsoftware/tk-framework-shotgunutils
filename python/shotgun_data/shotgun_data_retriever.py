@@ -217,16 +217,23 @@ class ShotgunDataRetriever(QtCore.QObject):
             # we don't own the task manager so just stop any tasks we might be running 
             # and disconnect from it:
             self._task_manager.stop_task_group(self._bg_tasks_group)
+
             # make sure we don't get exceptions trying to disconnect if the
-            # signals were never connected.
+            # signals were never connected or somehow disconnected externally.
             try:
                 self._task_manager.task_completed.disconnect(self._on_task_completed)
-            except (TypeError, RuntimeError):  # was never connected
-                pass
+            except (TypeError, RuntimeError), e:  # was never connected
+                self._bundle.log_warning(
+                    "Could not disconnect '_on_task_completed' slot from the "
+                    "task manager's 'task_completed' signal: %s" % (e,)
+                )
             try:
                 self._task_manager.task_failed.disconnect(self._on_task_failed)
-            except (TypeError, RuntimeError):  # was never connected
-                pass
+            except (TypeError, RuntimeError), e:  # was never connected
+                self._bundle.log_debug(
+                    "Could not disconnect '_on_task_failed' slot from the "
+                    "task manager's 'task_failed' signal: %s" % (e,)
+                )
 
             self._task_manager = None
 
@@ -409,6 +416,9 @@ class ShotgunDataRetriever(QtCore.QObject):
     def execute_nav_expand(self, *args, **kwargs):
         """
         Executes a Shotgun ``nav_expand`` query asynchronously.
+
+        See the python api documentation here:
+            https://github.com/shotgunsoftware/python-api/wiki
 
         This method takes the same parameters as the Shotgun ``nav_expand()`` call.
 

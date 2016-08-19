@@ -17,6 +17,12 @@ from .util import get_sg_data as util_get_sg_data
 class ShotgunStandardItem(QtGui.QStandardItem):
     """
     Special implementation of StandardItem which bridges PyQt and PySide.
+
+    .. warning:: Do *NOT* construct instances of this class and then manually
+        them to an existing ``ShotgunQueryModel`` (or one of its subclasses).
+        Doing so will likely causes memory issues or issues centered around
+        garbage collection as the model classes take a lot of care to know
+        exactly which items exist, when they're added/removed etc.
     """
 
     def __repr__(self):
