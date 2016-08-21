@@ -5,8 +5,9 @@ The Shotgun Utils Framework contains a collection of helpers and tools to make i
 painless to build consistent looking applications. It contains several modules which can each
 be used independently:
 
-- A Shotgun Data Model deriving from :class:`~PySide.QtGui.QStandardItemModel` which makes it easy
-  to quickly build responsive, data rich applications quickly.
+- Shotgun Data and Shotgun Hierarchy models deriving from
+  :class:`~PySide.QtGui.QStandardItemModel` which makes it easy to quickly build
+  responsive, rich applications with data from your Shotgun site.
 
 - A settings system handles per-user preferences and makes it easy to work with the
   :class:`~PySide.QtCore.QSettings` class from within your app code.
@@ -29,8 +30,9 @@ Contents:
    :maxdepth: 2
 
    shotgun_model
+   shotgun_hierarchy_model
    shotgun_data
    task_manager
    settings
    shotgun_globals
-   
+

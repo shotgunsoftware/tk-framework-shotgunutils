@@ -74,19 +74,19 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     Class Members
     -------------
 
-    Subclasses can set a ``SG_QUERY_MODEL_ITEM_CLASS`` class member that
+    Subclasses can set a ``_SG_QUERY_MODEL_ITEM_CLASS`` class member that
     identifies the class of item to use when constructing the model. This is
     also used during deserialization to create model items. The default is
     the ``ShotgunStandardItem``. If overriding, the class must subclass from
     ``ShotgunStandardItem``.
 
-        SG_QUERY_MODEL_ITEM_CLASS = ShotgunStandardItem
+        _SG_QUERY_MODEL_ITEM_CLASS = ShotgunStandardItem
 
-    Subclasses must also define the ``SG_DATA_UNIQUE_ID_FIELD`` class member.
+    Subclasses must also define the ``_SG_DATA_UNIQUE_ID_FIELD`` class member.
     This is used to specify the field in the Shotgun payload that is used to
     uniquely identify an item in the model.
 
-        SG_DATA_UNIQUE_ID_FIELD = "id"
+        _SG_DATA_UNIQUE_ID_FIELD = "id"
 
     """
 
@@ -118,10 +118,10 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
     # subclasses should define a unique id field from the SG data for use in
     # caching and associating data with items in the model
-    SG_DATA_UNIQUE_ID_FIELD = None
+    _SG_DATA_UNIQUE_ID_FIELD = None
 
     # subclasses should define the class to use when loading items from disk
-    SG_QUERY_MODEL_ITEM_CLASS = ShotgunStandardItem
+    _SG_QUERY_MODEL_ITEM_CLASS = ShotgunStandardItem
 
     # ---- caching/serialization related costants
 
@@ -159,10 +159,10 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         """
 
         # ensure subclasses define the required class members
-        if not self.SG_DATA_UNIQUE_ID_FIELD:
+        if not self._SG_DATA_UNIQUE_ID_FIELD:
             raise ShotgunModelError(
                 "ShotgunQueryModel subclass does not define the instance attr: "
-                "`SG_DATA_UNIQUE_ID_FIELD`"
+                "`_SG_DATA_UNIQUE_ID_FIELD`"
             )
 
         # intialize the Qt base class
@@ -474,8 +474,8 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         """
 
         data = get_sg_data(item)
-        if data and self.SG_DATA_UNIQUE_ID_FIELD in data:
-            uid = data.get(self.SG_DATA_UNIQUE_ID_FIELD)
+        if data and self._SG_DATA_UNIQUE_ID_FIELD in data:
+            uid = data.get(self._SG_DATA_UNIQUE_ID_FIELD)
             # remove the item from the tree data lookup
             del self.__tree_data[uid]
 
@@ -520,9 +520,9 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         # try to retrieve the uniqe identifier for this item via the data
         data = get_sg_data(item)
-        if data and self.SG_DATA_UNIQUE_ID_FIELD in data:
+        if data and self._SG_DATA_UNIQUE_ID_FIELD in data:
             # found the field in the data. store the item in the lookup
-            uid = data[self.SG_DATA_UNIQUE_ID_FIELD]
+            uid = data[self._SG_DATA_UNIQUE_ID_FIELD]
             self.__tree_data[uid] = item
 
         return item
@@ -576,8 +576,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         Later on in the data load cycle, if the model was instantiated with the
         `download_thumbs` parameter set to True, the standard Shotgun ``image``
         field thumbnail will be automatically downloaded for all items (or
-        picked up from local cache if possible). When these real thumbnails
-        arrive, the meth:`_populate_thumbnail()` method will be called.
+        picked up from local cache if possible).
 
         :param item: :class:`~PySide.QtGui.QStandardItem` that is about to be
             added to the model.  This has been primed with the standard
@@ -632,7 +631,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         Conveneince method. Returns the unique IDs of all items in the model.
 
         The unique IDs correspond to the field defined by
-        ``SG_DATA_UNIQUE_ID_FIELD``
+        ``_SG_DATA_UNIQUE_ID_FIELD``
 
         :return: A list of uniqe ids for all items in the model.
         :rtype: ``list``
@@ -645,7 +644,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         Convenience method. Returns an item given a unique ID.
 
         The unique ``uid`` corresponds to the field defined by
-        ``SG_DATA_UNIQUE_ID_FIELD``
+        ``_SG_DATA_UNIQUE_ID_FIELD``
 
         :param id: The unique id for an item in the model.
 
@@ -855,7 +854,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             while not in_stream.atEnd():
 
                 # this is the item where the deserialized data will live
-                item = self.SG_QUERY_MODEL_ITEM_CLASS()
+                item = self._SG_QUERY_MODEL_ITEM_CLASS()
                 num_items_loaded += 1
 
                 # keep a reference to this object to make GC happy (pyside may
@@ -872,7 +871,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                 if sg_data:
                     # add the model item to our tree data dict keyed by the
                     # unique identifier
-                    uid = sg_data.get(self.SG_DATA_UNIQUE_ID_FIELD)
+                    uid = sg_data.get(self._SG_DATA_UNIQUE_ID_FIELD)
                     if uid:
                         self.__tree_data[uid] = item
 

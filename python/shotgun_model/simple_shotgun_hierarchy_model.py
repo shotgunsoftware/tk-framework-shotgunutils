@@ -52,7 +52,7 @@ class SimpleShotgunHierarchyModel(ShotgunHierarchyModel):
 
         .. note:: For additional information on the ``path``,
             ``seed_entity_field``, and ``entity_fields`` arguments, please see
-            the `<python-api docs http://developer.shotgunsoftware.com/python-api/reference.html#shotgun>`_.
+            the `python-api docs <http://developer.shotgunsoftware.com/python-api/reference.html#shotgun>`_.
 
         """
 

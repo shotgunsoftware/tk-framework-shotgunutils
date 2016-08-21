@@ -26,9 +26,9 @@ logger = sgtk.platform.get_logger(__name__)
 
 class ShotgunModel(ShotgunQueryModel):
     """
-    A QT Model representing a Shotgun query.
+    A Qt Model representing a Shotgun query.
 
-    This class implements a standard  :class:`~PySide.QtCore.QAbstractItemModel`
+    This class implements a standard :class:`~PySide.QtCore.QAbstractItemModel`
     specialized to hold the contents of a particular Shotgun query. It is cached
     and refreshes its data asynchronously.
 
@@ -41,7 +41,7 @@ class ShotgunModel(ShotgunQueryModel):
     """
 
     # data field that uniquely identifies an entity
-    SG_DATA_UNIQUE_ID_FIELD = "id"
+    _SG_DATA_UNIQUE_ID_FIELD = "id"
 
     # Custom model role that holds the associated value
     SG_ASSOCIATED_FIELD_ROLE = QtCore.Qt.UserRole + 3
@@ -75,6 +75,7 @@ class ShotgunModel(ShotgunQueryModel):
         :param bg_task_manager:  Background task manager to use for any asynchronous work. If
                                  this is None then a task manager will be created as needed.
         :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
+
         """
         super(ShotgunModel, self).__init__(parent, bg_task_manager)
 
@@ -166,8 +167,7 @@ class ShotgunModel(ShotgunQueryModel):
               ['sg_status', 'is', 'ip']
             ]
 
-        :param item: One of the :class:`~PySide.QtGui.QStandardItem`s that are
-                     associated with this model.
+        :param item: One of the :class:`~PySide.QtGui.QStandardItem` items that are associated with this model.
         :returns: standard shotgun filter list to represent that item
         """
         # prime filters with our base query
@@ -651,7 +651,7 @@ class ShotgunModel(ShotgunQueryModel):
             data = get_sg_data(primary_item)
             for column in columns:
                 # set the display role to the string representation of the value
-                column_item = self.SG_QUERY_MODEL_ITEM_CLASS(self.__generate_display_name(column, data))
+                column_item = self._SG_QUERY_MODEL_ITEM_CLASS(self.__generate_display_name(column, data))
                 column_item.setEditable(column in self.__editable_fields)
 
                 # set associated field role to be the column value itself
@@ -1060,7 +1060,7 @@ class ShotgunModel(ShotgunQueryModel):
         """
 
         # construct tree view node object
-        item = self.SG_QUERY_MODEL_ITEM_CLASS(field_display_name)
+        item = self._SG_QUERY_MODEL_ITEM_CLASS(field_display_name)
         item.setEditable(field in self.__editable_fields)
 
         # keep tabs of which items we are creating

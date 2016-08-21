@@ -21,7 +21,6 @@ from sgtk.platform.qt import QtCore, QtGui
 from .shotgun_hierarchy_item import ShotgunHierarchyItem
 from .shotgun_query_model import ShotgunQueryModel
 from .util import get_sg_data, sanitize_qt, sanitize_for_qt_model
-from ..utils import color_mix
 
 # logger for this module
 logger = sgtk.platform.get_logger(__name__)
@@ -29,11 +28,11 @@ logger = sgtk.platform.get_logger(__name__)
 
 class ShotgunHierarchyModel(ShotgunQueryModel):
     """
-    A QT Model representing a Shotgun hierarchy query (``nav_expand()``).
+    A Qt Model representing a Shotgun hierarchy query (``nav_expand()``).
 
-    This class implements the
-    :class:`~shotgunutils.shotgun_model.ShotgunQueryModel` interface. It is
-    cached and refreshes its data asynchronously.
+    This class implements a standard :class:`~PySide.QtCore.QAbstractItemModel`
+    specialized to hold the contents of a particular Shotgun query. It is cached
+    and refreshes its data asynchronously.
 
     In order to use this class, you normally subclass it and implement certain
     key data methods for setting up queries, customizing etc. Then you connect
@@ -43,25 +42,25 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     The model stores a single column, lazy-loaded Shotgun Hierarchy as queried
     via the ``nav_expand()`` python-api method. The structure of items in the
     hierarchy mimics what is found in Shotgun as configured in each project's
-    *Tracking Settings*.
+    `Tracking Settings <https://support.shotgunsoftware.com/hc/en-us/articles/219031138-Project-Tracking-Settings>`_.
     """
 
     # data field that uniquely identifies an entity
-    SG_DATA_UNIQUE_ID_FIELD = "url"
+    _SG_DATA_UNIQUE_ID_FIELD = "url"
     # The results from the API call is a field called `url`. Ideally we'd be
     # consistent here and call it `path`. There's an internal ticket to make it
     # so, but for now we use `url`.
 
     # constant values to refer to the fields where the paths are stored in the
     # returned navigation data.
-    SG_PATH_FIELD = "url"
-    SG_PARENT_PATH_FIELD = "parent_url"
+    _SG_PATH_FIELD = "url"
+    _SG_PARENT_PATH_FIELD = "parent_url"
 
     # data role used to track whether more data has been fetched for items
-    SG_ITEM_FETCHED_MORE = QtCore.Qt.UserRole + 3
+    _SG_ITEM_FETCHED_MORE = QtCore.Qt.UserRole + 3
 
     # use hierarchy items when building the model
-    SG_QUERY_MODEL_ITEM_CLASS = ShotgunHierarchyItem
+    _SG_QUERY_MODEL_ITEM_CLASS = ShotgunHierarchyItem
 
     def __repr__(self):
         """
@@ -115,6 +114,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # can be overridden in subclasses via ``_finalize_item()`` though.
         base_color = QtGui.QApplication.instance().palette().base().color()
         text_color = QtGui.QApplication.instance().palette().text().color()
+
+        # local import to avoid doc generation issues
+        from ..utils import color_mix
         self._empty_item_color = color_mix(text_color, 1, base_color, 2)
 
     ############################################################################
@@ -207,10 +209,10 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         if not item_data:
             return
 
-        path = item_data[self.SG_PATH_FIELD]
+        path = item_data[self._SG_PATH_FIELD]
 
         # set the flag to prevent subsequent attempts to fetch more
-        item.setData(True, self.SG_ITEM_FETCHED_MORE)
+        item.setData(True, self._SG_ITEM_FETCHED_MORE)
 
         # query the information for this item to populate its children.
         # the slot for handling worker success will handle inserting the
@@ -237,7 +239,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # get the item and it's stored hierarchy data
         item = self.itemFromIndex(index)
 
-        if item.data(self.SG_ITEM_FETCHED_MORE):
+        if item.data(self._SG_ITEM_FETCHED_MORE):
             # more data has already been queried for this item
             return False
 
@@ -333,7 +335,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         .. note:: For additional information on the ``path``,
             ``seed_entity_field``, and ``entity_fields`` arguments, please see
-            the `<python-api docs http://developer.shotgunsoftware.com/python-api/reference.html#shotgun>`_.
+            the `python-api docs <http://developer.shotgunsoftware.com/python-api/reference.html#shotgun>`_.
 
         :return:
         """
@@ -489,36 +491,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
                 self._entity_fields
             )
 
-    def _update_item(self, item, data):
-        """
-        Updates the supplied item with the newly queried data.
-
-        :param item: A :class:`~PySide.QtGui.QStandardItem` instance to update.
-        :param dict data: The newly queried data.
-
-        :return: ``True`` if the item was updated, ``False`` otherwise.
-        """
-
-        # get a copy of the data and remove the child item info so that
-        # each item in the tree only stores data about itself
-        new_item_data = copy.deepcopy(data)
-        if "children" in data.keys():
-            del new_item_data["children"]
-
-        # compare with the item's existing data
-        old_item_data = get_sg_data(item)
-        if self._sg_compare_data(old_item_data, new_item_data):
-            # data has not changed
-            return False
-
-        # data differs. set the new data
-        item.setData(sanitize_for_qt_model(new_item_data), self.SG_DATA_ROLE)
-
-        # ensure the label is updated
-        item.setText(data["label"])
-
-        return True
-
     ############################################################################
     # private methods
 
@@ -544,17 +516,17 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         if data.get("ref", {}).get("kind") == "root":
             return self.invisibleRootItem()
 
-        item = self.SG_QUERY_MODEL_ITEM_CLASS(data["label"])
+        item = self._SG_QUERY_MODEL_ITEM_CLASS(data["label"])
         item.setEditable(False)
 
         # keep tabs of which items we are creating
         item.setData(True, self.IS_SG_MODEL_ROLE)
 
         # we have not fetched more data for this item yet
-        item.setData(False, self.SG_ITEM_FETCHED_MORE)
+        item.setData(False, self._SG_ITEM_FETCHED_MORE)
 
         # attach the nav data for access later
-        self._update_item(item, data)
+        self.__update_item(item, data)
 
         # allow item customization prior to adding to model
         self._item_created(item)
@@ -572,7 +544,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # identify a parent if none supplied. could be found via the parent
         # supplied in the data or the root if no parent item exists.
         parent = parent or self.item_from_path(
-            data.get(self.SG_PARENT_PATH_FIELD)) or self.invisibleRootItem()
+            data.get(self._SG_PARENT_PATH_FIELD)) or self.invisibleRootItem()
 
         if row is not None:
             parent.insertRow(row, item)
@@ -667,7 +639,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             child_item = item.child(row)
 
             data = get_sg_data(child_item)
-            if not item.is_entity_related():
+            # invisible root item does not have this property
+            if hasattr(item, 'is_entity_related') and not item.is_entity_related():
                 # empty items don't have valid paths to query
                 continue
 
@@ -676,7 +649,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
                 # not been queried. do nothing.
                 continue
 
-            paths.append(data[self.SG_PATH_FIELD])
+            paths.append(data[self._SG_PATH_FIELD])
 
             # recurse
             paths.extend(self.__get_queried_paths_r(child_item))
@@ -726,7 +699,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         else:
 
             # ensure we have a path for the item
-            item_path = nav_data.get(self.SG_PATH_FIELD, None)
+            item_path = nav_data.get(self._SG_PATH_FIELD, None)
             logger.debug("Got hierarchy data for path: %s" % (item_path,))
 
             if not item_path:
@@ -803,6 +776,36 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # keep a lookup to map the worker id with the path it is querying
         self._running_query_lookup[worker_id] = path
 
+    def __update_item(self, item, data):
+        """
+        Updates the supplied item with the newly queried data.
+
+        :param item: A :class:`~PySide.QtGui.QStandardItem` instance to update.
+        :param dict data: The newly queried data.
+
+        :return: ``True`` if the item was updated, ``False`` otherwise.
+        """
+
+        # get a copy of the data and remove the child item info so that
+        # each item in the tree only stores data about itself
+        new_item_data = copy.deepcopy(data)
+        if "children" in data.keys():
+            del new_item_data["children"]
+
+        # compare with the item's existing data
+        old_item_data = get_sg_data(item)
+        if self._sg_compare_data(old_item_data, new_item_data):
+            # data has not changed
+            return False
+
+        # data differs. set the new data
+        item.setData(sanitize_for_qt_model(new_item_data), self.SG_DATA_ROLE)
+
+        # ensure the label is updated
+        item.setText(data["label"])
+
+        return True
+
     def __update_subtree(self, item, nav_data):
         """
         Updates the subtree rooted at the supplied item with the supplied data.
@@ -818,7 +821,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         """
 
         # ensure the item's data is up-to-date
-        subtree_updated = self._update_item(item, nav_data)
+        subtree_updated = self.__update_item(item, nav_data)
 
         children_data = nav_data.get("children")
 
@@ -829,18 +832,18 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         for child_data in children_data:
 
-            if self.SG_PATH_FIELD not in child_data:
+            if self._SG_PATH_FIELD not in child_data:
                 item_data = get_sg_data(item)
-                parent_path = item_data[self.SG_PATH_FIELD]
+                parent_path = item_data[self._SG_PATH_FIELD]
 
                 # handle the case where there are child leaves without paths.
                 # these tend to be just items that make it clear there are no
                 # children. example: "No Shots"
                 # create a dummy path so that we can find it later
-                child_data[self.SG_PATH_FIELD] = "/".join(
+                child_data[self._SG_PATH_FIELD] = "/".join(
                     [parent_path, child_data["label"]])
 
-            child_paths.append(child_data[self.SG_PATH_FIELD])
+            child_paths.append(child_data[self._SG_PATH_FIELD])
 
         # iterate over item's children to see if any need to be removed.
         # this would be the case where the supplied nav_data does not contain
@@ -849,7 +852,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         for row in reversed(range(0, item.rowCount())):
             child_item = item.child(row)
             child_data = get_sg_data(child_item)
-            child_path = child_data[self.SG_PATH_FIELD]
+            child_path = child_data[self._SG_PATH_FIELD]
             if child_path not in child_paths:
                 # removing item
                 logger.debug("Removing item: %s" % (child_item,))
@@ -859,12 +862,12 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         # add/update the children for the supplied item
         for (row, child_data) in enumerate(children_data):
-            child_path = child_data[self.SG_PATH_FIELD]
+            child_path = child_data[self._SG_PATH_FIELD]
             child_item = self.item_from_path(child_path)
 
             if child_item:
                 # child already exists, ensure data is up-to-date
-                subtree_updated = self._update_item(child_item, child_data) \
+                subtree_updated = self.__update_item(child_item, child_data) \
                     or subtree_updated
             else:
                 # child item does not exist, create it at the specified row
@@ -872,3 +875,4 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
                 subtree_updated = True
 
         return subtree_updated
+

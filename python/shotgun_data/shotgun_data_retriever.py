@@ -470,14 +470,20 @@ class ShotgunDataRetriever(QtCore.QObject):
         .. note:: The provided Attachment entity definition must contain, at a
                   minimum, the "this_file" substructure.
 
-        .. example:: {'id': 597,
-                      'this_file': {'content_type': 'image/png',
-                                    'id': 597,
-                                    'link_type': 'upload',
-                                    'name': 'test.png',
-                                    'type': 'Attachment',
-                                    'url': 'https://abc.shotgunstudio.com/file_serve/attachment/597'},
-                      'type': 'Attachment'}
+        .. code-block:: python
+
+            {
+                "id": 597,
+                "this_file": {
+                    "content_type": "image/png",
+                    "id": 597,
+                    "link_type": "upload",
+                    "name": "test.png",
+                    "type": "Attachment",
+                    "url": "https://abc.shotgunstudio.com/file_serve/attachment/597"
+                },
+                "type": "Attachment"
+            }
 
         :param dict attachment_entity: The Attachment entity to download data from.
 
