@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Globals Access &mdash; tk-framework-shotgunutils v4.4.1 documentation</title>
+  <title>Shotgun Globals Access &mdash; tk-framework-shotgunutils v4.4.5 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.4.1 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.4.5 documentation" href="index.html"/>
         <link rel="prev" title="Shotgun Toolkit QT Settings Wrapper" href="settings.html"/> 
 
   
@@ -115,7 +115,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.4.1.<br>
+    <b>tk-framework-shotgunutils</b> v4.4.5.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -202,7 +202,7 @@ singleton can refresh its cache.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_manager</strong> (<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-shotgunutils/task_manager.html#task_manager.BackgroundTaskManager" title="(in tk-framework-shotgunutils vv4.4.0)"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a>) &#8211; Background task manager to use</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_manager</strong> (<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-shotgunutils/task_manager.html#task_manager.BackgroundTaskManager" title="(in tk-framework-shotgunutils vv4.4.1)"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a>) &#8211; Background task manager to use</td>
 </tr>
 </tbody>
 </table>
@@ -216,7 +216,7 @@ singleton can refresh its cache.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_manager</strong> (<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-shotgunutils/task_manager.html#task_manager.BackgroundTaskManager" title="(in tk-framework-shotgunutils vv4.4.0)"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a>) &#8211; Background task manager to use</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_manager</strong> (<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-shotgunutils/task_manager.html#task_manager.BackgroundTaskManager" title="(in tk-framework-shotgunutils vv4.4.1)"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a>) &#8211; Background task manager to use</td>
 </tr>
 </tbody>
 </table>
@@ -420,7 +420,7 @@ If None, the current context&#8217;s project will be used.</li>
 
 <dl class="function">
 <dt id="shotgun_globals.field_is_editable">
-<code class="descclassname">shotgun_globals.</code><code class="descname">field_is_editable</code><span class="sig-paren">(</span><em>cls</em>, <em>sg_entity_type</em>, <em>field_name</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.field_is_editable" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">shotgun_globals.</code><code class="descname">field_is_editable</code><span class="sig-paren">(</span><em>cls</em>, <em>sg_entity_type</em>, <em>field_name</em>, <em>project_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.field_is_editable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a boolean identifying the editability of the entity&#8217;s field.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -429,6 +429,10 @@ If None, the current context&#8217;s project will be used.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>sg_entity_type</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the entity type</li>
 <li><strong>field_name</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the field name to check editibility</li>
+<li><strong>project_id</strong> &#8211; The project Entity id. If None, the current
+context&#8217;s project will be used, or the &#8220;site&#8221;
+cache location will be returned if the current
+context does not have an associated project.</li>
 </ul>
 </td>
 </tr>
@@ -441,7 +445,7 @@ If None, the current context&#8217;s project will be used.</li>
 
 <dl class="function">
 <dt id="shotgun_globals.field_is_visible">
-<code class="descclassname">shotgun_globals.</code><code class="descname">field_is_visible</code><span class="sig-paren">(</span><em>cls</em>, <em>sg_entity_type</em>, <em>field_name</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.field_is_visible" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">shotgun_globals.</code><code class="descname">field_is_visible</code><span class="sig-paren">(</span><em>cls</em>, <em>sg_entity_type</em>, <em>field_name</em>, <em>project_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.field_is_visible" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a boolean identifying the visibility of the entity&#8217;s field.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -450,6 +454,10 @@ If None, the current context&#8217;s project will be used.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>sg_entity_type</strong> &#8211; the entity type</li>
 <li><strong>field_name</strong> &#8211; the field name to check visibility</li>
+<li><strong>project_id</strong> &#8211; The project Entity id. If None, the current
+context&#8217;s project will be used, or the &#8220;site&#8221;
+cache location will be returned if the current
+context does not have an associated project.</li>
 </ul>
 </td>
 </tr>
@@ -517,7 +525,7 @@ dates as &#8220;Yesterday&#8221;, &#8220;Today&#8221;, or &#8220;Tomorrow&#8221;
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v4.4.1',
+            VERSION:'v4.4.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.simple_shotgun_model &mdash; tk-framework-shotgunutils v4.4.1 documentation</title>
+  <title>shotgun_model.simple_shotgun_model &mdash; tk-framework-shotgunutils v4.4.5 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.4.1 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.4.5 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -115,7 +115,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.4.1.<br>
+    <b>tk-framework-shotgunutils</b> v4.4.5.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -213,7 +213,7 @@
 
 <div class="viewcode-block" id="SimpleShotgunModel.load_data"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.SimpleShotgunModel.load_data">[docs]</a>    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">columns</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">additional_filter_presets</span><span class="o">=</span><span class="bp">None</span>
+        <span class="n">columns</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">additional_filter_presets</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">editable_columns</span><span class="o">=</span><span class="bp">None</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Loads shotgun data into the model, using the cache if possible.</span>
@@ -238,9 +238,10 @@
 <span class="sd">                  parameter, this can be used to effectively cap the data set that the model</span>
 <span class="sd">                  is handling, allowing a user to for example show the twenty most recent notes or</span>
 <span class="sd">                  similar.</span>
-<span class="sd">        :param columns: List of Shotgun fields to use to populate the model columns</span>
+<span class="sd">        :param list columns: List of Shotgun fields names to use to populate the model columns</span>
 <span class="sd">        :param additional_filter_presets: List of Shotgun filter presets to apply, e.g.</span>
 <span class="sd">                  ``[{&quot;preset_name&quot;:&quot;LATEST&quot;,&quot;latest_by&quot;:&quot;BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT&quot;}]``</span>
+<span class="sd">        :param list editable_columns: A subset of ``columns`` that will be editable in views that use this model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="n">fields</span> <span class="ow">or</span> <span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">]</span>
@@ -255,6 +256,7 @@
             <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
             <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span>
             <span class="n">additional_filter_presets</span><span class="o">=</span><span class="n">additional_filter_presets</span><span class="p">,</span>
+            <span class="n">editable_columns</span><span class="o">=</span><span class="n">editable_columns</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_data</span><span class="p">()</span></div></div>
 </pre></div>
@@ -289,7 +291,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v4.4.1',
+            VERSION:'v4.4.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

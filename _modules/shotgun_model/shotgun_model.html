@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_model &mdash; tk-framework-shotgunutils v4.4.1 documentation</title>
+  <title>shotgun_model.shotgun_model &mdash; tk-framework-shotgunutils v4.4.5 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.4.1 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.4.5 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -115,7 +115,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.4.1.<br>
+    <b>tk-framework-shotgunutils</b> v4.4.5.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -553,7 +553,7 @@
 
 <div class="viewcode-block" id="ShotgunModel._load_data"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._load_data">[docs]</a>    <span class="k">def</span> <span class="nf">_load_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">hierarchy</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">columns</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">additional_filter_presets</span><span class="o">=</span><span class="bp">None</span>
+        <span class="n">columns</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">additional_filter_presets</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">editable_columns</span><span class="o">=</span><span class="bp">None</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is the main method to use to configure the model. You basically</span>
@@ -568,6 +568,20 @@
 
 <span class="sd">        If you want to refresh the data contained in the model (which you typically</span>
 <span class="sd">        want to), call the :meth:`_refresh_data()` method.</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            # Example call from a subclass of ShotgunModel that displays assets.</span>
+<span class="sd">            # Additional &quot;code&quot; and &quot; description&quot; columns will be displayed,</span>
+<span class="sd">            # and the &quot;description&quot; column will be editable.</span>
+<span class="sd">            self._load_data(</span>
+<span class="sd">                &quot;Asset&quot;,                            # entity_type</span>
+<span class="sd">                [],                                 # filters</span>
+<span class="sd">                [&quot;sg_asset_type&quot;, &quot;code&quot;],          # hierarchy</span>
+<span class="sd">                [&quot;description&quot;],                    # fields</span>
+<span class="sd">                columns=[&quot;code&quot;, &quot;description&quot;],    # additional columns to display</span>
+<span class="sd">                editable_columns=[&quot;description&quot;],</span>
+<span class="sd">            )</span>
 
 <span class="sd">        :param entity_type:               Shotgun entity type to download</span>
 <span class="sd">        :param filters:                   List of Shotgun filters. Standard Shotgun syntax. Passing None instead</span>
@@ -605,12 +619,13 @@
 <span class="sd">                                          parameter, this can be used to effectively cap the data set that the model</span>
 <span class="sd">                                          is handling, allowing a user to for example show the twenty most recent notes or</span>
 <span class="sd">                                          similar.</span>
-<span class="sd">        :param columns:                   If columns is specified, then any leaf row in the model will have columns created where</span>
+<span class="sd">        :param list columns:              If columns is specified, then any leaf row in the model will have columns created where</span>
 <span class="sd">                                          each column in the row contains the value for the corresponding field from columns. This means</span>
 <span class="sd">                                          that the data from the loaded entity will be available field by field. Subclasses can modify</span>
 <span class="sd">                                          this behavior by overriding _get_additional_columns.</span>
 <span class="sd">        :param additional_filter_presets: List of Shotgun filter presets to apply, e.g.</span>
 <span class="sd">                                          ``[{&quot;preset_name&quot;:&quot;LATEST&quot;,&quot;latest_by&quot;:&quot;BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT&quot;}]``</span>
+<span class="sd">        :param list editable_columns:     A subset of ``columns`` that will be editable in views that use this model.</span>
 
 <span class="sd">        :returns:                         True if cached data was loaded, False if not.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -627,8 +642,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__order</span> <span class="o">=</span> <span class="n">order</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy</span> <span class="o">=</span> <span class="n">hierarchy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span> <span class="o">=</span> <span class="n">columns</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__editable_fields</span> <span class="o">=</span> <span class="n">editable_columns</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__limit</span> <span class="o">=</span> <span class="n">limit</span> <span class="ow">or</span> <span class="mi">0</span> <span class="c1"># 0 means get all matches</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__additional_filter_presets</span> <span class="o">=</span> <span class="n">additional_filter_presets</span>
+
+        <span class="c1"># make sure `editable_fields` is a subset of `column_fields`</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__editable_fields</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">tank</span><span class="o">.</span><span class="n">TankError</span><span class="p">(</span>
+                <span class="s2">&quot;The `editable_fields` argument is not a subset of `column_fields`.&quot;</span><span class="p">)</span>
 
         <span class="c1"># when we cache the data associated with this model, create</span>
         <span class="c1"># the file name and path based on several parameters.</span>
@@ -704,6 +725,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__log_debug</span><span class="p">(</span><span class="s2">&quot;Fields: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__log_debug</span><span class="p">(</span><span class="s2">&quot;Order: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__order</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__log_debug</span><span class="p">(</span><span class="s2">&quot;Columns: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__log_debug</span><span class="p">(</span><span class="s2">&quot;Editable Columns: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__editable_fields</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__log_debug</span><span class="p">(</span><span class="s2">&quot;Filter Presets: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__additional_filter_presets</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__log_debug</span><span class="p">(</span><span class="s2">&quot;First population pass: Calling _load_external_data()&quot;</span><span class="p">)</span>
@@ -1099,7 +1121,8 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">get_sg_data</span><span class="p">(</span><span class="n">primary_item</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
                 <span class="c1"># set the display role to the string representation of the value</span>
-                <span class="n">column_item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_generate_display_name</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+                <span class="n">column_item</span> <span class="o">=</span> <span class="n">ShotgunStandardItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_generate_display_name</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+                <span class="n">column_item</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="n">column</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__editable_fields</span><span class="p">)</span>
 
                 <span class="c1"># set associated field role to be the column value itself</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
@@ -1514,6 +1537,7 @@
 
         <span class="c1"># construct tree view node object</span>
         <span class="n">item</span> <span class="o">=</span> <span class="n">ShotgunStandardItem</span><span class="p">(</span><span class="n">field_display_name</span><span class="p">)</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__editable_fields</span><span class="p">)</span>
 
         <span class="c1"># keep tabs of which items we are creating</span>
         <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">IS_SG_MODEL_ROLE</span><span class="p">)</span>
@@ -1772,6 +1796,7 @@
 
 <span class="sd">        :returns: Number of items loaded</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">num_items_loaded</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="n">fh</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -1895,7 +1920,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v4.4.1',
+            VERSION:'v4.4.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

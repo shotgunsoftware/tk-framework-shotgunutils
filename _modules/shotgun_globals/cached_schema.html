@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_globals.cached_schema &mdash; tk-framework-shotgunutils v4.4.1 documentation</title>
+  <title>shotgun_globals.cached_schema &mdash; tk-framework-shotgunutils v4.4.5 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.4.1 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.4.5 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -115,7 +115,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.4.1.<br>
+    <b>tk-framework-shotgunutils</b> v4.4.5.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -269,16 +269,17 @@
 
     <span class="k">def</span> <span class="nf">_get_current_project_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Gets the project id associated with the current context, or 0</span>
-<span class="sd">        if operating in a site-level context.</span>
+<span class="sd">        Return the id of the current project.</span>
 
-<span class="sd">        :returns:   int</span>
+<span class="sd">        :returns: The project id associated with the current context, or ``None``</span>
+<span class="sd">            if operating in a site-level context.</span>
+<span class="sd">        :rtype: ``int`` or ``None``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># The project id is going to be passed around by signals, as</span>
-        <span class="c1"># well as being passed to a core hook in some situations. As</span>
-        <span class="c1"># a result, we need it to always be an int value.</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">tank</span><span class="o">.</span><span class="n">pipeline_configuration</span><span class="o">.</span><span class="n">is_site_configuration</span><span class="p">():</span>
-            <span class="n">project_id</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c1"># site configuration (no project id). Return None which is</span>
+            <span class="c1"># consistent with core.</span>
+            <span class="n">project_id</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">project_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">tank</span><span class="o">.</span><span class="n">pipeline_configuration</span><span class="o">.</span><span class="n">get_project_id</span><span class="p">()</span>
 
@@ -351,6 +352,7 @@
 
 <span class="sd">        :param project_id:  The project Entity id. If None, the current</span>
 <span class="sd">                            context&#39;s project will be used.</span>
+<span class="sd">        :returns bool: True if loaded, False if not.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
         <span class="n">status_cache_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_status_cache_path</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
@@ -371,6 +373,9 @@
                                          <span class="s2">&quot;file &#39;</span><span class="si">%s</span><span class="s2">&#39;: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">status_cache_path</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">status_loaded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">return</span> <span class="bp">False</span>
         
     <span class="k">def</span> <span class="nf">_load_cached_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -378,6 +383,7 @@
 
 <span class="sd">        :param project_id:  The project Entity id. If None, the current</span>
 <span class="sd">                            context&#39;s project will be used.</span>
+<span class="sd">        :returns bool: True if loaded, False if not.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
         <span class="n">schema_cache_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_schema_cache_path</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
@@ -394,17 +400,21 @@
                                          <span class="s2">&quot;file &#39;</span><span class="si">%s</span><span class="s2">&#39;: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">schema_cache_path</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">schema_loaded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">return</span> <span class="bp">False</span>
             
     <span class="k">def</span> <span class="nf">_check_schema_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">field_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check and potentially trigger a cache refresh.</span>
 <span class="sd">        </span>
-<span class="sd">        :param entity_type: Shotgun entity type</span>
-<span class="sd">        :param field_name:  Shotgun field name</span>
-<span class="sd">        :param project_id:  The project Entity id. If None, the current</span>
-<span class="sd">                            context&#39;s project will be used.</span>
+<span class="sd">        :param str entity_type: Shotgun entity type</span>
+<span class="sd">        :param str field_name: Shotgun field name</span>
+<span class="sd">        :param int project_id: The project Entity id. If None, the current</span>
+<span class="sd">                               context&#39;s project will be used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
+        <span class="n">current_project_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
+        <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="n">current_project_id</span>
 
         <span class="c1"># TODO: currently, this only checks if there is a full cache in memory</span>
         <span class="c1"># or not. Later on, when we have the ability to check the current </span>
@@ -412,6 +422,15 @@
         <span class="c1"># more graceful fashion.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_schema_loaded</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span> <span class="ow">and</span> <span class="n">project_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_schema_query_ids</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="c1"># schema is not requested and not loaded.</span>
+            <span class="c1"># If a schema was requested for a project that isn&#39;t the current project, then</span>
+            <span class="c1"># let&#39;s check to see if we can get it from disk before we resort to going to</span>
+            <span class="c1"># Shotgun.</span>
+            <span class="k">if</span> <span class="n">project_id</span> <span class="o">!=</span> <span class="n">current_project_id</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_cached_status</span><span class="p">(</span><span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">):</span>
+                    <span class="c1"># If we were able to load the cached schema from disk then we don&#39;t</span>
+                    <span class="c1"># have anything else to do.</span>
+                    <span class="k">return</span>
+
             <span class="c1"># so download it from shotgun!</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Starting to download new metaschema from Shotgun...&quot;</span><span class="p">)</span>
 
@@ -428,12 +447,22 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Request status data from Shotgun.</span>
 
-<span class="sd">        :param project_id:  The project Entity id. If None, the current</span>
-<span class="sd">                            context&#39;s project will be used.</span>
+<span class="sd">        :param int project_id: The project Entity id. If None, the current</span>
+<span class="sd">                               context&#39;s project will be used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
+        <span class="n">current_project_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
+        <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="n">current_project_id</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_status_loaded</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span> <span class="ow">and</span> <span class="n">project_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_status_query_ids</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="c1"># If statuses were requested for a project that isn&#39;t the current project, then</span>
+            <span class="c1"># let&#39;s check to see if we can get it from disk before we resort to going to</span>
+            <span class="c1"># Shotgun.</span>
+            <span class="k">if</span> <span class="n">project_id</span> <span class="o">!=</span> <span class="n">current_project_id</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_cached_schema</span><span class="p">(</span><span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">):</span>
+                    <span class="c1"># If we were able to load the cached schema from disk then we don&#39;t</span>
+                    <span class="c1"># have anything else to do.</span>
+                    <span class="k">return</span>
+
             <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;bg_color&quot;</span><span class="p">,</span> <span class="s2">&quot;code&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Starting to download status list from Shotgun...&quot;</span><span class="p">)</span>
             
@@ -828,20 +857,21 @@
             <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="ow">and</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">]:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span>
-            <span class="n">valid_values</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;properties&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;valid_values&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="ow">and</span> <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">]:</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span>
+                    <span class="n">valid_values</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;properties&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;valid_values&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">valid_values</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;The data type for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> does not have valid values&quot;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">sg_entity_type</span><span class="p">,</span>
-                        <span class="n">field_name</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">valid_values</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="s2">&quot;The data type for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> does not have valid values&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">sg_entity_type</span><span class="p">,</span>
+                                <span class="n">field_name</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
 
-            <span class="k">return</span> <span class="n">valid_values</span>
-
+                    <span class="k">return</span> <span class="n">valid_values</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">))</span>
 
     <span class="nd">@classmethod</span>
@@ -904,43 +934,67 @@
         <span class="k">return</span> <span class="n">status_color</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">field_is_editable</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">field_is_editable</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a boolean identifying the editability of the entity&#39;s field.</span>
 
 <span class="sd">        :param str sg_entity_type: the entity type</span>
 <span class="sd">        :param str field_name: the field name to check editibility</span>
+<span class="sd">        :param project_id:  The project Entity id. If None, the current</span>
+<span class="sd">                            context&#39;s project will be used, or the &quot;site&quot;</span>
+<span class="sd">                            cache location will be returned if the current</span>
+<span class="sd">                            context does not have an associated project.</span>
 
 <span class="sd">        :returns: ``True`` if the field is ediable, ``False`` otherwise.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="ow">and</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">sg_entity_type</span><span class="p">]:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">sg_entity_type</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span>
+        <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
+
+        <span class="c1"># make sure the project id is found in each of the type and file schemas</span>
+        <span class="c1"># and that the entity type and field name are found in their respective</span>
+        <span class="c1"># project caches</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="ow">and</span>
+            <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span> <span class="ow">and</span>
+            <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]</span> <span class="ow">and</span>
+            <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">]):</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;editable&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not determine editability from the schema.&quot;</span><span class="p">)</span>
 
-
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">))</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">field_is_visible</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">field_is_visible</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a boolean identifying the visibility of the entity&#39;s field.</span>
 
 <span class="sd">        :param sg_entity_type: the entity type</span>
 <span class="sd">        :param field_name: the field name to check visibility</span>
+<span class="sd">        :param project_id:  The project Entity id. If None, the current</span>
+<span class="sd">                            context&#39;s project will be used, or the &quot;site&quot;</span>
+<span class="sd">                            cache location will be returned if the current</span>
+<span class="sd">                            context does not have an associated project.</span>
 
 <span class="sd">        :returns: ``True`` if the field is visible, ``False`` otherwise.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
+        <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="ow">and</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">sg_entity_type</span><span class="p">]:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">sg_entity_type</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span>
+        <span class="c1"># make sure the project id is found in each of the type and file schemas</span>
+        <span class="c1"># and that the entity type and field name are found in their respective</span>
+        <span class="c1"># project caches</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="ow">and</span>
+            <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span> <span class="ow">and</span>
+            <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]</span> <span class="ow">and</span>
+            <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">]):</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;visible&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
@@ -1012,7 +1066,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v4.4.1',
+            VERSION:'v4.4.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
