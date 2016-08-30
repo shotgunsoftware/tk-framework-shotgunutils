@@ -27,7 +27,7 @@ class ShotgunHierarchyItem(ShotgunStandardItem):
 
     # constant values to refer to the fields where the paths are stored in the
     # returned navigation data.
-    SG_PATH_FIELD = "url"
+    SG_PATH_FIELD = "path"
 
     def has_children(self):
         """
@@ -102,9 +102,6 @@ class ShotgunHierarchyItem(ShotgunStandardItem):
         if not data or not self.kind():
             return None
 
-        # The results from the API call is a field called `url`. Ideally we'd be
-        # consistent here. There's an internal ticket to make it so, but for
-        # now we pull the "url".
         return data.get(self.SG_PATH_FIELD)
 
     def target_entities(self):

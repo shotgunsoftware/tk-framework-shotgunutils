@@ -46,15 +46,12 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     """
 
     # data field that uniquely identifies an entity
-    _SG_DATA_UNIQUE_ID_FIELD = "url"
-    # The results from the API call is a field called `url`. Ideally we'd be
-    # consistent here and call it `path`. There's an internal ticket to make it
-    # so, but for now we use `url`.
+    _SG_DATA_UNIQUE_ID_FIELD = "path"
 
     # constant values to refer to the fields where the paths are stored in the
     # returned navigation data.
-    _SG_PATH_FIELD = "url"
-    _SG_PARENT_PATH_FIELD = "parent_url"
+    _SG_PATH_FIELD = "path"
+    _SG_PARENT_PATH_FIELD = "parent_path"
 
     # data role used to track whether more data has been fetched for items
     _SG_ITEM_FETCHED_MORE = QtCore.Qt.UserRole + 3
