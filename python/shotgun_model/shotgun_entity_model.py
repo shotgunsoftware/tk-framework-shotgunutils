@@ -57,7 +57,7 @@ class ShotgunEntityModel(ShotgunModel):
         fields = fields or []
 
         # default icon
-        self._default_icon = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Folder.png"))
+        self._default_icon = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Folder_dark.png"))
 
         ShotgunModel.__init__(self, 
                               parent = parent,

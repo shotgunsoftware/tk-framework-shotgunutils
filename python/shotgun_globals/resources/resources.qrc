@@ -1,14 +1,20 @@
 <RCC>
   <qresource prefix="tk-framework-shotgunutils">
     <file>icon_Asset_dark.png</file>
+    <file>icon_ClientUser_dark.png</file>
     <file>icon_EventLogEntry_dark.png</file>
     <file>icon_Folder.png</file>
+    <file>icon_Folder_dark.png</file>
     <file>icon_Group_dark.png</file>
     <file>icon_HumanUser_dark.png</file>
     <file>icon_Note_dark.png</file>
+    <file>icon_Playlist_dark.png</file>
     <file>icon_Project_dark.png</file>
+    <file>icon_PublishedFile_dark.png</file>
     <file>icon_Sequence_dark.png</file>
     <file>icon_Shot_dark.png</file>
+    <file>icon_Tag_dark.png</file>
+    <file>icon_TankPublishedFile_dark.png</file>
     <file>icon_Task_dark.png</file>
     <file>icon_Ticket_dark.png</file>
     <file>icon_Version_dark.png</file>
