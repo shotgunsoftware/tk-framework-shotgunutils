@@ -257,7 +257,7 @@ class CachedShotgunSchema(QtCore.QObject):
             # let's check to see if we can get it from disk before we resort to going to
             # Shotgun.
             if project_id != current_project_id:
-                if self._load_cached_status(project_id=project_id):
+                if self._load_cached_schema(project_id=project_id):
                     # If we were able to load the cached schema from disk then we don't
                     # have anything else to do.
                     return
@@ -289,7 +289,7 @@ class CachedShotgunSchema(QtCore.QObject):
             # let's check to see if we can get it from disk before we resort to going to
             # Shotgun.
             if project_id != current_project_id:
-                if self._load_cached_schema(project_id=project_id):
+                if self._load_cached_status(project_id=project_id):
                     # If we were able to load the cached schema from disk then we don't
                     # have anything else to do.
                     return
