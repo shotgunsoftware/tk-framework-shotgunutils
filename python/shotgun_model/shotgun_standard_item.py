@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Shotgun Software Inc.
+# Copyright (c) 2016 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -8,16 +8,21 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-from .util import sanitize_qt, get_sg_data
 
 from tank.platform.qt import QtGui
 
+from .util import sanitize_qt
+from .util import get_sg_data as util_get_sg_data
 
 class ShotgunStandardItem(QtGui.QStandardItem):
     """
     Special implementation of StandardItem which bridges PyQt and PySide.
 
-    Do not construct this object directly - instead use the ShotgunModel.create_item() method.
+    .. warning:: Do *NOT* construct instances of this class and then manually
+        them to an existing ``ShotgunQueryModel`` (or one of its subclasses).
+        Doing so will likely causes memory issues or issues centered around
+        garbage collection as the model classes take a lot of care to know
+        exactly which items exist, when they're added/removed etc.
     """
 
     def __repr__(self):
@@ -27,9 +32,6 @@ class ShotgunStandardItem(QtGui.QStandardItem):
         """
         return "<%s %s>" % (self.__class__.__name__, self.text())
 
-    ########################################################################################
-    # helper methods
-
     def get_sg_data(self):
         """
         Retrieves the shotgun data associated with this item.
@@ -38,7 +40,7 @@ class ShotgunStandardItem(QtGui.QStandardItem):
 
         :returns: Shotgun data or None if no data was associated
         """
-        return get_sg_data(self)
+        return util_get_sg_data(self)
 
     ########################################################################################
     # overridden methods

@@ -11,6 +11,7 @@
 import tank
 from tank.platform.qt import QtCore, QtGui
 
+
 # precalculated for performance
 HAS_QVARIANT = hasattr(QtCore, "QVariant")
 HAS_QSTRING = hasattr(QtCore, "QString")

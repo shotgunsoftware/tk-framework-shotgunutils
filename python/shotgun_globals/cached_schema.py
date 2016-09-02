@@ -439,9 +439,24 @@ class CachedShotgunSchema(QtCore.QObject):
                 self._bundle.log_debug("Unregistering %r from schema manager" % task_manager)
                 data_retriever = dr["data_retriever"]
                 data_retriever.stop()
-                data_retriever.work_completed.disconnect(self._on_worker_signal)
-                data_retriever.work_failure.disconnect(self._on_worker_failure)
-                
+
+                # make sure we don't get exceptions trying to disconnect if the
+                # signals were never connected or somehow disconnected externally
+                try:
+                    data_retriever.work_completed.disconnect(self._on_worker_signal)
+                except (TypeError, RuntimeError), e:  # was never connected
+                    self._bundle.log_warning(
+                        "Could not disconnect '_on_worker_signal' slot from "
+                        "the task manager's 'work_completed' signal: %s" % (e,)
+                    )
+
+                try:
+                    data_retriever.work_failure.disconnect(self._on_worker_failure)
+                except (TypeError, RuntimeError), e:  # was never connected
+                    self._bundle.log_warning(
+                        "Could not disconnect '_on_worker_failure' slot from "
+                        "the task manager's 'work_failure' signal: %s" % (e,)
+                    )
             else:
                 culled_retrievers.append(dr)
 
@@ -456,6 +471,7 @@ class CachedShotgunSchema(QtCore.QObject):
         :param project_id:  The id of the project entity to load the schema for. If
                             None, the current context's project will be used.
         """
+
         self = cls.__get_instance()
 
         if self._is_schema_loaded(project_id=project_id):
