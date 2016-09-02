@@ -29,19 +29,23 @@ class SimpleShotgunHierarchyModel(ShotgunHierarchyModel):
     can also be subclassed from this class.
     """
 
-    def load_data(self, path, seed_entity_field, entity_fields=None):
+    def load_data(self, seed_entity_field, path=None, entity_fields=None):
         """
         Loads shotgun data into the model, using the cache if possible.
-
-        :param str path: The path to the root of the hierarchy to display.
-            This corresponds to the ``path`` argument of the ``nav_expand()``
-            api method. For example, ``/Project/65`` would correspond to a
-            project on you shotgun site with id of ``65``.
 
         :param str seed_entity_field: This is a string that corresponds to the
             field on an entity used to seed the hierarchy. For example, a value
             of ``Version.entity`` would cause the model to display a hierarchy
             where the leaves match the entity value of Version entities.
+
+        :param str path: The path to the root of the hierarchy to display.
+            This corresponds to the ``path`` argument of the ``nav_expand()``
+            api method. For example, ``/Project/65`` would correspond to a
+            project on you shotgun site with id of ``65``. By default, this
+            value is ``None`` and the project from the current project will
+            be used. If no project can be determined, the path will default
+            to ``/`` which is the root path, meaning all projects will be
+            represented as top-level items in the model.
 
         :param dict entity_fields: A dictionary that identifies what fields to
             include on returned entities. Since the hierarchy can include any
@@ -50,15 +54,11 @@ class SimpleShotgunHierarchyModel(ShotgunHierarchyModel):
             dict's keys correspond to the entity type and the value is a list
             of field names to return.
 
-        .. note:: For additional information on the ``path``,
-            ``seed_entity_field``, and ``entity_fields`` arguments, please see
-            the `python-api docs <http://developer.shotgunsoftware.com/python-api/reference.html#shotgun>`_.
-
         """
 
         super(SimpleShotgunHierarchyModel, self)._load_data(
-            path,
             seed_entity_field,
+            path=path,
             entity_fields=entity_fields
         )
         self._refresh_data()

@@ -255,6 +255,31 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     ############################################################################
     # protected methods
 
+    def _get_default_path(self):
+        """
+        Returns the default path to use for loading data.
+
+        Attempts to determine the current context and root at the context's
+        project level. If no project can be determined, the root path will
+        be returned.
+
+        :return: The default path to load data from.
+        :rtype: ``str``
+        """
+
+        # default, root path
+        path = "/"
+
+        current_engine = sgtk.platform.current_engine()
+        if current_engine:
+            # an engine is running
+            project = current_engine.context.project
+            if project:
+                # we have a project in the context
+                path = "/Project/%s" % (project["id"])
+
+        return path
+
     def _item_created(self, item):
         """
         Called when an item is created, before it is added to the model.
@@ -280,8 +305,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
     def _load_data(
         self,
-        path,
         seed_entity_field,
+        path=None,
         entity_fields=None,
         cache_seed=None
     ):
@@ -299,15 +324,19 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         If you want to refresh the data contained in the model (which you
         typically want to), call the :meth:`_refresh_data()` method.
 
-        :param str path: The path to the root of the hierarchy to display.
-            This corresponds to the ``path`` argument of the ``nav_expand()``
-            api method. For example, ``/Project/65`` would correspond to a
-            project on you shotgun site with id of ``65``.
-
         :param str seed_entity_field: This is a string that corresponds to the
             field on an entity used to seed the hierarchy. For example, a value
             of ``Version.entity`` would cause the model to display a hierarchy
             where the leaves match the entity value of Version entities.
+
+        :param str path: The path to the root of the hierarchy to display.
+            This corresponds to the ``path`` argument of the ``nav_expand()``
+            api method. For example, ``/Project/65`` would correspond to a
+            project on you shotgun site with id of ``65``. By default, this
+            value is ``None`` and the project from the current project will
+            be used. If no project can be determined, the path will default
+            to ``/`` which is the root path, meaning all projects will be
+            represented as top-level items in the model.
 
         :param dict entity_fields: A dictionary that identifies what fields to
             include on returned entities. Since the hierarchy can include any
@@ -330,10 +359,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             an external string via this parameter which will be added to the
             seed.
 
-        .. note:: For additional information on the ``path``,
-            ``seed_entity_field``, and ``entity_fields`` arguments, please see
-            the `python-api docs <http://developer.shotgunsoftware.com/python-api/reference.html#shotgun>`_.
-
         :return:
         """
 
@@ -345,7 +370,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         self._has_query = True
 
-        self._path = path
+        self._path = path or self._get_default_path()
         self._seed_entity_field = seed_entity_field
         self._entity_fields = entity_fields or {}
 
