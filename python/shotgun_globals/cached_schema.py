@@ -464,7 +464,7 @@ class CachedShotgunSchema(QtCore.QObject):
             self.schema_loaded.connect(callback)
 
             # kick off full schema loading
-            self._check_schema_refresh(project_id)
+            self._check_schema_refresh(project_id=project_id)
 
     @classmethod
     def get_entity_fields(cls, sg_entity_type, project_id=None):
