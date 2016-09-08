@@ -395,17 +395,16 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             an external string via this parameter which will be added to the
             seed.
 
-        :return:
+        :returns: True if cached data was loaded, False if not.
         """
 
         if not self._hierarchy_is_supported:
             self.clear()
             root = self.invisibleRootItem()
-            item = QtGui.QStandardItem(
-                "WARNING: SG version must be v7.0.2 to use the Hierarchy Model")
+            item = QtGui.QStandardItem("WARNING: SG version must be v7.0.2 or higher to use the Hierarchy Model")
             item.setEditable(False)
             root.appendRow([item])
-            return
+            return False
 
         # we are changing the query
         self.query_changed.emit()
