@@ -28,7 +28,14 @@ logger = sgtk.platform.get_logger(__name__)
 
 class ShotgunHierarchyModel(ShotgunQueryModel):
     """
-    A Qt Model representing a Shotgun hierarchy query (``nav_expand()``).
+    A Qt Model representing a Shotgun hierarchy.
+
+    .. warning::
+
+        Use of this model requires version Shotgun ``v7.0.2`` or later.
+        Attempts to construct an instance of this model on an older version of
+        Shotgun will result with a single item in the model saying that
+        Hierarchy model isn't supported. A warning will also be logged.
 
     This class implements a standard :class:`~PySide.QtCore.QAbstractItemModel`
     specialized to hold the contents of a particular Shotgun query. It is cached
@@ -77,6 +84,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         """
 
         super(ShotgunHierarchyModel, self).__init__(parent, bg_task_manager)
+
+        self._hierarchy_is_supported = self._check_hierarchy_is_supported()
 
         self._path = None
         self._seed_entity_field = None
@@ -230,6 +239,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         :type index: :class:`~PySide.QtCore.QModelIndex`
         """
 
+        if not self._hierarchy_is_supported:
+            return False
+
         if not index.isValid():
             return False
 
@@ -254,6 +266,30 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
     ############################################################################
     # protected methods
+
+    def _check_hierarchy_is_supported(self):
+        """
+        Checks the current Shotgun connection to make sure it supports
+        hierarchy queries.
+        """
+
+        # get the current shotgun connection
+        current_engine = sgtk.platform.current_engine()
+        sg_connection = current_engine.shotgun
+        server_caps = sg_connection.server_caps
+
+        if not hierarchy_is_supported(sg_connection):
+            # oops, SG version is not compatible
+            cur_sg_version = "v%s" % (
+                ".".join(map(str,server_caps.version)))
+            logger.warning(
+                "The version of the Shotgun site %s is %s.\n"
+                "Version %s is required to use the ShotgunHierarchyModel" %
+                (server_caps.host, cur_sg_version, "v7.0.2")
+            )
+            return False
+
+        return True
 
     def _get_default_path(self):
         """
@@ -349,7 +385,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             Advanced parameter. With each shotgun query being cached on disk,
             the model generates a cache seed which it is using to store data on
             disk. Since the cache data on disk is a reflection of a particular
-            ``nav_dev()`` query, this seed is typically generated from the
+            hierarchy query, this seed is typically generated from the
             seed entity field and return entity fields supplied to this method.
             However, in cases where you are doing advanced subclassing, for
             example when you are culling out data based on some external state,
@@ -359,8 +395,16 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             an external string via this parameter which will be added to the
             seed.
 
-        :return:
+        :returns: True if cached data was loaded, False if not.
         """
+
+        if not self._hierarchy_is_supported:
+            self.clear()
+            root = self.invisibleRootItem()
+            item = QtGui.QStandardItem("WARNING: SG version must be v7.0.2 or higher to use the Hierarchy Model")
+            item.setEditable(False)
+            root.appendRow([item])
+            return False
 
         # we are changing the query
         self.query_changed.emit()
@@ -497,6 +541,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         that all existing items from the model are removed. This does affect
         view related states such as selection.
         """
+
+        if not self._hierarchy_is_supported:
+            return
 
         # get a list of all paths to update. these will be paths for all
         # existing items that are not empty or have no children already queried.
@@ -897,4 +944,23 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
                 subtree_updated = True
 
         return subtree_updated
+
+def hierarchy_is_supported(sg_connection):
+    """
+    Checks the current Shotgun connection to make sure it supports
+    hierarchy queries.
+
+    :param sg_connection: A shotgun connection.
+
+    :returns: ``True`` if hierarchy supported, ``False`` otherwise.
+    """
+
+    server_caps = sg_connection.server_caps
+
+    # make sure we're greater than or equal to SG v7.0.2
+    return (
+        hasattr(sg_connection, "server_caps") and
+        server_caps.version and
+        server_caps.version >= (7, 0, 2)
+    )
 
