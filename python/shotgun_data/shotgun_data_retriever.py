@@ -1112,7 +1112,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         elif action == "download_attachment":
             attachment_task_id = self._attachment_task_id_map.get(task_id)
             if attachment_task_id is not None:
-                del self.__attachment_task_id_map[task_id]
+                del self._attachment_task_id_map[task_id]
                 self.work_completed.emit(
                     str(attachment_task_id),
                     "find",
@@ -1137,6 +1137,12 @@ class ShotgunDataRetriever(QtCore.QObject):
             orig_task_id = task_id
             task_id = self._thumb_task_id_map[task_id]
             del self._thumb_task_id_map[orig_task_id]
+
+        # remap task ids for attachments:
+        if task_id in self._attachment_task_id_map:
+            orig_task_id = task_id
+            task_id = self._attachment_task_id_map[task_id]
+            del self._attachment_task_id_map[orig_task_id]
 
         # emit failure signal:
         self.work_failure.emit(str(task_id), msg)
