@@ -257,7 +257,7 @@ class CachedShotgunSchema(QtCore.QObject):
             # let's check to see if we can get it from disk before we resort to going to
             # Shotgun.
             if project_id != current_project_id:
-                if self._load_cached_status(project_id=project_id):
+                if self._load_cached_schema(project_id=project_id):
                     # If we were able to load the cached schema from disk then we don't
                     # have anything else to do.
                     return
@@ -289,7 +289,7 @@ class CachedShotgunSchema(QtCore.QObject):
             # let's check to see if we can get it from disk before we resort to going to
             # Shotgun.
             if project_id != current_project_id:
-                if self._load_cached_schema(project_id=project_id):
+                if self._load_cached_status(project_id=project_id):
                     # If we were able to load the cached schema from disk then we don't
                     # have anything else to do.
                     return
@@ -480,7 +480,7 @@ class CachedShotgunSchema(QtCore.QObject):
             self.schema_loaded.connect(callback)
 
             # kick off full schema loading
-            self._check_schema_refresh(project_id)
+            self._check_schema_refresh(project_id=project_id)
 
     @classmethod
     def get_entity_fields(cls, sg_entity_type, project_id=None):
