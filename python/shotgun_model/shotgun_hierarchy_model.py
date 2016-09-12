@@ -751,6 +751,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # pre-process data
         nav_data = self._before_data_processing(nav_data)
 
+        # ensure the data is clean
+        nav_data = self._sg_clean_data(nav_data)
+
         if self._request_full_refresh:
             # full refresh requested
 

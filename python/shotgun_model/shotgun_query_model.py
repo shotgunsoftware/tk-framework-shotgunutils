@@ -8,6 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+import datetime
 import os
 import urlparse
 import time
@@ -696,6 +697,48 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                 "Error reported: %s" % (e,)
             )
             return False
+
+    def _sg_clean_data(self, sg_data):
+        """
+        Recursively clean the supplied SG data for use by clients.
+
+        This method currently handles:
+
+            - Converting datetime objects to universal time stamps.
+
+        :param sg_data:
+        :return:
+        """
+        # Older versions of Shotgun return special timezone classes. QT is
+        # struggling to handle these. In fact, on linux it is struggling to
+        # serialize any complex object via QDataStream. So we need to account
+        # for this for older versions of SG.
+        #
+        # Convert time stamps to unix time. Unix time is a number representing
+        # the timestamp in the number of seconds since 1 Jan 1970 in the UTC
+        # timezone. So a unix timestamp is universal across time zones and DST
+        # changes.
+        #
+        # When you are pulling data from the shotgun model and want to convert
+        # this unix timestamp to a *local* timezone object, which is typically
+        # what you want when you are displaying a value on screen, use the
+        # following code:
+        # >>> local_datetime = datetime.fromtimestamp(unix_time)
+        #
+        # furthermore, if you want to turn that into a nicely formatted string:
+        # >>> local_datetime.strftime('%Y-%m-%d %H:%M')
+
+        if isinstance(sg_data, dict):
+            for k in sg_data.keys():
+                sg_data[k] = self._sg_clean_data(sg_data[k])
+        elif isinstance(sg_data, list):
+            for i in range(len(sg_data)):
+                sg_data[i] = self._sg_clean_data(sg_data[i])
+        elif isinstance(sg_data, datetime.datetime):
+            # convert to unix timestamp, local time zone
+            sg_data = time.mktime(sg_data.timetuple())
+
+        return sg_data
 
     def _sg_compare_data(self, a, b):
         """

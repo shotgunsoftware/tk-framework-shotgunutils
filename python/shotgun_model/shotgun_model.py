@@ -773,6 +773,9 @@ class ShotgunModel(ShotgunQueryModel):
         # pre-process data
         sg_data = self._before_data_processing(sg_data)
 
+        # ensure the data is clean
+        sg_data = self._sg_clean_data(sg_data)
+
         modifications_made = False
 
         if len(self._get_all_item_unique_ids()) == 0 or self._request_full_refresh:
