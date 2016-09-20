@@ -280,13 +280,19 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         if not hierarchy_is_supported(sg_connection):
             # oops, SG version is not compatible
-            cur_sg_version = "v%s" % (
-                ".".join(map(str,server_caps.version)))
-            logger.warning(
-                "The version of the Shotgun site %s is %s.\n"
-                "Version %s is required to use the ShotgunHierarchyModel" %
-                (server_caps.host, cur_sg_version, "v7.0.2")
-            )
+            if not hasattr(sg_connection, "nav_expand"):
+                logger.warning(
+                    "The version of the python-api you are using does not "
+                    "support hierarchy queries."
+                )
+            else:
+                cur_sg_version = "v%s" % (
+                    ".".join(map(str,server_caps.version)))
+                logger.warning(
+                    "The version of the Shotgun site %s is %s.\n"
+                    "Version %s is required to use the ShotgunHierarchyModel" %
+                    (server_caps.host, cur_sg_version, "v7.0.2")
+                )
             return False
 
         return True
@@ -401,7 +407,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         if not self._hierarchy_is_supported:
             self.clear()
             root = self.invisibleRootItem()
-            item = QtGui.QStandardItem("WARNING: SG version must be v7.0.2 or higher to use the Hierarchy Model")
+            item = QtGui.QStandardItem("WARNING: Hierarchy not supported. See logged warnings for details.")
             item.setEditable(False)
             root.appendRow([item])
             return False
@@ -964,6 +970,7 @@ def hierarchy_is_supported(sg_connection):
     return (
         hasattr(sg_connection, "server_caps") and
         server_caps.version and
-        server_caps.version >= (7, 0, 2)
+        server_caps.version >= (7, 0, 2) and
+        hasattr(sg_connection, "nav_expand")
     )
 
