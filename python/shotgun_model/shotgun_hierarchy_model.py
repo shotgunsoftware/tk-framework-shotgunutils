@@ -22,9 +22,6 @@ from .shotgun_hierarchy_item import ShotgunHierarchyItem
 from .shotgun_query_model import ShotgunQueryModel
 from .util import get_sg_data, sanitize_qt, sanitize_for_qt_model
 
-# logger for this module
-logger = sgtk.platform.get_logger(__name__)
-
 
 class ShotgunHierarchyModel(ShotgunQueryModel):
     """
@@ -85,7 +82,12 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         super(ShotgunHierarchyModel, self).__init__(parent, bg_task_manager)
 
-        self._hierarchy_is_supported = self._check_hierarchy_is_supported()
+        # check for hierarchy support
+        (self._hierarchy_is_supported, self._hierarchy_not_supported_reason) = \
+            self.__hierarchy_is_supported()
+
+        if not self._hierarchy_is_supported:
+            self._log_warning(self._hierarchy_not_supported_reason)
 
         self._path = None
         self._seed_entity_field = None
@@ -223,7 +225,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # query the information for this item to populate its children.
         # the slot for handling worker success will handle inserting the
         # queried data into the tree.
-        logger.debug("Fetching more for item: %s" % (item.text(),))
+        self._log_debug("Fetching more for item: %s" % (item.text(),))
         self.__query_hierarchy(
             path,
             self._seed_entity_field,
@@ -266,36 +268,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
     ############################################################################
     # protected methods
-
-    def _check_hierarchy_is_supported(self):
-        """
-        Checks the current Shotgun connection to make sure it supports
-        hierarchy queries.
-        """
-
-        # get the current shotgun connection
-        current_engine = sgtk.platform.current_engine()
-        sg_connection = current_engine.shotgun
-        server_caps = sg_connection.server_caps
-
-        if not hierarchy_is_supported(sg_connection):
-            # oops, SG version is not compatible
-            if not hasattr(sg_connection, "nav_expand"):
-                logger.warning(
-                    "The version of the python-api you are using does not "
-                    "support hierarchy queries."
-                )
-            else:
-                cur_sg_version = "v%s" % (
-                    ".".join(map(str,server_caps.version)))
-                logger.warning(
-                    "The version of the Shotgun site %s is %s.\n"
-                    "Version %s is required to use the ShotgunHierarchyModel" %
-                    (server_caps.host, cur_sg_version, "v7.0.2")
-                )
-            return False
-
-        return True
 
     def _get_default_path(self):
         """
@@ -407,7 +379,10 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         if not self._hierarchy_is_supported:
             self.clear()
             root = self.invisibleRootItem()
-            item = QtGui.QStandardItem("WARNING: Hierarchy not supported. See logged warnings for details.")
+            item = QtGui.QStandardItem("WARNING: Hierarchy not supported")
+            item.setEditable(False)
+            root.appendRow([item])
+            item = QtGui.QStandardItem("- %s" % (self._hierarchy_not_supported_reason,))
             item.setEditable(False)
             root.appendRow([item])
             return False
@@ -428,15 +403,15 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         self._cache_path = self.__get_data_cache_path(cache_seed)
 
         # print some debug info
-        logger.debug("")
-        logger.debug("Model Reset for: %s" % (self,))
-        logger.debug("Path: %s" % (self._path,))
-        logger.debug("Seed entity field: %s" % (self._seed_entity_field,))
-        logger.debug("Entity fields: %s" % (self._entity_fields,))
+        self._log_debug("")
+        self._log_debug("Model Reset for: %s" % (self,))
+        self._log_debug("Path: %s" % (self._path,))
+        self._log_debug("Seed entity field: %s" % (self._seed_entity_field,))
+        self._log_debug("Entity fields: %s" % (self._entity_fields,))
 
-        logger.debug("First population pass: Calling _load_external_data()")
+        self._log_debug("First population pass: Calling _load_external_data()")
         self._load_external_data()
-        logger.debug("External data population done.")
+        self._log_debug("External data population done.")
 
         # only one column. give it a default value
         self.setHorizontalHeaderLabels(
@@ -457,7 +432,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         if uid not in self._running_query_lookup:
             # not our job. ignore
-            logger.debug("Retrieved error from data worker: %s" % (msg,))
+            self._log_debug("Retrieved error from data worker: %s" % (msg,))
             return
 
         path = self._running_query_lookup[uid]
@@ -471,7 +446,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             "  Error: %s\n"
         ) % (path, msg)
         self.data_refresh_fail.emit(full_msg)
-        logger.warning(full_msg)
+        self._log_warning(full_msg)
 
     def _on_data_retriever_work_completed(self, uid, request_type, data):
         """
@@ -486,7 +461,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         uid = sanitize_qt(uid)  # qstring on pyqt, str on pyside
         data = sanitize_qt(data)
 
-        logger.debug("Received worker payload of type: %s" % (request_type,))
+        self._log_debug("Received worker payload of type: %s" % (request_type,))
 
         if uid not in self._running_query_lookup:
             # not our job. ignore.
@@ -559,7 +534,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         # query in order of length
         for path in sorted(set(paths)):
-            logger.debug("Refreshing hierarchy model path: %s" % (path,))
+            self._log_debug("Refreshing hierarchy model path: %s" % (path,))
             self.__query_hierarchy(
                 path,
                 self._seed_entity_field,
@@ -683,7 +658,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         # warn if the path is longer than the windows max path limitation
         if sys.platform == "win32" and len(data_cache_path) > 250:
-            logger.warning(
+            self._log_warning(
                 "Shotgun hierarchy data cache file path may be affected by "
                 "windows MAX_PATH limitation."
             )
@@ -731,6 +706,32 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         return paths
 
+    def __hierarchy_is_supported(self):
+        """
+        Checks the current Shotgun connection to make sure it supports
+        hierarchy queries.
+
+        :rtype tuple:
+        :returns: A tuple of 2 items where the first item is a boolean indicating
+            whether hierarchy is supported. If hierarchy is supported, the second
+            item will be ``None``. If hierarchy is not supported, the second item
+            will be a string explaining why.
+
+        """
+        current_engine = sgtk.platform.current_engine()
+        sg_connection = current_engine.shotgun
+        server_caps = sg_connection.server_caps
+
+        # make sure we're greater than or equal to SG v7.0.2
+        if not (hasattr(sg_connection, "server_caps") and
+                server_caps.version and
+                server_caps.version >= (7, 0, 2)):
+            return (False, "The version of SG being used does not support querying for the project hierarchy. v7.0.2 is required.")
+        elif not hasattr(sg_connection, "nav_expand"):
+            return (False, "The version of the python-api being used does not support querying for the project hierarchy.")
+
+        return (True, None)
+
     def __insert_subtree(self, nav_data):
         """
         Inserts a subtree for the item represented by ``nav_data``.
@@ -752,7 +753,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         :param dict nav_data: The data returned from the api call.
         """
 
-        logger.debug("--> Shotgun data arrived. (%s records)" % len(nav_data))
+        self._log_debug("--> Shotgun data arrived. (%s records)" % len(nav_data))
 
         # pre-process data
         nav_data = self._before_data_processing(nav_data)
@@ -766,11 +767,11 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             # reset flag for next request
             self._request_full_refresh = False
 
-            logger.debug("Rebuilding tree...")
+            self._log_debug("Rebuilding tree...")
             self.clear()
             self._load_external_data()
             self.__insert_subtree(nav_data)
-            logger.debug("...done!")
+            self._log_debug("...done!")
 
             modifications_made = True
 
@@ -778,7 +779,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
             # ensure we have a path for the item
             item_path = nav_data.get(self._SG_PATH_FIELD, None)
-            logger.debug("Got hierarchy data for path: %s" % (item_path,))
+            self._log_debug("Got hierarchy data for path: %s" % (item_path,))
 
             if not item_path:
                 raise sgtk.TankError(
@@ -791,15 +792,15 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
             if item:
                 # check item and children to see if data has been updated
-                logger.debug(
+                self._log_debug(
                     "Item exists in tree. Ensuring up-to-date...")
                 modifications_made = self.__update_subtree(item, nav_data)
-                logger.debug("...done!")
+                self._log_debug("...done!")
 
             else:
-                logger.debug("Detected new item. Adding in-situ to tree...")
+                self._log_debug("Detected new item. Adding in-situ to tree...")
                 self.__insert_subtree(nav_data)
-                logger.debug("...done!")
+                self._log_debug("...done!")
                 modifications_made = True
 
         # last step - save our tree to disk for fast caching next time!
@@ -807,12 +808,12 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # write to disk each time the user expands and item. consider the
         # performance of this setup and whether this logic should be altered.
         if modifications_made:
-            logger.debug("Saving tree to disk %s..." % self._cache_path)
+            self._log_debug("Saving tree to disk %s..." % self._cache_path)
             try:
                 self._save_to_disk()
-                logger.debug("...saving complete!")
+                self._log_debug("...saving complete!")
             except Exception, e:
-                logger.warning("Couldn't save cache data to disk: %s" % e)
+                self._log_warning("Couldn't save cache data to disk: %s" % e)
 
         if not self._running_query_lookup.keys():
             # no more data queries running. all data refreshed
@@ -846,7 +847,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         self.data_refreshing.emit()
 
-        logger.debug("Querying hierarchy item: %s" % (path,))
+        self._log_debug("Querying hierarchy item: %s" % (path,))
 
         worker_id = self._sg_data_retriever.execute_nav_expand(
             path, seed_entity_field, entity_fields)
@@ -933,7 +934,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             child_path = child_data[self._SG_PATH_FIELD]
             if child_path not in child_paths:
                 # removing item
-                logger.debug("Removing item: %s" % (child_item,))
+                self._log_debug("Removing item: %s" % (child_item,))
                 self._before_item_removed(child_item)
                 item.removeRow(row)
                 subtree_updated = True
@@ -953,24 +954,4 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
                 subtree_updated = True
 
         return subtree_updated
-
-def hierarchy_is_supported(sg_connection):
-    """
-    Checks the current Shotgun connection to make sure it supports
-    hierarchy queries.
-
-    :param sg_connection: A shotgun connection.
-
-    :returns: ``True`` if hierarchy supported, ``False`` otherwise.
-    """
-
-    server_caps = sg_connection.server_caps
-
-    # make sure we're greater than or equal to SG v7.0.2
-    return (
-        hasattr(sg_connection, "server_caps") and
-        server_caps.version and
-        server_caps.version >= (7, 0, 2) and
-        hasattr(sg_connection, "nav_expand")
-    )
 
