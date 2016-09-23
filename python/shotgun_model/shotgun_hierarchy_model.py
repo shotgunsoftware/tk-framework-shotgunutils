@@ -384,7 +384,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             item = QtGui.QStandardItem("WARNING: Hierarchy not supported")
             item.setEditable(False)
             root.appendRow([item])
-            item = QtGui.QStandardItem(self._hierarchy_not_supported_reason)
+            item = QtGui.QStandardItem("- %s" % (self._hierarchy_not_supported_reason,))
             item.setEditable(False)
             root.appendRow([item])
             return False
