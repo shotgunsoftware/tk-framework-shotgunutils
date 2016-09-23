@@ -9,6 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import datetime
+import errno
 import os
 import urlparse
 import time
@@ -16,14 +17,10 @@ import time
 # toolkit imports
 import sgtk
 from sgtk.platform.qt import QtCore, QtGui
-from sgtk.util import filesystem
 
 from .errors import ShotgunModelError, CacheReadVersionMismatch
 from .shotgun_standard_item import ShotgunStandardItem
 from .util import get_sg_data
-
-# logger for this module
-logger = sgtk.platform.get_logger(__name__)
 
 
 class ShotgunQueryModel(QtGui.QStandardItemModel):
@@ -277,11 +274,11 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         if self._cache_path and os.path.exists(self._cache_path):
             try:
                 os.remove(self._cache_path)
-                logger.debug(
+                self._log_debug(
                     "Removed cache file '%s' from disk." % self._cache_path
                 )
             except Exception, e:
-                logger.warning(
+                self._log_warning(
                     "Hard refresh failed and could not remove cache file '%s' "
                     "from disk. Details: %s" % (self._cache_path, e)
                 )
@@ -337,7 +334,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         :param str path:
         """
 
-        logger.debug("Cache path set to: %s" % (path,))
+        self._log_debug("Cache path set to: %s" % (path,))
         self.__full_cache_path = path
 
     # define the property for python 2.5 and older
@@ -669,13 +666,13 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         # warn if the cache file does not exist
         if not self._cache_path or not os.path.exists(self._cache_path):
-            logger.debug(
+            self._log_debug(
                 "Data cache file does not exist on disk.\n"
                 "Looking here: %s" % (self._cache_path,)
             )
             return False
 
-        logger.debug(
+        self._log_debug(
             "Now attempting cached data load from: %s ..." %
             (self._cache_path,)
         )
@@ -684,19 +681,35 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             time_before = time.time()
             num_items = self.__load_from_disk()
             time_diff = (time.time() - time_before)
-            logger.debug(
+            self._log_debug(
                 "Loading finished! Loaded %s items in %4fs" %
                 (num_items, time_diff)
             )
             self.cache_loaded.emit()
             return True
         except Exception, e:
-            logger.debug(
+            self._log_debug(
                 "Couldn't load cache data from disk.\n"
                 " Will proceed with full SG load.\n"
                 "Error reported: %s" % (e,)
             )
             return False
+
+    def _log_debug(self, msg):
+        """
+        Convenience wrapper around debug logging
+
+        :param msg: debug message
+        """
+        self._bundle.log_debug("[%s] %s" % (self.__class__.__name__, msg))
+
+    def _log_warning(self, msg):
+        """
+        Convenience wrapper around warning logging
+
+        :param msg: debug message
+        """
+        self._bundle.log_warning("[%s] %s" % (self.__class__.__name__, msg))
 
     def _sg_clean_data(self, sg_data):
         """
@@ -795,7 +808,6 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     ############################################################################
     # additional method used during de/serialization of model contents
 
-    @filesystem.with_cleared_umask
     def _save_to_disk(self):
         """
         Save the model to disk using QDataStream serialization.
@@ -804,11 +816,24 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         filename = self._cache_path
 
+        # set umask to zero, store old umask
+        old_umask = os.umask(0)
         try:
             # try to create the cache folder with as open permissions as
             # possible
             cache_dir = os.path.dirname(filename)
-            filesystem.ensure_folder_exists(cache_dir, 0777)
+
+            # make sure the cache directory exists
+            if not os.path.exists(cache_dir):
+                try:
+                    os.makedirs(cache_dir, 0777)
+                except OSError, e:
+                    # Race conditions are perfectly possible on some network
+                    # storage setups so make sure that we ignore any file
+                    # already exists errors, as they are not really errors!
+                    if e.errno != errno.EEXIST:
+                        # re-raise
+                        raise
 
             # write cache file
             fh = QtCore.QFile(filename)
@@ -835,11 +860,14 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             finally:
                 fh.close()
 
+                # set mask back to previous value
+                os.umask(old_umask)
+
             # and ensure the cache file has got open permissions
             os.chmod(filename, 0666)
 
         except Exception, e:
-            logger.warning(
+            self._log_warning(
                 "Could not write cache file '%s' to disk: %s" % (filename, e))
 
     ############################################################################
@@ -988,5 +1016,4 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             if child.hasChildren():
                 # write children
                 self.__save_to_disk_r(stream, child, depth+1)
-
 

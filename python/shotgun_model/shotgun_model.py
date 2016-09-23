@@ -20,9 +20,6 @@ from sgtk.platform.qt import QtCore, QtGui
 from .shotgun_query_model import ShotgunQueryModel
 from .util import get_sanitized_data, get_sg_data, sanitize_qt, sanitize_for_qt_model
 
-# logger for this module
-logger = sgtk.platform.get_logger(__name__)
-
 
 class ShotgunModel(ShotgunQueryModel):
     """
@@ -338,20 +335,20 @@ class ShotgunModel(ShotgunQueryModel):
         # get the cache path based on these new data query parameters
         self._cache_path = self.__get_data_cache_path(seed)
 
-        logger.debug("")
-        logger.debug("Model Reset for %s" % self)
-        logger.debug("Entity type: %s" % self.__entity_type)
-        logger.debug("Filters: %s" % self.__filters)
-        logger.debug("Hierarchy: %s" % self.__hierarchy)
-        logger.debug("Fields: %s" % self.__fields)
-        logger.debug("Order: %s" % self.__order)
-        logger.debug("Columns: %s" % self.__column_fields)
-        logger.debug("Editable Columns: %s" % self.__editable_fields)
-        logger.debug("Filter Presets: %s" % self.__additional_filter_presets)
+        self._log_debug("")
+        self._log_debug("Model Reset for %s" % self)
+        self._log_debug("Entity type: %s" % self.__entity_type)
+        self._log_debug("Filters: %s" % self.__filters)
+        self._log_debug("Hierarchy: %s" % self.__hierarchy)
+        self._log_debug("Fields: %s" % self.__fields)
+        self._log_debug("Order: %s" % self.__order)
+        self._log_debug("Columns: %s" % self.__column_fields)
+        self._log_debug("Editable Columns: %s" % self.__editable_fields)
+        self._log_debug("Filter Presets: %s" % self.__additional_filter_presets)
 
-        logger.debug("First population pass: Calling _load_external_data()")
+        self._log_debug("First population pass: Calling _load_external_data()")
         self._load_external_data()
-        logger.debug("External data population done.")
+        self._log_debug("External data population done.")
 
         # set our headers
         headers = [self.FIRST_COLUMN_HEADER] + self._get_additional_column_headers(
@@ -702,13 +699,13 @@ class ShotgunModel(ShotgunQueryModel):
 
         if self.__current_work_id != uid:
             # not our job. ignore
-            logger.debug("Retrieved error from data worker: %s" % msg)
+            self._log_debug("Retrieved error from data worker: %s" % msg)
             return
         self.__current_work_id = None
 
         full_msg = "Error retrieving data from Shotgun: %s" % msg
         self.data_refresh_fail.emit(full_msg)
-        logger.warning(full_msg)
+        self._log_warning(full_msg)
 
     def _on_data_retriever_work_completed(self, uid, request_type, data):
         """
@@ -723,7 +720,7 @@ class ShotgunModel(ShotgunQueryModel):
         uid = sanitize_qt(uid) # qstring on pyqt, str on pyside
         data = sanitize_qt(data)
 
-        logger.debug("Received worker payload of type %s" % request_type)
+        self._log_debug("Received worker payload of type %s" % request_type)
 
         if self.__current_work_id == uid:
             # our data has arrived from sg!
@@ -768,7 +765,7 @@ class ShotgunModel(ShotgunQueryModel):
         Handle asynchronous shotgun data arriving after a find request.
         """
 
-        logger.debug("--> Shotgun data arrived. (%s records)" % len(sg_data))
+        self._log_debug("--> Shotgun data arrived. (%s records)" % len(sg_data))
 
         # pre-process data
         sg_data = self._before_data_processing(sg_data)
@@ -785,9 +782,9 @@ class ShotgunModel(ShotgunQueryModel):
                 # we have an empty tree and incoming sg data.
                 # Run the full recursive tree generation for performance.
                 self._request_full_refresh = False # reset flag for next request
-                logger.debug("No cached items in tree! Creating full tree from Shotgun data...")
+                self._log_debug("No cached items in tree! Creating full tree from Shotgun data...")
                 self.__rebuild_whole_tree_from_sg_data(sg_data)
-                logger.debug("...done!")
+                self._log_debug("...done!")
                 modifications_made = True
             else:
                 # no data coming in from shotgun, so no need to rebuild the tree
@@ -805,21 +802,21 @@ class ShotgunModel(ShotgunQueryModel):
             removed_ids = ids_in_tree.difference(ids_from_shotgun)
 
             if len(removed_ids) > 0:
-                logger.debug("Detected deleted items %s. Rebuilding tree..." % removed_ids)
+                self._log_debug("Detected deleted items %s. Rebuilding tree..." % removed_ids)
                 self.__rebuild_whole_tree_from_sg_data(sg_data)
-                logger.debug("...done!")
+                self._log_debug("...done!")
                 modifications_made = True
 
             else:
                 added_ids = ids_from_shotgun.difference(ids_in_tree)
                 if len(added_ids) > 0:
                     # wedge in the new items
-                    logger.debug("Detected added items. Adding them in-situ to tree...")
+                    self._log_debug("Detected added items. Adding them in-situ to tree...")
                     for d in sg_data:
                         if d.get("id") in added_ids:
-                            logger.debug("Adding %s to tree" % d )
+                            self._log_debug("Adding %s to tree" % d )
                             self.__add_sg_item_to_tree(d)
-                    logger.debug("...done!")
+                    self._log_debug("...done!")
                     modifications_made = True
 
             # check for modifications. At this point, the number of items in the tree and
@@ -829,7 +826,7 @@ class ShotgunModel(ShotgunQueryModel):
             # Also note that we need to exclude any S3 urls from the comparison as these change
             # all the time
             #
-            logger.debug("Checking for modifications...")
+            self._log_debug("Checking for modifications...")
             detected_changes = False
             for d in sg_data:
                 # if there are modifications of any kind, we just rebuild the tree at the moment
@@ -838,28 +835,28 @@ class ShotgunModel(ShotgunQueryModel):
                     existing_sg_data = get_sg_data(item)
                     if not self._sg_compare_data(d, existing_sg_data):
                         # shotgun data has changed for this item! Rebuild the tree
-                        logger.debug("SG data change: %s --> %s" % (existing_sg_data, d))
+                        self._log_debug("SG data change: %s --> %s" % (existing_sg_data, d))
                         detected_changes = True
                 except KeyError, e:
-                    logger.warning("Shotgun item %s not appearing in tree - most likely because "
+                    self._log_warning("Shotgun item %s not appearing in tree - most likely because "
                                           "there is another object in Shotgun with the same name." % d)
 
             if detected_changes:
-                logger.debug("Detected modifications. Rebuilding tree...")
+                self._log_debug("Detected modifications. Rebuilding tree...")
                 self.__rebuild_whole_tree_from_sg_data(sg_data)
-                logger.debug("...done!")
+                self._log_debug("...done!")
                 modifications_made = True
             else:
-                logger.debug("...no modifications found.")
+                self._log_debug("...no modifications found.")
 
         # last step - save our tree to disk for fast caching next time!
         if modifications_made:
-            logger.debug("Saving tree to disk %s..." % self._cache_path)
+            self._log_debug("Saving tree to disk %s..." % self._cache_path)
             try:
                 self._save_to_disk()
-                logger.debug("...saving complete!")
+                self._log_debug("...saving complete!")
             except Exception, e:
-                logger.warning("Couldn't save cache data to disk: %s" % e)
+                self._log_warning("Couldn't save cache data to disk: %s" % e)
 
         # and emit completion signal
         self.data_refreshed.emit(modifications_made)
@@ -939,7 +936,7 @@ class ShotgunModel(ShotgunQueryModel):
         )
 
         if sys.platform == "win32" and len(data_cache_path) > 250:
-            logger.warning(
+            self._log_warning(
                 "Shotgun model data cache file path may be affected by windows "
                 "windows MAX_PATH limitation."
             )
@@ -987,7 +984,7 @@ class ShotgunModel(ShotgunQueryModel):
                 # of model data injected into the tree which does not have this property set
                 # so double check that the data actually is present.
                 if sg_data is None:
-                    logger.warning("Found cached leaf node in tree with a missing SG_DATA_ROLE. Please report "
+                    self._log_warning("Found cached leaf node in tree with a missing SG_DATA_ROLE. Please report "
                                        "to support on support@shotgunsoftware.com. If possible, please "
                                        "make a copy of the file '%s' and attach that with the support request. "
                                        "Affected Node name: '%s'. " % (self._cache_path, child.text()))
