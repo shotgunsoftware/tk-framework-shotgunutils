@@ -83,10 +83,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         super(ShotgunHierarchyModel, self).__init__(parent, bg_task_manager)
 
         # check for hierarchy support
-        current_engine = sgtk.platform.current_engine()
-        sg_connection = current_engine.shotgun
         (self._hierarchy_is_supported, self._hierarchy_not_supported_reason) = \
-            hierarchy_is_supported(sg_connection)
+            self.__hierarchy_is_supported()
 
         if not self._hierarchy_is_supported:
             self._log_warning(self._hierarchy_not_supported_reason)
@@ -708,6 +706,32 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         return paths
 
+    def __hierarchy_is_supported(self):
+        """
+        Checks the current Shotgun connection to make sure it supports
+        hierarchy queries.
+
+        :rtype tuple:
+        :returns: A tuple of 2 items where the first item is a boolean indicating
+            whether hierarchy is supported. If hierarchy is supported, the second
+            item will be ``None``. If hierarchy is not supported, the second item
+            will be a string explaining why.
+
+        """
+        current_engine = sgtk.platform.current_engine()
+        sg_connection = current_engine.shotgun
+        server_caps = sg_connection.server_caps
+
+        # make sure we're greater than or equal to SG v7.0.2
+        if not (hasattr(sg_connection, "server_caps") and
+                server_caps.version and
+                server_caps.version >= (7, 0, 2)):
+            return (False, "The version of SG being used does not support querying for the project hierarchy. v7.0.2 is required.")
+        elif not hasattr(sg_connection, "nav_expand"):
+            return (False, "The version of the python-api being used does not support querying for the project hierarchy.")
+
+        return (True, None)
+
     def __insert_subtree(self, nav_data):
         """
         Inserts a subtree for the item represented by ``nav_data``.
@@ -930,30 +954,4 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
                 subtree_updated = True
 
         return subtree_updated
-
-def hierarchy_is_supported(sg_connection):
-    """
-    Checks the current Shotgun connection to make sure it supports
-    hierarchy queries.
-
-    :param sg_connection: A shotgun connection.
-
-    :returns: A tuple of 2 items where the first item is a boolean indicating
-        whether hierarchy is supported. If hierarchy is supported, the second
-        item will be ``None``. If hierarchy is not supported, the second item
-        will be a string explaining why.
-
-    """
-
-    server_caps = sg_connection.server_caps
-
-    # make sure we're greater than or equal to SG v7.0.2
-    if not (hasattr(sg_connection, "server_caps") and
-            server_caps.version and
-            server_caps.version >= (7, 0, 2)):
-        return (False, "The version of SG being used does not support hierarchy queries. v7.0.2 is required.")
-    elif not hasattr(sg_connection, "nav_expand"):
-        return (False, "The verison of the python-api being used does not support hierarchy queries.")
-
-    return (True, None)
 
