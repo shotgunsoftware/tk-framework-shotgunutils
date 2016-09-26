@@ -1,0 +1,784 @@
+
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Shotgun Hierarchy Model &mdash; tk-framework-shotgunutils v4.4.12 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="tk-framework-shotgunutils v4.4.12 documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+    <a href='http://developer.shotgunsoftware.com'>
+    
+        <img style='width: 191px;
+                height: 60px; 
+                margin: 2px;
+                border-radius: 0px; 
+                padding: 0px;' 
+            src='_static/logo@2x.png'/>
+    
+    </a>
+    
+
+          
+            <a href="index.html" class="icon icon-home"> tk-framework-shotgunutils
+          
+
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+    
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="shotgun_model.html">Shotgun Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_manager.html">Background Task Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="shotgun_globals.html">Shotgun Globals Access</a></li>
+</ul>
+
+            
+          
+       
+    <div style='margin-top: 50px;
+                margin-left: 10px;
+                margin-right: 10px;
+                padding: 10px; 
+                color: #b3b3b3; 
+                font-size: 70%;
+                border-radius: 3px;
+                background-color: #444;
+                line-height: 18px;
+                '>    
+    <style>
+        a.custom_post_menu { display: inline; 
+                             padding: 0px; 
+                             text-decoration: underline; }
+    </style>
+
+    <b>tk-framework-shotgunutils</b> v4.4.12.<br>
+    
+        This documentation is part of the Shotgun Pipeline Toolkit.
+    
+    For more information, please visit
+    <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
+    The code associated with this documentation can be found 
+    <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
+
+    </div>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">tk-framework-shotgunutils</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Shotgun Hierarchy Model</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="shotgun-hierarchy-model">
+<h1>Shotgun Hierarchy Model<a class="headerlink" href="#shotgun-hierarchy-model" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>The shotgun hierarchy data model helps you build responsive, data rich
+applications quickly, leveraging Qt&#8217;s built-in model/view framework to represent
+your production hierarchy.</p>
+<img alt="_images/hierarchy_model.png" src="_images/hierarchy_model.png" />
+<p>The Shotgun Hierarchy Model is a custom Qt Model specialized to represent your
+Shotugn production hierarchy as defined in your site&#8217;s
+<a class="reference external" href="https://support.shotgunsoftware.com/hc/en-us/articles/219031138-Project-Tracking-Settings">Tracking Settings</a>.
+The hierarchy represented by the model is dynamically constructed based on a
+supplied root <code class="docutils literal"><span class="pre">path</span></code> which defines the root of the hierarchy in the model and
+a <code class="docutils literal"><span class="pre">seed_entity_field</span></code> which represents the target of the hierarchy (i.e. what
+you&#8217;re trying to drill down to in view using the model).</p>
+<p>Like the <a class="reference internal" href="shotgun_model.html#shotgun_model.ShotgunModel" title="shotgun_model.ShotgunModel"><code class="xref py py-class docutils literal"><span class="pre">ShotgunModel</span></code></a>, the <code class="docutils literal"><span class="pre">ShotgunHierarchyModel</span></code> uses a disk based
+cache and runs queries asynchronously to Shotgun in the background for
+performance. You derive your own model class from it, set up a query, and then
+hook up your model to a Qt View which will draw the data. The class contains
+several callbacks and allows for extensive customization, yet tries to shadow
+and encapsulate a lot of the details.</p>
+<img alt="_images/model_inheritance.png" src="_images/model_inheritance.png" />
+<div class="section" id="why-should-i-use-the-shotgun-hierarchy-model">
+<h3>Why should I use the Shotgun Hierarchy Model?<a class="headerlink" href="#why-should-i-use-the-shotgun-hierarchy-model" title="Permalink to this headline">¶</a></h3>
+<p>Using the Shotgun Hierarchy Model means switching to Model/View based
+programming. While there is perhaps slightly more overhead to get started with
+this, there are many benefits. The Shotgun Hierarchy Model (and the
+corresponding delegates and Shotgun View components) is an attempt to bridge
+this gap and make it quick and painless to get started with Qt Model/View
+programming.</p>
+<p>Qt provides a strong and mature Model/View hierarchy which is robust and easy to
+work with. If you are not familiar with it, please check the following links:</p>
+<ul class="simple">
+<li>Tutorial: <a class="reference external" href="http://qt-project.org/doc/qt-4.8/modelview.html">http://qt-project.org/doc/qt-4.8/modelview.html</a></li>
+<li>Technical details: <a class="reference external" href="http://qt-project.org/doc/qt-4.8/model-view-programming.html">http://qt-project.org/doc/qt-4.8/model-view-programming.html</a></li>
+</ul>
+<p>The benefits with this approach will become evident as you scale your UIs and
+their complexity. Developing code and tools where the data and the UI is
+combined will work in simple scenarios but for data rich applications this
+approach becomes hard to maintain, difficult to reuse and typically scales
+poorly as the dataset complexity grows. By leveraging Qt&#8217;s built-in
+functionality, you get access to a mature and well documented toolbox that makes
+it quick to develop tools:</p>
+<ul class="simple">
+<li>A hierarchy model instance represents a single Shotgun <code class="docutils literal"><span class="pre">nav_expand()</span></code> query.
+The model is lazy-loaded as each time you expand an item in the view, the
+children of that item are queried.</li>
+<li>The model is cached, meaning that all data is fetched in the background in
+worker threads. This means that the data in your UI will load up instantly and
+you never have to wait for Shotgun. If the query result is different than the
+cached result, the view will be updated on the fly as the data arrives.</li>
+<li>With Qt you have access to selection models, making it easy to create
+consistent selection behavior, even across multiple views, with full keyboard
+support.</li>
+<li>With Qt proxy models you can easily create interactive searching and filtering
+on the client side.</li>
+<li>Views and models are optimized and will perform nicely even if you have
+thousands of items loaded.</li>
+<li>With an attached view, you can easily control the Qt <em>delegates</em> system,
+making it easy to draw custom UIs for each item.</li>
+</ul>
+</div>
+<div class="section" id="shotgun-hierarchy-model-hello-world">
+<h3>Shotgun Hierarchy Model Hello World<a class="headerlink" href="#shotgun-hierarchy-model-hello-world" title="Permalink to this headline">¶</a></h3>
+<p>A hello world style example would look something like this, assuming this code
+is inside a toolkit app:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># import the shotgun model module from shotgunutils framework</span>
+<span class="n">shotgun_model</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span>
+    <span class="s2">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s2">&quot;shotgun_model&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create a standard Qt Tree View</span>
+<span class="n">view</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeView</span><span class="p">(</span><span class="n">parent_widget</span><span class="p">)</span>
+
+<span class="c1"># Set up our data backend</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">shotgun_model</span><span class="o">.</span><span class="n">SimpleShotgunHierarchyModel</span><span class="p">(</span><span class="n">parent_widget</span><span class="p">)</span>
+
+<span class="c1"># Tell the view to pull data from the model</span>
+<span class="n">view</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy_model</span><span class="p">)</span>
+
+<span class="c1"># build a hierarchy that encompases all your projects</span>
+<span class="c1"># target entities linked to the &quot;entity&quot; field on &quot;Version&quot; entities</span>
+<span class="n">model</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;Version.entity&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The above code will create a standard Qt tree view for your site (all projects)
+drilling down to entities with linked versions.</p>
+</div>
+<div class="section" id="beyond-hello-world">
+<h3>Beyond Hello World<a class="headerlink" href="#beyond-hello-world" title="Permalink to this headline">¶</a></h3>
+<p>The simple setup outlined above could be extended in the following ways:</p>
+<ul class="simple">
+<li>If you need more control of how the data is being retrieved, consider instead
+creating your own class and derive from <a class="reference internal" href="#shotgun_model.ShotgunHierarchyModel" title="shotgun_model.ShotgunHierarchyModel"><code class="xref py py-class docutils literal"><span class="pre">ShotgunHierarchyModel</span></code></a>. This
+makes it possible to customize the data as it arrives from Shotgun and how it
+will be displayed by the view.</li>
+<li>If you want to retrieve results from your view, connect signals to the view&#8217;s
+selection model. The items in the view hold all the information you need to
+query all the target entities under that level of the hierarchy. For example,
+an item that represents a <code class="docutils literal"><span class="pre">Sequence</span></code> entity in a view stores all the
+required information for querying target entities for all of its <code class="docutils literal"><span class="pre">Shots</span></code>.</li>
+<li>If you want to cull out items from the model, for example only to show items
+matching a particular search criteria, use a Proxy Model (typically
+<a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QSortFilterProxyModel.html#PySide.QtGui.QSortFilterProxyModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QSortFilterProxyModel</span></code></a>).</li>
+<li>If you want to control the way items are displayed in the view, consider using
+the Shotgun delegates module which is part of the Qt widgets framework. For
+more information, see <a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/views.html#views.WidgetDelegate" title="(in tk-framework-qtwidgets vv2.5.7)"><code class="xref py py-class docutils literal"><span class="pre">WidgetDelegate</span></code></a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="simpleshotgunhierarchymodel">
+<h2>SimpleShotgunHierarchyModel<a class="headerlink" href="#simpleshotgunhierarchymodel" title="Permalink to this headline">¶</a></h2>
+<p>Convenience wrapper around the Shotgun Hierarchy Model for quick and easy
+access. Use this when you want to prototype data modeling or if your are looking
+for a simple hierarchy without any customization. All you need to do is to
+instantiate the class (typically once, in your constructor) and then call
+<a class="reference internal" href="#shotgun_model.SimpleShotgunHierarchyModel.load_data" title="shotgun_model.SimpleShotgunHierarchyModel.load_data"><code class="xref py py-meth docutils literal"><span class="pre">SimpleShotgunHierarchyModel.load_data()</span></code></a> to specify the type of
+hierarchy to build in the model. Subsequently, call
+<a class="reference internal" href="shotgun_model.html#shotgun_model.SimpleShotgunModel.load_data" title="shotgun_model.SimpleShotgunModel.load_data"><code class="xref py py-meth docutils literal"><span class="pre">load_data()</span></code></a> whenever you wish to change the
+hierarchy represented by the model.</p>
+<p>This class derives from <a class="reference internal" href="#shotgun_model.ShotgunHierarchyModel" title="shotgun_model.ShotgunHierarchyModel"><code class="xref py py-class docutils literal"><span class="pre">ShotgunHierarchyModel</span></code></a> so all the customization
+methods available in the normal ShotgunModel can also be subclassed from this
+class.</p>
+<dl class="class">
+<dt id="shotgun_model.SimpleShotgunHierarchyModel">
+<em class="property">class </em><code class="descclassname">shotgun_model.</code><code class="descname">SimpleShotgunHierarchyModel</code><span class="sig-paren">(</span><em>parent</em>, <em>schema_generation=0</em>, <em>bg_task_manager=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/simple_shotgun_hierarchy_model.html#SimpleShotgunHierarchyModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.SimpleShotgunHierarchyModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">shotgun_model.shotgun_hierarchy_model.ShotgunHierarchyModel</span></code></p>
+<p>Convenience wrapper around the Shotgun Hierarchy model for quick and easy
+access.</p>
+<p>All you need to do is to instantiate the class (typically once, in your
+constructor) and then call <a class="reference internal" href="#shotgun_model.SimpleShotgunHierarchyModel.load_data" title="shotgun_model.SimpleShotgunHierarchyModel.load_data"><code class="xref py py-meth docutils literal"><span class="pre">load_data()</span></code></a> to specify which shotgun
+<code class="docutils literal"><span class="pre">nav_expand()</span></code> query to load up the top-level items in the hierarchy. The
+remaining items will be queried asynchronously as items are expanded.</p>
+<p>Subsequently call <a class="reference internal" href="#shotgun_model.SimpleShotgunHierarchyModel.load_data" title="shotgun_model.SimpleShotgunHierarchyModel.load_data"><code class="xref py py-meth docutils literal"><span class="pre">load_data()</span></code></a> whenever you wish to change the
+<code class="docutils literal"><span class="pre">nav_expand()</span></code> query associated with the model.</p>
+<p>This class derives from <a class="reference internal" href="#shotgun_model.ShotgunHierarchyModel" title="shotgun_model.ShotgunHierarchyModel"><code class="xref py py-class docutils literal"><span class="pre">ShotgunHierarchyModel</span></code></a> so all the
+customization methods available in the normal <a class="reference internal" href="#shotgun_model.ShotgunHierarchyModel" title="shotgun_model.ShotgunHierarchyModel"><code class="xref py py-class docutils literal"><span class="pre">ShotgunHierarchyModel</span></code></a>
+can also be subclassed from this class.</p>
+<p>Initialize the Hierarcy model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> (<code class="xref py py-class docutils literal"><span class="pre">QObject</span></code>) &#8211; The model&#8217;s parent.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="shotgun_model.SimpleShotgunHierarchyModel.load_data">
+<code class="descname">load_data</code><span class="sig-paren">(</span><em>seed_entity_field</em>, <em>path=None</em>, <em>entity_fields=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/simple_shotgun_hierarchy_model.html#SimpleShotgunHierarchyModel.load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.SimpleShotgunHierarchyModel.load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads shotgun data into the model, using the cache if possible.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>seed_entity_field</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; This is a string that corresponds to the
+field on an entity used to seed the hierarchy. For example, a value
+of <code class="docutils literal"><span class="pre">Version.entity</span></code> would cause the model to display a hierarchy
+where the leaves match the entity value of Version entities.</li>
+<li><strong>path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The path to the root of the hierarchy to display.
+This corresponds to the <code class="docutils literal"><span class="pre">path</span></code> argument of the <code class="docutils literal"><span class="pre">nav_expand()</span></code>
+api method. For example, <code class="docutils literal"><span class="pre">/Project/65</span></code> would correspond to a
+project on you shotgun site with id of <code class="docutils literal"><span class="pre">65</span></code>. By default, this
+value is <code class="docutils literal"><span class="pre">None</span></code> and the project from the current project will
+be used. If no project can be determined, the path will default
+to <code class="docutils literal"><span class="pre">/</span></code> which is the root path, meaning all projects will be
+represented as top-level items in the model.</li>
+<li><strong>entity_fields</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; A dictionary that identifies what fields to
+include on returned entities. Since the hierarchy can include any
+entity structure, this argument allows for specification of
+additional fields to include as these entities are returned. The
+dict&#8217;s keys correspond to the entity type and the value is a list
+of field names to return.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="shotgunhierarchymodel">
+<h2>ShotgunHierarchyModel<a class="headerlink" href="#shotgunhierarchymodel" title="Permalink to this headline">¶</a></h2>
+<p>A Qt Model representing a Shotgun query.</p>
+<p>This class implements a standard <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtCore/QAbstractItemModel.html#PySide.QtCore.QAbstractItemModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QAbstractItemModel</span></code></a>
+specialized to hold the contents of a particular shotgun API <code class="docutils literal"><span class="pre">nav_expand()</span></code>
+query. It is cached and refreshes its data asynchronously.</p>
+<dl class="class">
+<dt id="shotgun_model.ShotgunHierarchyModel">
+<em class="property">class </em><code class="descclassname">shotgun_model.</code><code class="descname">ShotgunHierarchyModel</code><span class="sig-paren">(</span><em>parent</em>, <em>schema_generation=0</em>, <em>bg_task_manager=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">shotgun_model.shotgun_query_model.ShotgunQueryModel</span></code></p>
+<p>A Qt Model representing a Shotgun hierarchy.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Use of this model requires version Shotgun <code class="docutils literal"><span class="pre">v7.0.2</span></code> or later.
+Attempts to construct an instance of this model on an older version of
+Shotgun will result with a single item in the model saying that
+Hierarchy model isn&#8217;t supported. A warning will also be logged.</p>
+</div>
+<p>This class implements a standard <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtCore/QAbstractItemModel.html#PySide.QtCore.QAbstractItemModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QAbstractItemModel</span></code></a>
+specialized to hold the contents of a particular Shotgun query. It is cached
+and refreshes its data asynchronously.</p>
+<p>In order to use this class, you normally subclass it and implement certain
+key data methods for setting up queries, customizing etc. Then you connect
+your class to a <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QAbstractItemView.html#PySide.QtGui.QAbstractItemView" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QAbstractItemView</span></code></a> of some sort which
+will display the result.</p>
+<p>The model stores a single column, lazy-loaded Shotgun Hierarchy as queried
+via the <code class="docutils literal"><span class="pre">nav_expand()</span></code> python-api method. The structure of items in the
+hierarchy mimics what is found in Shotgun as configured in each project&#8217;s
+<a class="reference external" href="https://support.shotgunsoftware.com/hc/en-us/articles/219031138-Project-Tracking-Settings">Tracking Settings</a>.</p>
+<p>Initialize the Hierarcy model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> (<code class="xref py py-class docutils literal"><span class="pre">QObject</span></code>) &#8211; The model&#8217;s parent.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Loading &amp; Refreshing the Hierarchy Data</strong></p>
+<p>These methods are used by subclasses to define the Shotgun query that loads
+and caches the hierarchy items and refreshes them once cached.</p>
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._load_data">
+<code class="descname">_load_data</code><span class="sig-paren">(</span><em>seed_entity_field</em>, <em>path=None</em>, <em>entity_fields=None</em>, <em>cache_seed=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel._load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the main method to use to configure the hierarchy model. You
+basically pass a specific <code class="docutils literal"><span class="pre">nav_expand</span></code> query to the model and it will
+start tracking this particular set of parameters.</p>
+<p>Any existing data contained in the model will be cleared.</p>
+<p>This method will not call the Shotgun API. If cached data is available,
+this will be immediately loaded (this operation is very fast even for
+substantial amounts of data).</p>
+<p>If you want to refresh the data contained in the model (which you
+typically want to), call the <a class="reference internal" href="#shotgun_model.ShotgunHierarchyModel._refresh_data" title="shotgun_model.ShotgunHierarchyModel._refresh_data"><code class="xref py py-meth docutils literal"><span class="pre">_refresh_data()</span></code></a> method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>seed_entity_field</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; This is a string that corresponds to the
+field on an entity used to seed the hierarchy. For example, a value
+of <code class="docutils literal"><span class="pre">Version.entity</span></code> would cause the model to display a hierarchy
+where the leaves match the entity value of Version entities.</li>
+<li><strong>path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The path to the root of the hierarchy to display.
+This corresponds to the <code class="docutils literal"><span class="pre">path</span></code> argument of the <code class="docutils literal"><span class="pre">nav_expand()</span></code>
+api method. For example, <code class="docutils literal"><span class="pre">/Project/65</span></code> would correspond to a
+project on you shotgun site with id of <code class="docutils literal"><span class="pre">65</span></code>. By default, this
+value is <code class="docutils literal"><span class="pre">None</span></code> and the project from the current project will
+be used. If no project can be determined, the path will default
+to <code class="docutils literal"><span class="pre">/</span></code> which is the root path, meaning all projects will be
+represented as top-level items in the model.</li>
+<li><strong>entity_fields</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; A dictionary that identifies what fields to
+include on returned entities. Since the hierarchy can include any
+entity structure, this argument allows for specification of
+additional fields to include as these entities are returned. The
+dict&#8217;s keys correspond to the entity type and the value is a list
+of field names to return.</li>
+<li><strong>cache_seed</strong> &#8211; Advanced parameter. With each shotgun query being cached on disk,
+the model generates a cache seed which it is using to store data on
+disk. Since the cache data on disk is a reflection of a particular
+hierarchy query, this seed is typically generated from the
+seed entity field and return entity fields supplied to this method.
+However, in cases where you are doing advanced subclassing, for
+example when you are culling out data based on some external state,
+the model state does not solely depend on the shotgun parameters. It
+may also depend on some external factors. In this case, the cache
+seed should also be influenced by those parameters and you can pass
+an external string via this parameter which will be added to the
+seed.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if cached data was loaded, False if not.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._refresh_data">
+<code class="descname">_refresh_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel._refresh_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._refresh_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rebuild the data in the model to ensure it is up to date.</p>
+<p>This call should be asynchronous and return instantly. The update should
+be applied as soon as the data from Shotgun is returned.</p>
+<p>If the model is empty (no cached data) no data will be shown at first
+while the model fetches data from Shotgun.</p>
+<p>As soon as a local cache exists, data is shown straight away and the
+shotgun update happens silently in the background.</p>
+<p>If data has been added, this will be injected into the existing
+structure. In this case, the rest of the model is intact, meaning that
+also selections and other view related states are unaffected.</p>
+<p>If data has been modified or deleted, a full rebuild is issued, meaning
+that all existing items from the model are removed. This does affect
+view related states such as selection.</p>
+</dd></dl>
+
+<p><strong>Customizing the Hierarchy Items</strong></p>
+<p>The following methods can be used by subclasses to customize the model
+and the information it displays when attached to a view.</p>
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._before_data_processing">
+<code class="descname">_before_data_processing</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._before_data_processing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called just after data has been retrieved from Shotgun but before any
+processing takes place.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You can subclass this if you want to perform summaries,
+calculations and other manipulations of the data before it is
+passed on to the model class.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; a shotgun dictionary, as retunrned by a CRUD SG API call.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">should return a shotgun dictionary, of the same form as the
+input.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._before_item_removed">
+<code class="descname">_before_item_removed</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._before_item_removed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called just before an item is removed from the model.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This base class implementation must be called in any
+subclasses overriding this behavior. Failure to do so will result in
+unexpected behavior.</p>
+</div>
+<p>The base class handles cleaning up the underlying item lookup when an
+item is removed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> (<a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a>) &#8211; The item about to be removed</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._finalize_item">
+<code class="descname">_finalize_item</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._finalize_item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called whenever an item is fully constructed, either because a shotgun
+query returned it or because it was loaded as part of a cache load from
+disk.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You can subclass this if you want to run post processing on
+the data as it is arriving. For example, if you are showing a list
+of task statuses in a filter view, you may want to remember which
+statuses a user had checked and unchecked the last time he was
+running the tool. By subclassing this method you can easily apply
+those settings before items appear in the UI.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> &#8211; <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> that is about to be
+added to the model.  This has been primed with the standard settings
+that the ShotgunModel handles.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._item_created">
+<code class="descname">_item_created</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel._item_created"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._item_created" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when an item is created, before it is added to the model.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This base class implementation must be called in any
+subclasses overriding this behavior. Failure to do so will result in
+unexpected behavior.</p>
+</div>
+<p>This base class implementation handles setting the foreground color
+of the item if it has no associated entities.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> (<a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a>) &#8211; The item that was just created.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._load_external_data">
+<code class="descname">_load_external_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._load_external_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called whenever the model needs to be rebuilt from scratch. This is
+called prior to any shotgun data is added to the model.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You can subclass this to add custom data to the model in a
+very flexible fashion. If you for example are loading published
+files from Shotgun, you could use this to load up a listing of
+files on disk, resulting in a model that shows both published files
+and local files.  External data will not be cached by the
+ShotgunModel framework.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._populate_item">
+<code class="descname">_populate_item</code><span class="sig-paren">(</span><em>item</em>, <em>sg_data</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._populate_item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whenever an item is downloaded from Shotgun, this method is called. It
+allows subclasses to intercept the construction of a
+<a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> and add additional metadata or
+make other changes that may be useful. Nothing needs to be returned.</p>
+<p>This method is called before the item is added into the model tree. At
+the point when the item is added into the tree, various signals will
+fire, informing views and proxy models that a new item has been added.
+This methods allows a subclassing object to add custom data prior to
+this.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">When an item is fetched from the cache, this method is <em>not</em>
+called, it will only be called when shotgun data initially arrives
+from a Shotgun API query.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>item</strong> &#8211; <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> that is about to be
+added to the model.</li>
+<li><strong>sg_data</strong> &#8211; Shotgun data dictionary that was received from Shotgun.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._populate_default_thumbnail">
+<code class="descname">_populate_default_thumbnail</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel._populate_default_thumbnail"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._populate_default_thumbnail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the icon for the supplied item based on its &#8220;kind&#8221; as returned
+by the <code class="docutils literal"><span class="pre">nav_expand()</span></code> api call.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> &#8211; The <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> item to set the
+icon for.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._set_tooltip">
+<code class="descname">_set_tooltip</code><span class="sig-paren">(</span><em>item</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._set_tooltip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the tooltip for the supplied item.</p>
+<p>Called when an item is created.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>item</strong> &#8211; Shotgun model item that requires a tooltip.</li>
+<li><strong>data</strong> &#8211; Dictionary of the SG data associated with the model.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Instance Methods</strong></p>
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes all items (including header items) from the model and
+sets the number of rows and columns to zero.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.destroy">
+<code class="descname">destroy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel.destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.destroy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call this method prior to destroying this object.
+This will ensure all worker threads etc are stopped.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.hard_refresh">
+<code class="descname">hard_refresh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel.hard_refresh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.hard_refresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears any caches on disk, then refreshes the data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.item_from_path">
+<code class="descname">item_from_path</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel.item_from_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.item_from_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> for the supplied path.</p>
+<p>Returns <code class="docutils literal"><span class="pre">None</span></code> if not found.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The path to search the tree for. The paths match those
+used by and returned from the python-api&#8217;s <code class="docutils literal"><span class="pre">nav_expand()</span></code> method.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> or <code class="docutils literal"><span class="pre">None</span></code> if not found</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.is_data_cached">
+<code class="descname">is_data_cached</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.is_data_cached" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if the model has any cached data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">True</span></code> if cached data exists for the model, <code class="docutils literal"><span class="pre">False</span></code>
+otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Autodesk.
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'v4.4.12',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+  
+ 
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-2114792-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+</body>
+</html>

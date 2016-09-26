@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v4.4.5 documentation</title>
+  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v4.4.12 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.4.5 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.4.12 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -115,7 +115,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.4.5.<br>
+    <b>tk-framework-shotgunutils</b> v4.4.12.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -228,7 +228,8 @@
     <span class="c1">#</span>
     <span class="c1"># - request_type is a string denoting the type of request</span>
     <span class="c1">#   this event is associated with. It can be either &quot;find&quot;</span>
-    <span class="c1">#   &quot;find_one&quot;, &quot;update&quot;, &quot;create&quot;, &quot;delete&quot; &quot;schema&quot; or &quot;thumbnail&quot;</span>
+    <span class="c1">#   &quot;find_one&quot;, &quot;update&quot;, &quot;create&quot;, &quot;delete&quot;, &quot;schema&quot;, &quot;expand_nav&quot;</span>
+    <span class="c1">#   or &quot;thumbnail&quot;</span>
     <span class="c1">#</span>
     <span class="c1"># - data_dict is a dictionary containing the payload</span>
     <span class="c1">#   of the request. It will be different depending on</span>
@@ -385,8 +386,24 @@
             <span class="c1"># we don&#39;t own the task manager so just stop any tasks we might be running </span>
             <span class="c1"># and disconnect from it:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">stop_task_group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bg_tasks_group</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">task_completed</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_task_completed</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">task_failed</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_task_failed</span><span class="p">)</span>
+
+            <span class="c1"># make sure we don&#39;t get exceptions trying to disconnect if the</span>
+            <span class="c1"># signals were never connected or somehow disconnected externally.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">task_completed</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_task_completed</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">),</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># was never connected</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span>
+                    <span class="s2">&quot;Could not disconnect &#39;_on_task_completed&#39; slot from the &quot;</span>
+                    <span class="s2">&quot;task manager&#39;s &#39;task_completed&#39; signal: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="p">,)</span>
+                <span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">task_failed</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_task_failed</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">),</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># was never connected</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span>
+                    <span class="s2">&quot;Could not disconnect &#39;_on_task_failed&#39; slot from the &quot;</span>
+                    <span class="s2">&quot;task manager&#39;s &#39;task_failed&#39; signal: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="p">,)</span>
+                <span class="p">)</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.clear"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -565,6 +582,32 @@
                               <span class="n">priority</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_CALL_PRIORITY</span><span class="p">,</span>
                               <span class="n">task_kwargs</span> <span class="o">=</span> <span class="n">task_kwargs</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="ShotgunDataRetriever.execute_nav_expand"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_nav_expand">[docs]</a>    <span class="k">def</span> <span class="nf">execute_nav_expand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a Shotgun ``nav_expand`` query asynchronously.</span>
+
+<span class="sd">        See the python api documentation here:</span>
+<span class="sd">            https://github.com/shotgunsoftware/python-api/wiki</span>
+
+<span class="sd">        This method takes the same parameters as the Shotgun ``nav_expand()`` call.</span>
+
+<span class="sd">        The query will be queued up and once processed, either a</span>
+<span class="sd">        work_completed or work_failure signal will be emitted.</span>
+
+<span class="sd">        :param ``*args``: args to be passed to the Shotgun ``nav_expand()`` call</span>
+<span class="sd">        :param ``**kwargs``: Named parameters to be passed to the Shotgun ``nav_expand()`` call</span>
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_task</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_task_execute_nav_expand</span><span class="p">,</span>
+            <span class="n">priority</span><span class="o">=</span><span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_CALL_PRIORITY</span><span class="p">,</span>
+            <span class="n">task_args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+            <span class="n">task_kwargs</span><span class="o">=</span><span class="n">kwargs</span>
+        <span class="p">)</span></div>
+
     <span class="k">def</span> <span class="nf">_add_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_cb</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">task_args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">task_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Simplified wrapper to add a task to the task manager.  All tasks get added into</span>
@@ -596,14 +639,20 @@
 <span class="sd">        .. note:: The provided Attachment entity definition must contain, at a</span>
 <span class="sd">                  minimum, the &quot;this_file&quot; substructure.</span>
 
-<span class="sd">        .. example:: {&#39;id&#39;: 597,</span>
-<span class="sd">                      &#39;this_file&#39;: {&#39;content_type&#39;: &#39;image/png&#39;,</span>
-<span class="sd">                                    &#39;id&#39;: 597,</span>
-<span class="sd">                                    &#39;link_type&#39;: &#39;upload&#39;,</span>
-<span class="sd">                                    &#39;name&#39;: &#39;test.png&#39;,</span>
-<span class="sd">                                    &#39;type&#39;: &#39;Attachment&#39;,</span>
-<span class="sd">                                    &#39;url&#39;: &#39;https://abc.shotgunstudio.com/file_serve/attachment/597&#39;},</span>
-<span class="sd">                      &#39;type&#39;: &#39;Attachment&#39;}</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            {</span>
+<span class="sd">                &quot;id&quot;: 597,</span>
+<span class="sd">                &quot;this_file&quot;: {</span>
+<span class="sd">                    &quot;content_type&quot;: &quot;image/png&quot;,</span>
+<span class="sd">                    &quot;id&quot;: 597,</span>
+<span class="sd">                    &quot;link_type&quot;: &quot;upload&quot;,</span>
+<span class="sd">                    &quot;name&quot;: &quot;test.png&quot;,</span>
+<span class="sd">                    &quot;type&quot;: &quot;Attachment&quot;,</span>
+<span class="sd">                    &quot;url&quot;: &quot;https://abc.shotgunstudio.com/file_serve/attachment/597&quot;</span>
+<span class="sd">                },</span>
+<span class="sd">                &quot;type&quot;: &quot;Attachment&quot;</span>
+<span class="sd">            }</span>
 
 <span class="sd">        :param dict attachment_entity: The Attachment entity to download data from.</span>
 
@@ -1010,6 +1059,19 @@
         <span class="n">res</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="o">*</span><span class="n">method_args</span><span class="p">,</span> <span class="o">**</span><span class="n">method_kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span><span class="s2">&quot;method&quot;</span><span class="p">,</span> <span class="s2">&quot;result&quot;</span><span class="p">:</span><span class="n">res</span><span class="p">}</span>
 
+    <span class="k">def</span> <span class="nf">_task_execute_nav_expand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
+<span class="sd">        ``nav_expand`` query</span>
+
+<span class="sd">        :param ``*args``: Unnamed arguments to be passed to the ``nav_expand()`` call</span>
+<span class="sd">        :param ``**kwargs``: Named arguments to be passed to the ``nav_expand()`` call</span>
+<span class="sd">        :returns: Dictionary containing the &#39;action&#39; together with result</span>
+<span class="sd">            returned by the find() call</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sg_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">nav_expand</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span><span class="s2">&quot;nav_expand&quot;</span><span class="p">,</span> <span class="s2">&quot;nav_result&quot;</span><span class="p">:</span><span class="n">sg_res</span><span class="p">}</span>
+
     <span class="k">def</span> <span class="nf">_task_check_attachment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attachment_entity</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check to see if an attachment file exists for the specified Attachment</span>
@@ -1177,6 +1239,8 @@
         <span class="n">action</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;action&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;find&quot;</span><span class="p">,</span> <span class="s2">&quot;find_one&quot;</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span> <span class="n">action</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;sg&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;sg_result&quot;</span><span class="p">]})</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;nav_expand&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span> <span class="s2">&quot;nav_expand&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;nav&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;nav_result&quot;</span><span class="p">]})</span>
         <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span> <span class="s2">&quot;schema&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;fields&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;fields&quot;</span><span class="p">],</span> <span class="s2">&quot;types&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;types&quot;</span><span class="p">]})</span>
         <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;method&quot;</span><span class="p">:</span>
@@ -1217,7 +1281,7 @@
         <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;download_attachment&quot;</span><span class="p">:</span>
             <span class="n">attachment_task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attachment_task_id_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">attachment_task_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__attachment_task_id_map</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attachment_task_id_map</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
                     <span class="nb">str</span><span class="p">(</span><span class="n">attachment_task_id</span><span class="p">),</span>
                     <span class="s2">&quot;find&quot;</span><span class="p">,</span>
@@ -1242,6 +1306,12 @@
             <span class="n">orig_task_id</span> <span class="o">=</span> <span class="n">task_id</span>
             <span class="n">task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_task_id_map</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_task_id_map</span><span class="p">[</span><span class="n">orig_task_id</span><span class="p">]</span>
+
+        <span class="c1"># remap task ids for attachments:</span>
+        <span class="k">if</span> <span class="n">task_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attachment_task_id_map</span><span class="p">:</span>
+            <span class="n">orig_task_id</span> <span class="o">=</span> <span class="n">task_id</span>
+            <span class="n">task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attachment_task_id_map</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attachment_task_id_map</span><span class="p">[</span><span class="n">orig_task_id</span><span class="p">]</span>
 
         <span class="c1"># emit failure signal:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">work_failure</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span></div>
@@ -1278,7 +1348,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v4.4.5',
+            VERSION:'v4.4.12',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

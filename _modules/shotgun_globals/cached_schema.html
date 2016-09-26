@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_globals.cached_schema &mdash; tk-framework-shotgunutils v4.4.5 documentation</title>
+  <title>shotgun_globals.cached_schema &mdash; tk-framework-shotgunutils v4.4.12 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.4.5 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.4.12 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -115,7 +115,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.4.5.<br>
+    <b>tk-framework-shotgunutils</b> v4.4.12.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -426,7 +426,7 @@
             <span class="c1"># let&#39;s check to see if we can get it from disk before we resort to going to</span>
             <span class="c1"># Shotgun.</span>
             <span class="k">if</span> <span class="n">project_id</span> <span class="o">!=</span> <span class="n">current_project_id</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_cached_status</span><span class="p">(</span><span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_cached_schema</span><span class="p">(</span><span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">):</span>
                     <span class="c1"># If we were able to load the cached schema from disk then we don&#39;t</span>
                     <span class="c1"># have anything else to do.</span>
                     <span class="k">return</span>
@@ -458,7 +458,7 @@
             <span class="c1"># let&#39;s check to see if we can get it from disk before we resort to going to</span>
             <span class="c1"># Shotgun.</span>
             <span class="k">if</span> <span class="n">project_id</span> <span class="o">!=</span> <span class="n">current_project_id</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_cached_schema</span><span class="p">(</span><span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_cached_status</span><span class="p">(</span><span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">):</span>
                     <span class="c1"># If we were able to load the cached schema from disk then we don&#39;t</span>
                     <span class="c1"># have anything else to do.</span>
                     <span class="k">return</span>
@@ -608,9 +608,24 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Unregistering </span><span class="si">%r</span><span class="s2"> from schema manager&quot;</span> <span class="o">%</span> <span class="n">task_manager</span><span class="p">)</span>
                 <span class="n">data_retriever</span> <span class="o">=</span> <span class="n">dr</span><span class="p">[</span><span class="s2">&quot;data_retriever&quot;</span><span class="p">]</span>
                 <span class="n">data_retriever</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
-                <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_signal</span><span class="p">)</span>
-                <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_failure</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_failure</span><span class="p">)</span>
-                
+
+                <span class="c1"># make sure we don&#39;t get exceptions trying to disconnect if the</span>
+                <span class="c1"># signals were never connected or somehow disconnected externally</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_signal</span><span class="p">)</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">),</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># was never connected</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span>
+                        <span class="s2">&quot;Could not disconnect &#39;_on_worker_signal&#39; slot from &quot;</span>
+                        <span class="s2">&quot;the task manager&#39;s &#39;work_completed&#39; signal: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="p">,)</span>
+                    <span class="p">)</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_failure</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_failure</span><span class="p">)</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">),</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># was never connected</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span>
+                        <span class="s2">&quot;Could not disconnect &#39;_on_worker_failure&#39; slot from &quot;</span>
+                        <span class="s2">&quot;the task manager&#39;s &#39;work_failure&#39; signal: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="p">,)</span>
+                    <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">culled_retrievers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dr</span><span class="p">)</span>
 
@@ -625,6 +640,7 @@
 <span class="sd">        :param project_id:  The id of the project entity to load the schema for. If</span>
 <span class="sd">                            None, the current context&#39;s project will be used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_schema_loaded</span><span class="p">(</span><span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">):</span>
@@ -633,7 +649,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">schema_loaded</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
 
             <span class="c1"># kick off full schema loading</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_entity_fields</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -1066,7 +1082,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v4.4.5',
+            VERSION:'v4.4.12',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

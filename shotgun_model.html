@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Model &mdash; tk-framework-shotgunutils v4.4.5 documentation</title>
+  <title>Shotgun Model &mdash; tk-framework-shotgunutils v4.4.12 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.4.5 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.4.12 documentation" href="index.html"/>
         <link rel="next" title="Shotgun Asynchronous Data Retriever" href="shotgun_data.html"/>
         <link rel="prev" title="The Shotgun Utilities Framework" href="index.html"/> 
 
@@ -97,7 +97,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#beyond-hello-world">Beyond Hello World</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#progress-spinner">Progress Spinner</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#data-items">Data Items</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#datetime-objects-and-the-shotgun-api">Datetime objects and the Shotgun API</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#simpleshotgunmodel">SimpleShotgunModel</a></li>
@@ -130,7 +129,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.4.5.<br>
+    <b>tk-framework-shotgunutils</b> v4.4.12.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -184,11 +183,11 @@
 <div class="section" id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
 <p>The shotgun data model helps you build responsive, data rich applications quickly and leverage
-QT&#8217;s built-in model/view framework</p>
+Qt&#8217;s built-in model/view framework</p>
 <img alt="_images/model_overview.png" src="_images/model_overview.png" />
-<p>The Shotgun Model is a custom QT Model specialized for Shotgun Queries. It uses a disk based cache
+<p>The Shotgun Model is a custom Qt Model specialized for Shotgun Queries. It uses a disk based cache
 and runs queries asynchronously to Shotgun in the background for performance. In a nut shell, you
-derive your own model class from it, set up a query, and then hook up your model to a QT View which
+derive your own model class from it, set up a query, and then hook up your model to a Qt View which
 will draw the data. The class contains several callbacks and allows for extensive customization, yet
 tries to shadow and encapsulate a lot of the details.</p>
 <img alt="_images/model_inheritance.png" src="_images/model_inheritance.png" />
@@ -197,8 +196,8 @@ tries to shadow and encapsulate a lot of the details.</p>
 <p>Using the Shotgun Model means switching to Model/View based programming. While there is perhaps slightly more
 overhead to get started with this, there are many benefits. The Shotgun Model (and the corresponding delegates
 and Shotgun View components) is an attempt to bridge this gap and make it quick and painless to get started
-with QT Model/View programming.</p>
-<p>QT provides a strong and mature Model/View hierarchy which is robust and easy to work with. If you are not
+with Qt Model/View programming.</p>
+<p>Qt provides a strong and mature Model/View hierarchy which is robust and easy to work with. If you are not
 familiar with it, please check the following links:</p>
 <ul class="simple">
 <li>Tutorial: <a class="reference external" href="http://qt-project.org/doc/qt-4.8/modelview.html">http://qt-project.org/doc/qt-4.8/modelview.html</a></li>
@@ -207,7 +206,7 @@ familiar with it, please check the following links:</p>
 <p>The benefits with this approach will become evident as you scale your UIs and their complexity. Developing code
 and tools where the data and the UI is combined will work in simple scenarios but for data rich applications
 this approach becomes hard to maintain, difficult to reuse and typically scales poorly as the dataset complexity grows.
-By leveraging QTs built-in functionality, you get access to a mature and well documented toolbox that makes
+By leveraging Qts built-in functionality, you get access to a mature and well documented toolbox that makes
 it quick to develop tools:</p>
 <ul class="simple">
 <li>A Shotgun model instance represents a single shotgun query. With two lines of code you can connect the resultset
@@ -215,11 +214,11 @@ of such a query with a standard Qt list, tree or table.</li>
 <li>The Shotgun model is cached, meaning that all data is fetched in the background in a worker thread. This means that
 the data in your UI will load up instantly and you never have to wait for shotgun. If the query result is different
 than the cached result, the view will be updated on the fly as the data arrives.</li>
-<li>With QT you have access to SelectionModels, making it easy to create consistent selection behavior, even across
+<li>With Qt you have access to SelectionModels, making it easy to create consistent selection behavior, even across
 multiple views. With full keyboard support.</li>
-<li>With QT proxy models you can easily create interactive searching and filtering on the client side.</li>
+<li>With Qt proxy models you can easily create interactive searching and filtering on the client side.</li>
 <li>Views and models are optimized and will perform nicely even if you have thousands of items loaded.</li>
-<li>Through the shotgun view module, you can easily control the QT <em>delegates</em> system, making it easy to
+<li>Through the shotgun view module, you can easily control the Qt <em>delegates</em> system, making it easy to
 draw custom UIs for each cell in your view.</li>
 </ul>
 </div>
@@ -232,7 +231,7 @@ toolkit app:</p>
 <span class="c1"># Set up alias</span>
 <span class="n">ShotgunModel</span> <span class="o">=</span> <span class="n">shotgun_model</span><span class="o">.</span><span class="n">ShotgunModel</span>
 
-<span class="c1"># Create a standard QT Tree View</span>
+<span class="c1"># Create a standard Qt Tree View</span>
 <span class="n">view</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeView</span><span class="p">(</span><span class="n">parent_widget</span><span class="p">)</span>
 
 <span class="c1"># Set up our data backend</span>
@@ -245,7 +244,7 @@ toolkit app:</p>
 <span class="n">model</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;Asset&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The above code will create a standard QT tree view of all assets in Shotgun.</p>
+<p>The above code will create a standard Qt tree view of all assets in Shotgun.</p>
 </div>
 <div class="section" id="beyond-hello-world">
 <h3>Beyond Hello World<a class="headerlink" href="#beyond-hello-world" title="Permalink to this headline">¶</a></h3>
@@ -259,14 +258,14 @@ things.</li>
 <li>If you want to cull out items from the model, for example only to show items matching a particular
 search criteria, use a Proxy Model (typically <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QSortFilterProxyModel.html#PySide.QtGui.QSortFilterProxyModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QSortFilterProxyModel</span></code></a>).</li>
 <li>If you want to control the way items are displayed in the view, consider using the Shotgun delegates
-module which is part of the QT widgets framework. For more information, see
-<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/views.html#views.WidgetDelegate" title="(in tk-framework-qtwidgets vv2.4.3)"><code class="xref py py-class docutils literal"><span class="pre">WidgetDelegate</span></code></a></li>
+module which is part of the Qt widgets framework. For more information, see
+<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/views.html#views.WidgetDelegate" title="(in tk-framework-qtwidgets vv2.5.7)"><code class="xref py py-class docutils literal"><span class="pre">WidgetDelegate</span></code></a></li>
 </ul>
 </div>
 <div class="section" id="progress-spinner">
-<span id="sg-model-data-items"></span><h3>Progress Spinner<a class="headerlink" href="#progress-spinner" title="Permalink to this headline">¶</a></h3>
+<h3>Progress Spinner<a class="headerlink" href="#progress-spinner" title="Permalink to this headline">¶</a></h3>
 <p>The model emits several signals at various points in its refresh cycle. If you want a spinner
-to pop up to indicate that data is being loaded, simply add a <a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/overlay_widget.html#overlay_widget.ShotgunModelOverlayWidget" title="(in tk-framework-qtwidgets vv2.4.3)"><code class="xref py py-class docutils literal"><span class="pre">ShotgunModelOverlayWidget</span></code></a>
+to pop up to indicate that data is being loaded, simply add a <a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/overlay_widget.html#overlay_widget.ShotgunModelOverlayWidget" title="(in tk-framework-qtwidgets vv2.5.7)"><code class="xref py py-class docutils literal"><span class="pre">ShotgunModelOverlayWidget</span></code></a>
 between your view and model, like this:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">overlay_widget</span> <span class="o">=</span> <span class="n">tank</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s2">&quot;tk-framework-qtwidgets&quot;</span><span class="p">,</span> <span class="s2">&quot;overlay_widget&quot;</span><span class="p">)</span>
 
@@ -297,23 +296,6 @@ in a dictionary with the keys name and value. For example, for a leaf node this 
 like <code class="docutils literal"><span class="pre">{&quot;name&quot;:</span> <span class="pre">&quot;code&quot;,</span> <span class="pre">&quot;value&quot;:</span> <span class="pre">&quot;AAA_123&quot;}</span></code>. For an intermediate node, it may be something such as
 <code class="docutils literal"><span class="pre">{&quot;name&quot;:</span> <span class="pre">&quot;sg_sequence&quot;,</span> <span class="pre">&quot;value&quot;:</span> <span class="pre">{&quot;id&quot;:</span> <span class="pre">123,</span> <span class="pre">&quot;name&quot;:</span> <span class="pre">&quot;AAA&quot;,</span> <span class="pre">&quot;type&quot;:</span> <span class="pre">&quot;Sequence&quot;}</span> <span class="pre">}</span></code>.</li>
 </ul>
-</div>
-<div class="section" id="datetime-objects-and-the-shotgun-api">
-<h3>Datetime objects and the Shotgun API<a class="headerlink" href="#datetime-objects-and-the-shotgun-api" title="Permalink to this headline">¶</a></h3>
-<p>Because of issues with serialization, please note that datetime objects returned by the Shotgun API are
-automatically converted to unix timestamps by the model. A unix timestamp is the number of seconds since
-1 Jan 1971, in the UTC time zone.</p>
-<p>When you are pulling data from the shotgun model and want to convert this unix timestamp
-to a <em>local</em> timezone object, which is what you would get from the Shotgun API, use the following code:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">datetime</span>
-<span class="kn">from</span> <span class="nn">tank_vendor</span> <span class="k">import</span> <span class="n">shotgun_api3</span>
-<span class="n">local_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">unix_time</span><span class="p">,</span> <span class="n">shotgun_api3</span><span class="o">.</span><span class="n">sg_timezone</span><span class="o">.</span><span class="n">LocalTimezone</span><span class="p">())</span>
-</pre></div>
-</div>
-<p>Furthermore, if you want to turn that into a nicely formatted string:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">time_str</span> <span class="o">=</span> <span class="n">local_datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
 </div>
 </div>
 <div class="section" id="simpleshotgunmodel">
@@ -507,7 +489,7 @@ name/code, type and id.</td>
 </div>
 <div class="section" id="shotgunmodel">
 <h2>ShotgunModel<a class="headerlink" href="#shotgunmodel" title="Permalink to this headline">¶</a></h2>
-<p>A QT Model representing a Shotgun query.</p>
+<p>A Qt Model representing a Shotgun query.</p>
 <p>This class implements a standard <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtCore/QAbstractItemModel.html#PySide.QtCore.QAbstractItemModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QAbstractItemModel</span></code></a> specialized to hold the contents
 of a particular Shotgun query. It is cached and refreshes its data asynchronously.</p>
 <p>The model can either be a flat list or a tree. This is controlled by a grouping
@@ -517,9 +499,9 @@ types for the asset types. The leaf nodes in this case would be assets.</p>
 <dl class="class">
 <dt id="shotgun_model.ShotgunModel">
 <em class="property">class </em><code class="descclassname">shotgun_model.</code><code class="descname">ShotgunModel</code><span class="sig-paren">(</span><em>parent</em>, <em>download_thumbs=True</em>, <em>schema_generation=0</em>, <em>bg_load_thumbs=True</em>, <em>bg_task_manager=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItemModel.html#PySide.QtGui.QStandardItemModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">PySide.QtGui.QStandardItemModel</span></code></a></p>
-<p>A QT Model representing a Shotgun query.</p>
-<p>This class implements a standard  <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtCore/QAbstractItemModel.html#PySide.QtCore.QAbstractItemModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QAbstractItemModel</span></code></a>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">shotgun_model.shotgun_query_model.ShotgunQueryModel</span></code></p>
+<p>A Qt Model representing a Shotgun query.</p>
+<p>This class implements a standard <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtCore/QAbstractItemModel.html#PySide.QtCore.QAbstractItemModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QAbstractItemModel</span></code></a>
 specialized to hold the contents of a particular Shotgun query. It is cached
 and refreshes its data asynchronously.</p>
 <p>In order to use this class, you normally subclass it and implement certain key data
@@ -531,54 +513,7 @@ between your class and the view.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Signal query_changed():</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">Gets emitted whenever the model&#8217;s sg query is changed.
-When the query changes, the contents of the model is cleared and the
-loading of new data is initiated.</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Signal cache_loaded():</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">Emitted whenever the model loads cache data.
-This typically follows shortly after a query changed signal, if
-cache data is available.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">Signal data_refreshing():</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">Emitted whenever the model starts to refresh its
-shotgun data. This is emitted from <a class="reference internal" href="#shotgun_model.ShotgunModel._refresh_data" title="shotgun_model.ShotgunModel._refresh_data"><code class="xref py py-meth docutils literal"><span class="pre">_refresh_data()</span></code></a>.  Useful
-signal if you want to present a loading indicator of some kind.</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Signal data_refreshed(bool):</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">Emitted whenever the model has been updated with fresh
-shotgun data. The boolean indicates that a change in the model data has
-taken place as part of this process. If the refresh fails for some reason,
-this signal may not be emitted. The synchronous data refresh cycle starts
-with a call to <a class="reference internal" href="#shotgun_model.ShotgunModel._refresh_data" title="shotgun_model.ShotgunModel._refresh_data"><code class="xref py py-meth docutils literal"><span class="pre">_refresh_data()</span></code></a> and normally ends with either a
-data_refreshed or a data_refresh_fail signal being emitted.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">Signal data_refresh_fail():</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">Emitted in the case the refresh fails for some reason,
-typically due to the absence of an internet connection. This signal could
-for example be used to drive a &#8220;retry&#8221; button of some kind. The str
-parameter carries an error message with details about why the
-refresh wasn&#8217;t successful.</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Constant SG_DATA_ROLE:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">Custom model role that holds the
-associated value. See <a class="reference internal" href="#sg-model-data-items"><span class="std std-ref">Progress Spinner</span></a>.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">Constant SG_ASSOCIATED_FIELD_ROLE:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">Custom model role that holds the
-shotgun data payload. See <a class="reference internal" href="#sg-model-data-items"><span class="std std-ref">Progress Spinner</span></a>.  This role will also hold
-the field value for the Shotgun entity for any items that are created for additional
-columns.</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>parent</strong> (<a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QWidget.html#PySide.QtGui.QWidget" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QWidget</span></code></a>) &#8211; Parent object.</li>
 <li><strong>download_thumbs</strong> &#8211; Boolean to indicate if this model should attempt
 to download and process thumbnails for the downloaded data.</li>
@@ -598,155 +533,16 @@ this is None then a task manager will be created as needed.</li>
 </tr>
 </tbody>
 </table>
-<dl class="attribute">
-<dt id="shotgun_model.ShotgunModel.entity_ids">
-<code class="descname">entity_ids</code><a class="headerlink" href="#shotgun_model.ShotgunModel.entity_ids" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list of entity ids that are part of this model.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="shotgun_model.ShotgunModel.destroy">
-<code class="descname">destroy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel.destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.destroy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Call this method prior to destroying this object.
-This will ensure all worker threads etc are stopped.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="shotgun_model.ShotgunModel.item_from_entity">
-<code class="descname">item_from_entity</code><span class="sig-paren">(</span><em>entity_type</em>, <em>entity_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel.item_from_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.item_from_entity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> based on entity type and entity id
-Returns none if not found.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>entity_type</strong> &#8211; Shotgun entity type to look for</li>
-<li><strong>entity_id</strong> &#8211; Shotgun entity id to look for</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> or None if not found</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="shotgun_model.ShotgunModel.index_from_entity">
-<code class="descname">index_from_entity</code><span class="sig-paren">(</span><em>entity_type</em>, <em>entity_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel.index_from_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.index_from_entity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a QModelIndex based on entity type and entity id
-Returns none if not found.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>entity_type</strong> &#8211; Shotgun entity type to look for</li>
-<li><strong>entity_id</strong> &#8211; Shotgun entity id to look for</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtCore/QModelIndex.html#PySide.QtCore.QModelIndex" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QModelIndex</span></code></a> or None if not found</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="shotgun_model.ShotgunModel.get_filters">
-<code class="descname">get_filters</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel.get_filters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.get_filters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list of Shotgun filters representing the given item. This is useful if
-you are trying to determine how intermediate leaf nodes partition leaf node data.</p>
-<p>For example, if you have created a hierarchical model for a Shot listing:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">hierarchy</span><span class="p">:</span> <span class="p">[</span><span class="n">sg_sequence</span><span class="p">,</span> <span class="n">sg_status</span><span class="p">,</span> <span class="n">code</span><span class="p">]</span>
-</pre></div>
-</div>
-<p>The Shotgun model will group the data by sequence, then by status, then the leaf
-nodes will be the shot names. If you execute the get_filters() method on a sequence
-level tree node, it may return:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span> <span class="p">[</span><span class="s1">&#39;sg_sequence&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;Sequence&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;foo&#39;</span><span class="p">}]</span> <span class="p">]</span>
-</pre></div>
-</div>
-<p>If you execute the get_filters() on a status node in the tree, it may return:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span>
-  <span class="p">[</span><span class="s1">&#39;sg_sequence&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;Sequence&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;foo&#39;</span><span class="p">}],</span>
-  <span class="p">[</span><span class="s1">&#39;sg_status&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="s1">&#39;ip&#39;</span><span class="p">]</span>
-<span class="p">]</span>
-</pre></div>
-</div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> &#8211; One of the <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> s that are
-associated with this model.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">standard shotgun filter list to represent that item</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="shotgun_model.ShotgunModel.get_entity_type">
-<code class="descname">get_entity_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel.get_entity_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.get_entity_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Shotgun Entity type associated with this model.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Shotgun entity type string (e.g. &#8216;Shot&#8217;, &#8216;Asset&#8217; etc).</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="shotgun_model.ShotgunModel.get_additional_column_fields">
-<code class="descname">get_additional_column_fields</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel.get_additional_column_fields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.get_additional_column_fields" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the fields for additional columns and their associated column in the model.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A list of dictionaries with the following keys:
-&#8220;field&#8221;: the requested additional field for the column
-&#8220;column_idx&#8221;: the column number in the model associated with the additional field</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="shotgun_model.ShotgunModel.hard_refresh">
-<code class="descname">hard_refresh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel.hard_refresh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.hard_refresh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clears any caches on disk, then refreshes the data.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="shotgun_model.ShotgunModel.is_data_cached">
-<code class="descname">is_data_cached</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel.is_data_cached"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.is_data_cached" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determine if the model has any cached data</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if cached data exists for the model, otherwise False</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<p><strong>Loading &amp; Refreshing the Data</strong></p>
+<p>These methods are used by subclasses to define the Shotgun query that loads
+and caches the model items and refreshes them once cached.</p>
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel._load_data">
 <code class="descname">_load_data</code><span class="sig-paren">(</span><em>entity_type</em>, <em>filters</em>, <em>hierarchy</em>, <em>fields</em>, <em>order=None</em>, <em>seed=None</em>, <em>limit=None</em>, <em>columns=None</em>, <em>additional_filter_presets=None</em>, <em>editable_columns=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._load_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the main method to use to configure the model. You basically
 pass a specific find query to the model and it will start tracking
 this particular set of filter and hierarchy parameters.</p>
-<p>Any existing data in contained in the model will be cleared.</p>
+<p>Any existing data contained in the model will be cleared.</p>
 <p>This method will not call the Shotgun API. If cached data is available,
 this will be immediately loaded (this operation is very fast even for
 substantial amounts of data).</p>
@@ -841,99 +637,50 @@ all existing items from the model are removed. This does affect view related
 states such as selection.</p>
 </dd></dl>
 
+<p><strong>Customizing the Model Items</strong></p>
+<p>The following methods can be used by subclasses to customize the model
+and the information it displays when attached to a view.</p>
 <dl class="method">
-<dt id="shotgun_model.ShotgunModel._request_thumbnail_download">
-<code class="descname">_request_thumbnail_download</code><span class="sig-paren">(</span><em>item</em>, <em>field</em>, <em>url</em>, <em>entity_type</em>, <em>entity_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._request_thumbnail_download"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._request_thumbnail_download" title="Permalink to this definition">¶</a></dt>
-<dd><p>Request that a thumbnail is downloaded for an item. If a thumbnail is successfully
-retrieved, either from disk (cached) or via shotgun, the method _populate_thumbnail()
-will be called. If you want to control exactly how your shotgun thumbnail is
-to appear in the UI, you can subclass this method. For example, you can subclass
-this method and perform image composition prior to the image being added to
-the item object.</p>
+<dt id="shotgun_model.ShotgunModel._before_data_processing">
+<code class="descname">_before_data_processing</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunModel._before_data_processing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called just after data has been retrieved from Shotgun but before any
+processing takes place.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">This is an advanced method which you can use if you want to load thumbnail
-data other than the standard &#8216;image&#8217; field. If that&#8217;s what you need, simply make
-sure that you set the download_thumbs parameter to true when you create the model
-and standard thumbnails will be automatically downloaded. This method is either used
-for linked thumb fields or if you want to download thumbnails for external model data
-that doesn&#8217;t come from Shotgun.</p>
+<p class="last">You can subclass this if you want to perform summaries,
+calculations and other manipulations of the data before it is
+passed on to the model class.</p>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>item</strong> &#8211; <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> which belongs to this model</li>
-<li><strong>field</strong> &#8211; Shotgun field where the thumbnail is stored. This is typically <code class="docutils literal"><span class="pre">image</span></code> but
-can also for example be <code class="docutils literal"><span class="pre">sg_sequence.Sequence.image</span></code>.</li>
-<li><strong>url</strong> &#8211; thumbnail url</li>
-<li><strong>entity_type</strong> &#8211; Shotgun entity type</li>
-<li><strong>entity_id</strong> &#8211; Shotgun entity id</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; a shotgun dictionary, as retunrned by a CRUD SG API call.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">should return a shotgun dictionary, of the same form as the
+input.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="shotgun_model.ShotgunModel._populate_item">
-<code class="descname">_populate_item</code><span class="sig-paren">(</span><em>item</em>, <em>sg_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._populate_item"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._populate_item" title="Permalink to this definition">¶</a></dt>
-<dd><p>Whenever an item is downloaded from Shotgun, this method is called. It allows subclasses to intercept
-the construction of a <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> and add additional metadata or make other changes
-that may be useful. Nothing needs to be returned.</p>
-<p>This method is called before the item is added into the model tree. At the point when
-the item is added into the tree, various signals will fire, informing views and proxy
-models that a new item has been added. This methods allows a subclassing object to
-add custom data prior to this.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">When an item is fetched from the cache, this method is <em>not</em> called, it will
-only be called when shotgun data initially arrives from a Shotgun API query.</p>
+<dt id="shotgun_model.ShotgunModel._before_item_removed">
+<code class="descname">_before_item_removed</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunModel._before_item_removed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called just before an item is removed from the model.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This base class implementation must be called in any
+subclasses overriding this behavior. Failure to do so will result in
+unexpected behavior.</p>
 </div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">This is typically subclassed if you retrieve additional fields alongside the standard &#8220;name&#8221; field
-and you want to put those into various custom data roles. These custom fields on the item
-can later on be picked up by custom (delegate) rendering code in the view.</p>
-</div>
+<p>The base class handles cleaning up the underlying item lookup when an
+item is removed.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>item</strong> &#8211; <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> that is about to be added to the model. This has been primed
-with the standard settings that the ShotgunModel handles.</li>
-<li><strong>sg_data</strong> &#8211; Shotgun data dictionary that was received from Shotgun given the fields
-and other settings specified in _load_data()</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="shotgun_model.ShotgunModel._populate_default_thumbnail">
-<code class="descname">_populate_default_thumbnail</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._populate_default_thumbnail"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._populate_default_thumbnail" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called whenever an item is constructed and needs to be associated with a default thumbnail.
-In the current implementation, thumbnails are not cached in the same way as the rest of
-the model data, meaning that this method is executed each time an item is constructed,
-regardless of if it came from an asynchronous shotgun query or a cache fetch.</p>
-<p>The purpose of this method is that you can subclass it if you want to ensure that items
-have an associated thumbnail directly when they are first created.</p>
-<p>Later on in the data load cycle, if the model was instantiated with the
-<cite>download_thumbs</cite> parameter set to True,
-the standard Shotgun <code class="docutils literal"><span class="pre">image</span></code> field thumbnail will be automatically downloaded for all items (or
-picked up from local cache if possible). When these real thumbnails arrive, the
-meth:<cite>_populate_thumbnail()</cite> method will be called.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> &#8211; <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> that is about to be added to the model.
-This has been primed with the standard settings that the ShotgunModel handles.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> (<a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a>) &#8211; The item about to be removed</td>
 </tr>
 </tbody>
 </table>
@@ -941,66 +688,207 @@ This has been primed with the standard settings that the ShotgunModel handles.</
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel._finalize_item">
-<code class="descname">_finalize_item</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._finalize_item"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._finalize_item" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called whenever an item is fully constructed, either because a shotgun query returned it
-or because it was loaded as part of a cache load from disk.</p>
+<code class="descname">_finalize_item</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunModel._finalize_item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called whenever an item is fully constructed, either because a shotgun
+query returned it or because it was loaded as part of a cache load from
+disk.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">You can subclass this if you want to run post processing on
-the data as it is arriving. For example, if you are showing a list of
-task statuses in a filter view, you may want to remember which
-statuses a user had checked and unchecked the last time he was running
-the tool. By subclassing this UI you can easily apply those settings
-before items appear in the UI.</p>
+the data as it is arriving. For example, if you are showing a list
+of task statuses in a filter view, you may want to remember which
+statuses a user had checked and unchecked the last time he was
+running the tool. By subclassing this method you can easily apply
+those settings before items appear in the UI.</p>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> &#8211; <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> that is about to be added to the model.
-This has been primed with the standard settings that the ShotgunModel handles.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> &#8211; <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> that is about to be
+added to the model.  This has been primed with the standard settings
+that the ShotgunModel handles.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="shotgun_model.ShotgunModel._set_tooltip">
-<code class="descname">_set_tooltip</code><span class="sig-paren">(</span><em>item</em>, <em>sg_item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._set_tooltip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._set_tooltip" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called when an item is created.</p>
+<dt id="shotgun_model.ShotgunModel._get_additional_columns">
+<code class="descname">_get_additional_columns</code><span class="sig-paren">(</span><em>primary_item</em>, <em>is_leaf</em>, <em>columns</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._get_additional_columns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._get_additional_columns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when an item is about to be inserted into the model, to get additional items
+to be included in the same row as the specified item. This provides an opportunity
+for subclasses to create one or more additional columns for each item in the model.</p>
+<p>Note that this method is always called before inserting an item, even when loading
+from the cache. Any data that is expensive to compute or query should be added
+to the ShotgunStandardItem in _populate_item, since column data is not cached.
+Also note that item population methods (_populate_item, _populate_thumbnail, etc)
+will not be called on the return columns.</p>
+<p>This method should return a list of QStandardItems, one for each additional column.
+The original ShotgunStandardItem is always the first item in each row and should
+NOT be included in the returned list. Any empty value returned by this method
+is guaranteed to be treated as an empty list (i.e. you may return None).</p>
+<p>This method is called after _finalize_item.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>primary_item</strong> &#8211; <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> that is about to be added to the model</li>
+<li><strong>is_leaf</strong> &#8211; boolean that is True if the item is a leaf item</li>
+<li><strong>columns</strong> &#8211; list of Shotgun field names requested as the columns from _load_data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel._get_additional_column_headers">
+<code class="descname">_get_additional_column_headers</code><span class="sig-paren">(</span><em>entity_type</em>, <em>columns</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._get_additional_column_headers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._get_additional_column_headers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called to set the headers for the additional columns requested from _load_data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>entity_type</strong> &#8211; type name of the entity the columns are for</li>
+<li><strong>columns</strong> &#8211; list of Shotgun field names requested as the columns from _load_data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of strings to use as the headers</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel._get_columns">
+<code class="descname">_get_columns</code><span class="sig-paren">(</span><em>item</em>, <em>is_leaf</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._get_columns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._get_columns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a row (list of QStandardItems) given an initial QStandardItem.  The item itself
+is always the first item in the row, but additional columns may be appended.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>item</strong> &#8211; A <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> that is associated with this model.</li>
+<li><strong>is_leaf</strong> &#8211; A boolean indicating if the item is a leaf item or not</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> s</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel._item_created">
+<code class="descname">_item_created</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._item_created"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._item_created" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when an item is created, before it is added to the model.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This base class implementation must be called in any
+subclasses overriding this behavior. Failure to do so will result in
+unexpected behavior.</p>
+</div>
+<p>This base class implementation handles storing item lookups for
+efficiency as well as to prevent issues with garbage collection.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> (<a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a>) &#8211; The item that was just created.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel._load_external_data">
+<code class="descname">_load_external_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunModel._load_external_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called whenever the model needs to be rebuilt from scratch. This is
+called prior to any shotgun data is added to the model.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p>You can subclass this if you want to set your own tooltip for the model item. By
-default, the SG_ASSOCIATED_FIELD_ROLE data is retrieved and the field name is used to
-determine which field to pick tooltip information from.</p>
-<p>For example,</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
-    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Task&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;entity&quot;</span><span class="p">:</span> <span class="p">{</span>                       <span class="c1"># (1) Tooltip becomes &quot;Asset &#39;Alice&#39;&quot;</span>
-        <span class="s2">&quot;sg_asset_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Character&quot;</span><span class="p">,</span> <span class="c1"># (2) Tooltip becomes &quot;Asset Type &#39;Character&#39;&quot;</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Asset&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;Alice&quot;</span>
-    <span class="p">},</span>
-    <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;Art&quot;</span>                  <span class="c1"># (3) Tooltip becomes &quot;Task &#39;Art&#39;&quot;</span>
-<span class="p">}</span>
-</pre></div>
+<p class="last">You can subclass this to add custom data to the model in a
+very flexible fashion. If you for example are loading published
+files from Shotgun, you could use this to load up a listing of
+files on disk, resulting in a model that shows both published files
+and local files.  External data will not be cached by the
+ShotgunModel framework.</p>
 </div>
-<p>1) If the field is an entity (e.g. entity), then the display name of that entity&#8217;s type
-will be used.</p>
-<p>2) If the field is part of a sub-entity (e.g entity.Asset.sg_asset_type), the display
-name of the sub-entity&#8217;s type followed by a space and the sub-entity&#8217;s field display name
-will be used.</p>
-<p>3) If the field is part of an entity and not an entity field(e.g. content), the display
-name of the entity&#8217;s type will be used.</p>
-<p class="last">In all cases, the string ends with the quoted name of the ShotgunStandardItem.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel._populate_default_thumbnail">
+<code class="descname">_populate_default_thumbnail</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunModel._populate_default_thumbnail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called whenever an item is constructed and needs to be associated with
+a default thumbnail.  In the current implementation, thumbnails are not
+cached in the same way as the rest of the model data, meaning that this
+method is executed each time an item is constructed, regardless of if
+it came from an asynchronous shotgun query or a cache fetch.</p>
+<p>The purpose of this method is that you can subclass it if you want to
+ensure that items have an associated thumbnail directly when they are
+first created.</p>
+<p>Later on in the data load cycle, if the model was instantiated with the
+<cite>download_thumbs</cite> parameter set to True, the standard Shotgun <code class="docutils literal"><span class="pre">image</span></code>
+field thumbnail will be automatically downloaded for all items (or
+picked up from local cache if possible).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> &#8211; <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> that is about to be
+added to the model.  This has been primed with the standard
+settings that the ShotgunModel handles.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel._populate_item">
+<code class="descname">_populate_item</code><span class="sig-paren">(</span><em>item</em>, <em>sg_data</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunModel._populate_item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whenever an item is downloaded from Shotgun, this method is called. It
+allows subclasses to intercept the construction of a
+<a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> and add additional metadata or
+make other changes that may be useful. Nothing needs to be returned.</p>
+<p>This method is called before the item is added into the model tree. At
+the point when the item is added into the tree, various signals will
+fire, informing views and proxy models that a new item has been added.
+This methods allows a subclassing object to add custom data prior to
+this.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">When an item is fetched from the cache, this method is <em>not</em>
+called, it will only be called when shotgun data initially arrives
+from a Shotgun API query.</p>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>item</strong> &#8211; Shotgun model item that requires a tooltip.</li>
-<li><strong>sg_item</strong> &#8211; Dictionary of the entity associated with the Shotgun model item.</li>
+<li><strong>item</strong> &#8211; <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> that is about to be
+added to the model.</li>
+<li><strong>sg_data</strong> &#8211; Shotgun data dictionary that was received from Shotgun.</li>
 </ul>
 </td>
 </tr>
@@ -1074,121 +962,78 @@ carried out async and is passed in the form of a QImage object.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="shotgun_model.ShotgunModel._before_data_processing">
-<code class="descname">_before_data_processing</code><span class="sig-paren">(</span><em>sg_data_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._before_data_processing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._before_data_processing" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called just after data has been retrieved from Shotgun but before any processing
-takes place.</p>
+<dt id="shotgun_model.ShotgunModel._request_thumbnail_download">
+<code class="descname">_request_thumbnail_download</code><span class="sig-paren">(</span><em>item</em>, <em>field</em>, <em>url</em>, <em>entity_type</em>, <em>entity_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._request_thumbnail_download"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._request_thumbnail_download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Request that a thumbnail is downloaded for an item. If a thumbnail is successfully
+retrieved, either from disk (cached) or via shotgun, the method _populate_thumbnail()
+will be called. If you want to control exactly how your shotgun thumbnail is
+to appear in the UI, you can subclass this method. For example, you can subclass
+this method and perform image composition prior to the image being added to
+the item object.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">You can subclass this if you want to perform summaries,
-calculations and other manipulations of the data before it is
-passed on to the model class. For example, if you request the model
-to retrieve a list of versions from Shotgun given a Shot,
-you can then subclass this method to cull out the data so that you
-are only left with the latest version for each task. This method
-is often used in conjunction with the order parameter in <a class="reference internal" href="#shotgun_model.ShotgunModel._load_data" title="shotgun_model.ShotgunModel._load_data"><code class="xref py py-meth docutils literal"><span class="pre">_load_data()</span></code></a>.</p>
+<p class="last">This is an advanced method which you can use if you want to load thumbnail
+data other than the standard &#8216;image&#8217; field. If that&#8217;s what you need, simply make
+sure that you set the download_thumbs parameter to true when you create the model
+and standard thumbnails will be automatically downloaded. This method is either used
+for linked thumb fields or if you want to download thumbnails for external model data
+that doesn&#8217;t come from Shotgun.</p>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sg_data_list</strong> &#8211; list of shotgun dictionaries, as retunrned by the find() call.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">should return a list of shotgun dictionaries, on the same form as the input.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>item</strong> &#8211; <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> which belongs to this model</li>
+<li><strong>field</strong> &#8211; Shotgun field where the thumbnail is stored. This is typically <code class="docutils literal"><span class="pre">image</span></code> but
+can also for example be <code class="docutils literal"><span class="pre">sg_sequence.Sequence.image</span></code>.</li>
+<li><strong>url</strong> &#8211; thumbnail url</li>
+<li><strong>entity_type</strong> &#8211; Shotgun entity type</li>
+<li><strong>entity_id</strong> &#8211; Shotgun entity id</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="shotgun_model.ShotgunModel._load_external_data">
-<code class="descname">_load_external_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._load_external_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._load_external_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called whenever the model needs to be rebuilt from scratch. This is called prior
-to any shotgun data is added to the model.</p>
+<dt id="shotgun_model.ShotgunModel._set_tooltip">
+<code class="descname">_set_tooltip</code><span class="sig-paren">(</span><em>item</em>, <em>sg_item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._set_tooltip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._set_tooltip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when an item is created.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">You can subclass this to add custom data to the model in a very
-flexible fashion. If you for example are loading published files from
-Shotgun, you could use this to load up a listing of files on disk,
-resulting in a model that shows both published files and local files.
-External data will not be cached by the ShotgunModel framework.</p>
+<p>You can subclass this if you want to set your own tooltip for the model item. By
+default, the SG_ASSOCIATED_FIELD_ROLE data is retrieved and the field name is used to
+determine which field to pick tooltip information from.</p>
+<p>For example,</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Task&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;entity&quot;</span><span class="p">:</span> <span class="p">{</span>                       <span class="c1"># (1) Tooltip becomes &quot;Asset &#39;Alice&#39;&quot;</span>
+        <span class="s2">&quot;sg_asset_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Character&quot;</span><span class="p">,</span> <span class="c1"># (2) Tooltip becomes &quot;Asset Type &#39;Character&#39;&quot;</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Asset&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;Alice&quot;</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;Art&quot;</span>                  <span class="c1"># (3) Tooltip becomes &quot;Task &#39;Art&#39;&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>1) If the field is an entity (e.g. entity), then the display name of that entity&#8217;s type
+will be used.</p>
+<p>2) If the field is part of a sub-entity (e.g entity.Asset.sg_asset_type), the display
+name of the sub-entity&#8217;s type followed by a space and the sub-entity&#8217;s field display name
+will be used.</p>
+<p>3) If the field is part of an entity and not an entity field(e.g. content), the display
+name of the entity&#8217;s type will be used.</p>
+<p class="last">In all cases, the string ends with the quoted name of the ShotgunStandardItem.</p>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="shotgun_model.ShotgunModel._get_additional_columns">
-<code class="descname">_get_additional_columns</code><span class="sig-paren">(</span><em>primary_item</em>, <em>is_leaf</em>, <em>columns</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._get_additional_columns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._get_additional_columns" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called when an item is about to be inserted into the model, to get additional items
-to be included in the same row as the specified item. This provides an opportunity
-for subclasses to create one or more additional columns for each item in the model.</p>
-<p>Note that this method is always called before inserting an item, even when loading
-from the cache. Any data that is expensive to compute or query should be added
-to the ShotgunStandardItem in _populate_item, since column data is not cached.
-Also note that item population methods (_populate_item, _populate_thumbnail, etc)
-will not be called on the return columns.</p>
-<p>This method should return a list of QStandardItems, one for each additional column.
-The original ShotgunStandardItem is always the first item in each row and should
-NOT be included in the returned list. Any empty value returned by this method
-is guaranteed to be treated as an empty list (i.e. you may return None).</p>
-<p>This method is called after _finalize_item.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>primary_item</strong> &#8211; <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> that is about to be added to the model</li>
-<li><strong>is_leaf</strong> &#8211; boolean that is True if the item is a leaf item</li>
-<li><strong>columns</strong> &#8211; list of Shotgun field names requested as the columns from _load_data</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a></p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="shotgun_model.ShotgunModel._get_additional_column_headers">
-<code class="descname">_get_additional_column_headers</code><span class="sig-paren">(</span><em>entity_type</em>, <em>columns</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._get_additional_column_headers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._get_additional_column_headers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called to set the headers for the additional columns requested from _load_data.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>entity_type</strong> &#8211; type name of the entity the columns are for</li>
-<li><strong>columns</strong> &#8211; list of Shotgun field names requested as the columns from _load_data</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of strings to use as the headers</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="shotgun_model.ShotgunModel._on_data_retriever_work_failure">
-<code class="descname">_on_data_retriever_work_failure</code><span class="sig-paren">(</span><em>uid</em>, <em>msg</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._on_data_retriever_work_failure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._on_data_retriever_work_failure" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asynchronous callback - the data retriever failed to do some work</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>uid</strong> &#8211; The unique id of the work that failed</li>
-<li><strong>msg</strong> &#8211; The error message returned for the failure</li>
+<li><strong>item</strong> &#8211; Shotgun model item that requires a tooltip.</li>
+<li><strong>sg_item</strong> &#8211; Dictionary of the entity associated with the Shotgun model item.</li>
 </ul>
 </td>
 </tr>
@@ -1196,44 +1041,36 @@ is guaranteed to be treated as an empty list (i.e. you may return None).</p>
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="shotgun_model.ShotgunModel._on_data_retriever_work_completed">
-<code class="descname">_on_data_retriever_work_completed</code><span class="sig-paren">(</span><em>uid</em>, <em>request_type</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel._on_data_retriever_work_completed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel._on_data_retriever_work_completed" title="Permalink to this definition">¶</a></dt>
-<dd><p>Signaled whenever the data retriever completes some work.
-This method will dispatch the work to different methods
-depending on what async task has completed.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>uid</strong> &#8211; The unique id of the work that completed</li>
-<li><strong>request_type</strong> &#8211; Type of work completed</li>
-<li><strong>data</strong> &#8211; Result of the work</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Instance Methods</strong></p>
+<dl class="attribute">
+<dt id="shotgun_model.ShotgunModel.entity_ids">
+<code class="descname">entity_ids</code><a class="headerlink" href="#shotgun_model.ShotgunModel.entity_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of entity ids that are part of this model.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="shotgun_model.ShotgunModel._ShotgunModel__create_item">
-<code class="descname">_ShotgunModel__create_item</code><span class="sig-paren">(</span><em>field_display_name</em>, <em>field</em>, <em>is_leaf</em>, <em>sg_item</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunModel._ShotgunModel__create_item" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a model item for the tree.</p>
+<dt id="shotgun_model.ShotgunModel.destroy">
+<code class="descname">destroy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel.destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.destroy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call this method prior to destroying this object.
+This will ensure all worker threads etc are stopped.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel.item_from_entity">
+<code class="descname">item_from_entity</code><span class="sig-paren">(</span><em>entity_type</em>, <em>entity_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel.item_from_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.item_from_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> based on entity type and entity id
+Returns none if not found.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>field_display_name</strong> &#8211; Name of the entry in the UI.</li>
-<li><strong>field</strong> &#8211; Name of the field in the entity dictionary.</li>
-<li><strong>is_leaf</strong> &#8211; Is this a leaf item?</li>
-<li><strong>sg_item</strong> &#8211; Entity dictionary.</li>
+<li><strong>entity_type</strong> &#8211; Shotgun entity type to look for</li>
+<li><strong>entity_id</strong> &#8211; Shotgun entity id to look for</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">ShotgunStandardItem instance.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> or None if not found</p>
 </td>
 </tr>
 </tbody>
@@ -1241,21 +1078,21 @@ depending on what async task has completed.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="shotgun_model.ShotgunModel._ShotgunModel__get_columns">
-<code class="descname">_ShotgunModel__get_columns</code><span class="sig-paren">(</span><em>item</em>, <em>is_leaf</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunModel._ShotgunModel__get_columns" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a row (list of QStandardItems) given an initial QStandardItem.  The item itself
-is always the first item in the row, but additional columns may be appended.</p>
+<dt id="shotgun_model.ShotgunModel.index_from_entity">
+<code class="descname">index_from_entity</code><span class="sig-paren">(</span><em>entity_type</em>, <em>entity_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel.index_from_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.index_from_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a QModelIndex based on entity type and entity id
+Returns none if not found.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>item</strong> &#8211; A <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> that is associated with this model.</li>
-<li><strong>is_leaf</strong> &#8211; A boolean indicating if the item is a leaf item or not</li>
+<li><strong>entity_type</strong> &#8211; Shotgun entity type to look for</li>
+<li><strong>entity_id</strong> &#8211; Shotgun entity id to look for</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> s</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtCore/QModelIndex.html#PySide.QtCore.QModelIndex" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QModelIndex</span></code></a> or None if not found</p>
 </td>
 </tr>
 </tbody>
@@ -1263,29 +1100,92 @@ is always the first item in the row, but additional columns may be appended.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="shotgun_model.ShotgunModel._ShotgunModel__populate_complete_tree">
-<code class="descname">_ShotgunModel__populate_complete_tree</code><span class="sig-paren">(</span><em>sg_data</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunModel._ShotgunModel__populate_complete_tree" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate tree model data structure based on Shotgun data.</p>
+<dt id="shotgun_model.ShotgunModel.get_filters">
+<code class="descname">get_filters</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel.get_filters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.get_filters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of Shotgun filters representing the given item. This is useful if
+you are trying to determine how intermediate leaf nodes partition leaf node data.</p>
+<p>For example, if you have created a hierarchical model for a Shot listing:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">hierarchy</span><span class="p">:</span> <span class="p">[</span><span class="n">sg_sequence</span><span class="p">,</span> <span class="n">sg_status</span><span class="p">,</span> <span class="n">code</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The Shotgun model will group the data by sequence, then by status, then the leaf
+nodes will be the shot names. If you execute the get_filters() method on a sequence
+level tree node, it may return:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span> <span class="p">[</span><span class="s1">&#39;sg_sequence&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;Sequence&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;foo&#39;</span><span class="p">}]</span> <span class="p">]</span>
+</pre></div>
+</div>
+<p>If you execute the get_filters() on a status node in the tree, it may return:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span>
+  <span class="p">[</span><span class="s1">&#39;sg_sequence&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;Sequence&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;foo&#39;</span><span class="p">}],</span>
+  <span class="p">[</span><span class="s1">&#39;sg_status&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="s1">&#39;ip&#39;</span><span class="p">]</span>
+<span class="p">]</span>
+</pre></div>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sg_data</strong> &#8211; List of shotgun entity dictionairies.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> &#8211; One of the <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a> items that are associated with this model.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">standard shotgun filter list to represent that item</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="shotgun_model.ShotgunModel._ShotgunModel__realize_parent_child_hierarchy_r">
-<code class="descname">_ShotgunModel__realize_parent_child_hierarchy_r</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunModel._ShotgunModel__realize_parent_child_hierarchy_r" title="Permalink to this definition">¶</a></dt>
-<dd><p>Inserts all children nodes alphabetically into their parent, recursively.</p>
+<dt id="shotgun_model.ShotgunModel.get_entity_type">
+<code class="descname">get_entity_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel.get_entity_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.get_entity_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Shotgun Entity type associated with this model.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> &#8211; Dictionary with keys &#8216;item&#8217; and &#8216;children&#8217; representing a ShotgunStandardItem and a list
-of ShotgunStandardItem to be appended as rows of &#8216;item&#8217;.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Shotgun entity type string (e.g. &#8216;Shot&#8217;, &#8216;Asset&#8217; etc).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel.get_additional_column_fields">
+<code class="descname">get_additional_column_fields</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel.get_additional_column_fields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.get_additional_column_fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the fields for additional columns and their associated column in the model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A list of dictionaries with the following keys:
+&#8220;field&#8221;: the requested additional field for the column
+&#8220;column_idx&#8221;: the column number in the model associated with the additional field</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel.hard_refresh">
+<code class="descname">hard_refresh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel.hard_refresh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.hard_refresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears any caches on disk, then refreshes the data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_model.html#ShotgunModel.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunModel.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes all items (including header items) from the model and
+sets the number of rows and columns to zero.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunModel.is_data_cached">
+<code class="descname">is_data_cached</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunModel.is_data_cached" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if the model has any cached data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">True</span></code> if cached data exists for the model, <code class="docutils literal"><span class="pre">False</span></code>
+otherwise.</td>
 </tr>
 </tbody>
 </table>
@@ -1336,7 +1236,7 @@ of ShotgunStandardItem to be appended as rows of &#8216;item&#8217;.</td>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v4.4.5',
+            VERSION:'v4.4.12',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
