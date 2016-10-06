@@ -17,7 +17,9 @@ import weakref
 
 from sgtk.platform.qt import QtCore, QtGui
 
+from .shotgun_standard_item import ShotgunStandardItem
 from .shotgun_query_model import ShotgunQueryModel
+from .shotgun_data import ShotgunDataHandler
 from .util import get_sanitized_data, get_sg_data, sanitize_qt, sanitize_for_qt_model
 
 
@@ -34,14 +36,13 @@ class ShotgunModel(ShotgunQueryModel):
     a :class:`~PySide.QtGui.QAbstractItemView` of some sort which will display the result. If you need to do manipulations
     such as sorting or filtering on the data, connect a proxy model (typically :class:`~PySide.QtGui.QSortFilterProxyModel`)
     between your class and the view.
-
     """
 
     # data field that uniquely identifies an entity
     _SG_DATA_UNIQUE_ID_FIELD = "id"
 
     # Custom model role that holds the associated value
-    SG_ASSOCIATED_FIELD_ROLE = QtCore.Qt.UserRole + 3
+    SG_ASSOCIATED_FIELD_ROLE = QtCore.Qt.UserRole + 10
 
     # header value for the first column
     FIRST_COLUMN_HEADER = "Name"
@@ -72,7 +73,6 @@ class ShotgunModel(ShotgunQueryModel):
         :param bg_task_manager:  Background task manager to use for any asynchronous work. If
                                  this is None then a task manager will be created as needed.
         :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
-
         """
         super(ShotgunModel, self).__init__(parent, bg_task_manager)
 
@@ -102,7 +102,7 @@ class ShotgunModel(ShotgunQueryModel):
         """
         Returns a list of entity ids that are part of this model.
         """
-        return self._get_all_item_unique_ids()
+        return self._data_handler.get_entity_ids(self.__entity_type)
 
     def destroy(self):
         """
@@ -111,7 +111,6 @@ class ShotgunModel(ShotgunQueryModel):
         """
         self.__current_work_id = None
         self.__thumb_map = {}
-
         super(ShotgunModel, self).destroy()
 
     def item_from_entity(self, entity_type, entity_id):
@@ -126,7 +125,9 @@ class ShotgunModel(ShotgunQueryModel):
         if entity_type != self.__entity_type:
             return None
 
-        return self._get_item_by_unique_id(entity_id)
+        # TODO: need to load up the view recursively then return item
+        #return self._get_item_by_unique_id(entity_id)
+        return xxxx
 
     def index_from_entity(self, entity_type, entity_id):
         """
@@ -174,7 +175,7 @@ class ShotgunModel(ShotgunQueryModel):
         p = item
         while p:
             field_data = get_sanitized_data(p, self.SG_ASSOCIATED_FIELD_ROLE)
-            filters.append( [ field_data["name"], "is", field_data["value"] ] )
+            filters.append([field_data["name"], "is", field_data["value"]])
             p = p.parent()
         return filters
 
@@ -195,7 +196,7 @@ class ShotgunModel(ShotgunQueryModel):
             "column_idx": the column number in the model associated with the additional field
         """
         # column is one greater than the index because of the default initial column
-        return [{"column_idx": i+1, "field": field} for (i, field) in enumerate(self.__column_fields)]
+        return [{"column_idx": i + 1, "field": field} for (i, field) in enumerate(self.__column_fields)]
 
     def hard_refresh(self):
         """
@@ -213,13 +214,85 @@ class ShotgunModel(ShotgunQueryModel):
     ########################################################################################
     # methods overridden from the base class.
 
+    def hasChildren(self, index):
+        """
+        Returns True if parent has any children; otherwise returns False.
+
+        This is used for the staged loading of nodes in hierarchies.
+
+        :param index: The index of the item being tested.
+        :type index: :class:`~PySide.QtCore.QModelIndex`
+        """
+        if not index.isValid():
+            return super(ShotgunModel, self).hasChildren(index)
+
+        item = self.itemFromIndex(index)
+
+        if not isinstance(item, ShotgunStandardItem):
+            return super(ShotgunModel, self).hasChildren(index)
+
+        return item.data(self._SG_ITEM_HAS_CHILDREN)
+
+    def fetchMore(self, index):
+        """
+        Retrieve child items for a node.
+
+        :param index: The index of the item being tested.
+        :type index: :class:`~PySide.QtCore.QModelIndex`
+        """
+        if not index.isValid():
+            return
+
+        item = self.itemFromIndex(index)
+
+        if not isinstance(item, ShotgunStandardItem):
+            return super(ShotgunModel, self).fetchMore(index)
+
+        # set the flag to prevent subsequent attempts to fetch more
+        item.setData(True, self._SG_ITEM_FETCHED_MORE)
+
+        # query the information for this item to populate its children.
+        # the slot for handling worker success will handle inserting the
+        # queried data into the tree.
+        self._log_debug("Fetching more for item: %s" % item.text())
+        self._data_handler.generate_child_nodes("/", item, self.__create_item)
+
+    def canFetchMore(self, index):
+        """
+        Returns True if there is more data available for parent; otherwise
+        returns False.
+
+        :param index: The index of the item being tested.
+        :type index: :class:`~PySide.QtCore.QModelIndex`
+        """
+        if not index.isValid():
+            return False
+
+        # get the item and its stored hierarchy data
+        item = self.itemFromIndex(index)
+
+        if not isinstance(item, ShotgunStandardItem):
+            return super(ShotgunModel, self).canFetchMore(index)
+
+        if item.data(self._SG_ITEM_FETCHED_MORE):
+            # more data has already been queried for this item
+            return False
+
+        # the number of existing child items
+        current_child_item_count = item.rowCount()
+        data_has_children = item.data(self._SG_ITEM_HAS_CHILDREN)
+
+        # we can fetch more if there are no children already and the item
+        # has children.
+        return current_child_item_count == 0 and data_has_children
+
     def clear(self):
         """
         Removes all items (including header items) from the model and
         sets the number of rows and columns to zero.
         """
 
-       # clear thumbnail download lookup so we don't process any more results:
+        # clear thumbnail download lookup so we don't process any more results:
         self.__thumb_map = {}
 
         # we are not looking for any data from the async processor
@@ -332,9 +405,6 @@ class ShotgunModel(ShotgunQueryModel):
                 "`column_fields`."
             )
 
-        # get the cache path based on these new data query parameters
-        self._cache_path = self.__get_data_cache_path(seed)
-
         self._log_debug("")
         self._log_debug("Model Reset for %s" % self)
         self._log_debug("Entity type: %s" % self.__entity_type)
@@ -345,6 +415,9 @@ class ShotgunModel(ShotgunQueryModel):
         self._log_debug("Columns: %s" % self.__column_fields)
         self._log_debug("Editable Columns: %s" % self.__editable_fields)
         self._log_debug("Filter Presets: %s" % self.__additional_filter_presets)
+
+        # get the cache path based on these new data query parameters
+        self._initialize_data_handler(self.__compute_cache_path(seed))
 
         self._log_debug("First population pass: Calling _load_external_data()")
         self._load_external_data()
@@ -357,7 +430,21 @@ class ShotgunModel(ShotgunQueryModel):
         )
         self.setHorizontalHeaderLabels(headers)
 
-        return self._load_cached_data()
+        root = self.invisibleRootItem()
+
+        # construct the top level nodes
+        # TODO: clarify syntax here.
+        nodes_generated = self._data_handler.generate_child_nodes("/", root, self.__create_item)
+
+        # if we got some data, emit cache load signal
+        if nodes_generated > 0:
+            self.cache_loaded.emit()
+
+        # trigger async refresh
+        self._refresh_data()
+
+        # return true if cache is loaded false if not
+        return nodes_generated > 0
 
     def _refresh_data(self):
         """
@@ -455,18 +542,23 @@ class ShotgunModel(ShotgunQueryModel):
             return
 
         if not self._sg_data_retriever:
-            raise sgtk.TankError("Data retriever is not available!")
+            raise sgtk.ShotgunModelError("Data retriever is not available!")
 
-        uid = self._sg_data_retriever.request_thumbnail(url,
-                                                         entity_type,
-                                                         entity_id,
-                                                         field,
-                                                         self.__bg_load_thumbs)
+        uid = self._sg_data_retriever.request_thumbnail(
+            url,
+            entity_type,
+            entity_id,
+            field,
+            self.__bg_load_thumbs
+        )
 
         # keep tabs of this and call out later - note that we use a weakref to allow
         # the model item to be gc'd if it's removed from the model before the thumb
         # request completes.
-        self.__thumb_map[uid] = {"item_ref": weakref.ref(item), "field": field }
+        self.__thumb_map[uid] = {
+            "item_ref": weakref.ref(item),
+            "field": field
+        }
 
     ########################################################################################
     # methods to be implemented by subclasses
@@ -530,7 +622,6 @@ class ShotgunModel(ShotgunQueryModel):
         :param item: Shotgun model item that requires a tooltip.
         :param sg_item: Dictionary of the entity associated with the Shotgun model item.
         """
-
         data = item.data(self.SG_ASSOCIATED_FIELD_ROLE)
         field = data["name"]
 
@@ -648,7 +739,9 @@ class ShotgunModel(ShotgunQueryModel):
             data = get_sg_data(primary_item)
             for column in columns:
                 # set the display role to the string representation of the value
-                column_item = self._SG_QUERY_MODEL_ITEM_CLASS(self.__generate_display_name(column, data))
+                column_item = ShotgunStandardItem(
+                    self.__generate_display_name(column, data)
+                )
                 column_item.setEditable(column in self.__editable_fields)
 
                 # set associated field role to be the column value itself
@@ -770,98 +863,81 @@ class ShotgunModel(ShotgunQueryModel):
         # pre-process data
         sg_data = self._before_data_processing(sg_data)
 
-        # ensure the data is clean
-        sg_data = self._sg_clean_data(sg_data)
+        # push shotgun data into our data handler which will figure out
+        # if there are any changes
+        modified_items = self._data_handler.update_find_data(sg_data, self.__hierarchy)
+        if modified_items > 0:
+            self._data_handler.save_cache()
 
-        modifications_made = False
-
-        if len(self._get_all_item_unique_ids()) == 0 or self._request_full_refresh:
-            # no items in the tree or full refresh requested.
-
-            if len(sg_data) != 0:
-                # we have an empty tree and incoming sg data.
-                # Run the full recursive tree generation for performance.
-                self._request_full_refresh = False # reset flag for next request
-                self._log_debug("No cached items in tree! Creating full tree from Shotgun data...")
-                self.__rebuild_whole_tree_from_sg_data(sg_data)
-                self._log_debug("...done!")
-                modifications_made = True
-            else:
-                # no data coming in from shotgun, so no need to rebuild the tree
-                # however still set the modifications flag (we went from an undefined
-                # tree to an empty tree, to trigger a zero-item cache to be saved
-                modifications_made = True
-
-        else:
-            # go through and see if there are any changes we should apply to the tree.
-
-            # check if anything has been deleted or added
-            ids_from_shotgun = set([ d.get("id") for d in sg_data ])
-            ids_in_tree = set(self._get_all_item_unique_ids())
-
-            removed_ids = ids_in_tree.difference(ids_from_shotgun)
-
-            if len(removed_ids) > 0:
-                self._log_debug("Detected deleted items %s. Rebuilding tree..." % removed_ids)
-                self.__rebuild_whole_tree_from_sg_data(sg_data)
-                self._log_debug("...done!")
-                modifications_made = True
-
-            else:
-                added_ids = ids_from_shotgun.difference(ids_in_tree)
-                if len(added_ids) > 0:
-                    # wedge in the new items
-                    self._log_debug("Detected added items. Adding them in-situ to tree...")
-                    for d in sg_data:
-                        if d.get("id") in added_ids:
-                            self._log_debug("Adding %s to tree" % d )
-                            self.__add_sg_item_to_tree(d)
-                    self._log_debug("...done!")
-                    modifications_made = True
-
-            # check for modifications. At this point, the number of items in the tree and
-            # the sg data should match, except for any duplicate items in the tree which would
-            # effectively shadow each other. These can be safely ignored.
-            #
-            # Also note that we need to exclude any S3 urls from the comparison as these change
-            # all the time
-            #
-            self._log_debug("Checking for modifications...")
-            detected_changes = False
-            for d in sg_data:
-                # if there are modifications of any kind, we just rebuild the tree at the moment
-                try:
-                    item = self._get_item_by_unique_id(d.get("id"))
-                    existing_sg_data = get_sg_data(item)
-                    if not self._sg_compare_data(d, existing_sg_data):
-                        # shotgun data has changed for this item! Rebuild the tree
-                        self._log_debug("SG data change: %s --> %s" % (existing_sg_data, d))
-                        detected_changes = True
-                except KeyError, e:
-                    self._log_warning("Shotgun item %s not appearing in tree - most likely because "
-                                          "there is another object in Shotgun with the same name." % d)
-
-            if detected_changes:
-                self._log_debug("Detected modifications. Rebuilding tree...")
-                self.__rebuild_whole_tree_from_sg_data(sg_data)
-                self._log_debug("...done!")
-                modifications_made = True
-            else:
-                self._log_debug("...no modifications found.")
-
-        # last step - save our tree to disk for fast caching next time!
-        if modifications_made:
-            self._log_debug("Saving tree to disk %s..." % self._cache_path)
-            try:
-                self._save_to_disk()
-                self._log_debug("...saving complete!")
-            except Exception, e:
-                self._log_warning("Couldn't save cache data to disk: %s" % e)
+        # update tree based on modifications
+        # TODO - code here!
+        # TODO - data operations should happen async
 
         # and emit completion signal
-        self.data_refreshed.emit(modifications_made)
+        self.data_refreshed.emit(modified_items > 0)
 
-    def __get_data_cache_path(self, cache_seed=None):
+    def __create_item(self, parent, data_item):
+        """
+        Creates a model item for the tree.
+
+        :param field_display_name: Name of the entry in the UI.
+        :param field: Name of the field in the entity dictionary.
+        :param is_leaf: Is this a leaf item?
+        :param sg_item: Entity dictionary.
+
+        :returns: ShotgunStandardItem instance.
+        """
+        # construct tree view node object
+        field_display_name = self.__generate_display_name(data_item.field, data_item.shotgun_data)
+        item = ShotgunStandardItem(field_display_name)
+        item.setEditable(data_item.field in self.__editable_fields)
+
+        # keep tabs of which items we are creating
+        item.setData(True, self.IS_SG_MODEL_ROLE)
+        item.setData(not data_item.is_leaf(), self._SG_ITEM_HAS_CHILDREN)
+
+        # store the actual value we have
+        item.setData(
+            {"name": data_item.field, "value": data_item.shotgun_data[data_item.field]},
+            self.SG_ASSOCIATED_FIELD_ROLE
+        )
+
+        if data_item.is_leaf():
+            # this is the leaf level!
+            # attach the shotgun data so that we can access it later
+            # note: QT automatically changes everything to be unicode
+            # according to strange rules of its own, so force convert
+            # all shotgun values to be proper unicode prior to setData
+            item.setData(sanitize_for_qt_model(data_item.shotgun_data), self.SG_DATA_ROLE)
+
+        # Now we got the object set up. Now start calling custom methods:
+
+        # allow item customization prior to adding to model
+        self._item_created(item)
+
+        # set up default thumb
+        self._populate_default_thumbnail(item)
+
+        # run the populate item method (only runs at construction, not on cache restore)
+        if data_item.is_leaf():
+            self._populate_item(item, data_item.shotgun_data)
+        else:
+            self._populate_item(item, None)
+
+        self._set_tooltip(item, data_item.shotgun_data)
+
+        # run the finalizer (always runs on construction, even via cache)
+        self._finalize_item(item)
+
+        # get complete row containing all columns for the current item
+        row = self._get_columns(item, data_item.is_leaf())
+
+        # and attach the node
+        parent.appendRow(row)
+
+        return item
+
+    def __compute_cache_path(self, cache_seed=None):
         """
         Calculates and returns a cache path to use for this instance's query.
 
@@ -932,7 +1008,7 @@ class ShotgunModel(ShotgunQueryModel):
             "sg",
             self.__entity_type,
             params_hash.hexdigest(),
-            filter_hash.hexdigest()
+            "%s.%s" % (filter_hash.hexdigest(), ShotgunDataHandler.FORMAT_VERSION)
         )
 
         if sys.platform == "win32" and len(data_cache_path) > 250:
@@ -942,77 +1018,6 @@ class ShotgunModel(ShotgunQueryModel):
             )
 
         return data_cache_path
-
-    ########################################################################################
-    # shotgun data processing and tree building
-
-    def __add_sg_item_to_tree(self, sg_item):
-        """
-        Add a single item to the tree. This is a slow method.
-        """
-        root = self.invisibleRootItem()
-        # now drill down recursively, create any missing nodes on the way
-        # and eventually add this as a leaf item
-        self.__add_sg_item_to_tree_r(sg_item, root, self.__hierarchy)
-
-
-    def __add_sg_item_to_tree_r(self, sg_item, root, hierarchy):
-        """
-        Add a shotgun item to the tree. Create intermediate nodes if neccessary.
-        """
-        # get the next field to display in tree view
-        field = hierarchy[0]
-
-        # get lower levels of values
-        remaining_fields = hierarchy[1:]
-
-        # are we at leaf level or not?
-        on_leaf_level = len(remaining_fields) == 0
-
-        # get the item we need at this level. Create it if not found.
-        field_display_name = self.__generate_display_name(field, sg_item)
-        found_item = None
-        for row_index in range(root.rowCount()):
-            child = root.child(row_index)
-
-            if on_leaf_level:
-                # compare shotgun ids
-                sg_data = child.data(self.SG_DATA_ROLE)
-
-                # #25231 some clients reporting some child items don't have this data attached
-                # this is either because of a bug which we don't yet fully understand or beacuse
-                # of model data injected into the tree which does not have this property set
-                # so double check that the data actually is present.
-                if sg_data is None:
-                    self._log_warning("Found cached leaf node in tree with a missing SG_DATA_ROLE. Please report "
-                                       "to support on support@shotgunsoftware.com. If possible, please "
-                                       "make a copy of the file '%s' and attach that with the support request. "
-                                       "Affected Node name: '%s'. " % (self._cache_path, child.text()))
-                else:
-                    if sg_data.get("id") == sg_item.get("id"):
-                        found_item = child
-                        break
-
-            else:
-                # not on leaf level. Just compare names
-                if str(child.text()) == field_display_name:
-                    found_item = child
-                    break
-
-        if found_item is None:
-
-            # didn't find item! So let's create it!
-            found_item = self.__create_item(field_display_name, field, on_leaf_level, sg_item)
-
-            # get a complete row containing all columns for the current item
-            row = self._get_columns(found_item, on_leaf_level)
-
-            # add it to the tree. At this point QT will fire off various signals to inform views etc.
-            root.appendRow(row)
-
-        if not on_leaf_level:
-            # there are more levels that we should recurse down into
-            self.__add_sg_item_to_tree_r(sg_item, found_item, remaining_fields)
 
     def __process_thumbnail_for_item(self, item):
         """
@@ -1024,162 +1029,17 @@ class ShotgunModel(ShotgunQueryModel):
             return
 
         for field in sg_data.keys():
-
             if "image" in field and sg_data[field] is not None:
                 # we have a thumb we are supposed to download!
                 # get the thumbnail - store the unique id we get back from
                 # the data retrieve in a dict for fast lookup later
-                self._request_thumbnail_download(item,
-                                                 field,
-                                                 sg_data[field],
-                                                 sg_data.get("type"),
-                                                 sg_data.get("id"))
-
-    def __rebuild_whole_tree_from_sg_data(self, data):
-        """
-        Clears the tree and rebuilds it from the given shotgun data.
-        Note that any selection and expansion states in the view will be lost.
-        """
-        # clear all internal memory storage
-        self.clear()
-
-        # get any external payload from deriving classes
-        self._load_external_data()
-        self.__populate_complete_tree(data)
-
-    def __create_item(self, field_display_name, field, is_leaf, sg_item):
-        """
-        Creates a model item for the tree.
-
-        :param field_display_name: Name of the entry in the UI.
-        :param field: Name of the field in the entity dictionary.
-        :param is_leaf: Is this a leaf item?
-        :param sg_item: Entity dictionary.
-
-        :returns: ShotgunStandardItem instance.
-        """
-
-        # construct tree view node object
-        item = self._SG_QUERY_MODEL_ITEM_CLASS(field_display_name)
-        item.setEditable(field in self.__editable_fields)
-
-        # keep tabs of which items we are creating
-        item.setData(True, self.IS_SG_MODEL_ROLE)
-
-        # store the actual value we have
-        item.setData({"name": field, "value": sg_item[field] }, self.SG_ASSOCIATED_FIELD_ROLE)
-
-        if is_leaf:
-            # this is the leaf level!
-            # attach the shotgun data so that we can access it later
-            # note: QT automatically changes everything to be unicode
-            # according to strange rules of its own, so force convert
-            # all shotgun values to be proper unicode prior to setData
-            item.setData(sanitize_for_qt_model(sg_item), self.SG_DATA_ROLE)
-
-        # ---- now we got the object set up. Now start calling custom methods:
-
-        # allow item customization prior to adding to model
-        self._item_created(item)
-
-        # set up default thumb
-        self._populate_default_thumbnail(item)
-
-        # run the populate item method (only runs at construction, not on cache restore)
-        if is_leaf:
-            self._populate_item(item, sg_item)
-        else:
-            self._populate_item(item, None)
-
-        self._set_tooltip(item, sg_item)
-
-        # run the finalizer (always runs on construction, even via cache)
-        self._finalize_item(item)
-
-        return item
-
-    def __realize_parent_child_hierarchy_r(self, node):
-        """
-        Inserts all children nodes alphabetically into their parent, recursively.
-
-        :param node: Dictionary with keys 'item' and 'children' representing a ShotgunStandardItem and a list
-            of ShotgunStandardItem to be appended as rows of 'item'.
-        """
-        # If this is a leaf, there are no children.
-        if "children" not in node:
-            return
-
-        children = node["children"]
-        # process values in alphabetical order by name, case insensitive, so that
-        # children are always sorted alphabetically underneath their parent.
-        for child_key in sorted(children.keys(), cmp=lambda x,y: cmp(x.lower(), y.lower())):
-            child = children[child_key]
-
-            on_leaf_level = not bool(child.get("children"))
-            row = self._get_columns(child["item"], on_leaf_level)
-            node["item"].appendRow(row)
-            self.__realize_parent_child_hierarchy_r(child)
-
-    def __populate_complete_tree(self, sg_data):
-        """
-        Generate tree model data structure based on Shotgun data.
-
-        :param sg_data: List of shotgun entity dictionairies.
-        """
-        # The tree is built in a two pass approach. We are first building the
-        # individual ShotgunStandardItems and a tree of dictionaries. Each
-        # dictionary has a key named 'item' which is the ShotgunStandardItem and
-        # another key named 'children' which holds a dictionary of all the direct
-        # children this node has. These children are keyed by their name in the
-        # dictionary. This dictionary of dictionaries approach is recursive from the
-        # root to the leaves. Using a dictionary of children allows us to do a quick
-        # lookup to see if a child node needs to be created or can be reused. We will
-        # be actually parenting the ShotgunStandardItems to other ShotgunStandardItems
-        # in the second pass when we have the complete list of children and can
-        # proceed on sorting them by name before insertion into the parent.
-        #
-        # Note that in the following algorithm two different non-leaf entities with
-        # the same name will be considered to be the same. Only leaf nodes with the
-        # same name are differentiated by appending an id to their name.
-
-        # and add the shotgun data
-        tree = {
-            "item": self.invisibleRootItem(),
-            "children": {}
-        }
-
-        # For each item that need to go inside the tree
-        for sg_item in sg_data:
-            sub_tree = tree
-
-            # Create model items by drilling down the hierarchy
-            for field_name in self.__hierarchy:
-                on_leaf_level = (self.__hierarchy[-1] == field_name)
-                # Get the value of field
-                field_display_name = self.__generate_display_name(field_name, sg_item)
-
-                # If we are at the leaf and there is already an item with the same name make
-                # this new item unique.
-                if on_leaf_level and field_display_name in sub_tree["children"]:
-                    field_display_name = "%s (id %s)" % (field_display_name, sg_item.get("id"))
-
-                # If this section of the tree has never seen this value
-                if field_display_name not in sub_tree["children"]:
-
-                    # Create the item.
-                    item = self.__create_item(field_display_name, field_name, on_leaf_level, sg_item)
-
-                    sub_tree["children"][field_display_name] = {
-                        "item": item,
-                        "children": {}
-                    }
-
-                if not on_leaf_level:
-                    sub_tree = sub_tree["children"][field_display_name]
-
-        # The second pass here consists of actually adding the children ShotgunStandardItem
-        # inside their parent, all sorted by name.
-        self.__realize_parent_child_hierarchy_r(tree)
+                self._request_thumbnail_download(
+                    item,
+                    field,
+                    sg_data[field],
+                    sg_data.get("type"),
+                    sg_data.get("id")
+                )
 
     def __generate_display_name(self, field, sg_data):
         """
@@ -1222,4 +1082,3 @@ class ShotgunModel(ShotgunQueryModel):
         else:
             # everything else just cast to string
             return str(value)
-

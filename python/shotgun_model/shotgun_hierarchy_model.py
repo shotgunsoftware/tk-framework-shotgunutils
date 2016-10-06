@@ -57,9 +57,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     _SG_PATH_FIELD = "path"
     _SG_PARENT_PATH_FIELD = "parent_path"
 
-    # data role used to track whether more data has been fetched for items
-    _SG_ITEM_FETCHED_MORE = QtCore.Qt.UserRole + 3
-
     # use hierarchy items when building the model
     _SG_QUERY_MODEL_ITEM_CLASS = ShotgunHierarchyItem
 
@@ -173,7 +170,10 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             used by and returned from the python-api's ``nav_expand()`` method.
         :returns: :class:`~PySide.QtGui.QStandardItem` or ``None`` if not found
         """
-        return self._get_item_by_unique_id(path)
+        #return self._get_item_by_unique_id(path) <--- todo refactor
+
+        # todo - need to load up the view recursively and then return item
+        return xxx
 
     ############################################################################
     # methods overridden from Qt base class
@@ -400,7 +400,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         self._entity_fields = entity_fields or {}
 
         # get the cache path based on these new data query parameters
-        self._cache_path = self.__get_data_cache_path(cache_seed)
+        self._initialize_data_handler(self.__compute_cache_path(cache_seed))
 
         # print some debug info
         self._log_debug("")
@@ -418,7 +418,13 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             ["%s Hierarchy" % (self._seed_entity_field,)]
         )
 
-        return self._load_cached_data()
+        # TODO - fix
+        root = self.invisibleRootItem()
+        status = self._data_handler.load_cached_data(root, self._SG_QUERY_MODEL_ITEM_CLASS)
+        if status:
+            self.cache_loaded.emit()
+
+        return XXXX
 
     def _on_data_retriever_work_failure(self, uid, msg):
         """
@@ -604,7 +610,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         return item
 
-    def __get_data_cache_path(self, cache_seed=None):
+    def __compute_cache_path(self, cache_seed=None):
         """
         Calculates and returns a cache path to use for this instance's query.
 
@@ -752,7 +758,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         :param dict nav_data: The data returned from the api call.
         """
-
+        # TODO - update for new data manager
         self._log_debug("--> Shotgun data arrived. (%s records)" % len(nav_data))
 
         # pre-process data
@@ -807,11 +813,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # todo: the hierarchy data is queried lazily. so this implies a
         # write to disk each time the user expands and item. consider the
         # performance of this setup and whether this logic should be altered.
-        if modifications_made:
-            self._log_debug("Saving tree to disk %s..." % self._cache_path)
+        if self._data_handler.is_modified():
             try:
-                self._save_to_disk()
-                self._log_debug("...saving complete!")
+                self._data_handler.save_cache()
             except Exception, e:
                 self._log_warning("Couldn't save cache data to disk: %s" % e)
 
@@ -934,8 +938,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             child_path = child_data[self._SG_PATH_FIELD]
             if child_path not in child_paths:
                 # removing item
-                self._log_debug("Removing item: %s" % (child_item,))
-                self._before_item_removed(child_item)
+                #self._log_debug("Removing item: %s" % (child_item,))
+                #self._before_item_removed(child_item)
+                # todo - update with new data backend
                 item.removeRow(row)
                 subtree_updated = True
 

@@ -132,7 +132,7 @@ def sanitize_qt(val):
         return sanitize_qt(val)    
     
     elif isinstance(val, list):
-        return [ sanitize_qt(d) for d in val ]
+        return [sanitize_qt(d) for d in val ]
     
     elif isinstance(val, dict):
         new_val = {}
