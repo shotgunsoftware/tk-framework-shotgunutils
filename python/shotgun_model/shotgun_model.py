@@ -19,7 +19,7 @@ from sgtk.platform.qt import QtCore, QtGui
 
 from .shotgun_standard_item import ShotgunStandardItem
 from .shotgun_query_model import ShotgunQueryModel
-from .shotgun_data import ShotgunDataHandler
+from .data_handler_find import ShotgunFindDataHandler
 from .util import get_sanitized_data, get_sg_data, sanitize_qt, sanitize_for_qt_model
 
 
@@ -38,22 +38,11 @@ class ShotgunModel(ShotgunQueryModel):
     between your class and the view.
     """
 
-    # data field that uniquely identifies an entity
-    _SG_DATA_UNIQUE_ID_FIELD = "id"
-
     # Custom model role that holds the associated value
     SG_ASSOCIATED_FIELD_ROLE = QtCore.Qt.UserRole + 10
 
     # header value for the first column
     FIRST_COLUMN_HEADER = "Name"
-
-    def __repr__(self):
-        """
-        Create a string representation of this instance
-        :returns: A string representation of this instance
-        """
-        return "<%s entity_type:%s>" % (
-            self.__class__.__name__, self.__entity_type)
 
     def __init__(self, parent, download_thumbs=True, schema_generation=0, bg_load_thumbs=True, bg_task_manager=None):
         """
@@ -94,6 +83,14 @@ class ShotgunModel(ShotgunQueryModel):
 
         self.__current_work_id = None
 
+    def __repr__(self):
+        """
+        Create a string representation of this instance
+        :returns: A string representation of this instance
+        """
+        return "<%s entity_type:%s>" % (
+            self.__class__.__name__, self.__entity_type)
+
     ########################################################################################
     # public methods
 
@@ -102,7 +99,9 @@ class ShotgunModel(ShotgunQueryModel):
         """
         Returns a list of entity ids that are part of this model.
         """
-        return self._data_handler.get_entity_ids(self.__entity_type)
+        # note that all of the ids may not be loaded into the actual model
+        # yet so we have to query the data handler for this.
+        return self._data_handler.get_entity_ids()
 
     def destroy(self):
         """
@@ -255,7 +254,9 @@ class ShotgunModel(ShotgunQueryModel):
         # the slot for handling worker success will handle inserting the
         # queried data into the tree.
         self._log_debug("Fetching more for item: %s" % item.text())
-        self._data_handler.generate_child_nodes("/", item, self.__create_item)
+
+        unique_id = item.data(self._SG_ITEM_UNIQUE_ID)
+        self._data_handler.generate_child_nodes(unique_id, item, self.__create_item)
 
     def canFetchMore(self, index):
         """
@@ -417,7 +418,9 @@ class ShotgunModel(ShotgunQueryModel):
         self._log_debug("Filter Presets: %s" % self.__additional_filter_presets)
 
         # get the cache path based on these new data query parameters
-        self._initialize_data_handler(self.__compute_cache_path(seed))
+        self._data_handler = ShotgunFindDataHandler(self.__compute_cache_path(seed), self)
+        # load up from disk
+        self._data_handler.load_cache()
 
         self._log_debug("First population pass: Calling _load_external_data()")
         self._load_external_data()
@@ -433,8 +436,7 @@ class ShotgunModel(ShotgunQueryModel):
         root = self.invisibleRootItem()
 
         # construct the top level nodes
-        # TODO: clarify syntax here.
-        nodes_generated = self._data_handler.generate_child_nodes("/", root, self.__create_item)
+        nodes_generated = self._data_handler.generate_child_nodes(None, root, self.__create_item)
 
         # if we got some data, emit cache load signal
         if nodes_generated > 0:
@@ -866,12 +868,57 @@ class ShotgunModel(ShotgunQueryModel):
         # push shotgun data into our data handler which will figure out
         # if there are any changes
         modified_items = self._data_handler.update_find_data(sg_data, self.__hierarchy)
+
+        self._log_debug("Shotgun data contained %d modifications" % len(modified_items))
+
         if modified_items > 0:
+            # todo - could happen async!
             self._data_handler.save_cache()
 
-        # update tree based on modifications
-        # TODO - code here!
-        # TODO - data operations should happen async
+        root = self.invisibleRootItem()
+        if root.rowCount() == 0:
+            # an empty tree - in this case perform a full insert, not a diff
+            self._data_handler.generate_child_nodes(None, root, self.__create_item)
+
+        else:
+            # the tree was already loaded. Perform diffs instead.
+            # update tree based on modifications
+            for item in modified_items:
+                data_item = item["data"]
+
+                # try to resolve a matching item in the model
+                # note that this may not exist because that part of the tree
+                # has not been expanded yet.
+                model_item = self._get_item_by_unique_id(data_item.unique_id)
+
+                if item["mode"] == self._data_handler.ADDED:
+                    # look for the parent of this item
+                    parent_data_item = data_item.parent
+                    # see if this exists in the tree
+                    parent_model_item = self._get_item_by_unique_id(parent_data_item.unique_id)
+                    if model_item:
+                        # the parent exists in the view. So add the child
+                        self.__create_item(parent_model_item, data_item)
+
+                elif model_item and item["mode"] == self._data_handler.DELETED:
+
+                    # see if the node exists in the tree
+                    model_item = self._get_item_by_unique_id(data_item.unique_id)
+                    if model_item:
+                        # remove it
+                        parent_model_item = model_item.parent()
+                        parent_model_item.removeRow(model_item.row())
+
+                elif item["mode"] == self._data_handler.UPDATED:
+                    # a node was updated
+                    # see if the node exists in the tree
+                    model_item = self._get_item_by_unique_id(data_item.unique_id)
+                    if model_item:
+                        # remove it
+                        parent_model_item = model_item.parent()
+                        parent_model_item.removeRow(model_item.row())
+                        # create a new item
+                        self.__create_item(parent_model_item, data_item)
 
         # and emit completion signal
         self.data_refreshed.emit(modified_items > 0)
@@ -894,7 +941,13 @@ class ShotgunModel(ShotgunQueryModel):
 
         # keep tabs of which items we are creating
         item.setData(True, self.IS_SG_MODEL_ROLE)
+
+        # flag if item has children, for the fetchMore functionality
         item.setData(not data_item.is_leaf(), self._SG_ITEM_HAS_CHILDREN)
+
+        # transfer a unique id from the data backend so we can
+        # refer back to this node later on
+        item.setData(data_item.unique_id, self._SG_ITEM_UNIQUE_ID)
 
         # store the actual value we have
         item.setData(
@@ -1008,7 +1061,7 @@ class ShotgunModel(ShotgunQueryModel):
             "sg",
             self.__entity_type,
             params_hash.hexdigest(),
-            "%s.%s" % (filter_hash.hexdigest(), ShotgunDataHandler.FORMAT_VERSION)
+            "%s.%s" % (filter_hash.hexdigest(), ShotgunFindDataHandler.FORMAT_VERSION)
         )
 
         if sys.platform == "win32" and len(data_cache_path) > 250:

@@ -7,22 +7,9 @@
 # By accessing, using, copying or modifying this work you indicate your
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
-
-import datetime
-import errno
-import os
-import urlparse
-import time
-
 # toolkit imports
 import sgtk
 from sgtk.platform.qt import QtCore, QtGui
-
-from .errors import ShotgunModelError, CacheReadVersionMismatch
-from .shotgun_standard_item import ShotgunStandardItem
-from .util import get_sg_data
-from .shotgun_data import ShotgunDataHandler
-
 
 class ShotgunQueryModel(QtGui.QStandardItemModel):
     """
@@ -70,22 +57,6 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     :constant IS_SG_MODEL_ROLE: Used to identify model items related to Shotgun
         data
 
-    Class Members
-    -------------
-
-    Subclasses can set a ``_SG_QUERY_MODEL_ITEM_CLASS`` class member that
-    identifies the class of item to use when constructing the model. This is
-    also used during deserialization to create model items. The default is
-    the ``ShotgunStandardItem``. If overriding, the class must subclass from
-    ``ShotgunStandardItem``.
-
-        _SG_QUERY_MODEL_ITEM_CLASS = ShotgunStandardItem
-
-    Subclasses must also define the ``_SG_DATA_UNIQUE_ID_FIELD`` class member.
-    This is used to specify the field in the Shotgun payload that is used to
-    uniquely identify an item in the model.
-
-        _SG_DATA_UNIQUE_ID_FIELD = "id"
 
     """
 
@@ -116,16 +87,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     # data role used to track whether more data has been fetched for items
     _SG_ITEM_FETCHED_MORE = QtCore.Qt.UserRole + 3
     _SG_ITEM_HAS_CHILDREN = QtCore.Qt.UserRole + 4
-
-    # ---- "abstract" class members
-
-    # subclasses should define a unique id field from the SG data for use in
-    # caching and associating data with items in the model
-    _SG_DATA_UNIQUE_ID_FIELD = None
-
-    # subclasses should define the class to use when loading items from disk
-    _SG_QUERY_MODEL_ITEM_CLASS = ShotgunStandardItem
-
+    _SG_ITEM_UNIQUE_ID = QtCore.Qt.UserRole + 5
 
 
     def __init__(self, parent, bg_task_manager=None):
@@ -154,14 +116,6 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             implement.
 
         """
-
-        # ensure subclasses define the required class members
-        if not self._SG_DATA_UNIQUE_ID_FIELD:
-            raise ShotgunModelError(
-                "ShotgunQueryModel subclass does not define the instance attr: "
-                "`_SG_DATA_UNIQUE_ID_FIELD`"
-            )
-
         # intialize the Qt base class
         super(ShotgunQueryModel, self).__init__(parent)
 
@@ -181,7 +135,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         # some of these data structures are to keep the GC
         # happy, others to hold alternative access methods to the data.
         self.__all_tree_items = []
-        self.__tree_data = {}
+        self.__items_by_uid = {}
 
         # set up data retriever and start work:
         self._sg_data_retriever = self._shotgun_data.ShotgunDataRetriever(
@@ -224,7 +178,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                 self._sg_data_retriever.clear()
 
             # model data in alt format
-            self.__tree_data = {}
+            self.__items_by_uid = {}
 
             # pyside will crash unless we actively hold a reference
             # to all items that we create.
@@ -272,6 +226,10 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         """
         Clear any caches on disk, then refresh the data.
         """
+        if self._data_handler is None:
+            # no data to refresh
+            return
+
         # delete cache file
         self._data_handler.remove_cache()
         # request a reload
@@ -284,6 +242,9 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         :return: ``True`` if cached data exists for the model, ``False``
             otherwise.
         """
+        if self._data_handler is None:
+            return False
+
         return self._data_handler.is_cache_available()
 
     ############################################################################
@@ -383,21 +344,6 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     # is being constructed (as described in the docstrings) such that client
     # developers can further customize to meet their needs.
 
-
-    def _initialize_data_handler(self, path):
-        """
-        Initialize a data handler for the given state.
-
-        Any existing data handler will be discarded.
-
-        @param path: path to cache file
-        @return:
-        """
-        self._data_handler = ShotgunDataHandler(path, self)
-        self._log_debug("Created %s" % self._data_handler)
-        # load up from disk
-        self._data_handler.load_cache()
-
     def _before_data_processing(self, data):
         """
         Called just after data has been retrieved from Shotgun but before any
@@ -448,19 +394,15 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         :param item: The item that was just created.
         :type item: :class:`~PySide.QtGui.QStandardItem`
         """
-
-        # todo - see if this needs updating for the new data storage
-
         # keep a reference to this object to make GC happy
         # (pyside may crash otherwise)
         self.__all_tree_items.append(item)
 
-        # try to retrieve the uniqe identifier for this item via the data
-        data = get_sg_data(item)
-        if data and self._SG_DATA_UNIQUE_ID_FIELD in data:
+        # organize items by unique id if they have one
+        unique_id = item.data(self._SG_ITEM_UNIQUE_ID)
+        if unique_id:
             # found the field in the data. store the item in the lookup
-            uid = data[self._SG_DATA_UNIQUE_ID_FIELD]
-            self.__tree_data[uid] = item
+            self.__items_by_uid[unique_id] = item
 
         return item
 
@@ -563,6 +505,20 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     # protected convenience methods. these methods can be used by subclasses
     # to manipulate and manage data returned from Shotgun.
 
+    def _get_item_by_unique_id(self, uid):
+        """
+        Convenience method. Returns an item given a unique ID.
+
+        The unique ``uid`` corresponds to the ``_SG_ITEM_UNIQUE_ID`` role.
+
+        :param uid: The unique id for an item in the model.
+
+        :return: An item corresponding to the supplied uniqueid
+        :rtype: :class:`~PySide.QtGui.QStandardItem`
+        """
+        if uid not in self.__items_by_uid:
+            return None
+        return self.__items_by_uid[uid]
 
     def _log_debug(self, msg):
         """

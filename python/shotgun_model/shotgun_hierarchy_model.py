@@ -20,6 +20,7 @@ from sgtk.platform.qt import QtCore, QtGui
 # framework imports
 from .shotgun_hierarchy_item import ShotgunHierarchyItem
 from .shotgun_query_model import ShotgunQueryModel
+from .data_handler_nav import ShotgunNavDataHandler
 from .util import get_sg_data, sanitize_qt, sanitize_for_qt_model
 
 
@@ -49,16 +50,10 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     `Tracking Settings <https://support.shotgunsoftware.com/hc/en-us/articles/219031138-Project-Tracking-Settings>`_.
     """
 
-    # data field that uniquely identifies an entity
-    _SG_DATA_UNIQUE_ID_FIELD = "path"
-
     # constant values to refer to the fields where the paths are stored in the
     # returned navigation data.
     _SG_PATH_FIELD = "path"
     _SG_PARENT_PATH_FIELD = "parent_path"
-
-    # use hierarchy items when building the model
-    _SG_QUERY_MODEL_ITEM_CLASS = ShotgunHierarchyItem
 
     def __repr__(self):
         """
@@ -400,7 +395,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         self._entity_fields = entity_fields or {}
 
         # get the cache path based on these new data query parameters
-        self._initialize_data_handler(self.__compute_cache_path(cache_seed))
+        self._data_handler = ShotgunNavDataHandler(self.__compute_cache_path(cache_seed), self)
+        # load up from disk
+        self._data_handler.load_cache()
 
         # print some debug info
         self._log_debug("")
@@ -420,7 +417,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         # TODO - fix
         root = self.invisibleRootItem()
-        status = self._data_handler.load_cached_data(root, self._SG_QUERY_MODEL_ITEM_CLASS)
+        status = self._data_handler.load_cached_data(root, ShotgunHierarchyItem)
         if status:
             self.cache_loaded.emit()
 
@@ -572,7 +569,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         if data.get("ref", {}).get("kind") == "root":
             return self.invisibleRootItem()
 
-        item = self._SG_QUERY_MODEL_ITEM_CLASS(data["label"])
+        item = ShotgunHierarchyItem(data["label"])
         item.setEditable(False)
 
         # keep tabs of which items we are creating
