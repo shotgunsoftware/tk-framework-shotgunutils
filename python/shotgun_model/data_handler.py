@@ -101,7 +101,7 @@ class ShotgunDataHandler(QtCore.QObject):
     Shotgun Model low level data storage.
     """
     # version of binary format
-    FORMAT_VERSION = 17
+    FORMAT_VERSION = 20
 
     (UPDATED, ADDED, DELETED) = range(3)
 

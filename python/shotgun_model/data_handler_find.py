@@ -10,6 +10,7 @@
 import datetime
 import urlparse
 import time
+import gc
 
 from .data_handler import ShotgunDataItem, ShotgunDataHandler, log_timing
 from .errors import ShotgunModelDataError
@@ -183,6 +184,13 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
             num_deletes += 1
 
         # lastly swap the new for the old
+        self._cache = None
+
+        # at this point, kick the gc to make sure the memory is freed up
+        # desite its cycles.
+        gc.collect()
+
+        # and set the new cache
         self._cache = new_cache
 
         self._log_debug("Shotgun data (%d records) received and processed. " % len(sg_data))
