@@ -444,9 +444,6 @@ class ShotgunModel(ShotgunQueryModel):
         if nodes_generated > 0:
             self.cache_loaded.emit()
 
-        # trigger async refresh
-        self._refresh_data()
-
         # return true if cache is loaded false if not
         return nodes_generated > 0
 
