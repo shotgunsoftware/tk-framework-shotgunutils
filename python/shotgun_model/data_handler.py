@@ -101,7 +101,7 @@ class ShotgunDataHandler(QtCore.QObject):
     Shotgun Model low level data storage.
     """
     # version of binary format
-    FORMAT_VERSION = 15
+    FORMAT_VERSION = 17
 
     (UPDATED, ADDED, DELETED) = range(3)
 
@@ -126,11 +126,11 @@ class ShotgunDataHandler(QtCore.QObject):
         Create a string representation of this instance
         :returns: A string representation of this instance
         """
-        return "<%s@%s>" % (self.__class__.__name__, self._cache_path)
-
-    def __del__(self):
-        self._log_debug("Deallocating %s" % self)
-        self.unload_cache()
+        return "<%s@%s (%d items)>" % (
+            self.__class__.__name__,
+            self._cache_path,
+            len(self._cache[self.CACHE_BY_UID])
+        )
 
     def _init_clear_cache(self):
         """
@@ -212,7 +212,7 @@ class ShotgunDataHandler(QtCore.QObject):
         else:
             self._log_debug("No cache found on disk. Starting from empty data store.")
 
-        self._log_debug("")
+        self._log_debug("Cache load complete: %s" % self)
 
     def unload_cache(self):
         """
@@ -222,7 +222,7 @@ class ShotgunDataHandler(QtCore.QObject):
             # nothing to do
             return
 
-        self._log_debug("Unloading cache (%s items)" % len(self._cache[self.CACHE_BY_UID]))
+        self._log_debug("Unloading in-memory cache for %s" % self)
         self._cache = None
 
     @log_timing
