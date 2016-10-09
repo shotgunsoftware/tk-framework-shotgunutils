@@ -47,7 +47,7 @@ class ShotgunDataItem(object):
         """
         The unique id for this node
         """
-        return self._data["uid"]
+        return self._data[ShotgunDataHandler.UID]
 
     @property
     def field(self):
@@ -55,27 +55,27 @@ class ShotgunDataItem(object):
         The shotgun field that this item represents
         """
         # todo: can we get rid of this? It doesn't seem generic
-        return self._data["field"]
+        return self._data[ShotgunDataHandler.FIELD]
 
     @property
     def shotgun_data(self):
         """
         The shotgun data associated with this item
         """
-        return self._data["sg_data"]
+        return self._data[ShotgunDataHandler.SG_DATA]
 
     @property
     def parent(self):
         """
         The parent of this item or None if no parent
         """
-        return ShotgunDataItem(self._data["parent"])
+        return ShotgunDataItem(self._data[ShotgunDataHandler.PARENT])
 
     def is_leaf(self):
         """
         Flag to indicate if this item is a leaf in the tree
         """
-        return self._data["is_leaf"]
+        return self._data[ShotgunDataHandler.IS_LEAF]
 
 
 
@@ -101,12 +101,12 @@ class ShotgunDataHandler(QtCore.QObject):
     Shotgun Model low level data storage.
     """
     # version of binary format
-    FORMAT_VERSION = 10
+    FORMAT_VERSION = 14
 
     (UPDATED, ADDED, DELETED) = range(3)
 
     # for serialization performance
-    (CACHE_BY_UID, CACHE_CHILDREN,) = range(2)
+    (CACHE_BY_UID, CACHE_CHILDREN, IS_LEAF, UID, PARENT, FIELD, SG_DATA) = range(7)
 
     def __init__(self, cache_path, parent):
         """
@@ -131,6 +131,16 @@ class ShotgunDataHandler(QtCore.QObject):
     def __del__(self):
         self._log_debug("Deallocating %s" % self)
         self.unload_cache()
+
+    def _init_clear_cache(self):
+        """
+        Helper method - initializes a clear cache.
+        :returns: new cache dictionary
+        """
+        return {
+            self.CACHE_CHILDREN: {},
+            self.CACHE_BY_UID: {},
+        }
 
     def is_cache_available(self):
         """
@@ -182,9 +192,7 @@ class ShotgunDataHandler(QtCore.QObject):
         Loads a cache from disk into memory
         """
         # init empty cache
-        self._cache = {}
-        self._cache[self.CACHE_CHILDREN] = {}
-        self._cache[self.CACHE_BY_UID] = {}
+        self._cache = self._init_clear_cache()
 
         # try to load
         self._log_debug("Loading from disk: %s" % self._cache_path)
@@ -210,6 +218,11 @@ class ShotgunDataHandler(QtCore.QObject):
         """
         Unloads any in-memory cache data.
         """
+        if self._cache is None:
+            # nothing to do
+            return
+
+        self._log_debug("Unloading cache (%s items)" % len(self._cache[self.CACHE_BY_UID]))
         self._cache = None
 
     @log_timing
@@ -239,6 +252,8 @@ class ShotgunDataHandler(QtCore.QObject):
         try:
             with open(self._cache_path, "wb") as fh:
                 pickler = cPickle.Pickler(fh, protocol=2)
+                # speeds up pickling but only works when there
+                # are no cycles in the data set
                 #pickler.fast = 1
                 pickler.dump(self.FORMAT_VERSION)
                 pickler.dump(self._cache)
@@ -273,11 +288,12 @@ class ShotgunDataHandler(QtCore.QObject):
             cache_node = self._cache[self.CACHE_BY_UID].get(unique_id)
 
         if cache_node:
-
             for item in cache_node[self.CACHE_CHILDREN].itervalues():
                 data_item = ShotgunDataItem(item)
                 factory_fn(parent_object, data_item)
                 num_nodes_generated += 1
+        else:
+            self._log_debug("No cache item found for id %s" % unique_id)
 
         return num_nodes_generated
 

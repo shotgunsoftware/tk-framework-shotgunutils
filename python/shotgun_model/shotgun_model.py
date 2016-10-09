@@ -871,8 +871,8 @@ class ShotgunModel(ShotgunQueryModel):
 
         self._log_debug("Shotgun data contained %d modifications" % len(modified_items))
 
-        if modified_items > 0:
-            # todo - could happen async!
+        if len(modified_items) > 0:
+            # todo - this could happen async!
             self._data_handler.save_cache()
 
         root = self.invisibleRootItem()
