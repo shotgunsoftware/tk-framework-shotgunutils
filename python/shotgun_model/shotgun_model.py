@@ -124,9 +124,15 @@ class ShotgunModel(ShotgunQueryModel):
         if entity_type != self.__entity_type:
             return None
 
-        # TODO: need to load up the view recursively then return item
-        #return self._get_item_by_unique_id(entity_id)
-        return xxxx
+        uid = self._data_handler.get_uid_from_entity_id(entity_id)
+
+        if uid is None:
+            # no match in data store
+            return None
+
+        # see if we have this in the model
+        # todo: handle expansion if needed
+        return self._get_item_by_unique_id(uid)
 
     def index_from_entity(self, entity_type, entity_id):
         """
@@ -914,8 +920,6 @@ class ShotgunModel(ShotgunQueryModel):
                     if parent_model_item:
                         # the parent exists in the view. So add the child
                         self.__create_item(parent_model_item, data_item)
-
-
 
         # and emit completion signal
         self.data_refreshed.emit(modified_items > 0)

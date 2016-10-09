@@ -44,6 +44,16 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                 entity_ids.append(uid)
         return entity_ids
 
+    def get_uid_from_entity_id(self, entity_id):
+        """
+        Returns the unique id for a given entity or None if not found
+        """
+        for uid in self._cache[self.CACHE_BY_UID].keys():
+            if isinstance(uid, int) and uid == entity_id:
+                return uid
+        return None
+
+
     @log_timing
     def update_find_data(self, sg_data, hierarchy):
         """

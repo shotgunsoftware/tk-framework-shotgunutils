@@ -169,7 +169,6 @@ query. It is cached and refreshes its data asynchronously.
     and the information it displays when attached to a view.
 
     .. automethod:: _before_data_processing
-    .. automethod:: _before_item_removed
     .. automethod:: _finalize_item
     .. automethod:: _item_created
     .. automethod:: _load_external_data

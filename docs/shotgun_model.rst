@@ -208,7 +208,6 @@ types for the asset types. The leaf nodes in this case would be assets.
     and the information it displays when attached to a view.
 
     .. automethod:: _before_data_processing
-    .. automethod:: _before_item_removed
     .. automethod:: _finalize_item
     .. automethod:: _get_additional_columns
     .. automethod:: _get_additional_column_headers
