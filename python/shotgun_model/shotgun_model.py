@@ -240,7 +240,7 @@ class ShotgunModel(ShotgunQueryModel):
         :type index: :class:`~PySide.QtCore.QModelIndex`
         """
         if not index.isValid():
-            return
+            return super(ShotgunModel, self).fetchMore(index)
 
         item = self.itemFromIndex(index)
 
@@ -267,7 +267,7 @@ class ShotgunModel(ShotgunQueryModel):
         :type index: :class:`~PySide.QtCore.QModelIndex`
         """
         if not index.isValid():
-            return False
+            return super(ShotgunModel, self).canFetchMore(index)
 
         # get the item and its stored hierarchy data
         item = self.itemFromIndex(index)
@@ -420,6 +420,7 @@ class ShotgunModel(ShotgunQueryModel):
         # get the cache path based on these new data query parameters
         self._data_handler = ShotgunFindDataHandler(self.__compute_cache_path(seed), self)
         # load up from disk
+        self._log_debug("Loading data from cache file into memory...")
         self._data_handler.load_cache()
 
         self._log_debug("First population pass: Calling _load_external_data()")
@@ -436,6 +437,7 @@ class ShotgunModel(ShotgunQueryModel):
         root = self.invisibleRootItem()
 
         # construct the top level nodes
+        self._log_debug("Creating model nodes for top level of data tree...")
         nodes_generated = self._data_handler.generate_child_nodes(None, root, self.__create_item)
 
         # if we got some data, emit cache load signal
@@ -867,6 +869,7 @@ class ShotgunModel(ShotgunQueryModel):
 
         # push shotgun data into our data handler which will figure out
         # if there are any changes
+        self._log_debug("Updating data model with new shotgun data...")
         modified_items = self._data_handler.update_find_data(sg_data, self.__hierarchy)
 
         self._log_debug("Shotgun data contained %d modifications" % len(modified_items))
@@ -878,6 +881,7 @@ class ShotgunModel(ShotgunQueryModel):
         root = self.invisibleRootItem()
         if root.rowCount() == 0:
             # an empty tree - in this case perform a full insert, not a diff
+            self._log_debug("Model was empty - doing a full load pass...")
             self._data_handler.generate_child_nodes(None, root, self.__create_item)
 
         else:
@@ -886,10 +890,7 @@ class ShotgunModel(ShotgunQueryModel):
             for item in modified_items:
                 data_item = item["data"]
 
-                # try to resolve a matching item in the model
-                # note that this may not exist because that part of the tree
-                # has not been expanded yet.
-                model_item = self._get_item_by_unique_id(data_item.unique_id)
+                self._log_debug("Processing change %s" % item)
 
                 if item["mode"] == self._data_handler.ADDED:
                     # look for the parent of this item
@@ -925,12 +926,10 @@ class ShotgunModel(ShotgunQueryModel):
 
     def __create_item(self, parent, data_item):
         """
-        Creates a model item for the tree.
+        Creates a model item for the tree given data out of the data store
 
-        :param field_display_name: Name of the entry in the UI.
-        :param field: Name of the field in the entity dictionary.
-        :param is_leaf: Is this a leaf item?
-        :param sg_item: Entity dictionary.
+        :param parent: item to parent the node under
+        :param data_item: :class:`ShotgunDataItem`
 
         :returns: ShotgunStandardItem instance.
         """

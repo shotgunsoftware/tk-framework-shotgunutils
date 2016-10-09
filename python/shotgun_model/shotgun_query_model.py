@@ -194,7 +194,9 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             self.__do_depth_first_tree_deletion(self.invisibleRootItem())
 
             # unload the data backend
-            self._data_handler = None
+            if self._data_handler:
+                self._data_handler.unload_cache()
+                self._data_handler = None
 
         finally:
             # Advertise that we're done resetting.
