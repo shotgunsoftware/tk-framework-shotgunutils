@@ -522,6 +522,21 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             return None
         return self.__items_by_uid[uid]
 
+    def _delete_item_by_unique_id(self, uid):
+        """
+        Remove an item if it exists.
+
+        :param uid: The unique id for an item in the model.
+        """
+        model_item = self._get_item_by_unique_id(uid)
+
+        if model_item:
+            # remove it
+            parent_model_item = model_item.parent()
+            parent_model_item.removeRow(model_item.row())
+            del self.__items_by_uid[uid]
+            model_item = None
+
     def _log_debug(self, msg):
         """
         Convenience wrapper around debug logging

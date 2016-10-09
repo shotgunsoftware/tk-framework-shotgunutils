@@ -56,7 +56,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
 
         :returns: list of updated plugin ids. empty list if cache was up to date.
         """
-        self._log_debug("Updating tree with %s shotgun records." % len(sg_data))
+        self._log_debug("Updating %s with %s shotgun records." % (self, len(sg_data)))
         self._log_debug("Hierarchy: %s" % hierarchy)
 
         if self._cache is None:

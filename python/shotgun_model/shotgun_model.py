@@ -894,29 +894,28 @@ class ShotgunModel(ShotgunQueryModel):
                     parent_data_item = data_item.parent
                     # see if this exists in the tree
                     parent_model_item = self._get_item_by_unique_id(parent_data_item.unique_id)
-                    if model_item:
+                    if parent_model_item:
                         # the parent exists in the view. So add the child
                         self.__create_item(parent_model_item, data_item)
 
-                elif model_item and item["mode"] == self._data_handler.DELETED:
+                elif item["mode"] in (self._data_handler.DELETED, self._data_handler.UPDATED):
+                    # see if the node exists in the tree, in that
+                    # case delete it.
+                    self._delete_item_by_unique_id(data_item.unique_id)
 
-                    # see if the node exists in the tree
-                    model_item = self._get_item_by_unique_id(data_item.unique_id)
-                    if model_item:
-                        # remove it
-                        parent_model_item = model_item.parent()
-                        parent_model_item.removeRow(model_item.row())
-
-                elif item["mode"] == self._data_handler.UPDATED:
-                    # a node was updated
-                    # see if the node exists in the tree
-                    model_item = self._get_item_by_unique_id(data_item.unique_id)
-                    if model_item:
-                        # remove it
-                        parent_model_item = model_item.parent()
-                        parent_model_item.removeRow(model_item.row())
-                        # create a new item
+            # second pass - re-insert all modifications
+            for item in modified_items:
+                if item["mode"] == self._data_handler.UPDATED:
+                    data_item = item["data"]
+                    # look for the parent of this item
+                    parent_data_item = data_item.parent
+                    # see if this exists in the tree
+                    parent_model_item = self._get_item_by_unique_id(parent_data_item.unique_id)
+                    if parent_model_item:
+                        # the parent exists in the view. So add the child
                         self.__create_item(parent_model_item, data_item)
+
+
 
         # and emit completion signal
         self.data_refreshed.emit(modified_items > 0)
