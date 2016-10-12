@@ -121,18 +121,69 @@ class ShotgunModel(ShotgunQueryModel):
         :param entity_id: Shotgun entity id to look for
         :returns: :class:`~PySide.QtGui.QStandardItem` or None if not found
         """
+        self._log_debug("Resolving model item for entity %s:%s" % (entity_type, entity_id))
+
         if entity_type != self.__entity_type:
+            self._log_debug("...entity type is not part of this model!")
             return None
 
         uid = self._data_handler.get_uid_from_entity_id(entity_id)
 
         if uid is None:
             # no match in data store
+            self._log_debug("...entity id is not part of the data set")
             return None
 
-        # see if we have this in the model
-        # todo: handle expansion if needed
-        return self._get_item_by_unique_id(uid)
+        # this node is loaded in the query cached by the data handler
+        # but may not exist in the model yet - because of deferred loading.
+
+        # first see if we have it in the tree
+        item = self._get_item_by_unique_id(uid)
+
+        if not item:
+
+            data_item = self._data_handler.get_data_item_from_uid(uid)
+
+            # item was not part of the model. Attempt to load its parents until it is visible.
+            self._log_debug("Item %s does not exist in the tree - will expand tree." % data_item)
+
+            # now get a list of all parents and recurse back down towards
+            # the node we want to load. If at any level, the data has not
+            # yet been loaded, we expand that level.
+            hierarchy_bottom_up = []
+            node = data_item
+            while node:
+                hierarchy_bottom_up.append(node)
+                node = node.parent
+
+            # reverse the list to get the top-down hierarchy
+            hierarchy_top_down = hierarchy_bottom_up[::-1]
+
+            self._log_debug("Resolved top-down hierarchy to be %s" % hierarchy_top_down)
+
+            for data_item in hierarchy_top_down:
+                # see if we have this item in the tree
+                item = self._get_item_by_unique_id(data_item.unique_id)
+                if not item:
+                    self._log_debug(
+                        "Data item %s does not exist in model - fetching parent's children..." % data_item
+                    )
+                    # this parent does not yet exist in the tree
+                    # find the parent and kick it to expand it
+
+                    # assume that the top level is always loaded in tree
+                    # so that it's always safe to do data_item.parent.uid here
+                    parent_item = self._get_item_by_unique_id(data_item.parent.unique_id)
+                    # get model index
+                    parent_model_index = parent_item.index()
+                    # kick it
+                    self.fetchMore(parent_model_index)
+
+            # now try again
+            item = self._get_item_by_unique_id(uid)
+
+        return item
+
 
     def index_from_entity(self, entity_type, entity_id):
         """

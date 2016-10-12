@@ -69,7 +69,16 @@ class ShotgunDataItem(object):
         """
         The parent of this item or None if no parent
         """
-        return ShotgunDataItem(self._data[ShotgunDataHandler.PARENT])
+        parent = self._data[ShotgunDataHandler.PARENT]
+        if parent is None:
+            return None
+
+        parent = ShotgunDataItem(parent)
+        if parent.unique_id is None:
+            # this is the invisible root node
+            return None
+
+        return parent
 
     def is_leaf(self):
         """
@@ -101,7 +110,7 @@ class ShotgunDataHandler(QtCore.QObject):
     Shotgun Model low level data storage.
     """
     # version of binary format
-    FORMAT_VERSION = 20
+    FORMAT_VERSION = 23
 
     (UPDATED, ADDED, DELETED) = range(3)
 
@@ -140,6 +149,7 @@ class ShotgunDataHandler(QtCore.QObject):
         return {
             self.CACHE_CHILDREN: {},
             self.CACHE_BY_UID: {},
+            self.UID: None
         }
 
     def is_cache_available(self):
@@ -264,6 +274,18 @@ class ShotgunDataHandler(QtCore.QObject):
         finally:
             # set mask back to previous value
             os.umask(old_umask)
+
+    def get_data_item_from_uid(self, unique_id):
+        """
+        Given a unique id, return a :class:`ShotgunDataItem`
+        Returns None if the given uid is not present in the cache.
+
+        :returns: :class:`ShotgunDataItem`
+        """
+        if not self.is_cache_loaded():
+            return None
+
+        return ShotgunDataItem(self._cache[self.CACHE_BY_UID].get(unique_id))
 
     @log_timing
     def generate_child_nodes(self, unique_id, parent_object, factory_fn):
