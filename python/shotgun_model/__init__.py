@@ -16,3 +16,4 @@ from .simple_shotgun_hierarchy_model import SimpleShotgunHierarchyModel
 from .shotgun_standard_item import ShotgunStandardItem
 from .shotgun_hierarchy_item import ShotgunHierarchyItem
 from .util import get_sg_data, get_sanitized_data, sanitize_qt, sanitize_for_qt_model
+from .note_creator import NoteCreator
