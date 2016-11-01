@@ -18,11 +18,13 @@ class SimpleShotgunHierarchyModel(ShotgunHierarchyModel):
 
     All you need to do is to instantiate the class (typically once, in your
     constructor) and then call :meth:`load_data` to specify which shotgun
-    ``nav_expand()`` query to load up the top-level items in the hierarchy. The
-    remaining items will be queried asynchronously as items are expanded.
+    :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` query to load up
+    the top-level items in the hierarchy. The remaining items will be queried
+    asynchronously as items are expanded.
 
     Subsequently call :meth:`load_data` whenever you wish to change the
-    ``nav_expand()`` query associated with the model.
+    :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` query associated
+    with the model.
 
     This class derives from :class:`ShotgunHierarchyModel` so all the
     customization methods available in the normal :class:`ShotgunHierarchyModel`
@@ -39,13 +41,14 @@ class SimpleShotgunHierarchyModel(ShotgunHierarchyModel):
             where the leaves match the entity value of Version entities.
 
         :param str path: The path to the root of the hierarchy to display.
-            This corresponds to the ``path`` argument of the ``nav_expand()``
-            api method. For example, ``/Project/65`` would correspond to a
-            project on you shotgun site with id of ``65``. By default, this
-            value is ``None`` and the project from the current project will
-            be used. If no project can be determined, the path will default
-            to ``/`` which is the root path, meaning all projects will be
-            represented as top-level items in the model.
+            This corresponds to the ``path`` argument of the
+            :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` api method.
+            For example, ``/Project/65`` would correspond to a project on you
+            shotgun site with id of ``65``. By default, this value is ``None``
+            and the project from the current project will be used. If no project
+            can be determined, the path will default to ``/`` which is the root
+            path, meaning all projects will be represented as top-level items in
+            the model.
 
         :param dict entity_fields: A dictionary that identifies what fields to
             include on returned entities. Since the hierarchy can include any
