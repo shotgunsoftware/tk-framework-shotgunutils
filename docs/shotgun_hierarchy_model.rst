@@ -15,12 +15,11 @@ your production hierarchy.
 The Shotgun Hierarchy Model is a custom Qt Model specialized to represent your
 Shotugn production hierarchy as defined in your site's
 `Tracking Settings <https://support.shotgunsoftware.com/hc/en-us/articles/219031138-Project-Tracking-Settings>`_.
-The hierarchy represented by the model is dynamically constructed based on a
-supplied root ``path`` which defines the root of the hierarchy in the model and
+The hierarchy represented by the model is dynamically constructed based on
 a ``seed_entity_field`` which represents the target of the hierarchy (i.e. what
 you're trying to drill down to in view using the model).
 
-Like the :class:`ShotgunModel`, the :class:`ShotgunHierarchyModel` uses a disk based
+Like the :class:`ShotgunModel`, the :class:`.ShotgunHierarchyModel` uses a disk based
 cache and runs queries asynchronously to Shotgun in the background for
 performance. You derive your own model class from it, set up a query, and then
 hook up your model to a Qt View which will draw the data. The class contains
@@ -53,9 +52,10 @@ poorly as the dataset complexity grows. By leveraging Qt's built-in
 functionality, you get access to a mature and well documented toolbox that makes
 it quick to develop tools:
 
-- A hierarchy model instance represents a single Shotgun ``nav_expand()`` query.
-  The model is lazy-loaded as each time you expand an item in the view, the
-  children of that item are queried.
+- A hierarchy model instance represents a single Shotgun
+  :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` query. The model is
+  lazy-loaded as each time you expand an item in the view, the children of that
+  item are queried.
 - The model is cached, meaning that all data is fetched in the background in
   worker threads. This means that the data in your UI will load up instantly and
   you never have to wait for Shotgun. If the query result is different than the
@@ -90,8 +90,8 @@ is inside a toolkit app::
     view.setModel(self._hierarchy_model)
 
     # build a hierarchy that encompases all your projects
-    # target entities linked to the "entity" field on "Version" entities
-    model.load_data("/", "Version.entity")
+    # targeting entities linked to the "entity" field on "Version" entities
+    model.load_data("Version.entity")
 
 The above code will create a standard Qt tree view for your site (all projects)
 drilling down to entities with linked versions.
@@ -102,7 +102,7 @@ Beyond Hello World
 The simple setup outlined above could be extended in the following ways:
 
 - If you need more control of how the data is being retrieved, consider instead
-  creating your own class and derive from :class:`ShotgunHierarchyModel`. This
+  creating your own class and derive from :class:`.ShotgunHierarchyModel`. This
   makes it possible to customize the data as it arrives from Shotgun and how it
   will be displayed by the view.
 - If you want to retrieve results from your view, connect signals to the view's
@@ -124,7 +124,7 @@ Convenience wrapper around the Shotgun Hierarchy Model for quick and easy
 access. Use this when you want to prototype data modeling or if your are looking
 for a simple hierarchy without any customization. All you need to do is to
 instantiate the class (typically once, in your constructor) and then call
-:meth:`SimpleShotgunHierarchyModel.load_data()` to specify the type of
+:meth:`.SimpleShotgunHierarchyModel.load_data()` to specify the type of
 hierarchy to build in the model. Subsequently, call
 :meth:`~SimpleShotgunModel.load_data()` whenever you wish to change the
 hierarchy represented by the model.
@@ -143,8 +143,9 @@ ShotgunHierarchyModel
 A Qt Model representing a Shotgun query.
 
 This class implements a standard :class:`~PySide.QtCore.QAbstractItemModel`
-specialized to hold the contents of a particular shotgun API ``nav_expand()``
-query. It is cached and refreshes its data asynchronously.
+specialized to hold the contents of a particular shotgun API
+:meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` query. It is cached and
+refreshes its data asynchronously.
 
 .. autoclass:: ShotgunHierarchyModel
     :show-inheritance:
