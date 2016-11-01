@@ -20,7 +20,7 @@ supplied root ``path`` which defines the root of the hierarchy in the model and
 a ``seed_entity_field`` which represents the target of the hierarchy (i.e. what
 you're trying to drill down to in view using the model).
 
-Like the :class:`ShotgunModel`, the ``ShotgunHierarchyModel`` uses a disk based
+Like the :class:`ShotgunModel`, the :class:`ShotgunHierarchyModel` uses a disk based
 cache and runs queries asynchronously to Shotgun in the background for
 performance. You derive your own model class from it, set up a query, and then
 hook up your model to a Qt View which will draw the data. The class contains

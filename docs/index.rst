@@ -29,6 +29,7 @@ Contents:
    :maxdepth: 2
 
    shotgun_model
+   shotgun_hierarchy_model
    shotgun_data
    task_manager
    settings
