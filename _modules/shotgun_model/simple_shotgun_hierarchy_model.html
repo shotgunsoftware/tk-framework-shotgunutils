@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.simple_shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v4.4.13 documentation</title>
+  <title>shotgun_model.simple_shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v4.4.14 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.4.13 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.4.14 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -90,6 +90,7 @@
             
                 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_model.html">Shotgun Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_hierarchy_model.html">Shotgun Hierarchy Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../task_manager.html">Background Task Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
@@ -115,7 +116,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.4.13.<br>
+    <b>tk-framework-shotgunutils</b> v4.4.14.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -187,11 +188,13 @@
 
 <span class="sd">    All you need to do is to instantiate the class (typically once, in your</span>
 <span class="sd">    constructor) and then call :meth:`load_data` to specify which shotgun</span>
-<span class="sd">    ``nav_expand()`` query to load up the top-level items in the hierarchy. The</span>
-<span class="sd">    remaining items will be queried asynchronously as items are expanded.</span>
+<span class="sd">    :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` query to load up</span>
+<span class="sd">    the top-level items in the hierarchy. The remaining items will be queried</span>
+<span class="sd">    asynchronously as items are expanded.</span>
 
 <span class="sd">    Subsequently call :meth:`load_data` whenever you wish to change the</span>
-<span class="sd">    ``nav_expand()`` query associated with the model.</span>
+<span class="sd">    :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` query associated</span>
+<span class="sd">    with the model.</span>
 
 <span class="sd">    This class derives from :class:`ShotgunHierarchyModel` so all the</span>
 <span class="sd">    customization methods available in the normal :class:`ShotgunHierarchyModel`</span>
@@ -208,13 +211,14 @@
 <span class="sd">            where the leaves match the entity value of Version entities.</span>
 
 <span class="sd">        :param str path: The path to the root of the hierarchy to display.</span>
-<span class="sd">            This corresponds to the ``path`` argument of the ``nav_expand()``</span>
-<span class="sd">            api method. For example, ``/Project/65`` would correspond to a</span>
-<span class="sd">            project on you shotgun site with id of ``65``. By default, this</span>
-<span class="sd">            value is ``None`` and the project from the current project will</span>
-<span class="sd">            be used. If no project can be determined, the path will default</span>
-<span class="sd">            to ``/`` which is the root path, meaning all projects will be</span>
-<span class="sd">            represented as top-level items in the model.</span>
+<span class="sd">            This corresponds to the ``path`` argument of the</span>
+<span class="sd">            :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` api method.</span>
+<span class="sd">            For example, ``/Project/65`` would correspond to a project on you</span>
+<span class="sd">            shotgun site with id of ``65``. By default, this value is ``None``</span>
+<span class="sd">            and the project from the current project will be used. If no project</span>
+<span class="sd">            can be determined, the path will default to ``/`` which is the root</span>
+<span class="sd">            path, meaning all projects will be represented as top-level items in</span>
+<span class="sd">            the model.</span>
 
 <span class="sd">        :param dict entity_fields: A dictionary that identifies what fields to</span>
 <span class="sd">            include on returned entities. Since the hierarchy can include any</span>
@@ -263,7 +267,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v4.4.13',
+            VERSION:'v4.4.14',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v4.4.13 documentation</title>
+  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v4.4.14 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.4.13 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.4.14 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -90,6 +90,7 @@
             
                 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_model.html">Shotgun Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_hierarchy_model.html">Shotgun Hierarchy Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../task_manager.html">Background Task Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
@@ -115,7 +116,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.4.13.<br>
+    <b>tk-framework-shotgunutils</b> v4.4.14.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -213,8 +214,9 @@
 <span class="sd">    will display the result. </span>
 
 <span class="sd">    The model stores a single column, lazy-loaded Shotgun Hierarchy as queried</span>
-<span class="sd">    via the ``nav_expand()`` python-api method. The structure of items in the</span>
-<span class="sd">    hierarchy mimics what is found in Shotgun as configured in each project&#39;s</span>
+<span class="sd">    via the :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`</span>
+<span class="sd">    python-api method. The structure of items in the hierarchy mimics what is</span>
+<span class="sd">    found in Shotgun as configured in each project&#39;s</span>
 <span class="sd">    `Tracking Settings &lt;https://support.shotgunsoftware.com/hc/en-us/articles/219031138-Project-Tracking-Settings&gt;`_.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -339,7 +341,8 @@
 <span class="sd">        Returns ``None`` if not found.</span>
 
 <span class="sd">        :param str path: The path to search the tree for. The paths match those</span>
-<span class="sd">            used by and returned from the python-api&#39;s ``nav_expand()`` method.</span>
+<span class="sd">            used by and returned from the python-api&#39;s</span>
+<span class="sd">            :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` method.</span>
 <span class="sd">        :returns: :class:`~PySide.QtGui.QStandardItem` or ``None`` if not found</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_item_by_unique_id</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
@@ -495,8 +498,8 @@
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is the main method to use to configure the hierarchy model. You</span>
-<span class="sd">        basically pass a specific ``nav_expand`` query to the model and it will</span>
-<span class="sd">        start tracking this particular set of parameters.</span>
+<span class="sd">        basically pass a specific :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`</span>
+<span class="sd">        query to the model and it will start tracking this particular set of parameters.</span>
 
 <span class="sd">        Any existing data contained in the model will be cleared.</span>
 
@@ -513,7 +516,8 @@
 <span class="sd">            where the leaves match the entity value of Version entities.</span>
 
 <span class="sd">        :param str path: The path to the root of the hierarchy to display.</span>
-<span class="sd">            This corresponds to the ``path`` argument of the ``nav_expand()``</span>
+<span class="sd">            This corresponds to the ``path`` argument of the</span>
+<span class="sd">            :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`</span>
 <span class="sd">            api method. For example, ``/Project/65`` would correspond to a</span>
 <span class="sd">            project on you shotgun site with id of ``65``. By default, this</span>
 <span class="sd">            value is ``None`` and the project from the current project will</span>
@@ -645,7 +649,7 @@
 <div class="viewcode-block" id="ShotgunHierarchyModel._populate_default_thumbnail"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel._populate_default_thumbnail">[docs]</a>    <span class="k">def</span> <span class="nf">_populate_default_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets the icon for the supplied item based on its &quot;kind&quot; as returned</span>
-<span class="sd">        by the ``nav_expand()`` api call.</span>
+<span class="sd">        by the :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` api call.</span>
 
 <span class="sd">        :param item: The :class:`~PySide.QtGui.QStandardItem` item to set the</span>
 <span class="sd">            icon for.</span>
@@ -718,8 +722,8 @@
 <span class="sd">        Creates a model item given the supplied data and optional parent.</span>
 
 <span class="sd">        The supplied ``data`` corresponds to the results of a call to the</span>
-<span class="sd">        ``nav_expand()`` api method. The data will be stored on the new item via</span>
-<span class="sd">        the ``SG_DATA_ROLE``.</span>
+<span class="sd">        :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` api method. The</span>
+<span class="sd">        data will be stored on the new item via the ``SG_DATA_ROLE``.</span>
 
 <span class="sd">        :param dict data: The hierarchy data to use when creating the item.</span>
 <span class="sd">        :param parent: Optional :class:`~PySide.QtGui.QStandardItem` instance</span>
@@ -909,7 +913,7 @@
 <span class="sd">        children.</span>
 
 <span class="sd">        :param dict nav_data: A dictionary of item data as returned via async</span>
-<span class="sd">            call to ``nav_expand``.</span>
+<span class="sd">            call to :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__create_item</span><span class="p">(</span><span class="n">nav_data</span><span class="p">)</span>
@@ -917,7 +921,8 @@
 
     <span class="k">def</span> <span class="nf">__on_nav_data_arrived</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nav_data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Handle asynchronous navigation data arriving after a nav_expand request.</span>
+<span class="sd">        Handle asynchronous navigation data arriving after a</span>
+<span class="sd">        :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` request.</span>
 
 <span class="sd">        :param dict nav_data: The data returned from the api call.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -990,7 +995,8 @@
 
     <span class="k">def</span> <span class="nf">__query_hierarchy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">seed_entity_field</span><span class="p">,</span> <span class="n">entity_fields</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Triggers the async ``nav_expand()`` query based on the supplied fields.</span>
+<span class="sd">        Triggers the async :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`</span>
+<span class="sd">        query based on the supplied fields.</span>
 
 <span class="sd">        This method returns immediately and does not block.</span>
 
@@ -1063,7 +1069,8 @@
 <span class="sd">        have been removed, then adds or updates children as needed.</span>
 
 <span class="sd">        :param item: A :class:`~PySide.QtGui.QStandardItem` instance to update.</span>
-<span class="sd">        :param dict nav_data: The data returned by a ``nav_expand()`` call.</span>
+<span class="sd">        :param dict nav_data: The data returned by a</span>
+<span class="sd">            :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` call.</span>
 
 <span class="sd">        :returns: ``True`` if the subtree was udpated, ``False`` otherwise.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1156,7 +1163,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v4.4.13',
+            VERSION:'v4.4.14',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

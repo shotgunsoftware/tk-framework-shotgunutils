@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Model &mdash; tk-framework-shotgunutils v4.4.13 documentation</title>
+  <title>Shotgun Model &mdash; tk-framework-shotgunutils v4.4.14 documentation</title>
   
 
   
@@ -32,8 +32,8 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.4.13 documentation" href="index.html"/>
-        <link rel="next" title="Shotgun Asynchronous Data Retriever" href="shotgun_data.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.4.14 documentation" href="index.html"/>
+        <link rel="next" title="Shotgun Hierarchy Model" href="shotgun_hierarchy_model.html"/>
         <link rel="prev" title="The Shotgun Utilities Framework" href="index.html"/> 
 
   
@@ -104,6 +104,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#shotgunmodel">ShotgunModel</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="shotgun_hierarchy_model.html">Shotgun Hierarchy Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_manager.html">Background Task Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
@@ -129,7 +130,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.4.13.<br>
+    <b>tk-framework-shotgunutils</b> v4.4.14.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -365,10 +366,10 @@ subclassed implementation.</li>
 parameter, this can be used to effectively cap the data set that the model
 is handling, allowing a user to for example show the twenty most recent notes or
 similar.</li>
-<li><strong>columns</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; List of Shotgun fields names to use to populate the model columns</li>
+<li><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; List of Shotgun fields names to use to populate the model columns</li>
 <li><strong>additional_filter_presets</strong> &#8211; List of Shotgun filter presets to apply, e.g.
 <code class="docutils literal"><span class="pre">[{&quot;preset_name&quot;:&quot;LATEST&quot;,&quot;latest_by&quot;:&quot;BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT&quot;}]</span></code></li>
-<li><strong>editable_columns</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; A subset of <code class="docutils literal"><span class="pre">columns</span></code> that will be editable in views that use this model.</li>
+<li><strong>editable_columns</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; A subset of <code class="docutils literal"><span class="pre">columns</span></code> that will be editable in views that use this model.</li>
 </ul>
 </td>
 </tr>
@@ -602,13 +603,13 @@ an external string via this parameter which will be added to the seed.</li>
 parameter, this can be used to effectively cap the data set that the model
 is handling, allowing a user to for example show the twenty most recent notes or
 similar.</li>
-<li><strong>columns</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; If columns is specified, then any leaf row in the model will have columns created where
+<li><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; If columns is specified, then any leaf row in the model will have columns created where
 each column in the row contains the value for the corresponding field from columns. This means
 that the data from the loaded entity will be available field by field. Subclasses can modify
 this behavior by overriding _get_additional_columns.</li>
 <li><strong>additional_filter_presets</strong> &#8211; List of Shotgun filter presets to apply, e.g.
 <code class="docutils literal"><span class="pre">[{&quot;preset_name&quot;:&quot;LATEST&quot;,&quot;latest_by&quot;:&quot;BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT&quot;}]</span></code></li>
-<li><strong>editable_columns</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; A subset of <code class="docutils literal"><span class="pre">columns</span></code> that will be editable in views that use this model.</li>
+<li><strong>editable_columns</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; A subset of <code class="docutils literal"><span class="pre">columns</span></code> that will be editable in views that use this model.</li>
 </ul>
 </td>
 </tr>
@@ -1203,7 +1204,7 @@ otherwise.</td>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="shotgun_data.html" class="btn btn-neutral float-right" title="Shotgun Asynchronous Data Retriever" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="shotgun_hierarchy_model.html" class="btn btn-neutral float-right" title="Shotgun Hierarchy Model" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral" title="The Shotgun Utilities Framework" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -1236,7 +1237,7 @@ otherwise.</td>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v4.4.13',
+            VERSION:'v4.4.14',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

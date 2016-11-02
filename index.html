@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>The Shotgun Utilities Framework &mdash; tk-framework-shotgunutils v4.4.13 documentation</title>
+  <title>The Shotgun Utilities Framework &mdash; tk-framework-shotgunutils v4.4.14 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.4.13 documentation" href="#"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.4.14 documentation" href="#"/>
         <link rel="next" title="Shotgun Model" href="shotgun_model.html"/> 
 
   
@@ -90,6 +90,7 @@
             
                 <ul>
 <li class="toctree-l1"><a class="reference internal" href="shotgun_model.html">Shotgun Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="shotgun_hierarchy_model.html">Shotgun Hierarchy Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_manager.html">Background Task Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
@@ -115,7 +116,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.4.13.<br>
+    <b>tk-framework-shotgunutils</b> v4.4.14.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -170,8 +171,9 @@
 painless to build consistent looking applications. It contains several modules which can each
 be used independently:</p>
 <ul class="simple">
-<li>Shotgun Data model deriving from <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItemModel.html#PySide.QtGui.QStandardItemModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItemModel</span></code></a> which makes
-it easy to quickly build responsive, rich applications with data from your Shotgun site.</li>
+<li>Shotgun Data and Shotgun Hierarchy models deriving from
+<a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItemModel.html#PySide.QtGui.QStandardItemModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItemModel</span></code></a> which makes it easy to quickly build
+responsive, rich applications with data from your Shotgun site.</li>
 <li>A settings system handles per-user preferences and makes it easy to work with the
 <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtCore/QSettings.html#PySide.QtCore.QSettings" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QSettings</span></code></a> class from within your app code.</li>
 <li>An asynchronous Shotgun data receiver which makes it easy to work with background queries
@@ -190,6 +192,12 @@ reference and code examples.</p>
 <li class="toctree-l2"><a class="reference internal" href="shotgun_model.html#simpleshotgunmodel">SimpleShotgunModel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="shotgun_model.html#shotgunentitymodel">ShotgunEntityModel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="shotgun_model.html#shotgunmodel">ShotgunModel</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="shotgun_hierarchy_model.html">Shotgun Hierarchy Model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="shotgun_hierarchy_model.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="shotgun_hierarchy_model.html#simpleshotgunhierarchymodel">SimpleShotgunHierarchyModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="shotgun_hierarchy_model.html#shotgunhierarchymodel">ShotgunHierarchyModel</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="shotgun_data.html">Shotgun Asynchronous Data Retriever</a><ul>
@@ -247,7 +255,7 @@ reference and code examples.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v4.4.13',
+            VERSION:'v4.4.14',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
