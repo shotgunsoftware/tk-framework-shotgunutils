@@ -167,6 +167,9 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                 else:
                     # not on leaf level yet
                     if unique_field_value not in sub_tree[self.CACHE_CHILDREN]:
+                        # item is not yet inserted in our new tree so add it
+                        # because these are parent items like project nodes
+
                         item = {
                             self.SG_DATA: sg_item,
                             self.FIELD: field_name,
@@ -189,7 +192,12 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                         else:
                             # record already existed in prev dataset. Check if value has changed
                             current_record = self._cache[self.CACHE_BY_UID][unique_field_value][self.SG_DATA]
-                            if not self.__compare_shotgun_data(current_record, sg_item):
+                            # don't compare the whole record but just the part that relates to this
+                            # intermediate node value. For example, we may be looking at a project node
+                            # in the hierarchy but the full sg record contains all the data for a shot.
+                            # in this case, just run the comparison on the project subset of the full
+                            # shot data dict.
+                            if not self.__compare_shotgun_data(current_record.get(field_name), sg_item.get(field_name)):
                                 diff_list.append({
                                     "data": ShotgunDataItem(item),
                                     "mode": self.UPDATED
@@ -321,34 +329,36 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
 
         :returns: True if a is same as b, false otherwise
         """
-        for key in a.iterkeys():
-            a_value = a[key]
-            b_value = b[key]
+        if isinstance(a, dict) and isinstance(b, dict):
 
-            # handle thumbnail fields as a special case
-            # thumbnail urls are (typically, there seem to be several standards!)
-            # on the form:
-            # https://sg-media-usor-01.s3.amazonaws.com/xxx/yyy/
-            #   filename.ext?lots_of_authentication_headers
-            #
-            # the query string changes all the times, so when we check if an item
-            # is out of date, omit it.
-            if (isinstance(a_value, str) and isinstance(b_value, str) and
-                  a_value.startswith("http") and b_value.startswith("http") and
-                  ("amazonaws" in a_value or "AccessKeyId" in a_value)):
-                # attempt to parse values are urls and eliminate the querystring
-                # compare hostname + path only
-                url_obj_a = urlparse.urlparse(a_value)
-                url_obj_b = urlparse.urlparse(b_value)
-                compare_str_a = "%s/%s" % (url_obj_a.netloc, url_obj_a.path)
-                compare_str_b = "%s/%s" % (url_obj_b.netloc, url_obj_b.path)
-                if compare_str_a != compare_str_b:
-                    # url has changed
+            for key in a.iterkeys():
+                a_value = a[key]
+                b_value = b[key]
+
+                # handle thumbnail fields as a special case
+                # thumbnail urls are (typically, there seem to be several standards!)
+                # on the form:
+                # https://sg-media-usor-01.s3.amazonaws.com/xxx/yyy/
+                #   filename.ext?lots_of_authentication_headers
+                #
+                # the query string changes all the times, so when we check if an item
+                # is out of date, omit it.
+                if (isinstance(a_value, str) and isinstance(b_value, str) and
+                      a_value.startswith("http") and b_value.startswith("http") and
+                      ("amazonaws" in a_value or "AccessKeyId" in a_value)):
+                    # attempt to parse values are urls and eliminate the querystring
+                    # compare hostname + path only
+                    url_obj_a = urlparse.urlparse(a_value)
+                    url_obj_b = urlparse.urlparse(b_value)
+                    compare_str_a = "%s/%s" % (url_obj_a.netloc, url_obj_a.path)
+                    compare_str_b = "%s/%s" % (url_obj_b.netloc, url_obj_b.path)
+                    if compare_str_a != compare_str_b:
+                        # url has changed
+                        return False
+
+                elif a_value != b_value:
                     return False
 
-            elif a_value != b_value:
-                return False
-
-        # all good - no diff
-        return True
+        else:
+            return a == b
 

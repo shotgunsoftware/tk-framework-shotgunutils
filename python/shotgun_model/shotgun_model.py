@@ -911,6 +911,14 @@ class ShotgunModel(ShotgunQueryModel):
     ########################################################################################
     # private methods
 
+    def __save_data_async(self, sg):
+        """
+        Async save
+        """
+        self._log_debug("ASYNC SAVE")
+        self._data_handler.save_cache()
+        self._log_debug("ASYNC SAVE DONE")
+
     def __on_sg_data_arrived(self, sg_data):
         """
         Handle asynchronous shotgun data arriving after a find request.
@@ -929,8 +937,8 @@ class ShotgunModel(ShotgunQueryModel):
         self._log_debug("Shotgun data contained %d modifications" % len(modified_items))
 
         if len(modified_items) > 0:
-            # todo - this could happen async!
-            self._data_handler.save_cache()
+            # save cache changes to disk in the background
+            self._sg_data_retriever.execute_method(self.__save_data_async)
 
         root = self.invisibleRootItem()
         if root.rowCount() == 0:

@@ -178,7 +178,7 @@ class ShotgunDataHandler(QtCore.QObject):
         """
         Saves the current cache to disk.
         """
-        self._log_debug("Saving to disk: %s" % self._cache_path)
+        self._log_debug("Saving to disk: %s" % self)
 
         # try to create the cache folder with as open permissions as possible
         cache_dir = os.path.dirname(self._cache_path)
@@ -218,6 +218,8 @@ class ShotgunDataHandler(QtCore.QObject):
         finally:
             # set mask back to previous value
             os.umask(old_umask)
+
+        self._log_debug("Completed save of %s. Size %s bytes" % (self, os.path.getsize(self._cache_path)))
 
     def get_data_item_from_uid(self, unique_id):
         """
