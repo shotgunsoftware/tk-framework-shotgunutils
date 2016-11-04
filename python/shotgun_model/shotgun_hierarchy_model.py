@@ -45,8 +45,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     will display the result. 
 
     The model stores a single column, lazy-loaded Shotgun Hierarchy as queried
-    via the ``nav_expand()`` python-api method. The structure of items in the
-    hierarchy mimics what is found in Shotgun as configured in each project's
+    via the :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`
+    python-api method. The structure of items in the hierarchy mimics what is
+    found in Shotgun as configured in each project's
     `Tracking Settings <https://support.shotgunsoftware.com/hc/en-us/articles/219031138-Project-Tracking-Settings>`_.
     """
 
@@ -162,7 +163,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         Returns ``None`` if not found.
 
         :param str path: The path to search the tree for. The paths match those
-            used by and returned from the python-api's ``nav_expand()`` method.
+            used by and returned from the python-api's
+            :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` method.
         :returns: :class:`~PySide.QtGui.QStandardItem` or ``None`` if not found
         """
         #return self._get_item_by_unique_id(path) <--- todo refactor
@@ -321,8 +323,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     ):
         """
         This is the main method to use to configure the hierarchy model. You
-        basically pass a specific ``nav_expand`` query to the model and it will
-        start tracking this particular set of parameters.
+        basically pass a specific :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`
+        query to the model and it will start tracking this particular set of parameters.
 
         Any existing data contained in the model will be cleared.
 
@@ -339,7 +341,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             where the leaves match the entity value of Version entities.
 
         :param str path: The path to the root of the hierarchy to display.
-            This corresponds to the ``path`` argument of the ``nav_expand()``
+            This corresponds to the ``path`` argument of the
+            :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`
             api method. For example, ``/Project/65`` would correspond to a
             project on you shotgun site with id of ``65``. By default, this
             value is ``None`` and the project from the current project will
@@ -479,7 +482,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     def _populate_default_thumbnail(self, item):
         """
         Sets the icon for the supplied item based on its "kind" as returned
-        by the ``nav_expand()`` api call.
+        by the :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` api call.
 
         :param item: The :class:`~PySide.QtGui.QStandardItem` item to set the
             icon for.
@@ -552,8 +555,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         Creates a model item given the supplied data and optional parent.
 
         The supplied ``data`` corresponds to the results of a call to the
-        ``nav_expand()`` api method. The data will be stored on the new item via
-        the ``SG_DATA_ROLE``.
+        :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` api method. The
+        data will be stored on the new item via the ``SG_DATA_ROLE``.
 
         :param dict data: The hierarchy data to use when creating the item.
         :param parent: Optional :class:`~PySide.QtGui.QStandardItem` instance
@@ -743,7 +746,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         children.
 
         :param dict nav_data: A dictionary of item data as returned via async
-            call to ``nav_expand``.
+            call to :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`.
         """
 
         item = self.__create_item(nav_data)
@@ -751,7 +754,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
     def __on_nav_data_arrived(self, nav_data):
         """
-        Handle asynchronous navigation data arriving after a nav_expand request.
+        Handle asynchronous navigation data arriving after a
+        :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` request.
 
         :param dict nav_data: The data returned from the api call.
         """
@@ -822,7 +826,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
     def __query_hierarchy(self, path, seed_entity_field, entity_fields):
         """
-        Triggers the async ``nav_expand()`` query based on the supplied fields.
+        Triggers the async :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`
+        query based on the supplied fields.
 
         This method returns immediately and does not block.
 
@@ -895,7 +900,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         have been removed, then adds or updates children as needed.
 
         :param item: A :class:`~PySide.QtGui.QStandardItem` instance to update.
-        :param dict nav_data: The data returned by a ``nav_expand()`` call.
+        :param dict nav_data: The data returned by a
+            :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` call.
 
         :returns: ``True`` if the subtree was udpated, ``False`` otherwise.
         """
