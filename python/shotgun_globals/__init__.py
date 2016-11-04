@@ -29,3 +29,4 @@ get_ordered_status_list = _cs.CachedShotgunSchema.get_ordered_status_list
 get_valid_values = _cs.CachedShotgunSchema.get_valid_values
 field_is_editable = _cs.CachedShotgunSchema.field_is_editable
 field_is_visible = _cs.CachedShotgunSchema.field_is_visible
+clear_cached_data = _cs.CachedShotgunSchema.clear_cached_data
