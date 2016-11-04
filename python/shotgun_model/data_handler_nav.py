@@ -8,7 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-from .data_handler import ShotgunDataItem, ShotgunDataHandler, log_timing, ShotgunModelDataError
+from .data_handler import ShotgunDataHandler
 
 class ShotgunNavDataHandler(ShotgunDataHandler):
     """

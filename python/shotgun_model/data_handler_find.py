@@ -12,7 +12,8 @@ import urlparse
 import time
 import gc
 
-from .data_handler import ShotgunDataItem, ShotgunDataHandler, log_timing
+from .data_handler import ShotgunDataHandler, log_timing
+from .data_item import ShotgunDataItem
 from .errors import ShotgunModelDataError
 
 class ShotgunFindDataHandler(ShotgunDataHandler):
@@ -26,6 +27,21 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         :param parent: Parent QT object
         """
         super(ShotgunFindDataHandler, self).__init__(cache_path, parent)
+        self._entity_ids = None
+
+    def _clear_cache(self):
+        """
+        Sets up an empty cache in memory
+        """
+        self._entity_ids = None
+        super(ShotgunFindDataHandler, self)._clear_cache()
+
+    def unload_cache(self):
+        """
+        Unloads any in-memory cache data.
+        """
+        self._entity_ids = None
+        super(ShotgunFindDataHandler, self).unload_cache()
 
     def get_entity_ids(self):
         """
@@ -37,12 +53,17 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         # loop over all cache items - the find data handler organizes
         # its unique ids so that all leaf nodes (e.g. representing an entity
         # are ints and all other items are strings
-        # todo - memoize?
-        entity_ids = []
-        for uid in self._cache[self.CACHE_BY_UID].keys():
-            if isinstance(uid, int):
-                entity_ids.append(uid)
-        return entity_ids
+
+        # memoized for performance
+        if self._entity_ids is None:
+            entity_ids = []
+            for uid in self._cache[self.CACHE_BY_UID].keys():
+                if isinstance(uid, int):
+                    # this is a leaf node representing an entity
+                    entity_ids.append(uid)
+            self._entity_ids = entity_ids
+
+        return self._entity_ids
 
     def get_uid_from_entity_id(self, entity_id):
         """
@@ -52,7 +73,6 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
             if isinstance(uid, int) and uid == entity_id:
                 return uid
         return None
-
 
     @log_timing
     def update_find_data(self, sg_data, hierarchy):
@@ -193,11 +213,11 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
             })
             num_deletes += 1
 
-        # lastly swap the new for the old
-        self._cache = None
+        # lastly swap the new for8 the old
+        self._clear_cache()
 
         # at this point, kick the gc to make sure the memory is freed up
-        # desite its cycles.
+        # despite its cycles.
         gc.collect()
 
         # and set the new cache

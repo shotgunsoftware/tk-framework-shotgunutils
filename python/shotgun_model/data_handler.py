@@ -20,74 +20,6 @@ from sgtk.platform.qt import QtCore, QtGui
 
 from .errors import ShotgunModelDataError
 
-
-class ShotgunDataItem(object):
-    """
-    Object wrapper around a data entry. This is used by
-    the :meth:`ShotgunDataHandler.generate_child_nodes()` method in order
-    to pass data cleanly into the item factory method callback.
-    """
-    def __init__(self, data_dict):
-        """
-        Do not construct this object by hand. Instances are created
-        by :class:`ShotgunDataHandler`.
-        :param data_dict: Internal ShotgunDataHandler data dictionary.
-        """
-        self._data = data_dict
-
-    def __repr__(self):
-        """
-        Create a string representation of this instance
-        :returns: A string representation of this instance
-        """
-        return "<%s uid:%s>" % (self.__class__.__name__, self.unique_id)
-
-    @property
-    def unique_id(self):
-        """
-        The unique id for this node
-        """
-        return self._data[ShotgunDataHandler.UID]
-
-    @property
-    def field(self):
-        """
-        The shotgun field that this item represents
-        """
-        # todo: can we get rid of this? It doesn't seem generic
-        return self._data[ShotgunDataHandler.FIELD]
-
-    @property
-    def shotgun_data(self):
-        """
-        The shotgun data associated with this item
-        """
-        return self._data[ShotgunDataHandler.SG_DATA]
-
-    @property
-    def parent(self):
-        """
-        The parent of this item or None if no parent
-        """
-        parent = self._data[ShotgunDataHandler.PARENT]
-        if parent is None:
-            return None
-
-        parent = ShotgunDataItem(parent)
-        if parent.unique_id is None:
-            # this is the invisible root node
-            return None
-
-        return parent
-
-    def is_leaf(self):
-        """
-        Flag to indicate if this item is a leaf in the tree
-        """
-        return self._data[ShotgunDataHandler.IS_LEAF]
-
-
-
 def log_timing(func):
     """
     Decorator that times and logs the execution of a method.
@@ -152,6 +84,12 @@ class ShotgunDataHandler(QtCore.QObject):
             self.UID: None
         }
 
+    def _clear_cache(self):
+        """
+        Sets up an empty cache in memory
+        """
+        self._cache = self._init_clear_cache()
+
     def is_cache_available(self):
         """
         Returns true if the cache exists on disk, false if not.
@@ -202,7 +140,7 @@ class ShotgunDataHandler(QtCore.QObject):
         Loads a cache from disk into memory
         """
         # init empty cache
-        self._cache = self._init_clear_cache()
+        self._clear_cache()
 
         # try to load
         self._log_debug("Loading from disk: %s" % self._cache_path)
@@ -246,6 +184,7 @@ class ShotgunDataHandler(QtCore.QObject):
         cache_dir = os.path.dirname(self._cache_path)
 
         # make sure the cache directory exists
+        # todo: upgrade to 0.18 filesystem methods
         if not os.path.exists(cache_dir):
             try:
                 os.makedirs(cache_dir, 0777)
@@ -265,6 +204,11 @@ class ShotgunDataHandler(QtCore.QObject):
                 # speeds up pickling but only works when there
                 # are no cycles in the data set
                 #pickler.fast = 1
+
+                # TODO: we are currently storing a parent node in our data structure
+                # for performance and cache size. By removing this, we could turn
+                # on the fast mode and this would speed things up further.
+
                 pickler.dump(self.FORMAT_VERSION)
                 pickler.dump(self._cache)
 
@@ -282,6 +226,9 @@ class ShotgunDataHandler(QtCore.QObject):
 
         :returns: :class:`ShotgunDataItem`
         """
+        # avoid cyclic imports
+        from .data_item import ShotgunDataItem
+
         if not self.is_cache_loaded():
             return None
 
@@ -298,6 +245,9 @@ class ShotgunDataHandler(QtCore.QObject):
 
         :returns: number of items generated.
         """
+        # avoid cyclic imports
+        from .data_item import ShotgunDataItem
+
         num_nodes_generated = 0
 
         self._log_debug("Creating child nodes for parent uid %s" % unique_id)
