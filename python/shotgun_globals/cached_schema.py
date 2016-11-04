@@ -899,9 +899,24 @@ class CachedShotgunSchema(QtCore.QObject):
         schema_cache = self._get_schema_cache_path(project_id)
         if os.path.isfile(schema_cache):
             self._bundle.log_debug("Removing schema cache file : %s" % schema_cache)
-            os.remove(schema_cache)
+            try:
+                os.remove(schema_cache)
+            except Exception, e:
+                self._bundle.log_error(
+                    "Caught error attempting to remove schema cache file [%s] :\n%s" %
+                    (schema_cache, e)
+                )
+                raise
 
         status_cache = self._get_status_cache_path(project_id)
         if os.path.isfile(status_cache):
             self._bundle.log_debug("Removing status cache file : %s" % status_cache)
-            os.remove(status_cache)
+            try:
+                os.remove(status_cache)
+            except Exception, e:
+                self._bundle.log_error(
+                    "Caught error attempting to remove status cache file [%s] :\n%s" %
+                    (status_cache, e)
+                )
+                raise
+
