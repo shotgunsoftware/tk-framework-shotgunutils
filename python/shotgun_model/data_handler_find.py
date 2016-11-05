@@ -360,5 +360,9 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                     return False
 
         else:
-            return a == b
+            if a != b:
+                return False
+
+        return True
+
 

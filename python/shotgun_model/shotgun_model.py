@@ -961,24 +961,27 @@ class ShotgunModel(ShotgunQueryModel):
                     parent_model_item = self._get_item_by_unique_id(parent_data_item.unique_id)
                     if parent_model_item:
                         # the parent exists in the view. So add the child
+                        # note: becuase of lazy loading, parent may not always exist.
+                        self._log_debug("Creating new model item for %s" % data_item)
                         self.__create_item(parent_model_item, data_item)
 
-                elif item["mode"] in (self._data_handler.DELETED, self._data_handler.UPDATED):
-                    # see if the node exists in the tree, in that
-                    # case delete it.
-                    self._delete_item_by_unique_id(data_item.unique_id)
+                elif item["mode"] == self._data_handler.DELETED:
+                    # see if the node exists in the tree, in that case delete it.
+                    # we check if it exists in the model because it may not have been
+                    # loaded in yet by the deferred loader
+                    model_item = self._get_item_by_unique_id(data_item.unique_id)
+                    if model_item:
+                        self._log_debug("Deleting model subtree %s" % model_item)
+                        self._delete_item(model_item)
 
-            # second pass - re-insert all modifications
-            for item in modified_items:
-                if item["mode"] == self._data_handler.UPDATED:
-                    data_item = item["data"]
-                    # look for the parent of this item
-                    parent_data_item = data_item.parent
-                    # see if this exists in the tree
-                    parent_model_item = self._get_item_by_unique_id(parent_data_item.unique_id)
-                    if parent_model_item:
-                        # the parent exists in the view. So add the child
-                        self.__create_item(parent_model_item, data_item)
+                elif item["mode"] == self._data_handler.UPDATED:
+                    # see if the node exists in the tree, in that case update it with new info
+                    # we check if it exists in the model because it may not have been
+                    # loaded in yet by the deferred loader
+                    model_item = self._get_item_by_unique_id(data_item.unique_id)
+                    if model_item:
+                        self._log_debug("Updating model item %s" % model_item)
+                        self.__update_item(model_item, data_item)
 
         # and emit completion signal
         self.data_refreshed.emit(modified_items > 0)
@@ -987,15 +990,38 @@ class ShotgunModel(ShotgunQueryModel):
         """
         Creates a model item for the tree given data out of the data store
 
-        :param parent: item to parent the node under
-        :param data_item: :class:`ShotgunDataItem`
+        :param :class:`~PySide.QtGui.QStandardItem` parent: Model item to parent the node under
+        :param :class:`ShotgunDataItem` data_item: Data to populate new item with
 
-        :returns: ShotgunStandardItem instance.
+        :returns: :class:`ShotgunStandardItem` instance.
         """
         # construct tree view node object
-        field_display_name = self.__generate_display_name(data_item.field, data_item.shotgun_data)
-        item = ShotgunStandardItem(field_display_name)
+        item = ShotgunStandardItem()
         item.setEditable(data_item.field in self.__editable_fields)
+
+        self.__update_item(item, data_item)
+
+        # run the finalizer
+        self._finalize_item(item)
+
+        # get complete row containing all columns for the current item
+        row = self._get_columns(item, data_item.is_leaf())
+
+        # and attach the node
+        parent.appendRow(row)
+
+        return item
+
+    def __update_item(self, item, data_item):
+        """
+        Updates a model item with the given data
+
+        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to update
+        :param :class:`ShotgunDataItem` data_item: Data to update item with
+        """
+
+        field_display_name = self.__generate_display_name(data_item.field, data_item.shotgun_data)
+        item.setText(field_display_name)
 
         # keep tabs of which items we are creating
         item.setData(True, self.IS_SG_MODEL_ROLE)
@@ -1024,12 +1050,14 @@ class ShotgunModel(ShotgunQueryModel):
         # Now we got the object set up. Now start calling custom methods:
 
         # allow item customization prior to adding to model
+        # note: this now runs both on update and create, which may be
+        #       conceptually confusing.
         self._item_created(item)
 
         # set up default thumb
         self._populate_default_thumbnail(item)
 
-        # run the populate item method (only runs at construction, not on cache restore)
+        # run the populate item method
         if data_item.is_leaf():
             self._populate_item(item, data_item.shotgun_data)
         else:
@@ -1037,16 +1065,6 @@ class ShotgunModel(ShotgunQueryModel):
 
         self._set_tooltip(item, data_item.shotgun_data)
 
-        # run the finalizer (always runs on construction, even via cache)
-        self._finalize_item(item)
-
-        # get complete row containing all columns for the current item
-        row = self._get_columns(item, data_item.is_leaf())
-
-        # and attach the node
-        parent.appendRow(row)
-
-        return item
 
     def __compute_cache_path(self, cache_seed=None):
         """

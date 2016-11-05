@@ -479,10 +479,6 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         This methods allows a subclassing object to add custom data prior to
         this.
 
-        .. note:: When an item is fetched from the cache, this method is *not*
-            called, it will only be called when shotgun data initially arrives
-            from a Shotgun API query.
-
         :param item: :class:`~PySide.QtGui.QStandardItem` that is about to be
             added to the model.
 
@@ -522,20 +518,44 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             return None
         return self.__items_by_uid[uid]
 
-    def _delete_item_by_unique_id(self, uid):
+    def _delete_item(self, item):
         """
-        Remove an item if it exists.
+        Remove an item and all its children if it exists.
+        Removes the entire row that item belongs to.
 
-        :param uid: The unique id for an item in the model.
+        :param str uid: The unique id for an item in the model.
         """
-        model_item = self._get_item_by_unique_id(uid)
+        # find all items in subtree and remove them
+        # from the uid based lookup to avoid issues
+        # where the C++ object has been deleted but we
+        # still a pyside reference.
+        self.__remove_unique_id_r(item)
 
-        if model_item:
-            # remove it
-            parent_model_item = model_item.parent()
-            parent_model_item.removeRow(model_item.row())
-            del self.__items_by_uid[uid]
-            model_item = None
+        # remove it
+        parent_model_item = item.parent()
+
+        if parent_model_item:
+            # remove entire row that item belongs to
+            parent_model_item.removeRow(item.row())
+
+    def __remove_unique_id_r(self, item):
+        """
+        Removes the unique id (if one exists) from
+        the self.__items_by_uid dictionary for this item
+        and all its children
+
+        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to process
+        """
+        # process children
+        for row_index in xrange(item.rowCount()):
+            child_item = item.child(row_index)
+            self.__remove_unique_id_r(child_item)
+
+        # now process self
+        unique_id = item.data(self._SG_ITEM_UNIQUE_ID)
+        if unique_id and unique_id in self.__items_by_uid:
+            del self.__items_by_uid[unique_id]
+
 
     def _log_debug(self, msg):
         """
