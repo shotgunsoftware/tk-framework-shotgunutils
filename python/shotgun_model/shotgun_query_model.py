@@ -11,6 +11,8 @@
 import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 
+from .shotgun_standard_item import ShotgunStandardItem
+
 class ShotgunQueryModel(QtGui.QStandardItemModel):
     """
     A Qt Model base class for querying Shotgun data.
@@ -272,6 +274,80 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             "email support@shotgunsoftware.com."
         )
 
+    def hasChildren(self, index):
+        """
+        Returns True if parent has any children; otherwise returns False.
+
+        This is used for the staged loading of nodes in hierarchies.
+
+        :param index: The index of the item being tested.
+        :type index: :class:`~PySide.QtCore.QModelIndex`
+        """
+        if not index.isValid():
+            return super(ShotgunQueryModel, self).hasChildren(index)
+
+        item = self.itemFromIndex(index)
+
+        if not isinstance(item, ShotgunStandardItem):
+            return super(ShotgunQueryModel, self).hasChildren(index)
+
+        return item.data(self._SG_ITEM_HAS_CHILDREN)
+
+    def fetchMore(self, index):
+        """
+        Retrieve child items for a node.
+
+        :param index: The index of the item being tested.
+        :type index: :class:`~PySide.QtCore.QModelIndex`
+        """
+        if not index.isValid():
+            return super(ShotgunQueryModel, self).fetchMore(index)
+
+        item = self.itemFromIndex(index)
+
+        if not isinstance(item, ShotgunStandardItem):
+            return super(ShotgunQueryModel, self).fetchMore(index)
+
+        # set the flag to prevent subsequent attempts to fetch more
+        item.setData(True, self._SG_ITEM_FETCHED_MORE)
+
+        # query the information for this item to populate its children.
+        # the slot for handling worker success will handle inserting the
+        # queried data into the tree.
+        self._log_debug("Fetching more for item: %s" % item.text())
+
+        unique_id = item.data(self._SG_ITEM_UNIQUE_ID)
+        self._data_handler.generate_child_nodes(unique_id, item, self._create_item)
+
+    def canFetchMore(self, index):
+        """
+        Returns True if there is more data available for parent; otherwise
+        returns False.
+
+        :param index: The index of the item being tested.
+        :type index: :class:`~PySide.QtCore.QModelIndex`
+        """
+        if not index.isValid():
+            return super(ShotgunQueryModel, self).canFetchMore(index)
+
+        # get the item and its stored hierarchy data
+        item = self.itemFromIndex(index)
+
+        if not isinstance(item, ShotgunStandardItem):
+            return super(ShotgunQueryModel, self).canFetchMore(index)
+
+        if item.data(self._SG_ITEM_FETCHED_MORE):
+            # more data has already been queried for this item
+            return False
+
+        # the number of existing child items
+        current_child_item_count = item.rowCount()
+        data_has_children = item.data(self._SG_ITEM_HAS_CHILDREN)
+
+        # we can fetch more if there are no children already and the item
+        # has children.
+        return current_child_item_count == 0 and data_has_children
+
     ############################################################################
     # abstract, protected slots. these methods are connected to the internal
     # data retriever's signals during initialization, so subclasses should
@@ -339,6 +415,24 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             "The '_refresh_data' method has not been "
             "implemented for this ShotgunQueryModel subclass."
         )
+
+    def _create_item(self, parent, data_item):
+        """
+        Creates a model item for the tree given data out of the data store
+
+        :param :class:`~PySide.QtGui.QStandardItem` parent: Model item to parent the node under
+        :param :class:`ShotgunDataItem` data_item: Data to populate new item with
+
+        :returns: Model item
+        :rtype: :class:`ShotgunStandardItem`
+
+        Abstract method
+        """
+        raise NotImplementedError(
+            "The '_create_item' method has not been "
+            "implemented for this ShotgunQueryModel subclass."
+        )
+
 
     ############################################################################
     # These methods provide the developer experience for shotgun query models.
@@ -538,25 +632,6 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             # remove entire row that item belongs to
             parent_model_item.removeRow(item.row())
 
-    def __remove_unique_id_r(self, item):
-        """
-        Removes the unique id (if one exists) from
-        the self.__items_by_uid dictionary for this item
-        and all its children
-
-        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to process
-        """
-        # process children
-        for row_index in xrange(item.rowCount()):
-            child_item = item.child(row_index)
-            self.__remove_unique_id_r(child_item)
-
-        # now process self
-        unique_id = item.data(self._SG_ITEM_UNIQUE_ID)
-        if unique_id and unique_id in self.__items_by_uid:
-            del self.__items_by_uid[unique_id]
-
-
     def _log_debug(self, msg):
         """
         Convenience wrapper around debug logging
@@ -592,4 +667,22 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         # delete the child leaves
         for index in range(node.rowCount())[::-1]:
             node.removeRow(index)
+
+    def __remove_unique_id_r(self, item):
+        """
+        Removes the unique id (if one exists) from
+        the self.__items_by_uid dictionary for this item
+        and all its children
+
+        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to process
+        """
+        # process children
+        for row_index in xrange(item.rowCount()):
+            child_item = item.child(row_index)
+            self.__remove_unique_id_r(child_item)
+
+        # now process self
+        unique_id = item.data(self._SG_ITEM_UNIQUE_ID)
+        if unique_id and unique_id in self.__items_by_uid:
+            del self.__items_by_uid[unique_id]
 

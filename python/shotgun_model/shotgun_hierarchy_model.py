@@ -550,7 +550,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     ############################################################################
     # private methods
 
-    def __create_item(self, data, parent=None, row=None):
+    def _create_item(self, data, parent=None, row=None):
         """
         Creates a model item given the supplied data and optional parent.
 
@@ -749,7 +749,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             call to :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`.
         """
 
-        item = self.__create_item(nav_data)
+        item = self._create_item(nav_data)
         self.__update_subtree(item, nav_data)
 
     def __on_nav_data_arrived(self, nav_data):
@@ -958,7 +958,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
                     or subtree_updated
             else:
                 # child item does not exist, create it at the specified row
-                self.__create_item(child_data, parent=item, row=row)
+                self._create_item(child_data, parent=item, row=row)
                 subtree_updated = True
 
         return subtree_updated

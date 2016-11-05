@@ -33,8 +33,9 @@ class ShotgunModel(ShotgunQueryModel):
 
     In order to use this class, you normally subclass it and implement certain key data
     methods for setting up queries, customizing etc. Then you connect your class to
-    a :class:`~PySide.QtGui.QAbstractItemView` of some sort which will display the result. If you need to do manipulations
-    such as sorting or filtering on the data, connect a proxy model (typically :class:`~PySide.QtGui.QSortFilterProxyModel`)
+    a :class:`~PySide.QtGui.QAbstractItemView` of some sort which will display the result.
+    If you need to do manipulations such as sorting or filtering on the data,
+    connect a proxy model (typically :class:`~PySide.QtGui.QSortFilterProxyModel`)
     between your class and the view.
     """
 
@@ -72,9 +73,6 @@ class ShotgunModel(ShotgunQueryModel):
 
         # is the model set up with a query?
         self.__has_query = False
-
-        # flag to indicate a full refresh
-        self._request_full_refresh = False
 
         # keep track of info for thumbnail download/load
         self.__download_thumbs = download_thumbs
@@ -114,8 +112,8 @@ class ShotgunModel(ShotgunQueryModel):
 
     def item_from_entity(self, entity_type, entity_id):
         """
-        Returns a :class:`~PySide.QtGui.QStandardItem` based on entity type and entity id
-        Returns none if not found.
+        Returns a :class:`~PySide.QtGui.QStandardItem` based on
+        entity type and entity id. Returns none if not found.
 
         :param entity_type: Shotgun entity type to look for
         :param entity_id: Shotgun entity id to look for
@@ -183,7 +181,6 @@ class ShotgunModel(ShotgunQueryModel):
             item = self._get_item_by_unique_id(uid)
 
         return item
-
 
     def index_from_entity(self, entity_type, entity_id):
         """
@@ -262,87 +259,10 @@ class ShotgunModel(ShotgunQueryModel):
             # no query in this model yet
             return
 
-        # when data arrives, force full rebuild
-        self._request_full_refresh = True
-
         super(ShotgunModel, self).hard_refresh()
 
     ########################################################################################
     # methods overridden from the base class.
-
-    def hasChildren(self, index):
-        """
-        Returns True if parent has any children; otherwise returns False.
-
-        This is used for the staged loading of nodes in hierarchies.
-
-        :param index: The index of the item being tested.
-        :type index: :class:`~PySide.QtCore.QModelIndex`
-        """
-        if not index.isValid():
-            return super(ShotgunModel, self).hasChildren(index)
-
-        item = self.itemFromIndex(index)
-
-        if not isinstance(item, ShotgunStandardItem):
-            return super(ShotgunModel, self).hasChildren(index)
-
-        return item.data(self._SG_ITEM_HAS_CHILDREN)
-
-    def fetchMore(self, index):
-        """
-        Retrieve child items for a node.
-
-        :param index: The index of the item being tested.
-        :type index: :class:`~PySide.QtCore.QModelIndex`
-        """
-        if not index.isValid():
-            return super(ShotgunModel, self).fetchMore(index)
-
-        item = self.itemFromIndex(index)
-
-        if not isinstance(item, ShotgunStandardItem):
-            return super(ShotgunModel, self).fetchMore(index)
-
-        # set the flag to prevent subsequent attempts to fetch more
-        item.setData(True, self._SG_ITEM_FETCHED_MORE)
-
-        # query the information for this item to populate its children.
-        # the slot for handling worker success will handle inserting the
-        # queried data into the tree.
-        self._log_debug("Fetching more for item: %s" % item.text())
-
-        unique_id = item.data(self._SG_ITEM_UNIQUE_ID)
-        self._data_handler.generate_child_nodes(unique_id, item, self.__create_item)
-
-    def canFetchMore(self, index):
-        """
-        Returns True if there is more data available for parent; otherwise
-        returns False.
-
-        :param index: The index of the item being tested.
-        :type index: :class:`~PySide.QtCore.QModelIndex`
-        """
-        if not index.isValid():
-            return super(ShotgunModel, self).canFetchMore(index)
-
-        # get the item and its stored hierarchy data
-        item = self.itemFromIndex(index)
-
-        if not isinstance(item, ShotgunStandardItem):
-            return super(ShotgunModel, self).canFetchMore(index)
-
-        if item.data(self._SG_ITEM_FETCHED_MORE):
-            # more data has already been queried for this item
-            return False
-
-        # the number of existing child items
-        current_child_item_count = item.rowCount()
-        data_has_children = item.data(self._SG_ITEM_HAS_CHILDREN)
-
-        # we can fetch more if there are no children already and the item
-        # has children.
-        return current_child_item_count == 0 and data_has_children
 
     def clear(self):
         """
@@ -495,7 +415,7 @@ class ShotgunModel(ShotgunQueryModel):
 
         # construct the top level nodes
         self._log_debug("Creating model nodes for top level of data tree...")
-        nodes_generated = self._data_handler.generate_child_nodes(None, root, self.__create_item)
+        nodes_generated = self._data_handler.generate_child_nodes(None, root, self._create_item)
 
         # if we got some data, emit cache load signal
         if nodes_generated > 0:
@@ -908,22 +828,52 @@ class ShotgunModel(ShotgunQueryModel):
                     # call method to populate it
                     self._populate_thumbnail(item, sg_field, thumbnail_path)
 
+    def _create_item(self, parent, data_item):
+        """
+        Creates a model item for the tree given data out of the data store
+
+        :param :class:`~PySide.QtGui.QStandardItem` parent: Model item to parent the node under
+        :param :class:`ShotgunDataItem` data_item: Data to populate new item with
+
+        :returns: Model item
+        :rtype: :class:`ShotgunStandardItem`
+        """
+        # construct tree view node object
+        item = ShotgunStandardItem()
+        item.setEditable(data_item.field in self.__editable_fields)
+
+        self.__update_item(item, data_item)
+
+        # run the finalizer
+        self._finalize_item(item)
+
+        # get complete row containing all columns for the current item
+        row = self._get_columns(item, data_item.is_leaf())
+
+        # and attach the node
+        parent.appendRow(row)
+
+        return item
+
     ########################################################################################
     # private methods
 
     def __save_data_async(self, sg):
         """
-        Async save
+        Asynchronous callback to perform a cache save in the background.
+
+        :param :class:`Shotgun` sg: Shotgun API instance
         """
-        self._log_debug("ASYNC SAVE")
+        self._log_debug("Begin asynchronously saving cache to disk")
         self._data_handler.save_cache()
-        self._log_debug("ASYNC SAVE DONE")
+        self._log_debug("Asynchronous cache save complete.")
 
     def __on_sg_data_arrived(self, sg_data):
         """
         Handle asynchronous shotgun data arriving after a find request.
-        """
 
+        :param list sg_data: Shotgun data payload.
+        """
         self._log_debug("--> Shotgun data arrived. (%s records)" % len(sg_data))
 
         # pre-process data
@@ -944,7 +894,7 @@ class ShotgunModel(ShotgunQueryModel):
         if root.rowCount() == 0:
             # an empty tree - in this case perform a full insert, not a diff
             self._log_debug("Model was empty - doing a full load pass...")
-            self._data_handler.generate_child_nodes(None, root, self.__create_item)
+            self._data_handler.generate_child_nodes(None, root, self._create_item)
 
         else:
             # the tree was already loaded. Perform diffs instead.
@@ -963,7 +913,7 @@ class ShotgunModel(ShotgunQueryModel):
                         # the parent exists in the view. So add the child
                         # note: becuase of lazy loading, parent may not always exist.
                         self._log_debug("Creating new model item for %s" % data_item)
-                        self.__create_item(parent_model_item, data_item)
+                        self._create_item(parent_model_item, data_item)
 
                 elif item["mode"] == self._data_handler.DELETED:
                     # see if the node exists in the tree, in that case delete it.
@@ -985,32 +935,6 @@ class ShotgunModel(ShotgunQueryModel):
 
         # and emit completion signal
         self.data_refreshed.emit(modified_items > 0)
-
-    def __create_item(self, parent, data_item):
-        """
-        Creates a model item for the tree given data out of the data store
-
-        :param :class:`~PySide.QtGui.QStandardItem` parent: Model item to parent the node under
-        :param :class:`ShotgunDataItem` data_item: Data to populate new item with
-
-        :returns: :class:`ShotgunStandardItem` instance.
-        """
-        # construct tree view node object
-        item = ShotgunStandardItem()
-        item.setEditable(data_item.field in self.__editable_fields)
-
-        self.__update_item(item, data_item)
-
-        # run the finalizer
-        self._finalize_item(item)
-
-        # get complete row containing all columns for the current item
-        row = self._get_columns(item, data_item.is_leaf())
-
-        # and attach the node
-        parent.appendRow(row)
-
-        return item
 
     def __update_item(self, item, data_item):
         """
@@ -1064,7 +988,6 @@ class ShotgunModel(ShotgunQueryModel):
             self._populate_item(item, None)
 
         self._set_tooltip(item, data_item.shotgun_data)
-
 
     def __compute_cache_path(self, cache_seed=None):
         """
