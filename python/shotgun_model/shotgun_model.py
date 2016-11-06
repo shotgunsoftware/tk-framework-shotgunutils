@@ -188,7 +188,7 @@ class ShotgunModel(ShotgunQueryModel):
         return [{"column_idx": i + 1, "field": field} for (i, field) in enumerate(self.__column_fields)]
 
     ########################################################################################
-    # protected methods not meant to be subclassed but meant to be called by subclasses
+    # protected methods
 
     def _load_data(
         self, entity_type, filters, hierarchy, fields, order=None, seed=None, limit=None,
@@ -348,9 +348,27 @@ class ShotgunModel(ShotgunQueryModel):
         # return true if cache is loaded false if not
         return nodes_generated > 0
 
+    def _refresh_data(self):
+        """
+        Rebuilds the data in the model to ensure it is up to date.
+        This call is asynchronous and will return instantly.
+        The update will be applied whenever the data from Shotgun is returned.
 
-    ########################################################################################
-    # methods to be implemented by subclasses
+        If the model is empty (no cached data) no data will be shown at first
+        while the model fetches data from Shotgun.
+
+        As soon as a local cache exists, data is shown straight away and the
+        shotgun update happens silently in the background.
+
+        If data has been added, this will be injected into the existing structure.
+        In this case, the rest of the model is intact, meaning that also selections
+        and other view related states are unaffected.
+
+        If data has been modified or deleted, a full rebuild is issued, meaning that
+        all existing items from the model are removed. This does affect view related
+        states such as selection.
+        """
+        self._request_data()
 
     def _item_created(self, item):
         """

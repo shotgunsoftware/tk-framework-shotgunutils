@@ -613,25 +613,9 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     # protected convenience methods. these methods can be used by subclasses
     # to manipulate and manage data returned from Shotgun.
 
-    def _refresh_data(self):
+    def _request_data(self, *args, **kwargs):
         """
-        Rebuilds the data in the model to ensure it is up to date.
-        This call is asynchronous and will return instantly.
-        The update will be applied whenever the data from Shotgun is returned.
 
-        If the model is empty (no cached data) no data will be shown at first
-        while the model fetches data from Shotgun.
-
-        As soon as a local cache exists, data is shown straight away and the
-        shotgun update happens silently in the background.
-
-        If data has been added, this will be injected into the existing structure.
-        In this case, the rest of the model is intact, meaning that also selections
-        and other view related states are unaffected.
-
-        If data has been modified or deleted, a full rebuild is issued, meaning that
-        all existing items from the model are removed. This does affect view related
-        states such as selection.
         """
         if not self._sg_data_retriever:
             raise sgtk.TankError("Data retriever is not available!")
@@ -654,7 +638,9 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         # request the data asynchronously from the data handler
         self.__current_work_id = self._data_handler.generate_data_request(
-            self._sg_data_retriever
+            self._sg_data_retriever,
+            *args,
+            **kwargs
         )
 
         if self.__current_work_id is None:

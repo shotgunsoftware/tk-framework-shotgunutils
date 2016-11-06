@@ -124,6 +124,22 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         self._log_debug("Resolving model item for path %s" % path)
         return self._ensure_item_loaded(path)
 
+    def fetchMore(self, index):
+        """
+        Retrieve child items for a node.
+
+        :param index: The index of the item being tested.
+        :type index: :class:`~PySide.QtCore.QModelIndex`
+        """
+        return super(ShotgunHierarchyModel, self).fetchMore(index)
+
+        # now request the subtree to refresh itself
+        if index.isValid():
+            item = self.itemFromIndex(index)
+            if isinstance(item, ShotgunStandardItem):
+                self._request_data(item.path)
+
+
     ############################################################################
     # protected methods
 
@@ -292,6 +308,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         if nodes_generated > 0:
             self.cache_loaded.emit()
 
+        # request that the root nodes are updated
+        self._request_data(self._path)
+
         # return true if cache is loaded false if not
         return nodes_generated > 0
 
@@ -321,32 +340,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         if icon:
             item.setIcon(icon)
-
-    def _refresh_data(self):
-        """
-        Rebuild the data in the model to ensure it is up to date.
-
-        This call should be asynchronous and return instantly. The update should
-        be applied as soon as the data from Shotgun is returned.
-
-        If the model is empty (no cached data) no data will be shown at first
-        while the model fetches data from Shotgun.
-
-        As soon as a local cache exists, data is shown straight away and the
-        shotgun update happens silently in the background.
-
-        If data has been added, this will be injected into the existing
-        structure. In this case, the rest of the model is intact, meaning that
-        also selections and other view related states are unaffected.
-
-        If data has been modified or deleted, a full rebuild is issued, meaning
-        that all existing items from the model are removed. This does affect
-        view related states such as selection.
-        """
-        if not self._hierarchy_is_supported:
-            return
-
-        super(ShotgunHierarchyModel, self)._refresh_data()
 
     def _update_item(self, item, data_item):
         """
