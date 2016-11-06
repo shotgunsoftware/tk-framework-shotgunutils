@@ -58,10 +58,8 @@ class SimpleShotgunHierarchyModel(ShotgunHierarchyModel):
             of field names to return.
 
         """
-
         super(SimpleShotgunHierarchyModel, self)._load_data(
             seed_entity_field,
             path=path,
             entity_fields=entity_fields
         )
-        self._refresh_data()

@@ -16,37 +16,31 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
     Data storage for navigation tree data via the nav_expand API endpoint.
     """
 
-    def __init__(self, cache_path, parent):
+    def __init__(self, seed_entity_field, entity_fields, cache_path, parent):
         """
         :param cache_path: Path to cache file location
         :param parent: Parent QT object
         """
         super(ShotgunNavDataHandler, self).__init__(cache_path, parent)
+        self.__seed_entity_field = seed_entity_field
+        self.__entity_fields = entity_fields
 
-    def generate_data_request(self, data_retriever):
+    def generate_data_request(self, data_retriever, path):
         """
         Generate a data request for a data retriever.
         Once the data has arrived, update_data() will be called.
 
         :returns: Request id or None if no work is needed
         """
-        # query in order of length
-        # NOTE: this could have performance implications for large extended trees
-        # as a number of queries are sent to the server.
-        # TODO: refactor the logic around refresh?
-        for path in sorted(set(paths)):
-            self._log_debug("Refreshing hierarchy model path: %s" % (path,))
+        self._log_debug("generate_data_request for path %s" % path)
 
-            worker_id = data_retriever.execute_nav_expand(
-                path,
-                self._seed_entity_field,
-                self._entity_fields
-            )
+        worker_id = data_retriever.execute_nav_expand(
+            path,
+            self.__seed_entity_field,
+            self.__entity_fields
+        )
 
-            # keep a lookup to map the worker id with the path it is querying
-            self._running_query_lookup[worker_id] = path
-
-
+        return worker_id
 
     @log_timing
     def update_data(self, sg_data):
@@ -60,11 +54,62 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
 
         :returns: list of updated plugin ids. empty list if cache was up to date.
         """
-        self._log_debug("Updating %s with %s shotgun records." % (self, len(sg_data)))
-        self._log_debug("Hierarchy: %s" % hierarchy)
-
         if self._cache is None:
             raise ShotgunModelDataError("No data currently loaded in memory!")
+
+        self._log_debug("Updating %s with %s shotgun records." % (self, len(sg_data)))
+
+        import pprint
+        pprint.pprint(sg_data)
+
+
+    #     item_path = sg_data.get(self._SG_PATH_FIELD, None)
+    #     self._log_debug("Got hierarchy data for path: %s" % (item_path,))
+    #
+    #     if not item_path:
+    #         raise sgtk.TankError(
+    #             "Unexpected error occured. Could not determine the path"
+    #             "from the queried hierarchy item."
+    #         )
+    #
+    #     # see if we have an item for the path
+    #     item = self.item_from_path(item_path)
+    #
+    #     if item:
+    #         # check item and children to see if data has been updated
+    #         self._log_debug(
+    #             "Item exists in tree. Ensuring up-to-date...")
+    #         modifications_made = self.__update_subtree(item, nav_data)
+    #         self._log_debug("...done!")
+    #
+    #     else:
+    #         self._log_debug("Detected new item. Adding in-situ to tree...")
+    #         self.__insert_subtree(nav_data)
+    #         self._log_debug("...done!")
+    #         modifications_made = True
+    #
+    #     # last step - save our tree to disk for fast caching next time!
+    #     # todo: the hierarchy data is queried lazily. so 2this implies a
+    #     # write to disk each time the user expands and item. consider the
+    #     # performance of this setup and whether this logic should be altered.
+    #     if self._data_handler.is_modified():
+    #         try:
+    #             self._data_handler.save_cache()
+    #         except Exception, e:
+    #             self._log_warning("Couldn't save cache data to disk: %s" % e)
+    #
+    #     if not self._running_query_lookup.keys():
+    #         # no more data queries running. all data refreshed
+    #         self.data_refreshed.emit(modifications_made)
+
+
+
+
+
+
+
+
+
 
         if len(self._cache[self.CACHE_CHILDREN]) == 0:
             self._log_debug("In-memory cache is empty.")
@@ -218,102 +263,11 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
 
 
 
-    #
-    #
-    #
-    #
-    #
-    # def __on_sg_data_arrived(self, sg_data):
-    #     """
-    #     Handle asynchronous navigation data arriving after a
-    #     :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` request.
-    #
-    #     :param dict sg_data: The data returned from the api call.
-    #     """
-    #     # ensure we have a path for the item
-    #     item_path = sg_data.get(self._SG_PATH_FIELD, None)
-    #     self._log_debug("Got hierarchy data for path: %s" % (item_path,))
-    #
-    #     if not item_path:
-    #         raise sgtk.TankError(
-    #             "Unexpected error occured. Could not determine the path"
-    #             "from the queried hierarchy item."
-    #         )
-    #
-    #     # see if we have an item for the path
-    #     item = self.item_from_path(item_path)
-    #
-    #     if item:
-    #         # check item and children to see if data has been updated
-    #         self._log_debug(
-    #             "Item exists in tree. Ensuring up-to-date...")
-    #         modifications_made = self.__update_subtree(item, nav_data)
-    #         self._log_debug("...done!")
-    #
-    #     else:
-    #         self._log_debug("Detected new item. Adding in-situ to tree...")
-    #         self.__insert_subtree(nav_data)
-    #         self._log_debug("...done!")
-    #         modifications_made = True
-    #
-    #     # last step - save our tree to disk for fast caching next time!
-    #     # todo: the hierarchy data is queried lazily. so 2this implies a
-    #     # write to disk each time the user expands and item. consider the
-    #     # performance of this setup and whether this logic should be altered.
-    #     if self._data_handler.is_modified():
-    #         try:
-    #             self._data_handler.save_cache()
-    #         except Exception, e:
-    #             self._log_warning("Couldn't save cache data to disk: %s" % e)
-    #
-    #     if not self._running_query_lookup.keys():
-    #         # no more data queries running. all data refreshed
-    #         self.data_refreshed.emit(modifications_made)
-    #
-    # def __insert_subtree(self, nav_data):
-    #     """
-    #     Inserts a subtree for the item represented by ``nav_data``.
-    #
-    #     The method first creates the item, then attempts to update/populate its
-    #     children.
-    #
-    #     :param dict nav_data: A dictionary of item data as returned via async
-    #         call to :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`.
-    #     """
-    #
-    #     item = self._create_item(nav_data)
-    #     self.__update_subtree(item, nav_data)
-    #
-    # def __update_item(self, item, data):
-    #     """
-    #     Updates the supplied item with the newly queried data.
-    #
-    #     :param item: A :class:`~PySide.QtGui.QStandardItem` instance to update.
-    #     :param dict data: The newly queried data.
-    #
-    #     :return: ``True`` if the item was updated, ``False`` otherwise.
-    #     """
-    #
-    #     # get a copy of the data and remove the child item info so that
-    #     # each item in the tree only stores data about itself
-    #     new_item_data = copy.deepcopy(data)
-    #     if "children" in data.keys():
-    #         del new_item_data["children"]
-    #
-    #     # compare with the item's existing data
-    #     old_item_data = get_sg_data(item)
-    #     if self._sg_compare_data(old_item_data, new_item_data):
-    #         # data has not changed
-    #         return False
-    #
-    #     # data differs. set the new data
-    #     item.setData(sanitize_for_qt_model(new_item_data), self.SG_DATA_ROLE)
-    #
-    #     # ensure the label is updated
-    #     item.setText(data["label"])
-    #
-    #     return True
-    #
+
+
+
+
+
     # def __update_subtree(self, item, nav_data):
     #     """
     #     Updates the subtree rooted at the supplied item with the supplied data.
@@ -385,4 +339,5 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
     #             subtree_updated = True
     #
     #     return subtree_updated
-    #
+
+

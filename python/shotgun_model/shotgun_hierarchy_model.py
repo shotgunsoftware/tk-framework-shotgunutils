@@ -277,6 +277,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         # get the cache path based on these new data query parameters
         self._data_handler = ShotgunNavDataHandler(
+            self._seed_entity_field,
+            self._entity_fields,
             self.__compute_cache_path(cache_seed),
             self
         )
@@ -443,7 +445,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             "sg_nav",
             seed_entity_field_path,
             params_hash.hexdigest(),
-            entity_field_hash.hexdigest(),
+            "%s.%s" % (entity_field_hash.hexdigest(), ShotgunNavDataHandler.FORMAT_VERSION)
         )
 
         # warn if the path is longer than the windows max path limitation

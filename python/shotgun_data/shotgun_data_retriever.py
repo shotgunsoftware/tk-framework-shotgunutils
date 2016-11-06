@@ -822,7 +822,7 @@ class ShotgunDataRetriever(QtCore.QObject):
                             returned by the find() call
         """
         sg_res = self._bundle.shotgun.find(*args, **kwargs)
-        return {"action":"find", "sg_result":sg_res}
+        return {"action": "find", "sg_result": sg_res}
 
     def _task_execute_find_one(self, *args, **kwargs):
         """
@@ -835,7 +835,7 @@ class ShotgunDataRetriever(QtCore.QObject):
                             returned by the find_one() call
         """
         sg_res = self._bundle.shotgun.find_one(*args, **kwargs)
-        return {"action":"find_one", "sg_result":sg_res}
+        return {"action": "find_one", "sg_result": sg_res}
 
     def _task_execute_update(self, *args, **kwargs):
         """
@@ -848,7 +848,7 @@ class ShotgunDataRetriever(QtCore.QObject):
                             returned by the update() call
         """
         sg_res = self._bundle.shotgun.update(*args, **kwargs)
-        return {"action":"update", "sg_result":sg_res}
+        return {"action": "update", "sg_result": sg_res}
 
     def _task_execute_create(self, *args, **kwargs):
         """
@@ -861,7 +861,7 @@ class ShotgunDataRetriever(QtCore.QObject):
                             returned by the create() call
         """
         sg_res = self._bundle.shotgun.create(*args, **kwargs)
-        return {"action":"create", "sg_result":sg_res}
+        return {"action": "create", "sg_result": sg_res}
 
     def _task_execute_delete(self, *args, **kwargs):
         """
@@ -874,7 +874,7 @@ class ShotgunDataRetriever(QtCore.QObject):
                             returned by the delete() call
         """
         sg_res = self._bundle.shotgun.delete(*args, **kwargs)
-        return {"action":"delete", "sg_result":sg_res}
+        return {"action": "delete", "sg_result": sg_res}
 
     def _task_execute_method(self, method, method_args, method_kwargs):
         """
@@ -888,7 +888,7 @@ class ShotgunDataRetriever(QtCore.QObject):
                                 returned by the method
         """
         res = method(self._bundle.shotgun, *method_args, **method_kwargs)
-        return {"action":"method", "result":res}
+        return {"action": "method", "result": res}
 
     def _task_execute_nav_expand(self, *args, **kwargs):
         """
@@ -901,7 +901,7 @@ class ShotgunDataRetriever(QtCore.QObject):
             returned by the find() call
         """
         sg_res = self._bundle.shotgun.nav_expand(*args, **kwargs)
-        return {"action":"nav_expand", "nav_result":sg_res}
+        return {"action": "nav_expand", "sg_result": sg_res}
 
     def _task_check_attachment(self, attachment_entity):
         """
@@ -1068,25 +1068,32 @@ class ShotgunDataRetriever(QtCore.QObject):
             return
 
         action = result.get("action")
-        if action in ["find", "find_one", "create", "delete", "update"]:
-            self.work_completed.emit(str(task_id), action, {"sg":result["sg_result"]})
-        elif action == "nav_expand":
-            self.work_completed.emit(str(task_id), "nav_expand", {"nav":result["nav_result"]})
+        if action in ["find", "find_one", "create", "delete", "update", "nav_expand"]:
+            self.work_completed.emit(
+                str(task_id),
+                action,
+                {"sg": result["sg_result"]}
+            )
         elif action == "schema":
-            self.work_completed.emit(str(task_id), "schema", {"fields":result["fields"], "types":result["types"]})
+            self.work_completed.emit(
+                str(task_id),
+                "schema",
+                {"fields": result["fields"], "types": result["types"]}
+            )
         elif action == "method":
-            self.work_completed.emit(str(task_id), "method", {"return_value":result["result"]})
+            self.work_completed.emit(
+                str(task_id),
+                "method",
+                {"return_value": result["result"]}
+            )
         elif action == "check_thumbnail":
             path = result.get("thumb_path", "")
             if path:
                 # check found a thumbnail!
                 self.work_completed.emit(
                     str(task_id),
-                    "find",
-                    dict(
-                        thumb_path=path,
-                        image=result["image"],
-                    ),
+                    "check_thumbnail",
+                    {"thumb_path": path, "image": result["image"]}
                 )
         elif action == "download_thumbnail":
             # look up the primary thumbnail task id in the map:
@@ -1095,19 +1102,16 @@ class ShotgunDataRetriever(QtCore.QObject):
                 del self._thumb_task_id_map[task_id]
                 self.work_completed.emit(
                     str(thumb_task_id),
-                    "find", 
-                    dict(
-                        thumb_path=result["thumb_path"],
-                        image=result["image"],
-                    ),
+                    "download_thumbnail",
+                    {"thumb_path": result["thumb_path"], "image": result["image"]}
                 )
         elif action == "check_attachment":
             path = result.get("file_path", "")
             if path:
                 self.work_completed.emit(
                     str(task_id),
-                    "find",
-                    dict(file_path=path),
+                    "check_attachment",
+                    {"file_path": path},
                 )
         elif action == "download_attachment":
             attachment_task_id = self._attachment_task_id_map.get(task_id)
@@ -1115,8 +1119,8 @@ class ShotgunDataRetriever(QtCore.QObject):
                 del self._attachment_task_id_map[task_id]
                 self.work_completed.emit(
                     str(attachment_task_id),
-                    "find",
-                    dict(file_path=result["file_path"]),
+                    "download_attachment",
+                    {"file_path": result["file_path"]},
                 )
 
     def _on_task_failed(self, task_id, group, msg, tb):
