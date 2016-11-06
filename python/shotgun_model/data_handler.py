@@ -271,6 +271,47 @@ class ShotgunDataHandler(QtCore.QObject):
 
         return num_nodes_generated
 
+    def generate_data_request(self, data_retriever):
+        """
+        Generate a data request for a data retriever.
+        Once the data has arrived, update_data() will be called.
+
+        :returns: Request id or None if no work is needed
+        """
+        raise NotImplementedError(
+            "The 'generate_data_request' method has not been "
+            "implemented for this ShotgunDataHandler subclass."
+        )
+
+    def generate_data_request(self, data_retriever):
+        """
+        Generate a data request for a data retriever.
+        Once the data has arrived, update_data() will be called.
+
+        :returns: Request id or None if no work is needed
+        """
+        raise NotImplementedError(
+            "The 'generate_data_request' method has not been "
+            "implemented for this ShotgunDataHandler subclass."
+        )
+
+    def update_data(self, sg_data):
+        """
+        Adds find data to the data set in memory.
+
+        Runs a comparison between old and new data and returns a list of entity ids
+        that have changed between what was previously in the database and what is there now.
+
+        raises an exception if no cache is loaded.
+
+        :returns: list of updated plugin ids. empty list if cache was up to date.
+        """
+        raise NotImplementedError(
+            "The 'update_data' method has not been "
+            "implemented for this ShotgunDataHandler subclass."
+        )
+
+
     def _log_debug(self, msg):
         """
         Convenience wrapper around debug logging

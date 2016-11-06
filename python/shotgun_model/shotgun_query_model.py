@@ -951,7 +951,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         # push shotgun data into our data handler which will figure out
         # if there are any changes
         self._log_debug("Updating data model with new shotgun data...")
-        modified_items = self._data_handler.update_find_data(sg_data)
+        modified_items = self._data_handler.update_data(sg_data)
 
         self._log_debug("Shotgun data contained %d modifications" % len(modified_items))
 

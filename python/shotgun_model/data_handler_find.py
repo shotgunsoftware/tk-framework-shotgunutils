@@ -87,7 +87,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
     def generate_data_request(self, data_retriever):
         """
         Generate a data request for a data retriever.
-        Once the data has arrived, update_find_data() will be called.
+        Once the data has arrived, update_data() will be called.
 
         :returns: Request id or None if no work is needed
         """
@@ -125,7 +125,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
 
 
     @log_timing
-    def update_find_data(self, sg_data):
+    def update_data(self, sg_data):
         """
         Adds find data to the data set in memory.
 

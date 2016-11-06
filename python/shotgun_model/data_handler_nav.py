@@ -9,6 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 from .data_handler import ShotgunDataHandler, log_timing
+from .errors import ShotgunModelDataError
 
 class ShotgunNavDataHandler(ShotgunDataHandler):
     """
@@ -22,37 +23,13 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
         """
         super(ShotgunNavDataHandler, self).__init__(cache_path, parent)
 
-
-
     def generate_data_request(self, data_retriever):
         """
         Generate a data request for a data retriever.
-        Once the data has arrived, update_find_data() will be called.
+        Once the data has arrived, update_data() will be called.
 
         :returns: Request id or None if no work is needed
         """
-
-
-
-
-
-        if not self._sg_data_retriever:
-            raise sgtk.TankError("Data retriever is not available!")
-
-        # clear any existing work queue
-        for worker_id in self._running_query_lookup.keys():
-            self._sg_data_retriever.stop_work(worker_id)
-        self._running_query_lookup = {}
-
-        # emit that the data is refreshing.
-        self.data_refreshing.emit()
-
-        # get a list of all paths to update. these will be paths for all
-        # existing items that are not empty or have no children already queried.
-        # we know we always need to refresh the inital path.
-        paths = [self._path]
-        paths.extend(self.__get_queried_paths_r(self.invisibleRootItem()))
-
         # query in order of length
         # NOTE: this could have performance implications for large extended trees
         # as a number of queries are sent to the server.
@@ -72,7 +49,7 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
 
 
     @log_timing
-    def update_find_data(self, sg_data, hierarchy):
+    def update_data(self, sg_data):
         """
         Adds find data to the data set in memory.
 
