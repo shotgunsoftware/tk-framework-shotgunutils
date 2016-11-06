@@ -8,7 +8,6 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import copy
 import hashlib
 import os
 import sys
@@ -56,23 +55,13 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     _SG_PATH_FIELD = "path"
     _SG_PARENT_PATH_FIELD = "parent_path"
 
-    def __repr__(self):
-        """
-        Create a string representation of this instance
-        :returns: A string representation of this instance
-        """
-        return "<%s path:%s seed:%s>" % (
-            self.__class__.__name__, self._path, self._seed_entity_field)
-
     def __init__(self, parent, schema_generation=0, bg_task_manager=None):
         """
         Initialize the Hierarcy model.
 
         :param parent: The model's parent.
         :type parent: :class:`~PySide.QtGui.QObject`
-
         """
-
         super(ShotgunHierarchyModel, self).__init__(parent, bg_task_manager)
 
         # check for hierarchy support
@@ -87,16 +76,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         self._entity_fields = None
 
         self._schema_generation = schema_generation
-
-        # flag to indicate a full refresh
-        self._request_full_refresh = False
-
-        # is the model set up with a query?
-        self._has_query = False
-
-        # keeps track of the currently running queries by mapping the id
-        # returned by the data retriever to the path being queried
-        self._running_query_lookup = {}
 
         # keep these icons around so they're not constantly being created
         self._folder_icon = QtGui.QIcon(
@@ -120,41 +99,16 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         from ..utils import color_mix
         self._empty_item_color = color_mix(text_color, 1, base_color, 2)
 
+    def __repr__(self):
+        """
+        Create a string representation of this instance
+        :returns: A string representation of this instance
+        """
+        return "<%s path:%s seed:%s>" % (
+            self.__class__.__name__, self._path, self._seed_entity_field)
+
     ############################################################################
     # public methods
-
-    def clear(self):
-        """
-        Removes all items (including header items) from the model and
-        sets the number of rows and columns to zero.
-        """
-
-        # we are not looking for any data from the async processor
-        self._running_query_lookup = {}
-
-        super(ShotgunHierarchyModel, self).clear()
-
-    def destroy(self):
-        """
-        Call this method prior to destroying this object.
-        This will ensure all worker threads etc are stopped.
-        """
-        self._running_query_lookup = {}
-
-        super(ShotgunHierarchyModel, self).destroy()
-
-    def hard_refresh(self):
-        """
-        Clears any caches on disk, then refreshes the data.
-        """
-        if not self._has_query:
-            # no query in this model yet
-            return
-
-        # when data arrives, force full rebuild
-        self._request_full_refresh = True
-
-        super(ShotgunHierarchyModel, self).hard_refresh()
 
     def item_from_path(self, path):
         """
@@ -167,101 +121,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` method.
         :returns: :class:`~PySide.QtGui.QStandardItem` or ``None`` if not found
         """
-        #return self._get_item_by_unique_id(path) <--- todo refactor
-
-        # todo - need to load up the view recursively and then return item
-        return xxx
-
-    ############################################################################
-    # methods overridden from Qt base class
-
-    def hasChildren(self, index):
-        """
-        Returns True if parent has any children; otherwise returns False.
-
-        :param index: The index of the item being tested.
-        :type index: :class:`~PySide.QtCore.QModelIndex`
-        """
-
-        if not index.isValid():
-            return super(ShotgunHierarchyModel, self).hasChildren(index)
-
-        item = self.itemFromIndex(index)
-        item_data = get_sg_data(item)
-
-        if not item_data:
-            # could not get the item data, let the base class check
-            return super(ShotgunHierarchyModel, self).hasChildren(index)
-
-        # the nav data knows whether it has children
-        return item.has_children()
-
-    def fetchMore(self, index):
-        """
-        Returns True if there is more data available for parent; otherwise
-        returns False.
-
-        :param index: The index of the item being tested.
-        :type index: :class:`~PySide.QtCore.QModelIndex`
-        """
-
-        if not index.isValid():
-            return
-
-        item = self.itemFromIndex(index)
-        item_data = get_sg_data(item)
-
-        if not item_data:
-            return
-
-        path = item_data[self._SG_PATH_FIELD]
-
-        # set the flag to prevent subsequent attempts to fetch more
-        item.setData(True, self._SG_ITEM_FETCHED_MORE)
-
-        # query the information for this item to populate its children.
-        # the slot for handling worker success will handle inserting the
-        # queried data into the tree.
-        self._log_debug("Fetching more for item: %s" % (item.text(),))
-        self.__query_hierarchy(
-            path,
-            self._seed_entity_field,
-            self._entity_fields
-        )
-
-    def canFetchMore(self, index):
-        """
-        Returns True if there is more data available for parent; otherwise
-        returns False.
-
-        :param index: The index of the item being tested.
-        :type index: :class:`~PySide.QtCore.QModelIndex`
-        """
-
-        if not self._hierarchy_is_supported:
-            return False
-
-        if not index.isValid():
-            return False
-
-        # get the item and it's stored hierarchy data
-        item = self.itemFromIndex(index)
-
-        if item.data(self._SG_ITEM_FETCHED_MORE):
-            # more data has already been queried for this item
-            return False
-
-        item_data = get_sg_data(item)
-
-        if not item_data:
-            return False
-
-        # the number of existing child items
-        child_item_count = item.rowCount()
-
-        # we can fetch more if there are no children already and the item
-        # has children.
-        return child_item_count == 0 and item.has_children()
+        self._log_debug("Resolving model item for path %s" % path)
+        return self._ensure_item_loaded(path)
 
     ############################################################################
     # protected methods
@@ -305,11 +166,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         :param item: The item that was just created.
         :type item: :class:`~PySide.QtGui.QStandardItem`
         """
-
         # call base class implementation as per docs
         super(ShotgunHierarchyModel, self)._item_created(item)
-
-        data = get_sg_data(item)
 
         if not item.is_entity_related():
             item.setForeground(self._empty_item_color)
@@ -391,23 +249,25 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # clear out old data
         self.clear()
 
-        self._has_query = True
-
         self._path = path or self._get_default_path()
         self._seed_entity_field = seed_entity_field
         self._entity_fields = entity_fields or {}
 
-        # get the cache path based on these new data query parameters
-        self._data_handler = ShotgunNavDataHandler(self.__compute_cache_path(cache_seed), self)
-        # load up from disk
-        self._data_handler.load_cache()
-
-        # print some debug info
         self._log_debug("")
         self._log_debug("Model Reset for: %s" % (self,))
         self._log_debug("Path: %s" % (self._path,))
         self._log_debug("Seed entity field: %s" % (self._seed_entity_field,))
         self._log_debug("Entity fields: %s" % (self._entity_fields,))
+
+        # get the cache path based on these new data query parameters
+        self._data_handler = ShotgunNavDataHandler(
+            self.__compute_cache_path(cache_seed),
+            self
+        )
+
+        # load up from disk
+        self._log_debug("Loading data from cache file into memory...")
+        self._data_handler.load_cache()
 
         self._log_debug("First population pass: Calling _load_external_data()")
         self._load_external_data()
@@ -418,66 +278,22 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             ["%s Hierarchy" % (self._seed_entity_field,)]
         )
 
-        # TODO - fix
         root = self.invisibleRootItem()
-        status = self._data_handler.load_cached_data(root, ShotgunHierarchyItem)
-        if status:
+
+        # construct the top level nodes
+        self._log_debug("Creating model nodes for top level of data tree...")
+        nodes_generated = self._data_handler.generate_child_nodes(
+            None,
+            root,
+            self._create_item
+        )
+
+        # if we got some data, emit cache load signal
+        if nodes_generated > 0:
             self.cache_loaded.emit()
 
-        return XXXX
-
-    def _on_data_retriever_work_failure(self, uid, msg):
-        """
-        Asynchronous callback - the data retriever failed to do some work
-
-        :param uid: The unique id of the work that failed
-        :param msg: The error message returned for the failure
-        """
-        uid = sanitize_qt(uid)  # qstring on pyqt, str on pyside
-        msg = sanitize_qt(msg)
-
-        if uid not in self._running_query_lookup:
-            # not our job. ignore
-            self._log_debug("Retrieved error from data worker: %s" % (msg,))
-            return
-
-        path = self._running_query_lookup[uid]
-
-        # query is done. clear it out
-        del self._running_query_lookup[uid]
-
-        full_msg = (
-            "Error retrieving data from Shotgun.\n"
-            "  Path: %s\n"
-            "  Error: %s\n"
-        ) % (path, msg)
-        self.data_refresh_fail.emit(full_msg)
-        self._log_warning(full_msg)
-
-    def _on_data_retriever_work_completed(self, uid, request_type, data):
-        """
-        Signaled whenever the data retriever completes some work.
-        This method will dispatch the work to different methods
-        depending on what async task has completed.
-
-        :param uid:             The unique id of the work that completed
-        :param request_type:    Type of work completed
-        :param data:            Result of the work
-        """
-        uid = sanitize_qt(uid)  # qstring on pyqt, str on pyside
-        data = sanitize_qt(data)
-
-        self._log_debug("Received worker payload of type: %s" % (request_type,))
-
-        if uid not in self._running_query_lookup:
-            # not our job. ignore.
-            return
-
-        # query is done. clear it out
-        del self._running_query_lookup[uid]
-
-        nav_data = data["nav"]
-        self.__on_nav_data_arrived(nav_data)
+        # return true if cache is loaded false if not
+        return nodes_generated > 0
 
     def _populate_default_thumbnail(self, item):
         """
@@ -487,7 +303,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         :param item: The :class:`~PySide.QtGui.QStandardItem` item to set the
             icon for.
         """
-
         icon = None
         data = get_sg_data(item)
         item_kind = item.kind()
@@ -528,51 +343,31 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         that all existing items from the model are removed. This does affect
         view related states such as selection.
         """
-
         if not self._hierarchy_is_supported:
             return
 
-        # get a list of all paths to update. these will be paths for all
-        # existing items that are not empty or have no children already queried.
-        # we know we always need to refresh the inital path.
-        paths = [self._path]
-        paths.extend(self.__get_queried_paths_r(self.invisibleRootItem()))
+        super(ShotgunHierarchyModel, self)._refresh_data()
 
-        # query in order of length
-        for path in sorted(set(paths)):
-            self._log_debug("Refreshing hierarchy model path: %s" % (path,))
-            self.__query_hierarchy(
-                path,
-                self._seed_entity_field,
-                self._entity_fields
-            )
-
-    ############################################################################
-    # private methods
-
-    def _create_item(self, data, parent=None, row=None):
+    def _update_item(self, item, data_item):
         """
-        Creates a model item given the supplied data and optional parent.
+        Updates a model item with the given data
 
-        The supplied ``data`` corresponds to the results of a call to the
-        :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` api method. The
-        data will be stored on the new item via the ``SG_DATA_ROLE``.
-
-        :param dict data: The hierarchy data to use when creating the item.
-        :param parent: Optional :class:`~PySide.QtGui.QStandardItem` instance
-            to parent the created item to.
-        :param int row: If supplied, insert the new item at the specified
-            row of the parent. Otherwise, append it to the list of children.
-
-        :return: The new :class:`~PySide.QtGui.QStandardItem` instance.
+        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to update
+        :param :class:`ShotgunDataItem` data_item: Data to update item with
         """
+        print ">>>>>>>>>>>>>>>>>> UPPPPPPDATE"
 
-        # if this is the root item, just return the invisible root item that
-        # comes with the model
-        if data.get("ref", {}).get("kind") == "root":
-            return self.invisibleRootItem()
+    def _create_item(self, parent, data_item):
+        """
+        Creates a model item for the tree given data out of the data store
 
-        item = ShotgunHierarchyItem(data["label"])
+        :param :class:`~PySide.QtGui.QStandardItem` parent: Model item to parent the node under
+        :param :class:`ShotgunDataItem` data_item: Data to populate new item with
+
+        :returns: Model item
+        :rtype: :class:`ShotgunStandardItem`
+        """
+        item = ShotgunHierarchyItem(data_item.shotgun_data["label"])
         item.setEditable(False)
 
         # keep tabs of which items we are creating
@@ -582,7 +377,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         item.setData(False, self._SG_ITEM_FETCHED_MORE)
 
         # attach the nav data for access later
-        self.__update_item(item, data)
+        item.setData(sanitize_for_qt_model(data_item.shotgun_data), self.SG_DATA_ROLE)
 
         # allow item customization prior to adding to model
         self._item_created(item)
@@ -590,25 +385,21 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # set up default thumb
         self._populate_default_thumbnail(item)
 
-        self._populate_item(item, data)
+        self._populate_item(item, data_item.shotgun_data)
 
-        self._set_tooltip(item, data)
+        self._set_tooltip(item, data_item.shotgun_data)
 
         # run the finalizer (always runs on construction, even via cache)
         self._finalize_item(item)
 
-        # identify a parent if none supplied. could be found via the parent
-        # supplied in the data or the root if no parent item exists.
-        parent = parent or self.item_from_path(
-            data.get(self._SG_PARENT_PATH_FIELD)) or self.invisibleRootItem()
-
-        if row is not None:
-            parent.insertRow(row, item)
-        else:
-            # example of using sort/filter proxy model
-            parent.appendRow(item)
+        # todo: handle multiple rows?
+        parent.appendRow(item)
 
         return item
+
+
+    ############################################################################
+    # private methods
 
     def __compute_cache_path(self, cache_seed=None):
         """
@@ -671,47 +462,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         return data_cache_path
 
-    def __get_queried_paths_r(self, item):
-        """
-        Returns a list of previously queried paths for items under the supplied
-        parent item.
-
-        This method is used to identify which items need to be re-queried when a
-        model refresh is requested. It recursively iterates over the supplied
-        item's children, looking for non-empty leaf nodes that have children.
-
-        :param item: The parent :class:`~PySide.QtGui.QStandardItem` instance
-            to use when checking for queried children.
-
-        :return: A list of paths
-        :rtype: list
-        """
-
-        paths = []
-
-        # iterate over all the child items
-        for row in range(item.rowCount()):
-
-            child_item = item.child(row)
-
-            data = get_sg_data(child_item)
-            # invisible root item does not have this property
-            if hasattr(item, 'is_entity_related') and not item.is_entity_related():
-                # empty items don't have valid paths to query
-                continue
-
-            if child_item.rowCount() == 0:
-                # this is an existing leaf node whose (potential) children have
-                # not been queried. do nothing.
-                continue
-
-            paths.append(data[self._SG_PATH_FIELD])
-
-            # recurse
-            paths.extend(self.__get_queried_paths_r(child_item))
-
-        return paths
-
     def __hierarchy_is_supported(self):
         """
         Checks the current Shotgun connection to make sure it supports
@@ -738,228 +488,4 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         return (True, None)
 
-    def __insert_subtree(self, nav_data):
-        """
-        Inserts a subtree for the item represented by ``nav_data``.
-
-        The method first creates the item, then attempts to update/populate its
-        children.
-
-        :param dict nav_data: A dictionary of item data as returned via async
-            call to :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`.
-        """
-
-        item = self._create_item(nav_data)
-        self.__update_subtree(item, nav_data)
-
-    def __on_nav_data_arrived(self, nav_data):
-        """
-        Handle asynchronous navigation data arriving after a
-        :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` request.
-
-        :param dict nav_data: The data returned from the api call.
-        """
-        # TODO - update for new data manager
-        self._log_debug("--> Shotgun data arrived. (%s records)" % len(nav_data))
-
-        # pre-process data
-        nav_data = self._before_data_processing(nav_data)
-
-        # ensure the data is clean
-        nav_data = self._sg_clean_data(nav_data)
-
-        if self._request_full_refresh:
-            # full refresh requested
-
-            # reset flag for next request
-            self._request_full_refresh = False
-
-            self._log_debug("Rebuilding tree...")
-            self.clear()
-            self._load_external_data()
-            self.__insert_subtree(nav_data)
-            self._log_debug("...done!")
-
-            modifications_made = True
-
-        else:
-
-            # ensure we have a path for the item
-            item_path = nav_data.get(self._SG_PATH_FIELD, None)
-            self._log_debug("Got hierarchy data for path: %s" % (item_path,))
-
-            if not item_path:
-                raise sgtk.TankError(
-                    "Unexpected error occured. Could not determine the path"
-                    "from the queried hierarchy item."
-                )
-
-            # see if we have an item for the path
-            item = self.item_from_path(item_path)
-
-            if item:
-                # check item and children to see if data has been updated
-                self._log_debug(
-                    "Item exists in tree. Ensuring up-to-date...")
-                modifications_made = self.__update_subtree(item, nav_data)
-                self._log_debug("...done!")
-
-            else:
-                self._log_debug("Detected new item. Adding in-situ to tree...")
-                self.__insert_subtree(nav_data)
-                self._log_debug("...done!")
-                modifications_made = True
-
-        # last step - save our tree to disk for fast caching next time!
-        # todo: the hierarchy data is queried lazily. so this implies a
-        # write to disk each time the user expands and item. consider the
-        # performance of this setup and whether this logic should be altered.
-        if self._data_handler.is_modified():
-            try:
-                self._data_handler.save_cache()
-            except Exception, e:
-                self._log_warning("Couldn't save cache data to disk: %s" % e)
-
-        if not self._running_query_lookup.keys():
-            # no more data queries running. all data refreshed
-            self.data_refreshed.emit(modifications_made)
-
-    def __query_hierarchy(self, path, seed_entity_field, entity_fields):
-        """
-        Triggers the async :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`
-        query based on the supplied fields.
-
-        This method returns immediately and does not block.
-
-        .. note:: For details on the ``path``, ``seed_entity_field``, and
-            ``entity_fields`` arguments, please see the
-            `<python-api docs http://developer.shotgunsoftware.com/python-api/reference.html#shotgun>`_.
-        """
-
-        if not self._sg_data_retriever:
-            raise sgtk.TankError("Data retriever is not available!")
-
-        # reverse the query lookup to see if the path is already being queried
-        path_to_worker_ids = \
-            dict((v, k) for k, v in self._running_query_lookup.items())
-
-        if path in path_to_worker_ids:
-            # a query is already running for this path. stop it.
-            worker_id = path_to_worker_ids[path]
-            self._sg_data_retriever.stop_work(worker_id)
-
-            # forget about the old query
-            del self._running_query_lookup[worker_id]
-
-        self.data_refreshing.emit()
-
-        self._log_debug("Querying hierarchy item: %s" % (path,))
-
-        worker_id = self._sg_data_retriever.execute_nav_expand(
-            path, seed_entity_field, entity_fields)
-
-        # keep a lookup to map the worker id with the path it is querying
-        self._running_query_lookup[worker_id] = path
-
-    def __update_item(self, item, data):
-        """
-        Updates the supplied item with the newly queried data.
-
-        :param item: A :class:`~PySide.QtGui.QStandardItem` instance to update.
-        :param dict data: The newly queried data.
-
-        :return: ``True`` if the item was updated, ``False`` otherwise.
-        """
-
-        # get a copy of the data and remove the child item info so that
-        # each item in the tree only stores data about itself
-        new_item_data = copy.deepcopy(data)
-        if "children" in data.keys():
-            del new_item_data["children"]
-
-        # compare with the item's existing data
-        old_item_data = get_sg_data(item)
-        if self._sg_compare_data(old_item_data, new_item_data):
-            # data has not changed
-            return False
-
-        # data differs. set the new data
-        item.setData(sanitize_for_qt_model(new_item_data), self.SG_DATA_ROLE)
-
-        # ensure the label is updated
-        item.setText(data["label"])
-
-        return True
-
-    def __update_subtree(self, item, nav_data):
-        """
-        Updates the subtree rooted at the supplied item with the supplied data.
-
-        This method updates the item and its children given a dictionary of
-        newly queried data from Shotgun. It first checks to see if any items
-        have been removed, then adds or updates children as needed.
-
-        :param item: A :class:`~PySide.QtGui.QStandardItem` instance to update.
-        :param dict nav_data: The data returned by a
-            :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` call.
-
-        :returns: ``True`` if the subtree was udpated, ``False`` otherwise.
-        """
-
-        # ensure the item's data is up-to-date
-        subtree_updated = self.__update_item(item, nav_data)
-
-        children_data = nav_data.get("children")
-
-        if not children_data:
-            return subtree_updated
-
-        child_paths = []
-
-        for child_data in children_data:
-
-            if self._SG_PATH_FIELD not in child_data:
-                item_data = get_sg_data(item)
-                parent_path = item_data[self._SG_PATH_FIELD]
-
-                # handle the case where there are child leaves without paths.
-                # these tend to be just items that make it clear there are no
-                # children. example: "No Shots"
-                # create a dummy path so that we can find it later
-                child_data[self._SG_PATH_FIELD] = "/".join(
-                    [parent_path, child_data["label"]])
-
-            child_paths.append(child_data[self._SG_PATH_FIELD])
-
-        # iterate over item's children to see if any need to be removed.
-        # this would be the case where the supplied nav_data does not contain
-        # information about an item that currently exists. iterate in reverse
-        # order so we can remove items in place without altering subsequent rows
-        for row in reversed(range(0, item.rowCount())):
-            child_item = item.child(row)
-            child_data = get_sg_data(child_item)
-            child_path = child_data[self._SG_PATH_FIELD]
-            if child_path not in child_paths:
-                # removing item
-                #self._log_debug("Removing item: %s" % (child_item,))
-                #self._before_item_removed(child_item)
-                # todo - update with new data backend
-                item.removeRow(row)
-                subtree_updated = True
-
-        # add/update the children for the supplied item
-        for (row, child_data) in enumerate(children_data):
-            child_path = child_data[self._SG_PATH_FIELD]
-            child_item = self.item_from_path(child_path)
-
-            if child_item:
-                # child already exists, ensure data is up-to-date
-                subtree_updated = self.__update_item(child_item, child_data) \
-                    or subtree_updated
-            else:
-                # child item does not exist, create it at the specified row
-                self._create_item(child_data, parent=item, row=row)
-                subtree_updated = True
-
-        return subtree_updated
 

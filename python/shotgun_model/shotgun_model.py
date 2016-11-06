@@ -335,7 +335,11 @@ class ShotgunModel(ShotgunQueryModel):
 
         # construct the top level nodes
         self._log_debug("Creating model nodes for top level of data tree...")
-        nodes_generated = self._data_handler.generate_child_nodes(None, root, self._create_item)
+        nodes_generated = self._data_handler.generate_child_nodes(
+            None,
+            root,
+            self._create_item
+        )
 
         # if we got some data, emit cache load signal
         if nodes_generated > 0:
