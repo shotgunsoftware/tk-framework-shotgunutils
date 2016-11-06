@@ -21,26 +21,35 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
     Shotgun Model low level data storage.
     """
 
-    def __init__(self, cache_path, parent):
+    def __init__(self, entity_type, filters, order, hierarchy, fields, column_fields, download_thumbs, limit, additional_filter_presets, cache_path, parent):
         """
         :param cache_path: Path to cache file location
         :param parent: Parent QT object
         """
         super(ShotgunFindDataHandler, self).__init__(cache_path, parent)
-        self._entity_ids = None
+        self.__entity_ids = None
+        self.__entity_type = entity_type
+        self.__filters = filters
+        self.__order = order
+        self.__hierarchy = hierarchy
+        self.__fields = fields
+        self.__column_fields = column_fields
+        self.__download_thumbs = download_thumbs
+        self.__limit = limit
+        self.__additional_filter_presets = additional_filter_presets
 
     def _clear_cache(self):
         """
         Sets up an empty cache in memory
         """
-        self._entity_ids = None
+        self.__entity_ids = None
         super(ShotgunFindDataHandler, self)._clear_cache()
 
     def unload_cache(self):
         """
         Unloads any in-memory cache data.
         """
-        self._entity_ids = None
+        self.__entity_ids = None
         super(ShotgunFindDataHandler, self).unload_cache()
 
     def get_entity_ids(self):
@@ -55,15 +64,15 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         # are ints and all other items are strings
 
         # memoized for performance
-        if self._entity_ids is None:
+        if self.__entity_ids is None:
             entity_ids = []
             for uid in self._cache[self.CACHE_BY_UID].keys():
                 if isinstance(uid, int):
                     # this is a leaf node representing an entity
                     entity_ids.append(uid)
-            self._entity_ids = entity_ids
+            self.__entity_ids = entity_ids
 
-        return self._entity_ids
+        return self.__entity_ids
 
     def get_uid_from_entity_id(self, entity_id):
         """
@@ -74,8 +83,49 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                 return uid
         return None
 
+
+    def generate_data_request(self, data_retriever):
+        """
+        Generate a data request for a data retriever.
+        Once the data has arrived, update_find_data() will be called.
+
+        :returns: Request id or None if no work is needed
+        """
+        # only request data from shotgun is filters are defined.
+        if self.__filters is None:
+            request_id = None
+
+        else:
+            # get data from shotgun - list/set cast to ensure unique fields
+            fields = self.__hierarchy + self.__fields + self.__column_fields
+            if self.__download_thumbs:
+                fields = fields + ["image"]
+            fields = list(set(fields))
+
+            find_kwargs = dict(
+                limit=self.__limit,
+            )
+
+            # We only want to include the filter presets kwarg if it was explicitly asked
+            # for. The reason for this is that it's a Shotgun 7.0 feature server side, and
+            # we don't want to break backwards compatibility with older versions of Shotgun.
+            if self.__additional_filter_presets:
+                find_kwargs["additional_filter_presets"] = self.__additional_filter_presets
+
+            request_id = data_retriever.execute_find(
+                self.__entity_type,
+                self.__filters,
+                fields,
+                self.__order,
+                **find_kwargs
+            )
+
+        print "req id: %s" % request_id
+        return request_id
+
+
     @log_timing
-    def update_find_data(self, sg_data, hierarchy):
+    def update_find_data(self, sg_data):
         """
         Adds find data to the data set in memory.
 
@@ -87,7 +137,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         :returns: list of updated plugin ids. empty list if cache was up to date.
         """
         self._log_debug("Updating %s with %s shotgun records." % (self, len(sg_data)))
-        self._log_debug("Hierarchy: %s" % hierarchy)
+        self._log_debug("Hierarchy: %s" % self.__hierarchy)
 
         if self._cache is None:
             raise ShotgunModelDataError("No data currently loaded in memory!")
@@ -119,9 +169,9 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
             # maintain a hierarchy of unique ids
 
             # Create items by drilling down the hierarchy
-            for field_name in hierarchy:
+            for field_name in self.__hierarchy:
 
-                on_leaf_level = (hierarchy[-1] == field_name)
+                on_leaf_level = (self.__hierarchy[-1] == field_name)
 
                 if not on_leaf_level:
                     # get the parent uid or None if we are at the root level

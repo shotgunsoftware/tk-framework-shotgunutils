@@ -9,7 +9,10 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 # toolkit imports
 import sgtk
+import weakref
 from sgtk.platform.qt import QtCore, QtGui
+
+from .util import get_sanitized_data, get_sg_data, sanitize_qt, sanitize_for_qt_model
 
 from .shotgun_standard_item import ShotgunStandardItem
 
@@ -92,13 +95,14 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     _SG_ITEM_UNIQUE_ID = QtCore.Qt.UserRole + 5
 
 
-    def __init__(self, parent, bg_task_manager=None):
+    def __init__(self, parent, bg_load_thumbs, bg_task_manager=None):
         """
         Initializes the model and provides some default convenience members.
 
         :param parent: The model's parent.
         :type parent: :class:`~PySide.QtGui.QObject`
 
+        :param bg_load_thumbs: If set to True, thumbnails will be loaded in the background.
         :param bg_task_manager: Background task manager to use for any
             asynchronous work. If this is None then a task manager will be
             created as needed.
@@ -110,19 +114,18 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         :protected _shotgun_data: ``shotgunutils.shotgun_data`` handle
 
+        :protected _data_handler: :class:`ShotgunDataHandler` instance or None
+
         :protected _shotgun_globals: ``shotgunutils.shotgun_globals`` handle
-
-        :protected _sg_data_retriever: A ``ShotgunDataRetriever`` instance.
-            Connected to virtual slots ``_on_data_retriever_work_completed``
-            and ``_on_data_retriever_work_failure`` which subclasses must
-            implement.
-
         """
         # intialize the Qt base class
         super(ShotgunQueryModel, self).__init__(parent)
 
         # keep a handle to the current app/engine/fw bundle for convenience
         self._bundle = sgtk.platform.current_bundle()
+
+        # should thumbs be processed async
+        self.__bg_load_thumbs = bg_load_thumbs
 
         # a class to handle loading and saving from disk
         self._data_handler = None
@@ -139,15 +142,17 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         self.__all_tree_items = []
         self.__items_by_uid = {}
 
+        # keep track of current requests
+        self.__thumb_map = {}
+        self.__current_work_id = None
+
         # set up data retriever and start work:
         self._sg_data_retriever = self._shotgun_data.ShotgunDataRetriever(
             parent=self,
             bg_task_manager=bg_task_manager
         )
-        self._sg_data_retriever.work_completed.connect(
-            self._on_data_retriever_work_completed)
-        self._sg_data_retriever.work_failure.connect(
-            self._on_data_retriever_work_failure)
+        self._sg_data_retriever.work_completed.connect(self.__on_data_retriever_work_completed)
+        self._sg_data_retriever.work_failure.connect(self.__on_data_retriever_work_failure)
         self._sg_data_retriever.start()
 
     ############################################################################
@@ -158,6 +163,11 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         Removes all items (including header items) from the model and
         sets the number of rows and columns to zero.
         """
+        # clear thumbnail download lookup so we don't process any more results:
+        self.__thumb_map = {}
+
+        # we are not looking for any data from the async processor
+        self.__current_work_id = None
 
         # Advertise that the model is about to completely cleared. This is super
         # important because proxy models usually cache data like indices and
@@ -211,6 +221,8 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         Base implementation ensures the data worker is stopped and calls
         ``clear()`` on the model.
         """
+        self.__current_work_id = None
+        self.__thumb_map = {}
 
         # gracefully stop the data retriever:
         self._sg_data_retriever.stop()
@@ -348,73 +360,10 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         # has children.
         return current_child_item_count == 0 and data_has_children
 
-    ############################################################################
-    # abstract, protected slots. these methods are connected to the internal
-    # data retriever's signals during initialization, so subclasses should
-    # implement these to act accordingly.
-
-    def _on_data_retriever_work_failure(self, uid, msg):
-        """
-        Asynchronous callback - the data retriever failed to do some work
-
-        :param uid: The unique id of the work that failed
-        :param msg: The error message returned for the failure
-
-        Abstract method
-        """
-        raise NotImplementedError(
-            "The '_on_data_retriever_work_failure' method has not been "
-            "implemented for this ShotgunQueryModel subclass."
-        )
-
-    def _on_data_retriever_work_completed(self, uid, request_type, data):
-        """
-        Signaled whenever the data retriever completes some work.
-
-        Dispatch the work to different methods depending on what async task has
-        completed.
-
-        :param uid:             The unique id of the work that completed
-        :param request_type:    Type of work completed
-        :param data:            Result of the work
-
-        Abstract method
-        """
-        raise NotImplementedError(
-            "The '_on_data_retriever_work_completed' method has not been "
-            "implemented for this ShotgunQueryModel subclass."
-        )
 
     ############################################################################
     # abstract, protected methods. these methods should be implemented by
     # subclasses to provide a consistent developer experience.
-
-    def _refresh_data(self):
-        """
-        Rebuild the data in the model to ensure it is up to date.
-
-        This call should be asynchronous and return instantly. The update should
-        be applied as soon as the data from Shotgun is returned.
-
-        If the model is empty (no cached data) no data will be shown at first
-        while the model fetches data from Shotgun.
-
-        As soon as a local cache exists, data is shown straight away and the
-        shotgun update happens silently in the background.
-
-        If data has been added, this will be injected into the existing
-        structure. In this case, the rest of the model is intact, meaning that
-        also selections and other view related states are unaffected.
-
-        If data has been modified or deleted, a full rebuild is issued, meaning
-        that all existing items from the model are removed. This does affect
-        view related states such as selection.
-        """
-
-        raise NotImplementedError(
-            "The '_refresh_data' method has not been "
-            "implemented for this ShotgunQueryModel subclass."
-        )
 
     def _create_item(self, parent, data_item):
         """
@@ -430,6 +379,20 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         """
         raise NotImplementedError(
             "The '_create_item' method has not been "
+            "implemented for this ShotgunQueryModel subclass."
+        )
+
+    def _update_item(self, item, data_item):
+        """
+        Updates a model item with the given data
+
+        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to update
+        :param :class:`ShotgunDataItem` data_item: Data to update item with
+
+        Abstract method
+        """
+        raise NotImplementedError(
+            "The '_update_item' method has not been "
             "implemented for this ShotgunQueryModel subclass."
         )
 
@@ -593,9 +556,218 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         # the default implementation does not set a tooltip
         pass
 
+    def _populate_thumbnail(self, item, field, path):
+        """
+        Called whenever the real thumbnail for an item exists on disk. The following
+        execution sequence typically happens:
+
+        - :class:`~PySide.QtGui.QStandardItem` is created, either through a cache load from disk or
+          from a payload coming from the Shotgun API.
+        - After the item has been set up with its associated Shotgun data,
+          :meth:`_populate_default_thumbnail()` is called, allowing client code to set
+          up a default thumbnail that will be shown while potential real thumbnail
+          data is being loaded.
+        - The model will now start looking for the real thumbail.
+        - If the thumbnail is already cached on disk, :meth:`_populate_thumbnail()` is called very soon.
+        - If there isn't a thumbnail associated, :meth:`_populate_thumbnail()` will not be called.
+        - If there isn't a thumbnail cached, the model will asynchronously download
+          the thumbnail from Shotgun and then (after some time) call :meth:`_populate_thumbnail()`.
+
+        This method will be called for standard thumbnails if the model has been
+        instantiated with the download_thumbs flag set to be true. It will be called for
+        items which are associated with shotgun entities (in a tree data layout, this is typically
+        leaf nodes). It will also be called once the data requested via _request_thumbnail_download()
+        arrives.
+
+        This method makes it possible to control how the thumbnail is applied and associated
+        with the item. The default implementation will simply set the thumbnail to be icon
+        of the item, but this can be altered by subclassing this method.
+
+        :param item: :class:`~PySide.QtGui.QStandardItem` which is associated with the given thumbnail
+        :param field: The Shotgun field which the thumbnail is associated with.
+        :param path: A path on disk to the thumbnail. This is a file in jpeg format.
+        """
+        # the default implementation sets the icon
+        thumb = QtGui.QPixmap(path)
+        item.setIcon(thumb)
+
+    def _populate_thumbnail_image(self, item, field, image, path):
+        """
+        Similar to :meth:`_populate_thumbnail()` but this method is called instead
+        when the bg_load_thumbs parameter has been set to true. In this case, no
+        loading of thumbnail data from disk is necessary - this has already been
+        carried out async and is passed in the form of a QImage object.
+
+        For further details, see :meth:`_populate_thumbnail()`
+
+        :param item: :class:`~PySide.QtGui.QStandardItem` which is associated with the given thumbnail
+        :param field: The Shotgun field which the thumbnail is associated with.
+        :param image: QImage object with the thumbnail loaded
+        :param path: A path on disk to the thumbnail. This is a file in jpeg format.
+        """
+        # the default implementation sets the icon
+        thumb = QtGui.QPixmap.fromImage(image)
+        item.setIcon(thumb)
+
     ############################################################################
     # protected convenience methods. these methods can be used by subclasses
     # to manipulate and manage data returned from Shotgun.
+
+    def _refresh_data(self):
+        """
+        Rebuilds the data in the model to ensure it is up to date.
+        This call is asynchronous and will return instantly.
+        The update will be applied whenever the data from Shotgun is returned.
+
+        If the model is empty (no cached data) no data will be shown at first
+        while the model fetches data from Shotgun.
+
+        As soon as a local cache exists, data is shown straight away and the
+        shotgun update happens silently in the background.
+
+        If data has been added, this will be injected into the existing structure.
+        In this case, the rest of the model is intact, meaning that also selections
+        and other view related states are unaffected.
+
+        If data has been modified or deleted, a full rebuild is issued, meaning that
+        all existing items from the model are removed. This does affect view related
+        states such as selection.
+        """
+        if not self._sg_data_retriever:
+            raise sgtk.TankError("Data retriever is not available!")
+
+        # Stop any queued work that hasn't completed yet.  Note that we intentionally only stop the
+        # find query and not the thumbnail cache/download.  This is because the thumbnails returned
+        # are likely to still be valid for the current data in the model and if they are stopped then
+        # the pattern 'create model->load cached->refresh from sg' would result in empty icons being
+        # presented to the user until the shotgun query has completed!
+        #
+        # This may result in unnecessary thumbnail downloads from Shotgun but in all likelihood, the
+        # thumbnails are going to be the same before and after the refresh and any additional overhead
+        # should be weighed against a cleaner user experience
+        if self.__current_work_id is not None:
+            self._sg_data_retriever.stop_work(self.__current_work_id)
+            self.__current_work_id = None
+
+        # emit that the data is refreshing.
+        self.data_refreshing.emit()
+
+        # request the data asynchronously from the data handler
+        self.__current_work_id = self._data_handler.generate_data_request(
+            self._sg_data_retriever
+        )
+
+        if self.__current_work_id is None:
+            # no async request was needed. process callback directly
+            self.__on_sg_data_arrived([])
+
+    def _request_thumbnail_download(self, item, field, url, entity_type, entity_id):
+        """
+        Request that a thumbnail is downloaded for an item. If a thumbnail is successfully
+        retrieved, either from disk (cached) or via shotgun, the method _populate_thumbnail()
+        will be called. If you want to control exactly how your shotgun thumbnail is
+        to appear in the UI, you can subclass this method. For example, you can subclass
+        this method and perform image composition prior to the image being added to
+        the item object.
+
+        .. note:: This is an advanced method which you can use if you want to load thumbnail
+            data other than the standard 'image' field. If that's what you need, simply make
+            sure that you set the download_thumbs parameter to true when you create the model
+            and standard thumbnails will be automatically downloaded. This method is either used
+            for linked thumb fields or if you want to download thumbnails for external model data
+            that doesn't come from Shotgun.
+
+        :param item: :class:`~PySide.QtGui.QStandardItem` which belongs to this model
+        :param field: Shotgun field where the thumbnail is stored. This is typically ``image`` but
+                      can also for example be ``sg_sequence.Sequence.image``.
+        :param url: thumbnail url
+        :param entity_type: Shotgun entity type
+        :param entity_id: Shotgun entity id
+        """
+        if url is None:
+            # nothing to download. bad input. gracefully ignore this request.
+            return
+
+        if not self._sg_data_retriever:
+            raise sgtk.ShotgunModelError("Data retriever is not available!")
+
+        uid = self._sg_data_retriever.request_thumbnail(
+            url,
+            entity_type,
+            entity_id,
+            field,
+            self.__bg_load_thumbs
+        )
+
+        # keep tabs of this and call out later - note that we use a weakref to allow
+        # the model item to be gc'd if it's removed from the model before the thumb
+        # request completes.
+        self.__thumb_map[uid] = {
+            "item_ref": weakref.ref(item),
+            "field": field
+        }
+
+    def _ensure_item_loaded(self, uid):
+        """
+        Ensures that the given unique id is loaded by the model.
+
+        :param str uid: Unique id for a :class:`ShotgunDataHandler` item.
+        :returns: :returns: :class:`~PySide.QtGui.QStandardItem` or ``None`` if not found
+        """
+        data_item = self._data_handler.get_data_item_from_uid(uid)
+
+        if data_item is None:
+            # no match in data store
+            self._log_debug("...uid '%s' is not part of the data set" % uid)
+            return None
+
+        # this node is loaded in the query cached by the data handler
+        # but may not exist in the model yet - because of deferred loading.
+
+        # first see if we have it in the model already
+        item = self._get_item_by_unique_id(uid)
+
+        if not item:
+
+            # item was not part of the model. Attempt to load its parents until it is visible.
+            self._log_debug("Item %s does not exist in the tree - will expand tree." % data_item)
+
+            # now get a list of all parents and recurse back down towards
+            # the node we want to load. If at any level, the data has not
+            # yet been loaded, we expand that level.
+            hierarchy_bottom_up = []
+            node = data_item
+            while node:
+                hierarchy_bottom_up.append(node)
+                node = node.parent
+
+            # reverse the list to get the top-down hierarchy
+            hierarchy_top_down = hierarchy_bottom_up[::-1]
+
+            self._log_debug("Resolved top-down hierarchy to be %s" % hierarchy_top_down)
+
+            for data_item in hierarchy_top_down:
+                # see if we have this item in the tree
+                item = self._get_item_by_unique_id(data_item.unique_id)
+                if not item:
+                    self._log_debug(
+                        "Data item %s does not exist in model - fetching parent's children..." % data_item
+                    )
+                    # this parent does not yet exist in the tree
+                    # find the parent and kick it to expand it
+
+                    # assume that the top level is always loaded in tree
+                    # so that it's always safe to do data_item.parent.uid here
+                    parent_item = self._get_item_by_unique_id(data_item.parent.unique_id)
+                    # get model index
+                    parent_model_index = parent_item.index()
+                    # kick it
+                    self.fetchMore(parent_model_index)
+
+            # now try again
+            item = self._get_item_by_unique_id(uid)
+
+        return item
 
     def _get_item_by_unique_id(self, uid):
         """
@@ -648,7 +820,6 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         """
         self._bundle.log_warning("[%s] %s" % (self.__class__.__name__, msg))
 
-
     ############################################################################
     # private methods
 
@@ -686,3 +857,150 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         if unique_id and unique_id in self.__items_by_uid:
             del self.__items_by_uid[unique_id]
 
+    def __on_data_retriever_work_failure(self, uid, msg):
+        """
+        Asynchronous callback - the data retriever failed to do some work
+
+        :param uid: The unique id of the work that failed
+        :param msg: The error message returned for the failure
+        """
+        uid = sanitize_qt(uid) # qstring on pyqt, str on pyside
+        msg = sanitize_qt(msg)
+
+        if self.__current_work_id != uid:
+            # not our job. ignore
+            self._log_debug("Retrieved error from data worker: %s" % msg)
+            return
+        self.__current_work_id = None
+
+        full_msg = "Error retrieving data from Shotgun: %s" % msg
+        self.data_refresh_fail.emit(full_msg)
+        self._log_warning(full_msg)
+
+    def __on_data_retriever_work_completed(self, uid, request_type, data):
+        """
+        Signaled whenever the data retriever completes some work.
+        This method will dispatch the work to different methods
+        depending on what async task has completed.
+
+        :param uid:             The unique id of the work that completed
+        :param request_type:    Type of work completed
+        :param data:            Result of the work
+        """
+        uid = sanitize_qt(uid)  # qstring on pyqt, str on pyside
+        data = sanitize_qt(data)
+
+        self._log_debug("Received worker payload of type %s" % request_type)
+
+        if self.__current_work_id == uid:
+            # our data has arrived from sg!
+            # process the data
+            self.__current_work_id = None
+            sg_data = data["sg"]
+            self.__on_sg_data_arrived(sg_data)
+
+        elif uid in self.__thumb_map:
+            # a thumbnail is now present on disk!
+            thumb_info = self.__thumb_map[uid]
+            del self.__thumb_map[uid]
+
+            thumbnail_path = data["thumb_path"]
+            thumbnail = data["image"]
+
+            # if the requested thumbnail has since dissapeared on the server,
+            # path and image will be None. In this case, skip processing
+            if thumbnail_path:
+                # get the model item from the weakref we stored in the thumb info:
+                item = thumb_info["item_ref"]()
+                if not item:
+                    # the model item no longer exists so we can ignore this result!
+                    return
+                sg_field = thumb_info["field"]
+
+                # call our deriving class implementation
+                if self.__bg_load_thumbs:
+                    # worker thread already loaded the thumbnail in as a QImage.
+                    # call a separate method.
+                    self._populate_thumbnail_image(item, sg_field, thumbnail, thumbnail_path)
+                else:
+                    # worker thread only ensured that the image exists
+                    # call method to populate it
+                    self._populate_thumbnail(item, sg_field, thumbnail_path)
+
+    def __save_data_async(self, sg):
+        """
+        Asynchronous callback to perform a cache save in the background.
+
+        :param :class:`Shotgun` sg: Shotgun API instance
+        """
+        self._log_debug("Begin asynchronously saving cache to disk")
+        self._data_handler.save_cache()
+        self._log_debug("Asynchronous cache save complete.")
+
+    def __on_sg_data_arrived(self, sg_data):
+        """
+        Handle asynchronous shotgun data arriving after a find request.
+
+        :param list sg_data: Shotgun data payload.
+        """
+        self._log_debug("--> Shotgun data arrived. (%s records)" % len(sg_data))
+
+        # pre-process data
+        sg_data = self._before_data_processing(sg_data)
+
+        # push shotgun data into our data handler which will figure out
+        # if there are any changes
+        self._log_debug("Updating data model with new shotgun data...")
+        modified_items = self._data_handler.update_find_data(sg_data)
+
+        self._log_debug("Shotgun data contained %d modifications" % len(modified_items))
+
+        if len(modified_items) > 0:
+            # save cache changes to disk in the background
+            self._sg_data_retriever.execute_method(self.__save_data_async)
+
+        root = self.invisibleRootItem()
+        if root.rowCount() == 0:
+            # an empty model - in this case just insert the root level items
+            self._log_debug("Model was empty - loading root level items...")
+            self._data_handler.generate_child_nodes(None, root, self._create_item)
+
+        else:
+            # we have some items loaded into our qt model. Look at the diff
+            # and make sure that what's loaded in the model is up to date.
+            for item in modified_items:
+                data_item = item["data"]
+
+                self._log_debug("Processing change %s" % item)
+
+                if item["mode"] == self._data_handler.ADDED:
+                    # look for the parent of this item
+                    parent_data_item = data_item.parent
+                    # see if this exists in the tree
+                    parent_model_item = self._get_item_by_unique_id(parent_data_item.unique_id)
+                    if parent_model_item:
+                        # the parent exists in the view. So add the child
+                        # note: becuase of lazy loading, parent may not always exist.
+                        self._log_debug("Creating new model item for %s" % data_item)
+                        self._create_item(parent_model_item, data_item)
+
+                elif item["mode"] == self._data_handler.DELETED:
+                    # see if the node exists in the tree, in that case delete it.
+                    # we check if it exists in the model because it may not have been
+                    # loaded in yet by the deferred loader
+                    model_item = self._get_item_by_unique_id(data_item.unique_id)
+                    if model_item:
+                        self._log_debug("Deleting model subtree %s" % model_item)
+                        self._delete_item(model_item)
+
+                elif item["mode"] == self._data_handler.UPDATED:
+                    # see if the node exists in the tree, in that case update it with new info
+                    # we check if it exists in the model because it may not have been
+                    # loaded in yet by the deferred loader
+                    model_item = self._get_item_by_unique_id(data_item.unique_id)
+                    if model_item:
+                        self._log_debug("Updating model item %s" % model_item)
+                        self._update_item(model_item, data_item)
+
+        # and emit completion signal
+        self.data_refreshed.emit(modified_items > 0)
