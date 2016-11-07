@@ -18,8 +18,10 @@ from sgtk.platform.qt import QtCore, QtGui
 
 # framework imports
 from .shotgun_hierarchy_item import ShotgunHierarchyItem
+from .shotgun_standard_item import ShotgunStandardItem
 from .shotgun_query_model import ShotgunQueryModel
 from .data_handler_nav import ShotgunNavDataHandler
+from .data_item import ShotgunDataItem
 from .util import get_sg_data, sanitize_qt, sanitize_for_qt_model
 
 
@@ -49,12 +51,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     found in Shotgun as configured in each project's
     `Tracking Settings <https://support.shotgunsoftware.com/hc/en-us/articles/219031138-Project-Tracking-Settings>`_.
     """
-
-    # constant values to refer to the fields where the paths are stored in the
-    # returned navigation data.
-    _SG_PATH_FIELD = "path"
-    _SG_PARENT_PATH_FIELD = "parent_path"
-
     def __init__(self, parent, schema_generation=0, bg_task_manager=None):
         """
         Initialize the Hierarcy model.
@@ -131,14 +127,13 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         :param index: The index of the item being tested.
         :type index: :class:`~PySide.QtCore.QModelIndex`
         """
-        return super(ShotgunHierarchyModel, self).fetchMore(index)
-
         # now request the subtree to refresh itself
         if index.isValid():
             item = self.itemFromIndex(index)
-            if isinstance(item, ShotgunStandardItem):
+            if isinstance(item, ShotgunHierarchyItem):
                 self._request_data(item.path)
 
+        return super(ShotgunHierarchyModel, self).fetchMore(index)
 
     ############################################################################
     # protected methods
@@ -277,6 +272,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         # get the cache path based on these new data query parameters
         self._data_handler = ShotgunNavDataHandler(
+            self._path,
             self._seed_entity_field,
             self._entity_fields,
             self.__compute_cache_path(cache_seed),
@@ -371,6 +367,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # we have not fetched more data for this item yet
         item.setData(False, self._SG_ITEM_FETCHED_MORE)
 
+        item.setData(not data_item.is_leaf(), self._SG_ITEM_HAS_CHILDREN)
+
         # attach the nav data for access later
         item.setData(sanitize_for_qt_model(data_item.shotgun_data), self.SG_DATA_ROLE)
 
@@ -391,6 +389,82 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         parent.appendRow(item)
 
         return item
+
+
+    #
+    # def __update_subtree(self, item, nav_data):
+    #     """
+    #     Updates the subtree rooted at the supplied item with the supplied data.
+    #
+    #     This method updates the item and its children given a dictionary of
+    #     newly queried data from Shotgun. It first checks to see if any items
+    #     have been removed, then adds or updates children as needed.
+    #
+    #     :param item: A :class:`~PySide.QtGui.QStandardItem` instance to update.
+    #     :param dict nav_data: The data returned by a
+    #         :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` call.
+    #
+    #     :returns: ``True`` if the subtree was udpated, ``False`` otherwise.
+    #     """
+    #
+    #     # ensure the item's data is up-to-date
+    #     subtree_updated = self.__update_item(item, nav_data)
+    #
+    #     children_data = nav_data.get("children")
+    #
+    #     if not children_data:
+    #         return subtree_updated
+    #
+    #     child_paths = []
+    #
+    #     for child_data in children_data:
+    #
+    #         if self._SG_PATH_FIELD not in child_data:
+    #             item_data = get_sg_data(item)
+    #             parent_path = item_data[self._SG_PATH_FIELD]
+    #
+    #             # handle the case where there are child leaves without paths.
+    #             # these tend to be just items that make it clear there are no
+    #             # children. example: "No Shots"
+    #             # create a dummy path so that we can find it later
+    #             child_data[self._SG_PATH_FIELD] = "/".join(
+    #                 [parent_path, child_data["label"]])
+    #
+    #         child_paths.append(child_data[self._SG_PATH_FIELD])
+    #
+    #     # iterate over item's children to see if any need to be removed.
+    #     # this would be the case where the supplied nav_data does not contain
+    #     # information about an item that currently exists. iterate in reverse
+    #     # order so we can remove items in place without altering subsequent rows
+    #     for row in reversed(range(0, item.rowCount())):
+    #         child_item = item.child(row)
+    #         child_data = get_sg_data(child_item)
+    #         child_path = child_data[self._SG_PATH_FIELD]
+    #         if child_path not in child_paths:
+    #             # removing item
+    #             #self._log_debug("Removing item: %s" % (child_item,))
+    #             #self._before_item_removed(child_item)
+    #             # todo - update with new data backend
+    #             item.removeRow(row)
+    #             subtree_updated = True
+    #
+    #     # add/update the children for the supplied item
+    #     for (row, child_data) in enumerate(children_data):
+    #         child_path = child_data[self._SG_PATH_FIELD]
+    #         child_item = self.item_from_path(child_path)
+    #
+    #         if child_item:
+    #             # child already exists, ensure data is up-to-date
+    #             subtree_updated = self.__update_item(child_item, child_data) \
+    #                 or subtree_updated
+    #         else:
+    #             # child item does not exist, create it at the specified row
+    #             self._create_item(child_data, parent=item, row=row)
+    #             subtree_updated = True
+    #
+    #     return subtree_updated
+    #
+
 
 
     ############################################################################

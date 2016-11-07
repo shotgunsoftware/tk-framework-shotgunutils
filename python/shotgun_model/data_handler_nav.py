@@ -8,20 +8,29 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+import gc
+
 from .data_handler import ShotgunDataHandler, log_timing
 from .errors import ShotgunModelDataError
+from .data_item import ShotgunDataItem
 
 class ShotgunNavDataHandler(ShotgunDataHandler):
     """
     Data storage for navigation tree data via the nav_expand API endpoint.
     """
 
-    def __init__(self, seed_entity_field, entity_fields, cache_path, parent):
+    # constant values to refer to the fields where the paths are stored in the
+    # returned navigation data.
+    _SG_PATH_FIELD = "path"
+    _SG_PARENT_PATH_FIELD = "parent_path"
+
+    def __init__(self, root_path, seed_entity_field, entity_fields, cache_path, parent):
         """
         :param cache_path: Path to cache file location
         :param parent: Parent QT object
         """
         super(ShotgunNavDataHandler, self).__init__(cache_path, parent)
+        self.__root_path = root_path
         self.__seed_entity_field = seed_entity_field
         self.__entity_fields = entity_fields
 
@@ -45,9 +54,9 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
     @log_timing
     def update_data(self, sg_data):
         """
-        Adds find data to the data set in memory.
+        Adds data to the data set in memory.
 
-        Runs a comparison between old and new data and returns a list of entity ids
+        Runs a comparison between old and new data and returns a list of items
         that have changed between what was previously in the database and what is there now.
 
         raises an exception if no cache is loaded.
@@ -59,57 +68,15 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
 
         self._log_debug("Updating %s with %s shotgun records." % (self, len(sg_data)))
 
-        import pprint
-        pprint.pprint(sg_data)
+        item_path = sg_data.get(self._SG_PATH_FIELD, None)
 
+        self._log_debug("Got hierarchy data for path: %s" % (item_path,))
 
-    #     item_path = sg_data.get(self._SG_PATH_FIELD, None)
-    #     self._log_debug("Got hierarchy data for path: %s" % (item_path,))
-    #
-    #     if not item_path:
-    #         raise sgtk.TankError(
-    #             "Unexpected error occured. Could not determine the path"
-    #             "from the queried hierarchy item."
-    #         )
-    #
-    #     # see if we have an item for the path
-    #     item = self.item_from_path(item_path)
-    #
-    #     if item:
-    #         # check item and children to see if data has been updated
-    #         self._log_debug(
-    #             "Item exists in tree. Ensuring up-to-date...")
-    #         modifications_made = self.__update_subtree(item, nav_data)
-    #         self._log_debug("...done!")
-    #
-    #     else:
-    #         self._log_debug("Detected new item. Adding in-situ to tree...")
-    #         self.__insert_subtree(nav_data)
-    #         self._log_debug("...done!")
-    #         modifications_made = True
-    #
-    #     # last step - save our tree to disk for fast caching next time!
-    #     # todo: the hierarchy data is queried lazily. so 2this implies a
-    #     # write to disk each time the user expands and item. consider the
-    #     # performance of this setup and whether this logic should be altered.
-    #     if self._data_handler.is_modified():
-    #         try:
-    #             self._data_handler.save_cache()
-    #         except Exception, e:
-    #             self._log_warning("Couldn't save cache data to disk: %s" % e)
-    #
-    #     if not self._running_query_lookup.keys():
-    #         # no more data queries running. all data refreshed
-    #         self.data_refreshed.emit(modifications_made)
-
-
-
-
-
-
-
-
-
+        if not item_path:
+            raise ShotgunModelDataError(
+                "Unexpected error occured. Could not determine the path"
+                "from the queried hierarchy item."
+            )
 
         if len(self._cache[self.CACHE_CHILDREN]) == 0:
             self._log_debug("In-memory cache is empty.")
@@ -117,10 +84,16 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
         # ensure the data is clean
         # todo - optimize this!
         self._log_debug("sanitizing data...")
-        sg_data = self.__sg_clean_data(sg_data)
+        sg_data = self._sg_clean_data(sg_data)
         self._log_debug("...done!")
 
         self._log_debug("Generating new tree in memory...")
+
+        if item_path == self.__root_path:
+            self._log_debug("This is the root of the tree.")
+            parent_item = self._cache
+        else:
+            parent_item = self._cache[self.CACHE_BY_UID][item_path]
 
         # create a brand new tree rather than trying to be clever
         # about how we cull intermediate nodes for deleted items
@@ -129,108 +102,48 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
         num_deletes = 0
         num_modifications = 0
 
-        new_cache = self._init_clear_cache()
+        # insert the new items in this dict
+        new_items = {}
 
         # analyze the incoming shotgun data
-        for sg_item in sg_data:
+        for sg_item in sg_data["children"]:
 
-            sub_tree = new_cache
-            # maintain a hierarchy of unique ids
+            unique_field_value = sg_item[self._SG_PATH_FIELD]
 
-            # Create items by drilling down the hierarchy
-            for field_name in hierarchy:
+            # this is an actual entity - insert into our new tree
+            item = {
+                self.SG_DATA: sg_item,
+                self.FIELD: None,
+                self.IS_LEAF: not sg_item["has_children"],
+                self.UID: unique_field_value,
+                self.PARENT: parent_item,
+                self.CACHE_CHILDREN: {},
+            }
+            new_items[unique_field_value] = item
 
-                on_leaf_level = (hierarchy[-1] == field_name)
-
-                if not on_leaf_level:
-                    # get the parent uid or None if we are at the root level
-                    parent_uid = sub_tree.get(self.UID)
-                    # generate path for this item
-                    unique_field_value = self.__generate_unique_key(parent_uid, field_name, sg_item)
-                else:
-                    # on the leaf level, use the entity id as the unique key
-                    unique_field_value = sg_item["id"]
-
-                # two distinct cases for leaves and non-leaves
-                if on_leaf_level:
-                    # this is an actual entity - insert into our new tree
-                    item = {
-                        self.SG_DATA: sg_item,
-                        self.FIELD: field_name,
-                        self.IS_LEAF: True,
-                        self.UID: unique_field_value,
-                        self.PARENT: sub_tree,
-                        self.CACHE_CHILDREN: {},
-                    }
-                    sub_tree[self.CACHE_CHILDREN][unique_field_value] = item
-                    new_cache[self.CACHE_BY_UID][unique_field_value] = item
-
-                    # now check with prev data structure to see if it has changed
-                    if unique_field_value not in self._cache[self.CACHE_BY_UID]:
-                        # this is a new node that wasn't there before
-                        diff_list.append({
-                            "data": ShotgunDataItem(item),
-                            "mode": self.ADDED
-                        })
-                        num_adds += 1
-                    else:
-                        # record already existed in prev dataset. Check if value has changed
-                        old_record = self._cache[self.CACHE_BY_UID][unique_field_value][self.SG_DATA]
-                        if not self.__compare_shotgun_data(old_record, sg_item):
-                            diff_list.append({
-                                "data": ShotgunDataItem(item),
-                                "mode": self.UPDATED
-                            })
-                            num_modifications += 1
-
-                else:
-                    # not on leaf level yet
-                    if unique_field_value not in sub_tree[self.CACHE_CHILDREN]:
-                        # item is not yet inserted in our new tree so add it
-                        # because these are parent items like project nodes
-
-                        item = {
-                            self.SG_DATA: sg_item,
-                            self.FIELD: field_name,
-                            self.IS_LEAF: False,
-                            self.UID: unique_field_value,
-                            self.PARENT: sub_tree,
-                            self.CACHE_CHILDREN: {},
-                        }
-                        sub_tree[self.CACHE_CHILDREN][unique_field_value] = item
-                        new_cache[self.CACHE_BY_UID][unique_field_value] = item
-
-                        # now check with prev data structure to see if it has changed
-                        if unique_field_value not in self._cache[self.CACHE_BY_UID]:
-                            # this is a new node that wasn't there before
-                            diff_list.append({
-                                "data": ShotgunDataItem(item),
-                                "mode": self.ADDED
-                            })
-                            num_adds += 1
-                        else:
-                            # record already existed in prev dataset. Check if value has changed
-                            current_record = self._cache[self.CACHE_BY_UID][unique_field_value][self.SG_DATA]
-                            # don't compare the whole record but just the part that relates to this
-                            # intermediate node value. For example, we may be looking at a project node
-                            # in the hierarchy but the full sg record contains all the data for a shot.
-                            # in this case, just run the comparison on the project subset of the full
-                            # shot data dict.
-                            if not self.__compare_shotgun_data(current_record.get(field_name), sg_item.get(field_name)):
-                                diff_list.append({
-                                    "data": ShotgunDataItem(item),
-                                    "mode": self.UPDATED
-                                })
-                                num_modifications += 1
-
-                    # recurse down to the next level
-                    sub_tree = sub_tree[self.CACHE_CHILDREN][unique_field_value]
+            # now check with prev data structure to see if it has changed
+            if unique_field_value not in self._cache[self.CACHE_BY_UID]:
+                # this is a new node that wasn't there before
+                diff_list.append({
+                    "data": ShotgunDataItem(item),
+                    "mode": self.ADDED
+                })
+                num_adds += 1
+            else:
+                # record already existed in prev dataset. Check if value has changed
+                old_record = self._cache[self.CACHE_BY_UID][unique_field_value][self.SG_DATA]
+                if not self._sg_compare_data(old_record, sg_item):
+                    diff_list.append({
+                        "data": ShotgunDataItem(item),
+                        "mode": self.UPDATED
+                    })
+                    num_modifications += 1
 
         # now figure out if anything has been removed
         self._log_debug("Diffing new tree against old tree...")
 
-        current_uids = set(self._cache[self.CACHE_BY_UID].keys())
-        new_uids = set(new_cache[self.CACHE_BY_UID].keys())
+        current_uids = set(parent_item[self.CACHE_CHILDREN].keys())
+        new_uids = set(new_items.keys())
 
         for deleted_uid in current_uids.difference(new_uids):
             item = self._cache[self.CACHE_BY_UID][deleted_uid]
@@ -240,15 +153,13 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
             })
             num_deletes += 1
 
-        # lastly swap the new for8 the old
-        self._clear_cache()
+        # lastly swap the new for the old
+        parent_item[self.CACHE_CHILDREN] = new_items
+        self._cache[self.CACHE_BY_UID].update(new_items)
 
         # at this point, kick the gc to make sure the memory is freed up
         # despite its cycles.
         gc.collect()
-
-        # and set the new cache
-        self._cache = new_cache
 
         self._log_debug("Shotgun data (%d records) received and processed. " % len(sg_data))
         self._log_debug("    The new tree is %d records." % len(self._cache[self.CACHE_BY_UID]))
@@ -259,85 +170,5 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
 
         return diff_list
 
-
-
-
-
-
-
-
-
-
-    # def __update_subtree(self, item, nav_data):
-    #     """
-    #     Updates the subtree rooted at the supplied item with the supplied data.
-    #
-    #     This method updates the item and its children given a dictionary of
-    #     newly queried data from Shotgun. It first checks to see if any items
-    #     have been removed, then adds or updates children as needed.
-    #
-    #     :param item: A :class:`~PySide.QtGui.QStandardItem` instance to update.
-    #     :param dict nav_data: The data returned by a
-    #         :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` call.
-    #
-    #     :returns: ``True`` if the subtree was udpated, ``False`` otherwise.
-    #     """
-    #
-    #     # ensure the item's data is up-to-date
-    #     subtree_updated = self.__update_item(item, nav_data)
-    #
-    #     children_data = nav_data.get("children")
-    #
-    #     if not children_data:
-    #         return subtree_updated
-    #
-    #     child_paths = []
-    #
-    #     for child_data in children_data:
-    #
-    #         if self._SG_PATH_FIELD not in child_data:
-    #             item_data = get_sg_data(item)
-    #             parent_path = item_data[self._SG_PATH_FIELD]
-    #
-    #             # handle the case where there are child leaves without paths.
-    #             # these tend to be just items that make it clear there are no
-    #             # children. example: "No Shots"
-    #             # create a dummy path so that we can find it later
-    #             child_data[self._SG_PATH_FIELD] = "/".join(
-    #                 [parent_path, child_data["label"]])
-    #
-    #         child_paths.append(child_data[self._SG_PATH_FIELD])
-    #
-    #     # iterate over item's children to see if any need to be removed.
-    #     # this would be the case where the supplied nav_data does not contain
-    #     # information about an item that currently exists. iterate in reverse
-    #     # order so we can remove items in place without altering subsequent rows
-    #     for row in reversed(range(0, item.rowCount())):
-    #         child_item = item.child(row)
-    #         child_data = get_sg_data(child_item)
-    #         child_path = child_data[self._SG_PATH_FIELD]
-    #         if child_path not in child_paths:
-    #             # removing item
-    #             #self._log_debug("Removing item: %s" % (child_item,))
-    #             #self._before_item_removed(child_item)
-    #             # todo - update with new data backend
-    #             item.removeRow(row)
-    #             subtree_updated = True
-    #
-    #     # add/update the children for the supplied item
-    #     for (row, child_data) in enumerate(children_data):
-    #         child_path = child_data[self._SG_PATH_FIELD]
-    #         child_item = self.item_from_path(child_path)
-    #
-    #         if child_item:
-    #             # child already exists, ensure data is up-to-date
-    #             subtree_updated = self.__update_item(child_item, child_data) \
-    #                 or subtree_updated
-    #         else:
-    #             # child item does not exist, create it at the specified row
-    #             self._create_item(child_data, parent=item, row=row)
-    #             subtree_updated = True
-    #
-    #     return subtree_updated
 
 

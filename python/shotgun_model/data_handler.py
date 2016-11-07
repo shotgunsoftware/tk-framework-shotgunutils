@@ -9,8 +9,10 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 from __future__ import with_statement
 
+import urlparse
 import errno
 import os
+import datetime
 import cPickle
 import time
 
@@ -311,7 +313,6 @@ class ShotgunDataHandler(QtCore.QObject):
             "implemented for this ShotgunDataHandler subclass."
         )
 
-
     def _log_debug(self, msg):
         """
         Convenience wrapper around debug logging
@@ -328,3 +329,96 @@ class ShotgunDataHandler(QtCore.QObject):
         """
         self._bundle.log_warning("[%s] %s" % (self.__class__.__name__, msg))
 
+    def _sg_clean_data(self, sg_data):
+        """
+        Recursively clean the supplied SG data for use by clients.
+
+        This method currently handles:
+
+            - Converting datetime objects to universal time stamps.
+
+        :param sg_data:
+        :return:
+        """
+        # Older versions of Shotgun return special timezone classes. QT is
+        # struggling to handle these. In fact, on linux it is struggling to
+        # serialize any complex object via QDataStream. So we need to account
+        # for this for older versions of SG.
+        #
+        # Convert time stamps to unix time. Unix time is a number representing
+        # the timestamp in the number of seconds since 1 Jan 1970 in the UTC
+        # timezone. So a unix timestamp is universal across time zones and DST
+        # changes.
+        #
+        # When you are pulling data from the shotgun model and want to convert
+        # this unix timestamp to a *local* timezone object, which is typically
+        # what you want when you are displaying a value on screen, use the
+        # following code:
+        # >>> local_datetime = datetime.fromtimestamp(unix_time)
+        #
+        # furthermore, if you want to turn that into a nicely formatted string:
+        # >>> local_datetime.strftime('%Y-%m-%d %H:%M')
+
+        if isinstance(sg_data, dict):
+            for k in sg_data.keys():
+                sg_data[k] = self._sg_clean_data(sg_data[k])
+        elif isinstance(sg_data, list):
+            for i in range(len(sg_data)):
+                sg_data[i] = self._sg_clean_data(sg_data[i])
+        elif isinstance(sg_data, datetime.datetime):
+            # convert to unix timestamp, local time zone
+            sg_data = time.mktime(sg_data.timetuple())
+
+        return sg_data
+
+
+    def _sg_compare_data(self, a, b):
+        """
+        Compares two shotgun data structures.
+        Both inputs are assumed to contain utf-8 encoded data.
+
+        :returns: True if a is same as b, false otherwise
+        """
+        if isinstance(a, dict):
+            if not isinstance(b, dict):
+                return False
+            if len(a) != len(b):
+                return False
+            for a_key in a.keys():
+                if not self._sg_compare_data(a.get(a_key), b.get(a_key)):
+                    return False
+
+        elif isinstance(a, list):
+            if not isinstance(b, list):
+                return False
+            if len(a) != len(b):
+                return False
+            for idx in xrange(len(a)):
+                if not self._sg_compare_data(a[idx], b[idx]):
+                    return False
+
+        # handle thumbnail fields as a special case
+        # thumbnail urls are (typically, there seem to be several standards!)
+        # on the form:
+        # https://sg-media-usor-01.s3.amazonaws.com/xxx/yyy/
+        #   filename.ext?lots_of_authentication_headers
+        #
+        # the query string changes all the times, so when we check if an item
+        # is out of date, omit it.
+        elif (isinstance(a, str) and isinstance(b, str) and
+              a.startswith("http") and b.startswith("http") and
+              ("amazonaws" in a or "AccessKeyId" in a)):
+            # attempt to parse values are urls and eliminate the querystring
+            # compare hostname + path only
+            url_obj_a = urlparse.urlparse(a)
+            url_obj_b = urlparse.urlparse(b)
+            compare_str_a = "%s/%s" % (url_obj_a.netloc, url_obj_a.path)
+            compare_str_b = "%s/%s" % (url_obj_b.netloc, url_obj_b.path)
+            if compare_str_a != compare_str_b:
+                # url has changed
+                return False
+
+        elif a != b:
+            return False
+
+        return True

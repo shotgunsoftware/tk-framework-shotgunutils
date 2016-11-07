@@ -7,7 +7,6 @@
 # By accessing, using, copying or modifying this work you indicate your
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
-import datetime
 import urlparse
 import time
 import gc
@@ -148,7 +147,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         # ensure the data is clean
         # todo - optimize this!
         self._log_debug("sanitizing data...")
-        sg_data = self.__sg_clean_data(sg_data)
+        sg_data = self._sg_clean_data(sg_data)
         self._log_debug("...done!")
 
         self._log_debug("Generating new tree in memory...")
@@ -207,7 +206,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                     else:
                         # record already existed in prev dataset. Check if value has changed
                         old_record = self._cache[self.CACHE_BY_UID][unique_field_value][self.SG_DATA]
-                        if not self.__compare_shotgun_data(old_record, sg_item):
+                        if not self._sg_compare_data(old_record, sg_item):
                             diff_list.append({
                                 "data": ShotgunDataItem(item),
                                 "mode": self.UPDATED
@@ -247,7 +246,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                             # in the hierarchy but the full sg record contains all the data for a shot.
                             # in this case, just run the comparison on the project subset of the full
                             # shot data dict.
-                            if not self.__compare_shotgun_data(current_record.get(field_name), sg_item.get(field_name)):
+                            if not self._sg_compare_data(current_record.get(field_name), sg_item.get(field_name)):
                                 diff_list.append({
                                     "data": ShotgunDataItem(item),
                                     "mode": self.UPDATED
@@ -290,49 +289,6 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
 
         return diff_list
 
-
-    def __sg_clean_data(self, sg_data):
-        """
-        Recursively clean the supplied SG data for use by clients.
-
-        This method currently handles:
-
-            - Converting datetime objects to universal time stamps.
-
-        :param sg_data:
-        :return:
-        """
-        # Older versions of Shotgun return special timezone classes. QT is
-        # struggling to handle these. In fact, on linux it is struggling to
-        # serialize any complex object via QDataStream. So we need to account
-        # for this for older versions of SG.
-        #
-        # Convert time stamps to unix time. Unix time is a number representing
-        # the timestamp in the number of seconds since 1 Jan 1970 in the UTC
-        # timezone. So a unix timestamp is universal across time zones and DST
-        # changes.
-        #
-        # When you are pulling data from the shotgun model and want to convert
-        # this unix timestamp to a *local* timezone object, which is typically
-        # what you want when you are displaying a value on screen, use the
-        # following code:
-        # >>> local_datetime = datetime.fromtimestamp(unix_time)
-        #
-        # furthermore, if you want to turn that into a nicely formatted string:
-        # >>> local_datetime.strftime('%Y-%m-%d %H:%M')
-
-        if isinstance(sg_data, dict):
-            for k in sg_data.keys():
-                sg_data[k] = self.__sg_clean_data(sg_data[k])
-        elif isinstance(sg_data, list):
-            for i in range(len(sg_data)):
-                sg_data[i] = self.__sg_clean_data(sg_data[i])
-        elif isinstance(sg_data, datetime.datetime):
-            # convert to unix timestamp, local time zone
-            sg_data = time.mktime(sg_data.timetuple())
-
-        return sg_data
-
     def __generate_unique_key(self, parent_unique_key, field, sg_data):
         """
         Generates a unique key from a shotgun field.
@@ -370,49 +326,5 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
             return "/%s" % unique_key
         else:
             return "%s/%s" % (parent_unique_key, unique_key)
-
-    def __compare_shotgun_data(self, a, b):
-        """
-        Compares two dicts, assumes the same set of keys in both.
-        Omits thumbnail fields because these change all the time (S3).
-        Both inputs are assumed to contain utf-8 encoded data.
-
-        :returns: True if a is same as b, false otherwise
-        """
-        if isinstance(a, dict) and isinstance(b, dict):
-
-            for key in a.iterkeys():
-                a_value = a[key]
-                b_value = b[key]
-
-                # handle thumbnail fields as a special case
-                # thumbnail urls are (typically, there seem to be several standards!)
-                # on the form:
-                # https://sg-media-usor-01.s3.amazonaws.com/xxx/yyy/
-                #   filename.ext?lots_of_authentication_headers
-                #
-                # the query string changes all the times, so when we check if an item
-                # is out of date, omit it.
-                if (isinstance(a_value, str) and isinstance(b_value, str) and
-                      a_value.startswith("http") and b_value.startswith("http") and
-                      ("amazonaws" in a_value or "AccessKeyId" in a_value)):
-                    # attempt to parse values are urls and eliminate the querystring
-                    # compare hostname + path only
-                    url_obj_a = urlparse.urlparse(a_value)
-                    url_obj_b = urlparse.urlparse(b_value)
-                    compare_str_a = "%s/%s" % (url_obj_a.netloc, url_obj_a.path)
-                    compare_str_b = "%s/%s" % (url_obj_b.netloc, url_obj_b.path)
-                    if compare_str_a != compare_str_b:
-                        # url has changed
-                        return False
-
-                elif a_value != b_value:
-                    return False
-
-        else:
-            if a != b:
-                return False
-
-        return True
 
 
