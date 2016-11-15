@@ -349,7 +349,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         :returns: Model item
         :rtype: :class:`ShotgunStandardItem`
         """
-        item = ShotgunHierarchyItem(data_item.shotgun_data["label"])
+        item = ShotgunHierarchyItem()
+
+        # set construction flags
         item.setEditable(False)
 
         # keep tabs of which items we are creating
@@ -358,12 +360,30 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # we have not fetched more data for this item yet
         item.setData(False, self._SG_ITEM_FETCHED_MORE)
 
+        # update values
+        self._update_item(item, data_item)
+
+        # todo: handle multiple rows?
+        parent.appendRow(item)
+
+        return item
+
+
+    def _update_item(self, item, data_item):
+        """
+        Updates a model item with the given data
+
+        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to update
+        :param :class:`ShotgunDataItem` data_item: Data to update item with
+        """
+
+        item.setText(data_item.shotgun_data["label"])
+
         item.setData(not data_item.is_leaf(), self._SG_ITEM_HAS_CHILDREN)
 
         # transfer a unique id from the data backend so we can
         # refer back to this node later on
         item.setData(data_item.unique_id, self._SG_ITEM_UNIQUE_ID)
-
 
         # attach the nav data for access later
         item.setData(sanitize_for_qt_model(data_item.shotgun_data), self.SG_DATA_ROLE)
@@ -380,96 +400,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         # run the finalizer (always runs on construction, even via cache)
         self._finalize_item(item)
-
-        # todo: handle multiple rows?
-        parent.appendRow(item)
-
-        return item
-
-
-    def _update_item(self, item, data_item):
-        """
-        Updates a model item with the given data
-
-        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to update
-        :param :class:`ShotgunDataItem` data_item: Data to update item with
-        """
-        print "> UPDATE"
-
-    #
-    # def __update_subtree(self, item, nav_data):
-    #     """
-    #     Updates the subtree rooted at the supplied item with the supplied data.
-    #
-    #     This method updates the item and its children given a dictionary of
-    #     newly queried data from Shotgun. It first checks to see if any items
-    #     have been removed, then adds or updates children as needed.
-    #
-    #     :param item: A :class:`~PySide.QtGui.QStandardItem` instance to update.
-    #     :param dict nav_data: The data returned by a
-    #         :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` call.
-    #
-    #     :returns: ``True`` if the subtree was udpated, ``False`` otherwise.
-    #     """
-    #
-    #     # ensure the item's data is up-to-date
-    #     subtree_updated = self.__update_item(item, nav_data)
-    #
-    #     children_data = nav_data.get("children")
-    #
-    #     if not children_data:
-    #         return subtree_updated
-    #
-    #     child_paths = []
-    #
-    #     for child_data in children_data:
-    #
-    #         if self._SG_PATH_FIELD not in child_data:
-    #             item_data = get_sg_data(item)
-    #             parent_path = item_data[self._SG_PATH_FIELD]
-    #
-    #             # handle the case where there are child leaves without paths.
-    #             # these tend to be just items that make it clear there are no
-    #             # children. example: "No Shots"
-    #             # create a dummy path so that we can find it later
-    #             child_data[self._SG_PATH_FIELD] = "/".join(
-    #                 [parent_path, child_data["label"]])
-    #
-    #         child_paths.append(child_data[self._SG_PATH_FIELD])
-    #
-    #     # iterate over item's children to see if any need to be removed.
-    #     # this would be the case where the supplied nav_data does not contain
-    #     # information about an item that currently exists. iterate in reverse
-    #     # order so we can remove items in place without altering subsequent rows
-    #     for row in reversed(range(0, item.rowCount())):
-    #         child_item = item.child(row)
-    #         child_data = get_sg_data(child_item)
-    #         child_path = child_data[self._SG_PATH_FIELD]
-    #         if child_path not in child_paths:
-    #             # removing item
-    #             #self._log_debug("Removing item: %s" % (child_item,))
-    #             #self._before_item_removed(child_item)
-    #             # todo - update with new data backend
-    #             item.removeRow(row)
-    #             subtree_updated = True
-    #
-    #     # add/update the children for the supplied item
-    #     for (row, child_data) in enumerate(children_data):
-    #         child_path = child_data[self._SG_PATH_FIELD]
-    #         child_item = self.item_from_path(child_path)
-    #
-    #         if child_item:
-    #             # child already exists, ensure data is up-to-date
-    #             subtree_updated = self.__update_item(child_item, child_data) \
-    #                 or subtree_updated
-    #         else:
-    #             # child item does not exist, create it at the specified row
-    #             self._create_item(child_data, parent=item, row=row)
-    #             subtree_updated = True
-    #
-    #     return subtree_updated
-    #
-
 
 
     ############################################################################

@@ -14,6 +14,7 @@ from .data_handler import ShotgunDataHandler, log_timing
 from .errors import ShotgunModelDataError
 from .data_item import ShotgunDataItem
 
+
 class ShotgunNavDataHandler(ShotgunDataHandler):
     """
     Data storage for navigation tree data via the nav_expand API endpoint.
@@ -108,7 +109,14 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
         # analyze the incoming shotgun data
         for sg_item in sg_data["children"]:
 
-            unique_field_value = sg_item[self._SG_PATH_FIELD]
+
+            if self._SG_PATH_FIELD not in sg_item:
+                # note: leaf nodes of kind 'empty' don't have a path
+                unique_field_value = "/".join(parent_item[self.UID], sg_item["label"])
+
+            else:
+                unique_field_value = sg_item.get(self._SG_PATH_FIELD)
+
 
             # this is an actual entity - insert into our new tree
             item = {
