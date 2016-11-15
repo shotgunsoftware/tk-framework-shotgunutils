@@ -881,3 +881,42 @@ class CachedShotgunSchema(QtCore.QObject):
         else:
             return self._status_data[project_id]["status_order"]
 
+    @classmethod
+    def clear_cached_data(cls, project_id=None):
+        """
+        Remove both the schema and status cache files from disk for
+        the specified project_id. If no project_id is specified, then
+        use the current context project.
+
+        :param project_id: The id of the project entity to remove
+                           schema and status cache files for. If
+                           None, the current context's project will
+                           be used.
+        """
+        self = cls.__get_instance()
+        project_id = project_id or self._get_current_project_id()
+
+        schema_cache = self._get_schema_cache_path(project_id)
+        if os.path.isfile(schema_cache):
+            self._bundle.log_debug("Removing schema cache file : %s" % schema_cache)
+            try:
+                os.remove(schema_cache)
+            except Exception, e:
+                self._bundle.log_error(
+                    "Caught error attempting to remove schema cache file [%s] :\n%s" %
+                    (schema_cache, e)
+                )
+                raise
+
+        status_cache = self._get_status_cache_path(project_id)
+        if os.path.isfile(status_cache):
+            self._bundle.log_debug("Removing status cache file : %s" % status_cache)
+            try:
+                os.remove(status_cache)
+            except Exception, e:
+                self._bundle.log_error(
+                    "Caught error attempting to remove status cache file [%s] :\n%s" %
+                    (status_cache, e)
+                )
+                raise
+
