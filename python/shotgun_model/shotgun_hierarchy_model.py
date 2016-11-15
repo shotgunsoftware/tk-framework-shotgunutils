@@ -131,7 +131,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         if index.isValid():
             item = self.itemFromIndex(index)
             if isinstance(item, ShotgunHierarchyItem):
-                self._request_data(item.path)
+                self._request_data(item.path())
 
         return super(ShotgunHierarchyModel, self).fetchMore(index)
 
@@ -339,15 +339,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         if icon:
             item.setIcon(icon)
 
-    def _update_item(self, item, data_item):
-        """
-        Updates a model item with the given data
-
-        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to update
-        :param :class:`ShotgunDataItem` data_item: Data to update item with
-        """
-        print ">>>>>>>>>>>>>>>>>> UPPPPPPDATE"
-
     def _create_item(self, parent, data_item):
         """
         Creates a model item for the tree given data out of the data store
@@ -368,6 +359,11 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         item.setData(False, self._SG_ITEM_FETCHED_MORE)
 
         item.setData(not data_item.is_leaf(), self._SG_ITEM_HAS_CHILDREN)
+
+        # transfer a unique id from the data backend so we can
+        # refer back to this node later on
+        item.setData(data_item.unique_id, self._SG_ITEM_UNIQUE_ID)
+
 
         # attach the nav data for access later
         item.setData(sanitize_for_qt_model(data_item.shotgun_data), self.SG_DATA_ROLE)
@@ -390,6 +386,15 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         return item
 
+
+    def _update_item(self, item, data_item):
+        """
+        Updates a model item with the given data
+
+        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to update
+        :param :class:`ShotgunDataItem` data_item: Data to update item with
+        """
+        print "> UPDATE"
 
     #
     # def __update_subtree(self, item, nav_data):

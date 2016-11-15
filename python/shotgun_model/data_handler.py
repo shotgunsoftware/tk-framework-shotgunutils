@@ -44,7 +44,7 @@ class ShotgunDataHandler(QtCore.QObject):
     Shotgun Model low level data storage.
     """
     # version of binary format
-    FORMAT_VERSION = 23
+    FORMAT_VERSION = 27
 
     (UPDATED, ADDED, DELETED) = range(3)
 
@@ -272,18 +272,6 @@ class ShotgunDataHandler(QtCore.QObject):
             self._log_debug("No cache item found for id %s" % unique_id)
 
         return num_nodes_generated
-
-    def generate_data_request(self, data_retriever):
-        """
-        Generate a data request for a data retriever.
-        Once the data has arrived, update_data() will be called.
-
-        :returns: Request id or None if no work is needed
-        """
-        raise NotImplementedError(
-            "The 'generate_data_request' method has not been "
-            "implemented for this ShotgunDataHandler subclass."
-        )
 
     def generate_data_request(self, data_retriever):
         """

@@ -74,7 +74,7 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
 
         if not item_path:
             raise ShotgunModelDataError(
-                "Unexpected error occured. Could not determine the path"
+                "Unexpected error occurred. Could not determine the path"
                 "from the queried hierarchy item."
             )
 
@@ -119,6 +119,11 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
                 self.PARENT: parent_item,
                 self.CACHE_CHILDREN: {},
             }
+
+            # if we have children in the existing cache, include those
+            if unique_field_value in self._cache[self.CACHE_BY_UID]:
+                item[self.CACHE_CHILDREN] = self._cache[self.CACHE_BY_UID][unique_field_value][self.CACHE_CHILDREN]
+
             new_items[unique_field_value] = item
 
             # now check with prev data structure to see if it has changed
