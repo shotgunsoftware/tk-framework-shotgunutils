@@ -22,7 +22,7 @@ from .shotgun_standard_item import ShotgunStandardItem
 from .shotgun_query_model import ShotgunQueryModel
 from .data_handler_nav import ShotgunNavDataHandler
 from .data_item import ShotgunDataItem
-from .util import get_sg_data, sanitize_qt, sanitize_for_qt_model
+from .util import get_sg_data, sanitize_for_qt_model
 
 
 class ShotgunHierarchyModel(ShotgunQueryModel):
@@ -321,7 +321,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             icon for.
         """
         icon = None
-        data = get_sg_data(item)
         item_kind = item.kind()
 
         if item_kind in ["entity", "entity_type"]:

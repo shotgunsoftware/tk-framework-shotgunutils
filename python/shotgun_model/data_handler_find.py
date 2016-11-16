@@ -7,23 +7,46 @@
 # By accessing, using, copying or modifying this work you indicate your
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
-import urlparse
-import time
 import gc
 
 from .data_handler import ShotgunDataHandler, log_timing
 from .data_item import ShotgunDataItem
 from .errors import ShotgunModelDataError
 
+
 class ShotgunFindDataHandler(ShotgunDataHandler):
     """
-    Shotgun Model low level data storage.
+    Shotgun Model low level data storage for use
+    with the Shotgun Model.
+
+    This implements a data storage where a single
+    shotgun find query is stored in the cache file.
     """
 
-    def __init__(self, entity_type, filters, order, hierarchy, fields, column_fields, download_thumbs, limit, additional_filter_presets, cache_path, parent):
+    def __init__(self, entity_type, filters, order, hierarchy, fields, download_thumbs, limit, additional_filter_presets, cache_path, parent):
         """
-        :param cache_path: Path to cache file location
-        :param parent: Parent QT object
+        :param entity_type:               Shotgun entity type to download
+        :param filters:                   List of Shotgun filters. Standard Shotgun syntax.
+        :param order:                     Order clause for the Shotgun data. Standard Shotgun API syntax.
+        :param hierarchy:                 List of grouping fields. These should be names of Shotgun
+                                          fields. If you for example want to create a list of items,
+                                          the value ``["code"]`` will be suitable. This will generate a data
+                                          model which is flat and where each item's default name is the
+                                          Shotgun name field. If you want to generate a tree where assets
+                                          are broken down by asset type, you could instead specify
+                                          ``["sg_asset_type", "code"]``.
+        :param fields:                    List of field names to retrieve from Shotgun (in addition to
+                                          the ones specified in the hierarchy parameter).
+        :param download_thumbs:           Boolean to indicate if this model should attempt
+                                          to download and process thumbnails for the downloaded data.
+        :param limit:                     Limit the number of results returned from Shotgun. In conjunction with the order
+                                          parameter, this can be used to effectively cap the data set that the model
+                                          is handling, allowing a user to for example show the twenty most recent notes or
+                                          similar.
+        :param additional_filter_presets: List of Shotgun filter presets to apply, e.g.
+                                          ``[{"preset_name":"LATEST","latest_by":"BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT"}]``
+        :param cache_path:                Path to cache file location
+        :param parent:                    Parent QT object
         """
         super(ShotgunFindDataHandler, self).__init__(cache_path, parent)
         self.__entity_ids = None
@@ -32,7 +55,6 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         self.__order = order
         self.__hierarchy = hierarchy
         self.__fields = fields
-        self.__column_fields = column_fields
         self.__download_thumbs = download_thumbs
         self.__limit = limit
         self.__additional_filter_presets = additional_filter_presets
@@ -76,18 +98,25 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
     def get_uid_from_entity_id(self, entity_id):
         """
         Returns the unique id for a given entity or None if not found
+
+        :param entity_id: Shotgun entity id to resolve
+        :returns: unique id as string or int, to be used with
+                  :meth:`get_data_item_from_uid`.
         """
         for uid in self._cache[self.CACHE_BY_UID].keys():
             if isinstance(uid, int) and uid == entity_id:
                 return uid
         return None
 
-
     def generate_data_request(self, data_retriever):
         """
         Generate a data request for a data retriever.
-        Once the data has arrived, update_data() will be called.
 
+        Once the data has arrived, the caller is expected to
+        call meth:`update_data` and pass in the received
+        data payload for processing.
+
+        :param data_retriever: :class:`~tk-framework-shotgunutils:shotgun_data.ShotgunDataRetriever` instance.
         :returns: Request id or None if no work is needed
         """
         # only request data from shotgun is filters are defined.
@@ -96,7 +125,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
 
         else:
             # get data from shotgun - list/set cast to ensure unique fields
-            fields = self.__hierarchy + self.__fields + self.__column_fields
+            fields = self.__hierarchy + self.__fields
             if self.__download_thumbs:
                 fields = fields + ["image"]
             fields = list(set(fields))
@@ -119,21 +148,35 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                 **find_kwargs
             )
 
-        print "req id: %s" % request_id
         return request_id
-
 
     @log_timing
     def update_data(self, sg_data):
         """
-        Adds find data to the data set in memory.
+        The counterpart to :meth:`generate_data_request`. When the data
+        request has been carried out, this method should be called by the calling
+        class and the data payload from Shotgun should be provided via the
+        sg_data parameter.
 
-        Runs a comparison between old and new data and returns a list of entity ids
-        that have changed between what was previously in the database and what is there now.
+        The shotgun find data is compared against the existing tree and
+        a list of differences is returned, indicating which nodes were
+        added, deleted and modified, on the following form::
 
-        raises an exception if no cache is loaded.
+            [
+             {
+                "data": ShotgunDataItem instance,
+                "mode": self.UPDATED|ADDED|DELETED
+             },
+             {
+                "data": ShotgunDataItem instance,
+                "mode": self.UPDATED|ADDED|DELETED
+             },
+             ...
+            ]
 
-        :returns: list of updated plugin ids. empty list if cache was up to date.
+        :param sg_data: list, resulting from a Shotgun find query
+        :returns: list of updates. see above
+        :raises: :class:`ShotgunModelDataError` if no cache is loaded into memory
         """
         self._log_debug("Updating %s with %s shotgun records." % (self, len(sg_data)))
         self._log_debug("Hierarchy: %s" % self.__hierarchy)
@@ -158,7 +201,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         num_deletes = 0
         num_modifications = 0
 
-        new_cache = self._init_clear_cache()
+        new_cache = self._create_clear_cache()
 
         # analyze the incoming shotgun data
         for sg_item in sg_data:
@@ -292,9 +335,21 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         """
         Generates a unique key from a shotgun field.
 
-        Used in conjunction with the hierarchical nature of the find data handler -
-        assuming that on each level, values are unique.
+        Used in conjunction with the hierarchical nature of the find data handler.
+
+        :param parent_unique_key: uid for the parent
+        :param field: the shotgun field that the node represents
+        :param sg_data: associated shotgun data dictionary
+        :returns: Unique string or int
         """
+        # note: these ids are written to disk and kept in memory
+        # and thus affect memory usage and i/o peformance. We assume
+        # that a vast majority of nodes are leaves and store these as
+        # ints for compactness. non-leaf nodes have a "path-like" string
+        # to uniquely describe their location in the tree.
+        #
+        # we assume that on each level, values are unique.
+
         value = sg_data.get(field)
 
         if isinstance(value, dict) and "id" in value and "type" in value:

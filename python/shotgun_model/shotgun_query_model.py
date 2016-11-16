@@ -12,9 +12,10 @@ import sgtk
 import weakref
 from sgtk.platform.qt import QtCore, QtGui
 
-from .util import get_sanitized_data, get_sg_data, sanitize_qt, sanitize_for_qt_model
+from .util import sanitize_qt
 
 from .shotgun_standard_item import ShotgunStandardItem
+
 
 class ShotgunQueryModel(QtGui.QStandardItemModel):
     """
@@ -615,7 +616,16 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
     def _request_data(self, *args, **kwargs):
         """
+        Routes a data request to the current :class:`DataHandler` and initiates
+        a data fetching operation. Once data has arrived, :meth:`_create_item` and
+        :meth:`_update_item` will be called for each created or updated object
+        retrieved from the remote data set.
 
+        This is normally called from subclassing implementations when they want
+        trigger a new data fetch cycle.
+
+        All parameters passed to this method will be forwarded to
+        :meth:`DataHandler.generate_data_request`.
         """
         if not self._sg_data_retriever:
             raise sgtk.TankError("Data retriever is not available!")

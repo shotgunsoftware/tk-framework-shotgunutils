@@ -7,26 +7,15 @@
 # By accessing, using, copying or modifying this work you indicate your
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
-from __future__ import with_statement
-
-import errno
-import os
-import cPickle
-import time
-
-# toolkit imports
-import sgtk
-from sgtk.platform.qt import QtCore, QtGui
-
 
 from .data_handler import ShotgunDataHandler
 
 
 class ShotgunDataItem(object):
     """
-    Object wrapper around a data entry. This is used by
-    the :meth:`ShotgunDataHandler.generate_child_nodes()` method in order
-    to pass data cleanly into the item factory method callback.
+    Object wrapper around an entry in the :class:`DataHandler`.
+    These objects are returned by all datahandler methods and
+    forms the official interface for data exchange.
     """
 
     def __init__(self, data_dict):

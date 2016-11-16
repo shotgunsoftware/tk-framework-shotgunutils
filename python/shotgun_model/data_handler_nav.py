@@ -17,7 +17,12 @@ from .data_item import ShotgunDataItem
 
 class ShotgunNavDataHandler(ShotgunDataHandler):
     """
-    Data storage for navigation tree data via the nav_expand API endpoint.
+    Shotgun Model low level data storage for use
+    with the Shotgun Hierarchy Model.
+
+    This implements a data storage where a series of
+    nav_expand queries are stringed together into a single
+    cache file on disk.
     """
 
     # constant values to refer to the fields where the paths are stored in the
@@ -27,8 +32,27 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
 
     def __init__(self, root_path, seed_entity_field, entity_fields, cache_path, parent):
         """
-        :param cache_path: Path to cache file location
-        :param parent: Parent QT object
+        :param str root_path: The path to the root of the hierarchy to display.
+            This corresponds to the ``path`` argument of the
+            :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`
+            api method. For example, ``/Project/65`` would correspond to a
+            project on you shotgun site with id of ``65``.
+
+        :param str seed_entity_field: This is a string that corresponds to the
+            field on an entity used to seed the hierarchy. For example, a value
+            of ``Version.entity`` would cause the model to display a hierarchy
+            where the leaves match the entity value of Version entities.
+
+        :param dict entity_fields: A dictionary that identifies what fields to
+            include on returned entities. Since the hierarchy can include any
+            entity structure, this argument allows for specification of
+            additional fields to include as these entities are returned. The
+            dict's keys correspond to the entity type and the value is a list
+            of field names to return.
+
+        :param str cache_path: Path to cache file location.
+
+        :param :class:`~PySide.QtGui.QObject` parent: Parent QT object.
         """
         super(ShotgunNavDataHandler, self).__init__(cache_path, parent)
         self.__root_path = root_path
@@ -38,8 +62,12 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
     def generate_data_request(self, data_retriever, path):
         """
         Generate a data request for a data retriever.
-        Once the data has arrived, update_data() will be called.
 
+        Once the data has arrived, the caller is expected to
+        call meth:`update_data` and pass in the received
+        data payload for processing.
+
+        :param data_retriever: :class:`~tk-framework-shotgunutils:shotgun_data.ShotgunDataRetriever` instance.
         :returns: Request id or None if no work is needed
         """
         self._log_debug("generate_data_request for path %s" % path)
@@ -55,14 +83,30 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
     @log_timing
     def update_data(self, sg_data):
         """
-        Adds data to the data set in memory.
+        The counterpart to :meth:`generate_data_request`. When the data
+        request has been carried out, this method should be called by the calling
+        class and the data payload from Shotgun should be provided via the
+        sg_data parameter.
 
-        Runs a comparison between old and new data and returns a list of items
-        that have changed between what was previously in the database and what is there now.
+        The shotgun nav data is compared against an existing part of the tree and
+        a list of differences is returned, indicating which nodes were
+        added, deleted and modified, on the following form::
 
-        raises an exception if no cache is loaded.
+            [
+             {
+                "data": ShotgunDataItem instance,
+                "mode": self.UPDATED|ADDED|DELETED
+             },
+             {
+                "data": ShotgunDataItem instance,
+                "mode": self.UPDATED|ADDED|DELETED
+             },
+             ...
+            ]
 
-        :returns: list of updated plugin ids. empty list if cache was up to date.
+        :param sg_data: list, resulting from a Shotgun nav_expand query
+        :returns: list of updates. see above
+        :raises: :class:`ShotgunModelDataError` if no cache is loaded into memory
         """
         if self._cache is None:
             raise ShotgunModelDataError("No data currently loaded in memory!")

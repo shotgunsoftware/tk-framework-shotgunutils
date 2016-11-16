@@ -22,6 +22,7 @@ from sgtk.platform.qt import QtCore, QtGui
 
 from .errors import ShotgunModelDataError
 
+
 def log_timing(func):
     """
     Decorator that times and logs the execution of a method.
@@ -41,14 +42,40 @@ def log_timing(func):
 
 class ShotgunDataHandler(QtCore.QObject):
     """
-    Shotgun Model low level data storage.
+    Abstract class that manages low level data storage for QT models.
+
+    This class abstracts away the data management and allows
+    the model to access the data in a simple tree-like fashion.
+    Each node in the tree is also identified by a unique id
+    and can be accessed directly via this id in an O(1) lookup.
+
+    It also offers fast serialization and loading. Each
+    ShotgunDataHandler is connected to a single cache file on disk.
+
+    Each QT model typically sublcasses this in order to create
+    a specific data handler. These methods need to be implemented
+    by all deriving classes:
+
+    - generate_data_request - called by the model when it needs
+      additional data to be loaded from shotgun. The data handler
+      formulates the exact request to be sent out to the server.
+
+    - update_data - the counterpart of generate_data_request: this
+      is called when the requested shotgun data is returned and
+      needs to be inserted into the data structure.
+
+    Data returned back from this class to the Model layer
+    is always sent as ShotgunDataItem object to provide a full
+    encapsulation around the internals of this class.
     """
-    # version of binary format
+    # version of binary format - increment this whenever changes
+    # are made which renders the cache files non-backwards compatible.
     FORMAT_VERSION = 27
 
+    # constants for updates
     (UPDATED, ADDED, DELETED) = range(3)
 
-    # for serialization performance
+    # internal constants for serialization performance
     (CACHE_BY_UID, CACHE_CHILDREN, IS_LEAF, UID, PARENT, FIELD, SG_DATA) = range(7)
 
     def __init__(self, cache_path, parent):
@@ -75,22 +102,23 @@ class ShotgunDataHandler(QtCore.QObject):
             len(self._cache[self.CACHE_BY_UID])
         )
 
-    def _init_clear_cache(self):
+    def _create_clear_cache(self):
         """
         Helper method - initializes a clear cache.
+
         :returns: new cache dictionary
         """
         return {
-            self.CACHE_CHILDREN: {},
-            self.CACHE_BY_UID: {},
-            self.UID: None
+            self.CACHE_CHILDREN: {},  # hierarchy
+            self.CACHE_BY_UID: {},    # uid-based lookup
+            self.UID: None            # the uid of the root is None
         }
 
     def _clear_cache(self):
         """
         Sets up an empty cache in memory
         """
-        self._cache = self._init_clear_cache()
+        self._cache = self._create_clear_cache()
 
     def is_cache_available(self):
         """
@@ -205,7 +233,7 @@ class ShotgunDataHandler(QtCore.QObject):
                 pickler = cPickle.Pickler(fh, protocol=2)
                 # speeds up pickling but only works when there
                 # are no cycles in the data set
-                #pickler.fast = 1
+                # pickler.fast = 1
 
                 # TODO: we are currently storing a parent node in our data structure
                 # for performance and cache size. By removing this, we could turn
@@ -228,6 +256,7 @@ class ShotgunDataHandler(QtCore.QObject):
         Given a unique id, return a :class:`ShotgunDataItem`
         Returns None if the given uid is not present in the cache.
 
+        :param unique_id: unique identifier, typically an int or a string
         :returns: :class:`ShotgunDataItem`
         """
         # avoid cyclic imports
@@ -246,6 +275,18 @@ class ShotgunDataHandler(QtCore.QObject):
         each node will be passed to the factory method for construction.
 
         unique id can be none, meaning generate the top level of the tree
+
+        :param unique_id:     Unique identifier, typically an int or a string
+        :param parent_object: Parent object that the requester wants to parent
+                              newly created nodes to. This object is passed into
+                              the node creation factory method as nodes are being
+                              created.
+        :param factory_fn:    Method to execute whenever a child node needs to
+                              be created. The factory_fn will be called with the
+                              following syntax: factory_fn(parent_object, data_item),
+                              where parent_object is the parent_object parameter and
+                              data_item is a :class:`ShotgunDataItem` representing the
+                              data that the node should be associated with.
 
         :returns: number of items generated.
         """
@@ -273,11 +314,17 @@ class ShotgunDataHandler(QtCore.QObject):
 
         return num_nodes_generated
 
-    def generate_data_request(self, data_retriever):
+    def generate_data_request(self, data_retriever, *args, **kwargs):
         """
         Generate a data request for a data retriever.
-        Once the data has arrived, update_data() will be called.
+        Subclassed implementations can add arbitrary
+        arguments in order to control the parameters and loading state.
 
+        Once the data has arrived, the caller is expected to
+        call meth:`update_data` and pass in the received
+        data payload for processing.
+
+        :param data_retriever: :class:`~tk-framework-shotgunutils:shotgun_data.ShotgunDataRetriever` instance.
         :returns: Request id or None if no work is needed
         """
         raise NotImplementedError(
@@ -287,14 +334,29 @@ class ShotgunDataHandler(QtCore.QObject):
 
     def update_data(self, sg_data):
         """
-        Adds find data to the data set in memory.
+        The counterpart to :meth:`generate_data_request`. When the data
+        request has been carried out, this method should be called by the calling
+        class and the data payload from Shotgun should be provided via the
+        sg_data parameter. Deriving classes implement the business logic for
+        how to insert the data correctly into the internal data structure.
 
-        Runs a comparison between old and new data and returns a list of entity ids
-        that have changed between what was previously in the database and what is there now.
+        A list of differences should be returned, indicating which nodes were
+        added, deleted and modified, on the following form::
 
-        raises an exception if no cache is loaded.
+            [
+             {
+                "data": ShotgunDataItem instance,
+                "mode": self.UPDATED|ADDED|DELETED
+             },
+             {
+                "data": ShotgunDataItem instance,
+                "mode": self.UPDATED|ADDED|DELETED
+             },
+             ...
+            ]
 
-        :returns: list of updated plugin ids. empty list if cache was up to date.
+        :param sg_data: data payload, usually a dictionary
+        :returns: list of updates. see above
         """
         raise NotImplementedError(
             "The 'update_data' method has not been "
@@ -325,8 +387,8 @@ class ShotgunDataHandler(QtCore.QObject):
 
             - Converting datetime objects to universal time stamps.
 
-        :param sg_data:
-        :return:
+        :param sg_data: Shotgun data dictionary
+        :return: Cleaned up Shotgun data dictionary
         """
         # Older versions of Shotgun return special timezone classes. QT is
         # struggling to handle these. In fact, on linux it is struggling to
@@ -358,7 +420,6 @@ class ShotgunDataHandler(QtCore.QObject):
             sg_data = time.mktime(sg_data.timetuple())
 
         return sg_data
-
 
     def _sg_compare_data(self, a, b):
         """

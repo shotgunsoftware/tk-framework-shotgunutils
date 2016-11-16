@@ -20,8 +20,7 @@ from sgtk.platform.qt import QtCore, QtGui
 from .shotgun_standard_item import ShotgunStandardItem
 from .shotgun_query_model import ShotgunQueryModel
 from .data_handler_find import ShotgunFindDataHandler
-from .util import get_sanitized_data, get_sg_data, sanitize_qt, sanitize_for_qt_model
-
+from .util import get_sanitized_data, get_sg_data, sanitize_for_qt_model
 
 class ShotgunModel(ShotgunQueryModel):
     """
@@ -308,8 +307,7 @@ class ShotgunModel(ShotgunQueryModel):
             self.__filters,
             self.__order,
             self.__hierarchy,
-            self.__fields,
-            self.__column_fields,
+            self.__fields + self.__column_fields,
             self.__download_thumbs,
             self.__limit,
             self.__additional_filter_presets,
