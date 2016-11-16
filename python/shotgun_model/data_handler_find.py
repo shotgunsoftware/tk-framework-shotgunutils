@@ -145,7 +145,6 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
             self._log_debug("In-memory cache is empty.")
 
         # ensure the data is clean
-        # todo - optimize this!
         self._log_debug("sanitizing data...")
         sg_data = self._sg_clean_data(sg_data)
         self._log_debug("...done!")

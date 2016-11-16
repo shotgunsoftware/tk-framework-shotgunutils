@@ -363,7 +363,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # update values
         self._update_item(item, data_item)
 
-        # todo: handle multiple rows?
+        # todo: hierarchy model to handle multiple rows?
         parent.appendRow(item)
 
         return item

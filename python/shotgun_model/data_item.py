@@ -56,7 +56,6 @@ class ShotgunDataItem(object):
         """
         The shotgun field that this item represents
         """
-        # todo: can we get rid of this? It doesn't seem generic
         return self._data[ShotgunDataHandler.FIELD]
 
     @property
