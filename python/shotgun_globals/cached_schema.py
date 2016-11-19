@@ -551,8 +551,12 @@ class CachedShotgunSchema(QtCore.QObject):
 
         :returns: Field display name        
         """
+
         self = cls.__get_instance()
         project_id = project_id or self._get_current_project_id()
+
+        (sg_entity_type, field_name) = _account_for_bubble_fields(
+            sg_entity_type, field_name)
 
         self._check_schema_refresh(
             sg_entity_type,
@@ -588,6 +592,9 @@ class CachedShotgunSchema(QtCore.QObject):
         self = cls.__get_instance()
         project_id = project_id or self._get_current_project_id()
 
+        (sg_entity_type, field_name) = _account_for_bubble_fields(
+            sg_entity_type, field_name)
+
         self._check_schema_refresh(
             sg_entity_type,
             field_name,
@@ -621,14 +628,14 @@ class CachedShotgunSchema(QtCore.QObject):
 
         :returns: Data type string
         """
+
+        source_field_name = field_name
+
         self = cls.__get_instance()
         project_id = project_id or self._get_current_project_id()
 
-        # Detect bubble fields. If the field_name is "sg_sequence.Sequence.code"
-        # then we know we want to get the data type of the "code" field on the
-        # "Sequence" entity type.
-        if "." in field_name:
-            (sg_entity_type, field_name) = field_name.split(".")[-2:]
+        (sg_entity_type, field_name) = _account_for_bubble_fields(
+            sg_entity_type, field_name)
 
         self._check_schema_refresh(
             sg_entity_type,
@@ -641,7 +648,8 @@ class CachedShotgunSchema(QtCore.QObject):
                 data = self._field_schema[project_id][sg_entity_type][field_name]
                 return data["data_type"]["value"]
 
-        raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
+        raise ValueError("Could not find the schema for %s.%s" % (
+            sg_entity_type, source_field_name))
 
     @classmethod
     def get_valid_types(cls, sg_entity_type, field_name, project_id=None):
@@ -655,8 +663,14 @@ class CachedShotgunSchema(QtCore.QObject):
 
         :returns: List of entity types
         """
+
+        source_field_name = field_name
+
         self = cls.__get_instance()
         project_id = project_id or self._get_current_project_id()
+
+        (sg_entity_type, field_name) = _account_for_bubble_fields(
+            sg_entity_type, field_name)
 
         self._check_schema_refresh(
             sg_entity_type,
@@ -673,13 +687,14 @@ class CachedShotgunSchema(QtCore.QObject):
                     raise ValueError(
                         "The data type for %s.%s does not have valid types" % (
                             sg_entity_type,
-                            field_name
+                            source_field_name
                         )
                     )
 
                 return valid_types
 
-        raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
+        raise ValueError("Could not find the schema for %s.%s" % (
+            sg_entity_type, source_field_name))
 
     @classmethod
     def get_valid_values(cls, sg_entity_type, field_name, project_id=None):
@@ -695,8 +710,14 @@ class CachedShotgunSchema(QtCore.QObject):
 
         :raises: ``ValueError`` if the field has no valid values.
         """
+
+        source_field_name = field_name
+
         self = cls.__get_instance()
         project_id = project_id or self._get_current_project_id()
+
+        (sg_entity_type, field_name) = _account_for_bubble_fields(
+            sg_entity_type, field_name)
 
         self._check_schema_refresh(
             sg_entity_type,
@@ -714,12 +735,13 @@ class CachedShotgunSchema(QtCore.QObject):
                         raise ValueError(
                             "The data type for %s.%s does not have valid values" % (
                                 sg_entity_type,
-                                field_name
+                                source_field_name
                             )
                         )
 
                     return valid_values
-        raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
+        raise ValueError("Could not find the schema for %s.%s" % (
+            sg_entity_type, source_field_name))
 
     @classmethod
     def get_status_display_name(cls, status_code, project_id=None):
@@ -792,12 +814,23 @@ class CachedShotgunSchema(QtCore.QObject):
                             cache location will be returned if the current
                             context does not have an associated project.
 
+        The ``field_name`` may be in "bubble" notation. This method will account
+        for it and return the editability setting for the evaluated entity type
+        and field defined in the bubble noation. For example, if the field is
+        defined as "sg_sequence.Sequence.code", this method will return the
+        editability of the `code` field on the `Sequence` entity.
+
         :returns: ``True`` if the field is ediable, ``False`` otherwise.
         """
         self = cls.__get_instance()
 
+        source_field_name = field_name
+
         project_id = project_id or self._get_current_project_id()
         self._check_schema_refresh(sg_entity_type, field_name, project_id=project_id)
+
+        (sg_entity_type, field_name) = _account_for_bubble_fields(
+            sg_entity_type, field_name)
 
         # make sure the project id is found in each of the type and file schemas
         # and that the entity type and field name are found in their respective
@@ -813,7 +846,8 @@ class CachedShotgunSchema(QtCore.QObject):
             except KeyError:
                 raise ValueError("Could not determine editability from the schema.")
 
-        raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
+        raise ValueError("Could not find the schema for %s.%s" % (
+            sg_entity_type, source_field_name))
 
     @classmethod
     def field_is_visible(cls, sg_entity_type, field_name, project_id=None):
@@ -827,11 +861,23 @@ class CachedShotgunSchema(QtCore.QObject):
                             cache location will be returned if the current
                             context does not have an associated project.
 
+        The ``field_name`` may be in "bubble" notation. This method will account
+        for it and return the visibility setting for the evaluated entity type
+        and field defined in the bubble noation. For example, if the field is
+        defined as "sg_sequence.Sequence.code", this method will return the
+        visibility of the `code` field on the `Sequence` entity.
+
         :returns: ``True`` if the field is visible, ``False`` otherwise.
         """
+
+        source_field_name = field_name
+
         self = cls.__get_instance()
         project_id = project_id or self._get_current_project_id()
         self._check_schema_refresh(sg_entity_type, field_name, project_id=project_id)
+
+        (sg_entity_type, field_name) = _account_for_bubble_fields(
+            sg_entity_type, field_name)
 
         # make sure the project id is found in each of the type and file schemas
         # and that the entity type and field name are found in their respective
@@ -847,7 +893,8 @@ class CachedShotgunSchema(QtCore.QObject):
             except KeyError:
                 raise ValueError("Could not determine visibility from the schema.")
 
-        raise ValueError("Could not find the schema for %s.%s" % (sg_entity_type, field_name))
+        raise ValueError("Could not find the schema for %s.%s" % (
+            sg_entity_type, source_field_name))
 
     @classmethod
     def get_ordered_status_list(cls, display_names=False, project_id=None):
@@ -920,3 +967,29 @@ class CachedShotgunSchema(QtCore.QObject):
                 )
                 raise
 
+
+def _account_for_bubble_fields(sg_entity_type, field_name):
+    """Detect bubble fields and return the proper entity type and field name.
+
+    :param str sg_entity_type: The intput entity type name. If the field name
+        is a bubbled field notation, this value will be replaced by the
+        parsed entity type in the field string.
+    :param str field_name: The name of the field. This may be in "bubble"
+        notation: "sg_sequence.Sequence.code"
+
+    If field_name is in bubble notation (example: "sg_sequence.Sequence.code")
+    this method will return "code" as the field name and "Sequence" as the
+    entity type.
+
+    If the field name is not in bubble notation, this method simply returns a
+    tuple containing the supplied arguments.
+
+    :returns: A tuple (str, str) where the first item is the evaluated entity
+        type name and the second is the evaluated field name.
+    :rtype: tuple
+    """
+
+    if "." in field_name:
+        (sg_entity_type, field_name) = field_name.split(".")[-2:]
+
+    return (sg_entity_type, field_name)
