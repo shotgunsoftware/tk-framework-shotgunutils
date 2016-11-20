@@ -96,11 +96,14 @@ class ShotgunDataHandler(QtCore.QObject):
         Create a string representation of this instance
         :returns: A string representation of this instance
         """
-        return "<%s@%s (%d items)>" % (
-            self.__class__.__name__,
-            self._cache_path,
-            len(self._cache[self.CACHE_BY_UID])
-        )
+        if self._cache is None:
+            return "<%s@%s (unloaded)>" % (self.__class__.__name__, self._cache_path)
+        else:
+            return "<%s@%s (%d items)>" % (
+                self.__class__.__name__,
+                self._cache_path,
+                len(self._cache[self.CACHE_BY_UID])
+            )
 
     def _create_clear_cache(self):
         """
