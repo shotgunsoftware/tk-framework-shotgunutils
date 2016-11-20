@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Shotgun Software Inc.
+# Copyright (c) 2016 Shotgun Software Inc.
 # 
 # CONFIDENTIAL AND PROPRIETARY
 # 
@@ -10,67 +10,16 @@
 
 import sys
 import os
-import shutil
-import tempfile
 
 from tank_test.tank_test_base import *
-import tank
-from tank.errors import TankError
-from tank.platform import application
-from tank.platform import constants
-from tank.template import Template
-from tank.deploy import descriptor
+
+# import the test base class
+test_python_path = os.path.abspath(os.path.join( os.path.dirname(__file__), "..", "python"))
+sys.path.append(test_python_path)
+from base_test import TestShotgunUtilsFramework
 
 
-class TestFramework(TankTestBase):
-    """
-    General fixtures class for testing Toolkit apps
-    """
-    
-    def setUp(self):
-        """
-        Fixtures setup
-        """
-        super(TestFramework, self).setUp()
-        self.setup_fixtures()
-
-        # set up an environment variable that points to the root of the
-        # framework so we can specify its location in the environment fixture
-
-        self.framework_root = os.path.abspath(os.path.join( os.path.dirname(__file__), "..", ".."))
-        os.environ["FRAMEWORK_ROOT"] = self.framework_root
-
-        # Add these to mocked shotgun
-        self.add_to_sg_mock_db([self.project])
-
-        # run folder creation for the shot
-        self.tk.create_filesystem_structure(self.project["type"], self.project["id"])
-
-        # now make a context
-        context = self.tk.context_from_entity(self.project["type"], self.project["id"])
-
-        # and start the engine
-        self.engine = tank.platform.start_engine("test_engine", self.tk, context)
-
-        self.app = self.engine.apps["test_app"]
-        self.framework = self.app.frameworks['tk-framework-shotgunutils']
-
-
-    def tearDown(self):
-        """
-        Fixtures teardown
-        """
-        # engine is held as global, so must be destroyed.
-        cur_engine = tank.platform.current_engine()
-        if cur_engine:
-            cur_engine.destroy()
-
-        # important to call base class so it can clean up memory
-        super(TestFramework, self).tearDown()
-
-    
-    
-class TestDataHandler(TestFramework):
+class TestDataHandler(TestShotgunUtilsFramework):
     """
     Tests for the data handler low level io
     """
@@ -86,7 +35,42 @@ class TestDataHandler(TestFramework):
         """
         Test loading and saving
         """
-        dh = self.shotgun_model.data_handler.ShotgunDataHandler("/tmp/foo", None)
-        print dh
+        test_path = os.path.join(self.tank_temp, "cache.pickle")
+
+        dh = self.shotgun_model.data_handler.ShotgunDataHandler(test_path, None)
+
+        # no cache file on disk
+        self.assertFalse(dh.is_cache_available())
+
+        # not loaded
+        self.assertFalse(dh.is_cache_loaded())
+
+        # now load the cache
+        dh.load_cache()
+
+        # no cache file on disk
+        self.assertFalse(dh.is_cache_available())
+
+        # but it is loaded
+        self.assertTrue(dh.is_cache_loaded())
+
+        # save the cache
+        dh.save_cache()
+
+        # no cache file on disk
+        self.assertTrue(dh.is_cache_available())
+
+        # but it is loaded
+        self.assertTrue(dh.is_cache_loaded())
+
+        # remove from disk
+        dh.remove_cache()
+
+        # no cache file on disk
+        self.assertFalse(dh.is_cache_available())
+
+        # but it is loaded
+        self.assertFalse(dh.is_cache_loaded())
+
 
 

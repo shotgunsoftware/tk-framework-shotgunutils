@@ -162,9 +162,6 @@ class ShotgunDataHandler(QtCore.QObject):
         # unload from memory
         self.unload_cache()
 
-        # init again
-        self.load_cache()
-
         return True
 
     @log_timing

@@ -9,16 +9,14 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 """
-A simple engine to support unit tests.
+A dummy app
 """
 
-from tank.platform import Application
-import tank
-import sys
+from sgtk.platform import Application
 
 
 class TestApp(Application):
     
     def init_app(self):
-        print "app init"
-                
+        pass
+
