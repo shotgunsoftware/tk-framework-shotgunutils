@@ -11,7 +11,7 @@
 import sys
 import os
 
-from mock import patch, Mock
+from mock import patch, Mock, call
 from tank_test.tank_test_base import *
 
 # import the test base class
@@ -187,3 +187,61 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         Tests child node generation from cache
         """
 
+        test_path = os.path.join(self.tank_temp, "test_find_handler.pickle")
+
+        dh = self.shotgun_model.data_handler_find.ShotgunFindDataHandler(
+            entity_type="Asset",
+            filters=[],
+            order=None,
+            hierarchy=["sg_asset_type", "code"],
+            fields=["code"],
+            download_thumbs=True,
+            limit=None,
+            additional_filter_presets=None,
+            cache_path=test_path,
+            parent=None
+        )
+
+        dh.load_cache()
+
+        # push some test data in
+        sg_data = [
+            {"code": "p_foo", "type": "Asset", "id": 1, "sg_asset_type": "Prop"},
+            {"code": "p_bar", "type": "Asset", "id": 2, "sg_asset_type": "Prop"},
+            {"code": "p_baz", "type": "Asset", "id": 3, "sg_asset_type": "Prop"},
+            {"code": "c_foo", "type": "Asset", "id": 4, "sg_asset_type": "Character"},
+            {"code": "c_bar", "type": "Asset", "id": 5, "sg_asset_type": "Character"},
+            {"code": "c_baz", "type": "Asset", "id": 6, "sg_asset_type": "Character"},
+        ]
+        dh.update_data(sg_data)
+
+
+        callback = Mock()
+
+        dh.generate_child_nodes(None, None, callback)
+
+        calls = [
+            call(None, dh.get_data_item_from_uid("/Character")),
+            call(None, dh.get_data_item_from_uid("/Prop")),
+        ]
+
+        callback.assert_has_calls(calls)
+
+        # and check children
+        callback = Mock()
+        dh.generate_child_nodes("/Character", None, callback)
+        calls = [
+            call(None, dh.get_data_item_from_uid(4)),
+            call(None, dh.get_data_item_from_uid(5)),
+            call(None, dh.get_data_item_from_uid(6)),
+        ]
+        callback.assert_has_calls(calls)
+
+        callback = Mock()
+        dh.generate_child_nodes("/Prop", None, callback)
+        calls = [
+            call(None, dh.get_data_item_from_uid(1)),
+            call(None, dh.get_data_item_from_uid(2)),
+            call(None, dh.get_data_item_from_uid(3)),
+        ]
+        callback.assert_has_calls(calls)
