@@ -31,16 +31,19 @@ class TestDataHandler(TestShotgunUtilsFramework):
         super(TestDataHandler, self).setUp()
         self.shotgun_model = self.framework.import_module("shotgun_model")
 
-    def test_io(self):
+    def test_basic_io(self):
         """
         Test loading and saving
         """
-        test_path = os.path.join(self.tank_temp, "cache.pickle")
+        test_path = os.path.join(self.tank_temp, "test_basic_io.pickle")
 
         dh = self.shotgun_model.data_handler.ShotgunDataHandler(test_path, None)
 
         # no cache file on disk
         self.assertFalse(dh.is_cache_available())
+
+        # nothing loaded
+        self.assertEquals(dh.get_data_item_from_uid("foo"), None)
 
         # not loaded
         self.assertFalse(dh.is_cache_loaded())
@@ -54,6 +57,9 @@ class TestDataHandler(TestShotgunUtilsFramework):
         # but it is loaded
         self.assertTrue(dh.is_cache_loaded())
 
+        # nothing can be found
+        self.assertEquals(dh.get_data_item_from_uid("foo"), None)
+
         # save the cache
         dh.save_cache()
 
@@ -62,6 +68,9 @@ class TestDataHandler(TestShotgunUtilsFramework):
 
         # but it is loaded
         self.assertTrue(dh.is_cache_loaded())
+
+        # nothing can be found
+        self.assertEquals(dh.get_data_item_from_uid("foo"), None)
 
         # remove from disk
         dh.remove_cache()

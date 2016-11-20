@@ -33,6 +33,18 @@ class ShotgunDataItem(object):
         """
         return "<%s uid:%s>" % (self.__class__.__name__, self.unique_id)
 
+    def __eq__(self, other):
+        """
+        Test if this ShotgunDataItem instance is equal to another ShotgunDataItem instance
+
+        :param other:   Other ShotgunDataItem instance to compare with
+        :returns:       True if equal to other, False otherwise
+        """
+        if not isinstance(other, ShotgunDataItem):
+            return NotImplemented
+
+        return self.unique_id == other.unique_id
+
     @property
     def unique_id(self):
         """

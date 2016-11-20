@@ -265,7 +265,9 @@ class ShotgunDataHandler(QtCore.QObject):
         if not self.is_cache_loaded():
             return None
 
-        return ShotgunDataItem(self._cache[self.CACHE_BY_UID].get(unique_id))
+        data = self._cache[self.CACHE_BY_UID].get(unique_id)
+
+        return ShotgunDataItem(data) if data else None
 
     @log_timing
     def generate_child_nodes(self, unique_id, parent_object, factory_fn):
