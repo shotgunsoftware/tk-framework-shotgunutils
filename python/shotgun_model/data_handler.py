@@ -52,9 +52,10 @@ class ShotgunDataHandler(object):
     It also offers fast serialization and loading. Each
     ShotgunDataHandler is connected to a single cache file on disk.
 
-    Each Qt model typically sublcasses this in order to create
-    a specific data handler. These methods need to be implemented
-    by all deriving classes:
+    Each Qt model typically has a corresponding ShotgunDataHandler
+    subclass where data related business logic is implemented.
+    The following methods need to be implemented by all
+    deriving classes:
 
     - generate_data_request - called by the model when it needs
       additional data to be loaded from shotgun. The data handler
@@ -92,8 +93,7 @@ class ShotgunDataHandler(object):
 
     def __repr__(self):
         """
-        Create a string representation of this instance
-        :returns: A string representation of this instance
+        String representation of this instance
         """
         if self._cache is None:
             return "<%s@%s (unloaded)>" % (self.__class__.__name__, self._cache_path)

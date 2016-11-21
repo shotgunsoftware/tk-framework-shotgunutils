@@ -28,8 +28,7 @@ class ShotgunDataItem(object):
 
     def __repr__(self):
         """
-        Create a string representation of this instance
-        :returns: A string representation of this instance
+        String representation of this instance
         """
         return "<%s uid:%s>" % (self.__class__.__name__, self.unique_id)
 
