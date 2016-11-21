@@ -605,7 +605,7 @@ class ShotgunModel(ShotgunQueryModel):
         if data_item.is_leaf():
             # this is the leaf level!
             # attach the shotgun data so that we can access it later
-            # note: QT automatically changes everything to be unicode
+            # note: Qt automatically changes everything to be unicode
             # according to strange rules of its own, so force convert
             # all shotgun values to be proper unicode prior to setData
             item.setData(sanitize_for_qt_model(data_item.shotgun_data), self.SG_DATA_ROLE)

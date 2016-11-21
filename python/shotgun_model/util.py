@@ -59,10 +59,10 @@ def sanitize_for_qt_model(val):
     Useful when you have shotgun (or other) data and want to 
     prepare it for storage as role data in a model.
 
-    QT/pyside/pyqt automatically changes the data to be unicode
+    Qt/pyside/pyqt automatically changes the data to be unicode
     according to internal rules of its own, sometimes resulting in 
     unicode errors. A safe strategy for storing unicode data inside
-    QT model roles is therefore to ensure everything is converted to 
+    Qt model roles is therefore to ensure everything is converted to
     unicode prior to insertion into the model. This method ensures 
     that. All string values will be coonverted to unicode. UTF-8
     is assumed for all strings: 
@@ -71,7 +71,7 @@ def sanitize_for_qt_model(val):
     out: {'a': u'aaa', 'c': {'x': u'y', 'z': u'aa'}, 'b': 123, 'd': [{'x': u'y', 'z': u'aa'}]}
 
     This method is the counterpart to sanitize_qt() which is the reciprocal
-    of this operation. When working with QT models and shotgun data, 
+    of this operation. When working with Qt models and shotgun data,
     we recommend the following best practices:
 
     - when sg data is inserted into a role in model, run it through

@@ -46,7 +46,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         :param additional_filter_presets: List of Shotgun filter presets to apply, e.g.
                                           ``[{"preset_name":"LATEST","latest_by":"BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT"}]``
         :param cache_path:                Path to cache file location
-        :param parent:                    Parent QT object
+        :param parent:                    Parent Qt object
         """
         super(ShotgunFindDataHandler, self).__init__(cache_path, parent)
         self.__entity_ids = None

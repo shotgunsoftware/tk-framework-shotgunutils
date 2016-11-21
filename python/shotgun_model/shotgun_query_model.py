@@ -180,8 +180,8 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             # implementation results in memory issues - similar to reset(),
             # scenarios where objects are constructed in python (e.g.
             # QStandardItems) and then handed over to a model and then
-            # subsequently cleared and deallocated by QT itself (on the C++
-            # side) often results in dangling pointers across the pyside/QT
+            # subsequently cleared and deallocated by Qt itself (on the C++
+            # side) often results in dangling pointers across the pyside/Qt
             # boundary, ultimately resulting in crashes or instability.
 
             # ask async data retriever to clear its queue of queries
@@ -272,7 +272,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         Re-implements QAbstractItemModel:reset() by 'sealing it' so that it
         cannot be executed by calling code easily. This is because the reset
         method often results in crashes and instability because of how
-        PySide/QT manages memory.
+        PySide/Qt manages memory.
 
         For more information, see the clear() method in ``ShotgunModel``.
         """

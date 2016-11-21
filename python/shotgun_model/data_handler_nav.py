@@ -52,7 +52,7 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
 
         :param str cache_path: Path to cache file location.
 
-        :param :class:`~PySide.QtGui.QObject` parent: Parent QT object.
+        :param :class:`~PySide.QtGui.QObject` parent: Parent Qt object.
         """
         super(ShotgunNavDataHandler, self).__init__(cache_path, parent)
         self.__root_path = root_path

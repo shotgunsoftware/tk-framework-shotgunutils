@@ -42,7 +42,7 @@ def log_timing(func):
 
 class ShotgunDataHandler(QtCore.QObject):
     """
-    Abstract class that manages low level data storage for QT models.
+    Abstract class that manages low level data storage for Qt models.
 
     This class abstracts away the data management and allows
     the model to access the data in a simple tree-like fashion.
@@ -52,7 +52,7 @@ class ShotgunDataHandler(QtCore.QObject):
     It also offers fast serialization and loading. Each
     ShotgunDataHandler is connected to a single cache file on disk.
 
-    Each QT model typically sublcasses this in order to create
+    Each Qt model typically sublcasses this in order to create
     a specific data handler. These methods need to be implemented
     by all deriving classes:
 
@@ -81,7 +81,7 @@ class ShotgunDataHandler(QtCore.QObject):
     def __init__(self, cache_path, parent):
         """
         :param cache_path: Path to cache file location
-        :param parent: Parent QT object
+        :param parent: Parent Qt object
         """
         super(ShotgunDataHandler, self).__init__(parent)
         # keep a handle to the current app/engine/fw bundle for convenience
@@ -392,7 +392,7 @@ class ShotgunDataHandler(QtCore.QObject):
         :param sg_data: Shotgun data dictionary
         :return: Cleaned up Shotgun data dictionary
         """
-        # Older versions of Shotgun return special timezone classes. QT is
+        # Older versions of Shotgun return special timezone classes. Qt is
         # struggling to handle these. In fact, on linux it is struggling to
         # serialize any complex object via QDataStream. So we need to account
         # for this for older versions of SG.
