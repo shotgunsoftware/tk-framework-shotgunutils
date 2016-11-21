@@ -40,7 +40,7 @@ def log_timing(func):
     return wrapper
 
 
-class ShotgunDataHandler(QtCore.QObject):
+class ShotgunDataHandler(object):
     """
     Abstract class that manages low level data storage for Qt models.
 
@@ -78,12 +78,11 @@ class ShotgunDataHandler(QtCore.QObject):
     # internal constants for serialization performance
     (CACHE_BY_UID, CACHE_CHILDREN, IS_LEAF, UID, PARENT, FIELD, SG_DATA) = range(7)
 
-    def __init__(self, cache_path, parent):
+    def __init__(self, cache_path):
         """
         :param cache_path: Path to cache file location
-        :param parent: Parent Qt object
         """
-        super(ShotgunDataHandler, self).__init__(parent)
+        super(ShotgunDataHandler, self).__init__()
         # keep a handle to the current app/engine/fw bundle for convenience
         self._bundle = sgtk.platform.current_bundle()
         # the path to the cache file

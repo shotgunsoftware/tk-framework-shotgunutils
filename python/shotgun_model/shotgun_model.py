@@ -311,8 +311,7 @@ class ShotgunModel(ShotgunQueryModel):
             self.__download_thumbs,
             self.__limit,
             self.__additional_filter_presets,
-            self.__compute_cache_path(seed),
-            self
+            self.__compute_cache_path(seed)
         )
         # load up from disk
         self._log_debug("Loading data from cache file into memory...")

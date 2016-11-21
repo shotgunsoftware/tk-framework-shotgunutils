@@ -275,8 +275,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             self._path,
             self._seed_entity_field,
             self._entity_fields,
-            self.__compute_cache_path(cache_seed),
-            self
+            self.__compute_cache_path(cache_seed)
         )
 
         # load up from disk

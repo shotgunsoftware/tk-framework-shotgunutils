@@ -37,7 +37,7 @@ class TestDataHandler(TestShotgunUtilsFramework):
         """
         test_path = os.path.join(self.tank_temp, "test_basic_io.pickle")
 
-        dh = self.shotgun_model.data_handler.ShotgunDataHandler(test_path, None)
+        dh = self.shotgun_model.data_handler.ShotgunDataHandler(test_path)
 
         # no cache file on disk
         self.assertFalse(dh.is_cache_available())

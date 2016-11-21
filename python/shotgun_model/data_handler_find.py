@@ -23,7 +23,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
     shotgun find query is stored in the cache file.
     """
 
-    def __init__(self, entity_type, filters, order, hierarchy, fields, download_thumbs, limit, additional_filter_presets, cache_path, parent):
+    def __init__(self, entity_type, filters, order, hierarchy, fields, download_thumbs, limit, additional_filter_presets, cache_path):
         """
         :param entity_type:               Shotgun entity type to download
         :param filters:                   List of Shotgun filters. Standard Shotgun syntax.
@@ -46,9 +46,8 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         :param additional_filter_presets: List of Shotgun filter presets to apply, e.g.
                                           ``[{"preset_name":"LATEST","latest_by":"BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT"}]``
         :param cache_path:                Path to cache file location
-        :param parent:                    Parent Qt object
         """
-        super(ShotgunFindDataHandler, self).__init__(cache_path, parent)
+        super(ShotgunFindDataHandler, self).__init__(cache_path)
         self.__entity_ids = None
         self.__entity_type = entity_type
         self.__filters = filters

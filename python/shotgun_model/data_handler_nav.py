@@ -30,7 +30,7 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
     _SG_PATH_FIELD = "path"
     _SG_PARENT_PATH_FIELD = "parent_path"
 
-    def __init__(self, root_path, seed_entity_field, entity_fields, cache_path, parent):
+    def __init__(self, root_path, seed_entity_field, entity_fields, cache_path):
         """
         :param str root_path: The path to the root of the hierarchy to display.
             This corresponds to the ``path`` argument of the
@@ -51,10 +51,8 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
             of field names to return.
 
         :param str cache_path: Path to cache file location.
-
-        :param :class:`~PySide.QtGui.QObject` parent: Parent Qt object.
         """
-        super(ShotgunNavDataHandler, self).__init__(cache_path, parent)
+        super(ShotgunNavDataHandler, self).__init__(cache_path)
         self.__root_path = root_path
         self.__seed_entity_field = seed_entity_field
         self.__entity_fields = entity_fields

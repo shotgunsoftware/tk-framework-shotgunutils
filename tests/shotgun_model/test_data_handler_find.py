@@ -47,8 +47,7 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
             download_thumbs=True,
             limit=None,
             additional_filter_presets=None,
-            cache_path=test_path,
-            parent=None
+            cache_path=test_path
         )
 
         dh.load_cache()
@@ -86,8 +85,7 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
             download_thumbs=True,
             limit=None,
             additional_filter_presets=None,
-            cache_path=test_path,
-            parent=None
+            cache_path=test_path
         )
 
         dh.load_cache()
@@ -198,8 +196,7 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
             download_thumbs=True,
             limit=None,
             additional_filter_presets=None,
-            cache_path=test_path,
-            parent=None
+            cache_path=test_path
         )
 
         dh.load_cache()

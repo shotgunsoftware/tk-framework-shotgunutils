@@ -43,7 +43,6 @@ class TestShotgunNavDataHandler(TestShotgunUtilsFramework):
             seed_entity_field="Version.entity",
             entity_fields=None,
             cache_path=test_path,
-            parent=None
         )
 
         dh.load_cache()
@@ -69,7 +68,6 @@ class TestShotgunNavDataHandler(TestShotgunUtilsFramework):
             seed_entity_field="Version.entity",
             entity_fields=None,
             cache_path=test_path,
-            parent=None
         )
 
         dh.load_cache()
@@ -146,7 +144,6 @@ class TestShotgunNavDataHandler(TestShotgunUtilsFramework):
             seed_entity_field="Version.entity",
             entity_fields=None,
             cache_path=test_path,
-            parent=None
         )
 
         dh.load_cache()
