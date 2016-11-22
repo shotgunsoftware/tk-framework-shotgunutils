@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Globals Access &mdash; tk-framework-shotgunutils v4.4.14 documentation</title>
+  <title>Shotgun Globals Access &mdash; tk-framework-shotgunutils v4.4.15 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.4.14 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.4.15 documentation" href="index.html"/>
         <link rel="prev" title="Shotgun Toolkit QT Settings Wrapper" href="settings.html"/> 
 
   
@@ -116,7 +116,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.4.14.<br>
+    <b>tk-framework-shotgunutils</b> v4.4.15.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -427,7 +427,7 @@ If None, the current context&#8217;s project will be used.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>sg_entity_type</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the entity type</li>
 <li><strong>field_name</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the field name to check editibility</li>
 <li><strong>project_id</strong> &#8211; The project Entity id. If None, the current
@@ -437,8 +437,18 @@ context does not have an associated project.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">True</span></code> if the field is ediable, <code class="docutils literal"><span class="pre">False</span></code> otherwise.</p>
-</td>
+</tbody>
+</table>
+<p>The <code class="docutils literal"><span class="pre">field_name</span></code> may be in &#8220;bubble&#8221; notation. This method will account
+for it and return the editability setting for the evaluated entity type
+and field defined in the bubble noation. For example, if the field is
+defined as &#8220;sg_sequence.Sequence.code&#8221;, this method will return the
+editability of the <cite>code</cite> field on the <cite>Sequence</cite> entity.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">True</span></code> if the field is ediable, <code class="docutils literal"><span class="pre">False</span></code> otherwise.</td>
 </tr>
 </tbody>
 </table>
@@ -452,7 +462,7 @@ context does not have an associated project.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>sg_entity_type</strong> &#8211; the entity type</li>
 <li><strong>field_name</strong> &#8211; the field name to check visibility</li>
 <li><strong>project_id</strong> &#8211; The project Entity id. If None, the current
@@ -462,8 +472,18 @@ context does not have an associated project.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">True</span></code> if the field is visible, <code class="docutils literal"><span class="pre">False</span></code> otherwise.</p>
-</td>
+</tbody>
+</table>
+<p>The <code class="docutils literal"><span class="pre">field_name</span></code> may be in &#8220;bubble&#8221; notation. This method will account
+for it and return the visibility setting for the evaluated entity type
+and field defined in the bubble noation. For example, if the field is
+defined as &#8220;sg_sequence.Sequence.code&#8221;, this method will return the
+visibility of the <cite>code</cite> field on the <cite>Sequence</cite> entity.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">True</span></code> if the field is visible, <code class="docutils literal"><span class="pre">False</span></code> otherwise.</td>
 </tr>
 </tbody>
 </table>
@@ -526,7 +546,7 @@ dates as &#8220;Yesterday&#8221;, &#8220;Today&#8221;, or &#8220;Tomorrow&#8221;
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v4.4.14',
+            VERSION:'v4.4.15',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

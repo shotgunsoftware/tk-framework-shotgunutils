@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_globals.cached_schema &mdash; tk-framework-shotgunutils v4.4.14 documentation</title>
+  <title>shotgun_globals.cached_schema &mdash; tk-framework-shotgunutils v4.4.15 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.4.14 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v4.4.15 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -116,7 +116,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.4.14.<br>
+    <b>tk-framework-shotgunutils</b> v4.4.15.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -721,8 +721,12 @@
 
 <span class="sd">        :returns: Field display name        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
+
+        <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">_account_for_bubble_fields</span><span class="p">(</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span>
             <span class="n">sg_entity_type</span><span class="p">,</span>
@@ -758,6 +762,9 @@
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
 
+        <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">_account_for_bubble_fields</span><span class="p">(</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span>
             <span class="n">sg_entity_type</span><span class="p">,</span>
             <span class="n">field_name</span><span class="p">,</span>
@@ -791,14 +798,14 @@
 
 <span class="sd">        :returns: Data type string</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">source_field_name</span> <span class="o">=</span> <span class="n">field_name</span>
+
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
 
-        <span class="c1"># Detect bubble fields. If the field_name is &quot;sg_sequence.Sequence.code&quot;</span>
-        <span class="c1"># then we know we want to get the data type of the &quot;code&quot; field on the</span>
-        <span class="c1"># &quot;Sequence&quot; entity type.</span>
-        <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">field_name</span><span class="p">:</span>
-            <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">field_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>
+        <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">_account_for_bubble_fields</span><span class="p">(</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span>
             <span class="n">sg_entity_type</span><span class="p">,</span>
@@ -811,7 +818,8 @@
                 <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span>
                 <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
 
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">source_field_name</span><span class="p">))</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_valid_types</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -825,8 +833,14 @@
 
 <span class="sd">        :returns: List of entity types</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">source_field_name</span> <span class="o">=</span> <span class="n">field_name</span>
+
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
+
+        <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">_account_for_bubble_fields</span><span class="p">(</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span>
             <span class="n">sg_entity_type</span><span class="p">,</span>
@@ -843,13 +857,14 @@
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="s2">&quot;The data type for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> does not have valid types&quot;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="n">sg_entity_type</span><span class="p">,</span>
-                            <span class="n">field_name</span>
+                            <span class="n">source_field_name</span>
                         <span class="p">)</span>
                     <span class="p">)</span>
 
                 <span class="k">return</span> <span class="n">valid_types</span>
 
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">source_field_name</span><span class="p">))</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_valid_values</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -865,8 +880,14 @@
 
 <span class="sd">        :raises: ``ValueError`` if the field has no valid values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">source_field_name</span> <span class="o">=</span> <span class="n">field_name</span>
+
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
+
+        <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">_account_for_bubble_fields</span><span class="p">(</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span>
             <span class="n">sg_entity_type</span><span class="p">,</span>
@@ -884,12 +905,13 @@
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                             <span class="s2">&quot;The data type for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> does not have valid values&quot;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="n">sg_entity_type</span><span class="p">,</span>
-                                <span class="n">field_name</span>
+                                <span class="n">source_field_name</span>
                             <span class="p">)</span>
                         <span class="p">)</span>
 
                     <span class="k">return</span> <span class="n">valid_values</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">source_field_name</span><span class="p">))</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_status_display_name</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">status_code</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -962,12 +984,23 @@
 <span class="sd">                            cache location will be returned if the current</span>
 <span class="sd">                            context does not have an associated project.</span>
 
+<span class="sd">        The ``field_name`` may be in &quot;bubble&quot; notation. This method will account</span>
+<span class="sd">        for it and return the editability setting for the evaluated entity type</span>
+<span class="sd">        and field defined in the bubble noation. For example, if the field is</span>
+<span class="sd">        defined as &quot;sg_sequence.Sequence.code&quot;, this method will return the</span>
+<span class="sd">        editability of the `code` field on the `Sequence` entity.</span>
+
 <span class="sd">        :returns: ``True`` if the field is ediable, ``False`` otherwise.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
 
+        <span class="n">source_field_name</span> <span class="o">=</span> <span class="n">field_name</span>
+
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
+
+        <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">_account_for_bubble_fields</span><span class="p">(</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
 
         <span class="c1"># make sure the project id is found in each of the type and file schemas</span>
         <span class="c1"># and that the entity type and field name are found in their respective</span>
@@ -983,7 +1016,8 @@
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not determine editability from the schema.&quot;</span><span class="p">)</span>
 
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">source_field_name</span><span class="p">))</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">field_is_visible</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -997,11 +1031,23 @@
 <span class="sd">                            cache location will be returned if the current</span>
 <span class="sd">                            context does not have an associated project.</span>
 
+<span class="sd">        The ``field_name`` may be in &quot;bubble&quot; notation. This method will account</span>
+<span class="sd">        for it and return the visibility setting for the evaluated entity type</span>
+<span class="sd">        and field defined in the bubble noation. For example, if the field is</span>
+<span class="sd">        defined as &quot;sg_sequence.Sequence.code&quot;, this method will return the</span>
+<span class="sd">        visibility of the `code` field on the `Sequence` entity.</span>
+
 <span class="sd">        :returns: ``True`` if the field is visible, ``False`` otherwise.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">source_field_name</span> <span class="o">=</span> <span class="n">field_name</span>
+
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
+
+        <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">_account_for_bubble_fields</span><span class="p">(</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
 
         <span class="c1"># make sure the project id is found in each of the type and file schemas</span>
         <span class="c1"># and that the entity type and field name are found in their respective</span>
@@ -1017,7 +1063,8 @@
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not determine visibility from the schema.&quot;</span><span class="p">)</span>
 
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">source_field_name</span><span class="p">))</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_ordered_status_list</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">display_names</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -1051,6 +1098,71 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="s2">&quot;status_order&quot;</span><span class="p">]</span>
 
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">clear_cached_data</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove both the schema and status cache files from disk for</span>
+<span class="sd">        the specified project_id. If no project_id is specified, then</span>
+<span class="sd">        use the current context project.</span>
+
+<span class="sd">        :param project_id: The id of the project entity to remove</span>
+<span class="sd">                           schema and status cache files for. If</span>
+<span class="sd">                           None, the current context&#39;s project will</span>
+<span class="sd">                           be used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
+        <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
+
+        <span class="n">schema_cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_schema_cache_path</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">schema_cache</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Removing schema cache file : </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">schema_cache</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">schema_cache</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_error</span><span class="p">(</span>
+                    <span class="s2">&quot;Caught error attempting to remove schema cache file [</span><span class="si">%s</span><span class="s2">] :</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                    <span class="p">(</span><span class="n">schema_cache</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">raise</span>
+
+        <span class="n">status_cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_status_cache_path</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">status_cache</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Removing status cache file : </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">status_cache</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">status_cache</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_error</span><span class="p">(</span>
+                    <span class="s2">&quot;Caught error attempting to remove status cache file [</span><span class="si">%s</span><span class="s2">] :</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                    <span class="p">(</span><span class="n">status_cache</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">raise</span>
+
+
+<span class="k">def</span> <span class="nf">_account_for_bubble_fields</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Detect bubble fields and return the proper entity type and field name.</span>
+
+<span class="sd">    :param str sg_entity_type: The intput entity type name. If the field name</span>
+<span class="sd">        is a bubbled field notation, this value will be replaced by the</span>
+<span class="sd">        parsed entity type in the field string.</span>
+<span class="sd">    :param str field_name: The name of the field. This may be in &quot;bubble&quot;</span>
+<span class="sd">        notation: &quot;sg_sequence.Sequence.code&quot;</span>
+
+<span class="sd">    If field_name is in bubble notation (example: &quot;sg_sequence.Sequence.code&quot;)</span>
+<span class="sd">    this method will return &quot;code&quot; as the field name and &quot;Sequence&quot; as the</span>
+<span class="sd">    entity type.</span>
+
+<span class="sd">    If the field name is not in bubble notation, this method simply returns a</span>
+<span class="sd">    tuple containing the supplied arguments.</span>
+
+<span class="sd">    :returns: A tuple (str, str) where the first item is the evaluated entity</span>
+<span class="sd">        type name and the second is the evaluated field name.</span>
+<span class="sd">    :rtype: tuple</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">field_name</span><span class="p">:</span>
+        <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">field_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
 </pre></div>
 
            </div>
@@ -1083,7 +1195,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v4.4.14',
+            VERSION:'v4.4.15',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
