@@ -17,6 +17,7 @@ HAS_QVARIANT = hasattr(QtCore, "QVariant")
 HAS_QSTRING = hasattr(QtCore, "QString")
 HAS_QBYTEARRAY = hasattr(QtCore, "QByteArray")
 
+
 def get_sg_data(item):
     """
     Helper method.
@@ -30,6 +31,7 @@ def get_sg_data(item):
     """
     from .shotgun_model import ShotgunModel
     return get_sanitized_data(item, ShotgunModel.SG_DATA_ROLE)
+
 
 def get_sanitized_data(item, role):
     """
@@ -53,6 +55,7 @@ def get_sanitized_data(item, role):
         return sanitize_qt(item.data(role))
     except AttributeError:
         return None
+
 
 def sanitize_for_qt_model(val):
     """
@@ -83,11 +86,11 @@ def sanitize_for_qt_model(val):
     """
 
     if isinstance(val, list):
-        return [ sanitize_for_qt_model(d) for d in val ]
+        return [sanitize_for_qt_model(d) for d in val]
 
     elif isinstance(val, dict):
         new_val = {}
-        for (k,v) in val.iteritems():
+        for (k, v) in val.iteritems():
             # go through dictionary and convert each value separately
             new_val[k] = sanitize_for_qt_model(v)
         return new_val
@@ -97,6 +100,7 @@ def sanitize_for_qt_model(val):
 
     # for everything else, just pass through
     return val
+
 
 def sanitize_qt(val):
     """
@@ -132,11 +136,11 @@ def sanitize_qt(val):
         return sanitize_qt(val)    
     
     elif isinstance(val, list):
-        return [sanitize_qt(d) for d in val ]
+        return [sanitize_qt(d) for d in val]
     
     elif isinstance(val, dict):
         new_val = {}
-        for (k,v) in val.iteritems():
+        for (k, v) in val.iteritems():
             # both keys and values can be bad
             safe_key = sanitize_qt(k)
             safe_val = sanitize_qt(v)
@@ -145,4 +149,3 @@ def sanitize_qt(val):
 
     else:
         return val        
-
