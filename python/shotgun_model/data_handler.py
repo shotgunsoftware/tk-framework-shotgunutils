@@ -66,7 +66,7 @@ class ShotgunDataHandler(object):
       needs to be inserted into the data structure.
 
     Data returned back from this class to the Model layer
-    is always sent as ShotgunDataItem object to provide a full
+    is always sent as ShotgunItemData object to provide a full
     encapsulation around the internals of this class.
     """
     # version of binary format - increment this whenever changes
@@ -104,7 +104,7 @@ class ShotgunDataHandler(object):
                 len(self._cache[self.CACHE_BY_UID])
             )
 
-    def _create_clear_cache(self):
+    def _create_empty_cache(self):
         """
         Helper method - initializes a clear cache.
 
@@ -120,7 +120,7 @@ class ShotgunDataHandler(object):
         """
         Sets up an empty cache in memory
         """
-        self._cache = self._create_clear_cache()
+        self._cache = self._create_empty_cache()
 
     def is_cache_available(self):
         """
@@ -252,21 +252,26 @@ class ShotgunDataHandler(object):
 
     def get_data_item_from_uid(self, unique_id):
         """
-        Given a unique id, return a :class:`ShotgunDataItem`
+        Given a unique id, return a :class:`ShotgunItemData`
         Returns None if the given uid is not present in the cache.
 
-        :param unique_id: unique identifier, typically an int or a string
-        :returns: :class:`ShotgunDataItem`
+        Unique ids are constructed by :class:`ShotgunDataHandler`
+        and are usually retrieved from a :class:`ShotgunItemData`.
+        They are implementation specific and can be any type object,
+        but are normally strings, ints or None for the root node.
+
+        :param unique_id: unique identifier
+        :returns: :class:`ShotgunItemData`
         """
         # avoid cyclic imports
-        from .data_item import ShotgunDataItem
+        from .data_item import ShotgunItemData
 
         if not self.is_cache_loaded():
             return None
 
         data = self._cache[self.CACHE_BY_UID].get(unique_id)
 
-        return ShotgunDataItem(data) if data else None
+        return ShotgunItemData(data) if data else None
 
     @log_timing
     def generate_child_nodes(self, unique_id, parent_object, factory_fn):
@@ -286,13 +291,13 @@ class ShotgunDataHandler(object):
                               be created. The factory_fn will be called with the
                               following syntax: factory_fn(parent_object, data_item),
                               where parent_object is the parent_object parameter and
-                              data_item is a :class:`ShotgunDataItem` representing the
+                              data_item is a :class:`ShotgunItemData` representing the
                               data that the node should be associated with.
 
         :returns: number of items generated.
         """
         # avoid cyclic imports
-        from .data_item import ShotgunDataItem
+        from .data_item import ShotgunItemData
 
         num_nodes_generated = 0
 
@@ -307,7 +312,7 @@ class ShotgunDataHandler(object):
 
         if cache_node:
             for item in cache_node[self.CACHE_CHILDREN].itervalues():
-                data_item = ShotgunDataItem(item)
+                data_item = ShotgunItemData(item)
                 factory_fn(parent_object, data_item)
                 num_nodes_generated += 1
         else:
@@ -346,11 +351,11 @@ class ShotgunDataHandler(object):
 
             [
              {
-                "data": ShotgunDataItem instance,
+                "data": ShotgunItemData instance,
                 "mode": self.UPDATED|ADDED|DELETED
              },
              {
-                "data": ShotgunDataItem instance,
+                "data": ShotgunItemData instance,
                 "mode": self.UPDATED|ADDED|DELETED
              },
              ...

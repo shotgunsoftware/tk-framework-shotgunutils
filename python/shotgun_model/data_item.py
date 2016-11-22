@@ -11,7 +11,7 @@
 from .data_handler import ShotgunDataHandler
 
 
-class ShotgunDataItem(object):
+class ShotgunItemData(object):
     """
     Object wrapper around an entry in the :class:`DataHandler`.
     These objects are returned by all datahandler methods and
@@ -34,12 +34,12 @@ class ShotgunDataItem(object):
 
     def __eq__(self, other):
         """
-        Test if this ShotgunDataItem instance is equal to another ShotgunDataItem instance
+        Test if this ShotgunItemData instance is equal to another ShotgunItemData instance
 
-        :param other:   Other ShotgunDataItem instance to compare with
+        :param other:   Other ShotgunItemData instance to compare with
         :returns:       True if equal to other, False otherwise
         """
-        if not isinstance(other, ShotgunDataItem):
+        if not isinstance(other, ShotgunItemData):
             return NotImplemented
 
         return self.unique_id == other.unique_id
@@ -74,7 +74,7 @@ class ShotgunDataItem(object):
         if parent is None:
             return None
 
-        parent = ShotgunDataItem(parent)
+        parent = ShotgunItemData(parent)
         if parent.unique_id is None:
             # this is the invisible root node
             return None

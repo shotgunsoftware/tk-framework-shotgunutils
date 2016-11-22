@@ -10,7 +10,7 @@
 import gc
 
 from .data_handler import ShotgunDataHandler, log_timing
-from .data_item import ShotgunDataItem
+from .data_item import ShotgunItemData
 from .errors import ShotgunModelDataError
 
 
@@ -163,11 +163,11 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
 
             [
              {
-                "data": ShotgunDataItem instance,
+                "data": ShotgunItemData instance,
                 "mode": self.UPDATED|ADDED|DELETED
              },
              {
-                "data": ShotgunDataItem instance,
+                "data": ShotgunItemData instance,
                 "mode": self.UPDATED|ADDED|DELETED
              },
              ...
@@ -200,7 +200,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         num_deletes = 0
         num_modifications = 0
 
-        new_cache = self._create_clear_cache()
+        new_cache = self._create_empty_cache()
 
         # analyze the incoming shotgun data
         for sg_item in sg_data:
@@ -240,7 +240,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                     if unique_field_value not in self._cache[self.CACHE_BY_UID]:
                         # this is a new node that wasn't there before
                         diff_list.append({
-                            "data": ShotgunDataItem(item),
+                            "data": ShotgunItemData(item),
                             "mode": self.ADDED
                         })
                         num_adds += 1
@@ -249,7 +249,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                         old_record = self._cache[self.CACHE_BY_UID][unique_field_value][self.SG_DATA]
                         if not self._sg_compare_data(old_record, sg_item):
                             diff_list.append({
-                                "data": ShotgunDataItem(item),
+                                "data": ShotgunItemData(item),
                                 "mode": self.UPDATED
                             })
                             num_modifications += 1
@@ -275,7 +275,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                         if unique_field_value not in self._cache[self.CACHE_BY_UID]:
                             # this is a new node that wasn't there before
                             diff_list.append({
-                                "data": ShotgunDataItem(item),
+                                "data": ShotgunItemData(item),
                                 "mode": self.ADDED
                             })
                             num_adds += 1
@@ -289,7 +289,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                             # shot data dict.
                             if not self._sg_compare_data(current_record.get(field_name), sg_item.get(field_name)):
                                 diff_list.append({
-                                    "data": ShotgunDataItem(item),
+                                    "data": ShotgunItemData(item),
                                     "mode": self.UPDATED
                                 })
                                 num_modifications += 1
@@ -306,12 +306,12 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         for deleted_uid in current_uids.difference(new_uids):
             item = self._cache[self.CACHE_BY_UID][deleted_uid]
             diff_list.append({
-                "data": ShotgunDataItem(item),
+                "data": ShotgunItemData(item),
                 "mode": self.DELETED
             })
             num_deletes += 1
 
-        # lastly swap the new for8 the old
+        # lastly swap the new for the old
         self._clear_cache()
 
         # at this point, kick the gc to make sure the memory is freed up

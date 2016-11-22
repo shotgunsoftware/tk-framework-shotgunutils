@@ -21,7 +21,7 @@ from .shotgun_hierarchy_item import ShotgunHierarchyItem
 from .shotgun_standard_item import ShotgunStandardItem
 from .shotgun_query_model import ShotgunQueryModel
 from .data_handler_nav import ShotgunNavDataHandler
-from .data_item import ShotgunDataItem
+from .data_item import ShotgunItemData
 from .util import get_sg_data, sanitize_for_qt_model
 
 
@@ -341,7 +341,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         Creates a model item for the tree given data out of the data store
 
         :param :class:`~PySide.QtGui.QStandardItem` parent: Model item to parent the node under
-        :param :class:`ShotgunDataItem` data_item: Data to populate new item with
+        :param :class:`ShotgunItemData` data_item: Data to populate new item with
 
         :returns: Model item
         :rtype: :class:`ShotgunStandardItem`
@@ -371,7 +371,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         Updates a model item with the given data
 
         :param :class:`~PySide.QtGui.QStandardItem` item: Model item to update
-        :param :class:`ShotgunDataItem` data_item: Data to update item with
+        :param :class:`ShotgunItemData` data_item: Data to update item with
         """
 
         item.setText(data_item.shotgun_data["label"])

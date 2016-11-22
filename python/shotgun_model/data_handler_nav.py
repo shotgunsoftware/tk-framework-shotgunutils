@@ -12,7 +12,7 @@ import gc
 
 from .data_handler import ShotgunDataHandler, log_timing
 from .errors import ShotgunModelDataError
-from .data_item import ShotgunDataItem
+from .data_item import ShotgunItemData
 
 
 class ShotgunNavDataHandler(ShotgunDataHandler):
@@ -92,11 +92,11 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
 
             [
              {
-                "data": ShotgunDataItem instance,
+                "data": ShotgunItemData instance,
                 "mode": self.UPDATED|ADDED|DELETED
              },
              {
-                "data": ShotgunDataItem instance,
+                "data": ShotgunItemData instance,
                 "mode": self.UPDATED|ADDED|DELETED
              },
              ...
@@ -179,7 +179,7 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
             if unique_field_value not in self._cache[self.CACHE_BY_UID]:
                 # this is a new node that wasn't there before
                 diff_list.append({
-                    "data": ShotgunDataItem(item),
+                    "data": ShotgunItemData(item),
                     "mode": self.ADDED
                 })
                 num_adds += 1
@@ -188,7 +188,7 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
                 old_record = self._cache[self.CACHE_BY_UID][unique_field_value][self.SG_DATA]
                 if not self._sg_compare_data(old_record, sg_item):
                     diff_list.append({
-                        "data": ShotgunDataItem(item),
+                        "data": ShotgunItemData(item),
                         "mode": self.UPDATED
                     })
                     num_modifications += 1
@@ -202,7 +202,7 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
         for deleted_uid in current_uids.difference(new_uids):
             item = self._cache[self.CACHE_BY_UID][deleted_uid]
             diff_list.append({
-                "data": ShotgunDataItem(item),
+                "data": ShotgunItemData(item),
                 "mode": self.DELETED
             })
             num_deletes += 1
