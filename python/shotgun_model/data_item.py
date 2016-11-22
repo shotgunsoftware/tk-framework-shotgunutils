@@ -18,6 +18,14 @@ class ShotgunItemData(object):
     forms the official interface for data exchange.
     """
 
+    # @todo - a future optimisation may be to explore the usse of __slots__.
+    #
+    # It would be interesting to revisit ShotgunItemData in the future by
+    # having ShotgunDataItems stored directly in the pickled cache and
+    # use __slots__ to keep memory usage low. This would probably
+    # require a resolver class however for the Pickler since
+    # the path to our classes change every reload.
+
     def __init__(self, data_dict):
         """
         Do not construct this object by hand. Instances are created

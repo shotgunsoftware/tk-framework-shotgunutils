@@ -435,22 +435,26 @@ class ShotgunDataHandler(object):
         :returns: True if a is same as b, false otherwise
         """
         if isinstance(a, dict):
-            if not isinstance(b, dict):
+            # input is a dictionary
+            if isinstance(a, dict) and isinstance(b, dict) and len(a) == len(b):
+                # dicts are symmetrical. Compare items recursively.
+                for a_key in a.keys():
+                    if not self._sg_compare_data(a.get(a_key), b.get(a_key)):
+                        return False
+            else:
+                # dicts are misaligned
                 return False
-            if len(a) != len(b):
-                return False
-            for a_key in a.keys():
-                if not self._sg_compare_data(a.get(a_key), b.get(a_key)):
-                    return False
 
         elif isinstance(a, list):
-            if not isinstance(b, list):
+            # input is a list
+            if isinstance(a, list) and isinstance(b, list) and len(a) == len(b):
+                # lists are symmetrical. Compare items recursively.
+                for idx in xrange(len(a)):
+                    if not self._sg_compare_data(a[idx], b[idx]):
+                        return False
+            else:
+                # list items are misaligned
                 return False
-            if len(a) != len(b):
-                return False
-            for idx in xrange(len(a)):
-                if not self._sg_compare_data(a[idx], b[idx]):
-                    return False
 
         # handle thumbnail fields as a special case
         # thumbnail urls are (typically, there seem to be several standards!)
@@ -474,6 +478,7 @@ class ShotgunDataHandler(object):
                 return False
 
         elif a != b:
+            # compare all other values using simple equality
             return False
 
         return True
