@@ -279,8 +279,8 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         # now figure out if anything has been removed
         self._log_debug("Diffing new tree against old tree...")
 
-        current_uids = self._cache.uids
-        new_uids = new_cache.uids
+        current_uids = set(self._cache.uids)
+        new_uids = set(new_cache.uids)
 
         for deleted_uid in current_uids.difference(new_uids):
             diff_list.append({

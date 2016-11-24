@@ -54,21 +54,22 @@ class ShotgunDataHandlerCache(object):
     @property
     def uids(self):
         """
-        All the uids in this cache as a set
+        All uids in unspecified order, as an iterator for scalability
         """
-        return set(self._cache[self.CACHE_BY_UID].iterkeys())
+        return self._cache[self.CACHE_BY_UID].iterkeys()
 
     def get_child_uids(self, parent_uid):
         """
         Returns all the child uids for the given parent
+        Returned in unspecified order as an iterator for scalability
 
         :param parent_uid: Parent uid
         :returns: list of child uids
         """
         if parent_uid is None:
-            return self._cache[self.CACHE_CHILDREN].keys()
+            return self._cache[self.CACHE_CHILDREN].iterkeys()
         else:
-            return self._cache[self.CACHE_BY_UID][parent_uid][self.CACHE_CHILDREN].keys()
+            return self._cache[self.CACHE_BY_UID][parent_uid][self.CACHE_CHILDREN].iterkeys()
 
     def item_exists(self, unique_id):
         """

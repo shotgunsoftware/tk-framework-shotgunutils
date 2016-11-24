@@ -145,8 +145,8 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
         num_deletes = 0
         num_modifications = 0
 
-        new_uids = []
-        previous_uids = self._cache.get_child_uids(parent_uid)
+        new_uids = set()
+        previous_uids = set(self._cache.get_child_uids(parent_uid))
 
         # analyze the incoming shotgun data
         for sg_item in sg_data["children"]:
@@ -158,7 +158,7 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
             else:
                 unique_field_value = sg_item.get(self._SG_PATH_FIELD)
 
-            new_uids.append(unique_field_value)
+            new_uids.add(unique_field_value)
 
             # check if item already exists
             already_exists = self._cache.item_exists(unique_field_value)
@@ -191,7 +191,7 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
                 num_modifications += 1
 
         # now figure out if anything has been removed
-        for deleted_uid in set(previous_uids).difference(set(new_uids)):
+        for deleted_uid in previous_uids.difference(new_uids):
             item = self._cache.take_item(deleted_uid)
             diff_list.append({
                 "data": item,
