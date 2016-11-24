@@ -302,6 +302,8 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         item = self.itemFromIndex(index)
 
         if not isinstance(item, ShotgunStandardItem):
+            # there may be items of other types in the model
+            # (although unlikely) in that case push to base class
             return super(ShotgunQueryModel, self).hasChildren(index)
 
         return item.data(self._SG_ITEM_HAS_CHILDREN)
@@ -825,14 +827,13 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         :param node: :class:`~PySide.QtGui.QStandardItem` tree node
         """
-
         # depth first traversal
         for index in xrange(node.rowCount()):
             child_node = node.child(index)
             self.__do_depth_first_tree_deletion(child_node)
 
         # delete the child leaves
-        for index in range(node.rowCount())[::-1]:
+        for index in xrange(node.rowCount(), 0, -1):
             node.removeRow(index)
 
     def __remove_unique_id_r(self, item):

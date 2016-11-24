@@ -9,7 +9,6 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 from __future__ import with_statement
 
-import urlparse
 import errno
 import os
 import datetime
@@ -383,7 +382,7 @@ class ShotgunDataHandler(object):
         # >>> local_datetime.strftime('%Y-%m-%d %H:%M')
 
         if isinstance(sg_data, dict):
-            for k in sg_data.keys():
+            for k in sg_data:
                 sg_data[k] = self._sg_clean_data(sg_data[k])
         elif isinstance(sg_data, list):
             for i in range(len(sg_data)):

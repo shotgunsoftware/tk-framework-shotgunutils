@@ -40,22 +40,22 @@ class TestDataHandler(TestShotgunUtilsFramework):
         dh = self.shotgun_model.data_handler.ShotgunDataHandler(test_path)
 
         # no cache file on disk
-        self.assertFalse(dh.is_cache_available())
+        self.assertEquals(dh.is_cache_available(), False)
 
         # nothing loaded
         self.assertEquals(dh.get_data_item_from_uid("foo"), None)
 
         # not loaded
-        self.assertFalse(dh.is_cache_loaded())
+        self.assertEquals(dh.is_cache_loaded(), False)
 
         # now load the cache
         dh.load_cache()
 
         # no cache file on disk
-        self.assertFalse(dh.is_cache_available())
+        self.assertEquals(dh.is_cache_available(), False)
 
         # but it is loaded
-        self.assertTrue(dh.is_cache_loaded())
+        self.assertEquals(dh.is_cache_loaded(), True)
 
         # nothing can be found
         self.assertEquals(dh.get_data_item_from_uid("foo"), None)
@@ -64,10 +64,10 @@ class TestDataHandler(TestShotgunUtilsFramework):
         dh.save_cache()
 
         # no cache file on disk
-        self.assertTrue(dh.is_cache_available())
+        self.assertEquals(dh.is_cache_available(), True)
 
         # but it is loaded
-        self.assertTrue(dh.is_cache_loaded())
+        self.assertEquals(dh.is_cache_loaded(), True)
 
         # nothing can be found
         self.assertEquals(dh.get_data_item_from_uid("foo"), None)
@@ -76,10 +76,8 @@ class TestDataHandler(TestShotgunUtilsFramework):
         dh.remove_cache()
 
         # no cache file on disk
-        self.assertFalse(dh.is_cache_available())
+        self.assertEquals(dh.is_cache_available(), False)
 
         # but it is loaded
-        self.assertFalse(dh.is_cache_loaded())
-
-
+        self.assertEquals(dh.is_cache_loaded(), False)
 

@@ -10,7 +10,6 @@
 import gc
 
 from .data_handler import ShotgunDataHandler, log_timing
-from .data_item import ShotgunItemData
 from .errors import ShotgunModelDataError
 from .data_handler_cache import ShotgunDataHandlerCache
 from .util import compare_shotgun_data
@@ -111,32 +110,31 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         """
         # only request data from shotgun is filters are defined.
         if self.__filters is None:
-            request_id = None
+            return None
 
-        else:
-            # get data from shotgun - list/set cast to ensure unique fields
-            fields = self.__hierarchy + self.__fields
-            if self.__download_thumbs:
-                fields = fields + ["image"]
-            fields = list(set(fields))
+        # get data from shotgun - list/set cast to ensure unique fields
+        fields = self.__hierarchy + self.__fields
+        if self.__download_thumbs:
+            fields = fields + ["image"]
+        fields = list(set(fields))
 
-            find_kwargs = dict(
-                limit=self.__limit,
-            )
+        find_kwargs = dict(
+            limit=self.__limit,
+        )
 
-            # We only want to include the filter presets kwarg if it was explicitly asked
-            # for. The reason for this is that it's a Shotgun 7.0 feature server side, and
-            # we don't want to break backwards compatibility with older versions of Shotgun.
-            if self.__additional_filter_presets:
-                find_kwargs["additional_filter_presets"] = self.__additional_filter_presets
+        # We only want to include the filter presets kwarg if it was explicitly asked
+        # for. The reason for this is that it's a Shotgun 7.0 feature server side, and
+        # we don't want to break backwards compatibility with older versions of Shotgun.
+        if self.__additional_filter_presets:
+            find_kwargs["additional_filter_presets"] = self.__additional_filter_presets
 
-            request_id = data_retriever.execute_find(
-                self.__entity_type,
-                self.__filters,
-                fields,
-                self.__order,
-                **find_kwargs
-            )
+        request_id = data_retriever.execute_find(
+            self.__entity_type,
+            self.__filters,
+            fields,
+            self.__order,
+            **find_kwargs
+        )
 
         return request_id
 
@@ -333,21 +331,17 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
 
         if isinstance(value, dict) and "id" in value and "type" in value:
             # for single entity links, return the entity id
-            unique_key = value["id"]
+            unique_key = "%s_%s" % (value["type"], value["id"])
 
         elif isinstance(value, list):
             # this is a list of some sort. Loop over all elements and extract a comma separated list.
             formatted_values = []
-            if len(value) == 0:
-                # no items in list
-                formatted_values.append("_")
             for v in value:
                 if isinstance(v, dict) and "id" in v and "type" in v:
                     # This is a link field
-                    formatted_values.append(str(v["id"]))
+                    formatted_values.append("%s_%s" % (v["type"], v["id"]))
                 else:
                     formatted_values.append(str(v))
-
             unique_key = ",".join(formatted_values)
 
         else:

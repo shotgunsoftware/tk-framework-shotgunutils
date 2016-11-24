@@ -56,7 +56,7 @@ class ShotgunDataHandlerCache(object):
         """
         All the uids in this cache as a set
         """
-        return set(self._cache[self.CACHE_BY_UID])
+        return set(self._cache[self.CACHE_BY_UID].iterkeys())
 
     def get_child_uids(self, parent_uid):
         """
