@@ -27,8 +27,7 @@ class ShotgunStandardItem(QtGui.QStandardItem):
 
     def __repr__(self):
         """
-        Create a string representation of this instance
-        :returns: A string representation of this instance
+        String representation of this instance
         """
         return "<%s %s>" % (self.__class__.__name__, self.text())
 

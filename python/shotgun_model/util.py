@@ -11,11 +11,13 @@
 import tank
 from tank.platform.qt import QtCore, QtGui
 
+import urlparse
 
 # precalculated for performance
 HAS_QVARIANT = hasattr(QtCore, "QVariant")
 HAS_QSTRING = hasattr(QtCore, "QString")
 HAS_QBYTEARRAY = hasattr(QtCore, "QByteArray")
+
 
 def get_sg_data(item):
     """
@@ -30,6 +32,7 @@ def get_sg_data(item):
     """
     from .shotgun_model import ShotgunModel
     return get_sanitized_data(item, ShotgunModel.SG_DATA_ROLE)
+
 
 def get_sanitized_data(item, role):
     """
@@ -54,15 +57,16 @@ def get_sanitized_data(item, role):
     except AttributeError:
         return None
 
+
 def sanitize_for_qt_model(val):
     """
     Useful when you have shotgun (or other) data and want to 
     prepare it for storage as role data in a model.
 
-    QT/pyside/pyqt automatically changes the data to be unicode
+    Qt/pyside/pyqt automatically changes the data to be unicode
     according to internal rules of its own, sometimes resulting in 
     unicode errors. A safe strategy for storing unicode data inside
-    QT model roles is therefore to ensure everything is converted to 
+    Qt model roles is therefore to ensure everything is converted to
     unicode prior to insertion into the model. This method ensures 
     that. All string values will be coonverted to unicode. UTF-8
     is assumed for all strings: 
@@ -71,7 +75,7 @@ def sanitize_for_qt_model(val):
     out: {'a': u'aaa', 'c': {'x': u'y', 'z': u'aa'}, 'b': 123, 'd': [{'x': u'y', 'z': u'aa'}]}
 
     This method is the counterpart to sanitize_qt() which is the reciprocal
-    of this operation. When working with QT models and shotgun data, 
+    of this operation. When working with Qt models and shotgun data,
     we recommend the following best practices:
 
     - when sg data is inserted into a role in model, run it through
@@ -83,11 +87,11 @@ def sanitize_for_qt_model(val):
     """
 
     if isinstance(val, list):
-        return [ sanitize_for_qt_model(d) for d in val ]
+        return [sanitize_for_qt_model(d) for d in val]
 
     elif isinstance(val, dict):
         new_val = {}
-        for (k,v) in val.iteritems():
+        for (k, v) in val.iteritems():
             # go through dictionary and convert each value separately
             new_val[k] = sanitize_for_qt_model(v)
         return new_val
@@ -97,6 +101,7 @@ def sanitize_for_qt_model(val):
 
     # for everything else, just pass through
     return val
+
 
 def sanitize_qt(val):
     """
@@ -132,11 +137,11 @@ def sanitize_qt(val):
         return sanitize_qt(val)    
     
     elif isinstance(val, list):
-        return [ sanitize_qt(d) for d in val ]
+        return [sanitize_qt(d) for d in val]
     
     elif isinstance(val, dict):
         new_val = {}
-        for (k,v) in val.iteritems():
+        for (k, v) in val.iteritems():
             # both keys and values can be bad
             safe_key = sanitize_qt(k)
             safe_val = sanitize_qt(v)
@@ -146,3 +151,59 @@ def sanitize_qt(val):
     else:
         return val        
 
+
+def compare_shotgun_data(a, b):
+    """
+    Compares two shotgun data structures.
+    Both inputs are assumed to contain utf-8 encoded data.
+
+    :returns: True if a is same as b, false otherwise
+    """
+    if isinstance(a, dict):
+        # input is a dictionary
+        if isinstance(a, dict) and isinstance(b, dict) and len(a) == len(b):
+            # dicts are symmetrical. Compare items recursively.
+            for a_key in a.keys():
+                if not compare_shotgun_data(a.get(a_key), b.get(a_key)):
+                    return False
+        else:
+            # dicts are misaligned
+            return False
+
+    elif isinstance(a, list):
+        # input is a list
+        if isinstance(a, list) and isinstance(b, list) and len(a) == len(b):
+            # lists are symmetrical. Compare items recursively.
+            for idx in xrange(len(a)):
+                if not compare_shotgun_data(a[idx], b[idx]):
+                    return False
+        else:
+            # list items are misaligned
+            return False
+
+    # handle thumbnail fields as a special case
+    # thumbnail urls are (typically, there seem to be several standards!)
+    # on the form:
+    # https://sg-media-usor-01.s3.amazonaws.com/xxx/yyy/
+    #   filename.ext?lots_of_authentication_headers
+    #
+    # the query string changes all the times, so when we check if an item
+    # is out of date, omit it.
+    elif (isinstance(a, str) and isinstance(b, str) and
+          a.startswith("http") and b.startswith("http") and
+          ("amazonaws" in a or "AccessKeyId" in a)):
+        # attempt to parse values are urls and eliminate the querystring
+        # compare hostname + path only
+        url_obj_a = urlparse.urlparse(a)
+        url_obj_b = urlparse.urlparse(b)
+        compare_str_a = "%s/%s" % (url_obj_a.netloc, url_obj_a.path)
+        compare_str_b = "%s/%s" % (url_obj_b.netloc, url_obj_b.path)
+        if compare_str_a != compare_str_b:
+            # url has changed
+            return False
+
+    elif a != b:
+        # compare all other values using simple equality
+        return False
+
+    return True

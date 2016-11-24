@@ -156,13 +156,12 @@ refreshes its data asynchronously.
                       hasChildren,
                       reset
 
-    **Loading & Refreshing the Hierarchy Data**
+    **Loading the Hierarchy Data**
 
     These methods are used by subclasses to define the Shotgun query that loads
     and caches the hierarchy items and refreshes them once cached.
 
     .. automethod:: _load_data
-    .. automethod:: _refresh_data
 
     **Customizing the Hierarchy Items**
 
@@ -170,7 +169,6 @@ refreshes its data asynchronously.
     and the information it displays when attached to a view.
 
     .. automethod:: _before_data_processing
-    .. automethod:: _before_item_removed
     .. automethod:: _finalize_item
     .. automethod:: _item_created
     .. automethod:: _load_external_data

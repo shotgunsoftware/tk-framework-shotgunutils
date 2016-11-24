@@ -18,7 +18,7 @@ requires_shotgun_fields:
 
 # More verbose description of this item 
 display_name: "Shotgun Utilities Framework"
-description: "A Collection of QT objects and utilities to simplify app development and Shotgun connectivity."
+description: "A Collection of Qt objects and utilities to simplify app development and Shotgun connectivity."
 
 # Required minimum versions for this item to run
 requires_shotgun_version:

@@ -1,0 +1,16 @@
+engines:
+
+    test_engine:
+
+        location: {'type': 'dev', 'path': '{PIPELINE_CONFIG}/config/bundles/test_engine'}
+        debug_logging: false
+
+        apps:
+            test_app:
+                location: {'type': 'dev', 'path': '{PIPELINE_CONFIG}/config/bundles/test_app'}
+
+frameworks:
+  tk-framework-shotgunutils_v4.x.x:
+    location: {type: path, path: '$FRAMEWORK_ROOT' }
+
+                

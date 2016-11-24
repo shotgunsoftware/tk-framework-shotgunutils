@@ -20,3 +20,7 @@ class CacheReadVersionMismatch(ShotgunModelError):
     """Indicates that a cache file is incompatible with this code"""
     pass
 
+
+class ShotgunModelDataError(ShotgunModelError):
+    """Error used for all data storage related issues."""
+    pass
