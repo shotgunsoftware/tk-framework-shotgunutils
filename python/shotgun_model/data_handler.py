@@ -21,7 +21,7 @@ import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 
 from .errors import ShotgunModelDataError
-
+from .data_handler_cache import ShotgunDataHandlerCache
 
 def log_timing(func):
     """
@@ -76,9 +76,6 @@ class ShotgunDataHandler(object):
     # constants for updates
     (UPDATED, ADDED, DELETED) = range(3)
 
-    # internal constants for serialization performance
-    (CACHE_BY_UID, CACHE_CHILDREN, IS_LEAF, UID, PARENT, FIELD, SG_DATA) = range(7)
-
     def __init__(self, cache_path):
         """
         :param cache_path: Path to cache file location
@@ -101,26 +98,8 @@ class ShotgunDataHandler(object):
             return "<%s@%s (%d items)>" % (
                 self.__class__.__name__,
                 self._cache_path,
-                len(self._cache[self.CACHE_BY_UID])
+                self._cache.size
             )
-
-    def _create_empty_cache(self):
-        """
-        Helper method - initializes a clear cache.
-
-        :returns: new cache dictionary
-        """
-        return {
-            self.CACHE_CHILDREN: {},  # hierarchy
-            self.CACHE_BY_UID: {},    # uid-based lookup
-            self.UID: None            # the uid of the root is None
-        }
-
-    def _clear_cache(self):
-        """
-        Sets up an empty cache in memory
-        """
-        self._cache = self._create_empty_cache()
 
     def is_cache_available(self):
         """
@@ -169,7 +148,7 @@ class ShotgunDataHandler(object):
         Loads a cache from disk into memory
         """
         # init empty cache
-        self._clear_cache()
+        self._cache = ShotgunDataHandlerCache()
 
         # try to load
         self._log_debug("Loading from disk: %s" % self._cache_path)
@@ -182,7 +161,8 @@ class ShotgunDataHandler(object):
                         raise ShotgunModelDataError(
                             "Cache file has version %s - version %s is required" % (file_version, self.FORMAT_VERSION)
                         )
-                    self._cache = pickler.load()
+                    raw_cache_data = pickler.load()
+                    self._cache = ShotgunDataHandlerCache(raw_cache_data)
             except Exception, e:
                 self._log_debug("Cache '%s' not valid - ignoring. Details: %s" % (self._cache_path, e))
 
@@ -239,7 +219,13 @@ class ShotgunDataHandler(object):
                 # on the fast mode and this would speed things up further.
 
                 pickler.dump(self.FORMAT_VERSION)
-                pickler.dump(self._cache)
+                if self._cache is None:
+                    # dump an empty cache
+                    empty_cache = ShotgunDataHandlerCache()
+                    pickler.dump(empty_cache.raw_data)
+
+                else:
+                    pickler.dump(self._cache.raw_data)
 
             # and ensure the cache file has got open permissions
             os.chmod(self._cache_path, 0666)
@@ -263,15 +249,10 @@ class ShotgunDataHandler(object):
         :param unique_id: unique identifier
         :returns: :class:`ShotgunItemData`
         """
-        # avoid cyclic imports
-        from .data_item import ShotgunItemData
-
         if not self.is_cache_loaded():
             return None
 
-        data = self._cache[self.CACHE_BY_UID].get(unique_id)
-
-        return ShotgunItemData(data) if data else None
+        return self._cache.get_entry_by_uid(unique_id)
 
     @log_timing
     def generate_child_nodes(self, unique_id, parent_object, factory_fn):
@@ -296,27 +277,13 @@ class ShotgunDataHandler(object):
 
         :returns: number of items generated.
         """
-        # avoid cyclic imports
-        from .data_item import ShotgunItemData
-
         num_nodes_generated = 0
 
         self._log_debug("Creating child nodes for parent uid %s" % unique_id)
 
-        if unique_id is None:
-            # this is the root
-            cache_node = self._cache
-        else:
-            # resolve cache node from uid
-            cache_node = self._cache[self.CACHE_BY_UID].get(unique_id)
-
-        if cache_node:
-            for item in cache_node[self.CACHE_CHILDREN].itervalues():
-                data_item = ShotgunItemData(item)
-                factory_fn(parent_object, data_item)
-                num_nodes_generated += 1
-        else:
-            self._log_debug("No cache item found for id %s" % unique_id)
+        for data_item in self._cache.get_children(unique_id):
+            factory_fn(parent_object, data_item)
+            num_nodes_generated += 1
 
         return num_nodes_generated
 
@@ -427,58 +394,3 @@ class ShotgunDataHandler(object):
 
         return sg_data
 
-    def _sg_compare_data(self, a, b):
-        """
-        Compares two shotgun data structures.
-        Both inputs are assumed to contain utf-8 encoded data.
-
-        :returns: True if a is same as b, false otherwise
-        """
-        if isinstance(a, dict):
-            # input is a dictionary
-            if isinstance(a, dict) and isinstance(b, dict) and len(a) == len(b):
-                # dicts are symmetrical. Compare items recursively.
-                for a_key in a.keys():
-                    if not self._sg_compare_data(a.get(a_key), b.get(a_key)):
-                        return False
-            else:
-                # dicts are misaligned
-                return False
-
-        elif isinstance(a, list):
-            # input is a list
-            if isinstance(a, list) and isinstance(b, list) and len(a) == len(b):
-                # lists are symmetrical. Compare items recursively.
-                for idx in xrange(len(a)):
-                    if not self._sg_compare_data(a[idx], b[idx]):
-                        return False
-            else:
-                # list items are misaligned
-                return False
-
-        # handle thumbnail fields as a special case
-        # thumbnail urls are (typically, there seem to be several standards!)
-        # on the form:
-        # https://sg-media-usor-01.s3.amazonaws.com/xxx/yyy/
-        #   filename.ext?lots_of_authentication_headers
-        #
-        # the query string changes all the times, so when we check if an item
-        # is out of date, omit it.
-        elif (isinstance(a, str) and isinstance(b, str) and
-              a.startswith("http") and b.startswith("http") and
-              ("amazonaws" in a or "AccessKeyId" in a)):
-            # attempt to parse values are urls and eliminate the querystring
-            # compare hostname + path only
-            url_obj_a = urlparse.urlparse(a)
-            url_obj_b = urlparse.urlparse(b)
-            compare_str_a = "%s/%s" % (url_obj_a.netloc, url_obj_a.path)
-            compare_str_b = "%s/%s" % (url_obj_b.netloc, url_obj_b.path)
-            if compare_str_a != compare_str_b:
-                # url has changed
-                return False
-
-        elif a != b:
-            # compare all other values using simple equality
-            return False
-
-        return True

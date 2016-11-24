@@ -13,6 +13,7 @@ import gc
 from .data_handler import ShotgunDataHandler, log_timing
 from .errors import ShotgunModelDataError
 from .data_item import ShotgunItemData
+from .data_handler_cache import ShotgunDataHandlerCache
 
 
 class ShotgunNavDataHandler(ShotgunDataHandler):
@@ -121,7 +122,7 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
                 "from the queried hierarchy item."
             )
 
-        if len(self._cache[self.CACHE_CHILDREN]) == 0:
+        if self._cache.size == 0:
             self._log_debug("In-memory cache is empty.")
 
         # ensure the data is clean
@@ -133,9 +134,9 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
 
         if item_path == self.__root_path:
             self._log_debug("This is the root of the tree.")
-            parent_item = self._cache
+            parent_uid = None
         else:
-            parent_item = self._cache[self.CACHE_BY_UID][item_path]
+            parent_uid = item_path
 
         # create a brand new tree rather than trying to be clever
         # about how we cull intermediate nodes for deleted items
@@ -144,77 +145,62 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
         num_deletes = 0
         num_modifications = 0
 
-        # insert the new items in this dict
-        new_items = {}
+        new_uids = []
+        previous_uids = self._cache.get_child_uids(parent_uid)
 
         # analyze the incoming shotgun data
         for sg_item in sg_data["children"]:
 
             if self._SG_PATH_FIELD not in sg_item:
                 # note: leaf nodes of kind 'empty' don't have a path
-                unique_field_value = "/".join(parent_item[self.UID], sg_item["label"])
+                unique_field_value = "/".join(parent_uid, sg_item["label"])
 
             else:
                 unique_field_value = sg_item.get(self._SG_PATH_FIELD)
 
-            # this is an actual entity - insert into our new tree
-            item = {
-                self.SG_DATA: sg_item,
-                self.FIELD: None,
-                self.IS_LEAF: not sg_item["has_children"],
-                self.UID: unique_field_value,
-                self.PARENT: parent_item,
-                self.CACHE_CHILDREN: {},
-            }
+            new_uids.append(unique_field_value)
 
-            # if we have children in the existing cache, include those
-            if unique_field_value in self._cache[self.CACHE_BY_UID]:
-                item[self.CACHE_CHILDREN] = self._cache[self.CACHE_BY_UID][unique_field_value][self.CACHE_CHILDREN]
+            # check if item already exists
+            already_exists = self._cache.item_exists(unique_field_value)
 
-            new_items[unique_field_value] = item
+            # insert the change into the data set directly.
+            # if the item already existed and was updated,
+            # this returns true
+            updated = self._cache.add_item(
+                parent_uid=parent_uid,
+                sg_data=sg_item,
+                field_name=None,
+                is_leaf=not sg_item["has_children"],
+                uid=unique_field_value
+            )
 
-            # now check with prev data structure to see if it has changed
-            if unique_field_value not in self._cache[self.CACHE_BY_UID]:
-                # this is a new node that wasn't there before
+            if not already_exists:
+                # item was added
                 diff_list.append({
-                    "data": ShotgunItemData(item),
+                    "data": self._cache.get_entry_by_uid(unique_field_value),
                     "mode": self.ADDED
                 })
                 num_adds += 1
-            else:
-                # record already existed in prev dataset. Check if value has changed
-                old_record = self._cache[self.CACHE_BY_UID][unique_field_value][self.SG_DATA]
-                if not self._sg_compare_data(old_record, sg_item):
-                    diff_list.append({
-                        "data": ShotgunItemData(item),
-                        "mode": self.UPDATED
-                    })
-                    num_modifications += 1
+
+            elif updated:
+                # item existed but was updated
+                diff_list.append({
+                    "data": self._cache.get_entry_by_uid(unique_field_value),
+                    "mode": self.UPDATED
+                })
+                num_modifications += 1
 
         # now figure out if anything has been removed
-        self._log_debug("Diffing new tree against old tree...")
-
-        current_uids = set(parent_item[self.CACHE_CHILDREN].keys())
-        new_uids = set(new_items.keys())
-
-        for deleted_uid in current_uids.difference(new_uids):
-            item = self._cache[self.CACHE_BY_UID][deleted_uid]
+        for deleted_uid in set(previous_uids).difference(set(new_uids)):
+            item = self._cache.take_item(deleted_uid)
             diff_list.append({
-                "data": ShotgunItemData(item),
+                "data": item,
                 "mode": self.DELETED
             })
             num_deletes += 1
 
-        # lastly swap the new for the old
-        parent_item[self.CACHE_CHILDREN] = new_items
-        self._cache[self.CACHE_BY_UID].update(new_items)
-
-        # at this point, kick the gc to make sure the memory is freed up
-        # despite its cycles.
-        gc.collect()
-
         self._log_debug("Shotgun data (%d records) received and processed. " % len(sg_data))
-        self._log_debug("    The new tree is %d records." % len(self._cache[self.CACHE_BY_UID]))
+        self._log_debug("    The new tree is %d records." % self._cache.size)
         self._log_debug("    There were %d diffs from in-memory cache:" % len(diff_list))
         self._log_debug("    Number of new records: %d" % num_adds)
         self._log_debug("    Number of deleted records: %d" % num_deletes)

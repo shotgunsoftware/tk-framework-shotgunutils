@@ -8,7 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-from .data_handler import ShotgunDataHandler
+from .data_handler import ShotgunDataHandlerCache
 
 
 class ShotgunItemData(object):
@@ -57,28 +57,28 @@ class ShotgunItemData(object):
         """
         The unique id for this node
         """
-        return self._data[ShotgunDataHandler.UID]
+        return self._data[ShotgunDataHandlerCache.UID]
 
     @property
     def field(self):
         """
         The shotgun field that this item represents
         """
-        return self._data[ShotgunDataHandler.FIELD]
+        return self._data[ShotgunDataHandlerCache.FIELD]
 
     @property
     def shotgun_data(self):
         """
         The shotgun data associated with this item
         """
-        return self._data[ShotgunDataHandler.SG_DATA]
+        return self._data[ShotgunDataHandlerCache.SG_DATA]
 
     @property
     def parent(self):
         """
         The parent of this item or None if no parent
         """
-        parent = self._data[ShotgunDataHandler.PARENT]
+        parent = self._data[ShotgunDataHandlerCache.PARENT]
         if parent is None:
             return None
 
@@ -93,6 +93,6 @@ class ShotgunItemData(object):
         """
         Flag to indicate if this item is a leaf in the tree
         """
-        return self._data[ShotgunDataHandler.IS_LEAF]
+        return self._data[ShotgunDataHandlerCache.IS_LEAF]
 
 
