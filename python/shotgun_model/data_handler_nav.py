@@ -153,7 +153,7 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
 
             if self._SG_PATH_FIELD not in sg_item:
                 # note: leaf nodes of kind 'empty' don't have a path
-                unique_field_value = "/".join(parent_uid, sg_item["label"])
+                unique_field_value = "%s/%s" % (parent_uid, sg_item["label"])
 
             else:
                 unique_field_value = sg_item.get(self._SG_PATH_FIELD)

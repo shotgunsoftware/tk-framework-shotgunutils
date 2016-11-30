@@ -834,7 +834,10 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         # delete the child leaves
         for index in xrange(node.rowCount(), 0, -1):
-            node.removeRow(index)
+            # notes about xrange syntax:
+            # index will count from rowCount down to 1
+            # to get zero based indices, subtract 1
+            node.removeRow(index - 1)
 
     def __remove_unique_id_r(self, item):
         """
