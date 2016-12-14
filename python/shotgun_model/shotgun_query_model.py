@@ -962,10 +962,17 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         root = self.invisibleRootItem()
         if root.rowCount() == 0:
             # an empty model - in this case just insert the root level items
+            # applying the root changes like this is an optimization so that
+            # we don't need to look at the entire data set in the case when
+            # it's a deep nested tree structure with an empty cache and lots
+            # of items.
             self._log_debug("Model was empty - loading root level items...")
             self._data_handler.generate_child_nodes(None, root, self._create_item)
+            self._log_debug("...done")
 
         else:
+            self._log_debug("Begin applying diffs to model...")
+
             # we have some items loaded into our qt model. Look at the diff
             # and make sure that what's loaded in the model is up to date.
             for item in modified_items:
@@ -976,8 +983,14 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                 if item["mode"] == self._data_handler.ADDED:
                     # look for the parent of this item
                     parent_data_item = data_item.parent
-                    # see if this exists in the tree
-                    parent_model_item = self._get_item_by_unique_id(parent_data_item.unique_id)
+                    if parent_data_item is None:
+                        # item is parented under the root
+                        parent_model_item = self.invisibleRootItem()
+                    else:
+                        # this item has a well defined parent
+                        # see if this exists in the tree
+                        parent_model_item = self._get_item_by_unique_id(parent_data_item.unique_id)
+
                     if parent_model_item:
                         # the parent exists in the view. So add the child
                         # note: becuase of lazy loading, parent may not always exist.
@@ -1001,6 +1014,8 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                     if model_item:
                         self._log_debug("Updating model item %s" % model_item)
                         self._update_item(model_item, data_item)
+
+            self._log_debug("...diffs applied!")
 
         # and emit completion signal
         self.data_refreshed.emit(modified_items > 0)
