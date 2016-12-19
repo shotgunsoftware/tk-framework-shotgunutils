@@ -187,7 +187,7 @@ class ShotgunModel(ShotgunQueryModel):
         """
         if index is None:
             # load everything
-            index = self.invisibleRootItem()
+            index = self.invisibleRootItem().index()
 
         if self.canFetchMore(index):
             self.fetchMore(index)
