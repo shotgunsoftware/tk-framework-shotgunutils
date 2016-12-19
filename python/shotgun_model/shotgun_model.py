@@ -166,6 +166,36 @@ class ShotgunModel(ShotgunQueryModel):
             p = p.parent()
         return filters
 
+    def ensure_data_is_loaded(self, index=None):
+        """
+        Recursively processes the model and ensures that all data
+        has been loaded into the model.
+
+        Beginning with v5, the Shotgun model defer loads its data into the model for
+        optimal performance. Normally, this is not an issue - the data is typically
+        requested prior to a user expanding a tree node in a view. In some cases,
+        however, it is necessary to pre-fetch parts of the tree. One example of this
+        is if you want to perform filtering via a
+        :class:`~PySide.QtGui.QSortFilterProxyModel`. Please note that for large
+        data sets, this operation may be slow.
+
+        .. versionadded:: 5.0.0
+
+        :param index: Model index for which to recursively load data.
+                      If set to None, the entire tree will be loaded.
+        :type index: :class:`~PySide.QtCore.QModelIndex`
+        """
+        if index is None:
+            # load everything
+            index = self.invisibleRootItem()
+
+        if self.canFetchMore(index):
+            self.fetchMore(index)
+
+        for child_index in xrange(self.rowCount(index)):
+            child_model_index = self.index(child_index, 0, parent=index)
+            self.ensure_data_is_loaded(child_model_index)
+
     def get_entity_type(self):
         """
         Returns the Shotgun Entity type associated with this model.

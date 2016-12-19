@@ -241,7 +241,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
     def hard_refresh(self):
         """
-        Clear any caches on disk, then refresh the data.
+        Clears any caches on disk, then refreshes the data.
         """
         if self._data_handler is None:
             # no data to refresh

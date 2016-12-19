@@ -189,10 +189,10 @@ types for the asset types. The leaf nodes in this case would be assets.
 
 
 .. autoclass:: ShotgunModel
-    :show-inheritance:
     :members:
     :inherited-members:
-    :exclude-members: reset
+    :exclude-members: reset, clear, hasChildren, fetchMore, canFetchMore,
+                      ensure_data_is_loaded, destroy, hard_refresh, is_data_cached
 
     **Loading & Refreshing the Data**
 
@@ -201,6 +201,10 @@ types for the asset types. The leaf nodes in this case would be assets.
 
     .. automethod:: _load_data
     .. automethod:: _refresh_data
+    .. automethod:: ensure_data_is_loaded
+    .. automethod:: destroy
+    .. automethod:: hard_refresh
+    .. automethod:: is_data_cached
 
     **Customizing the Model Items**
 

@@ -148,13 +148,16 @@ specialized to hold the contents of a particular shotgun API
 refreshes its data asynchronously.
 
 .. autoclass:: ShotgunHierarchyModel
-    :show-inheritance:
     :inherited-members:
     :members:
     :exclude-members: canFetchMore,
                       fetchMore,
                       hasChildren,
-                      reset
+                      reset,
+                      clear,
+                      destroy,
+                      hard_refresh,
+                      is_data_cached
 
     **Loading the Hierarchy Data**
 
@@ -162,6 +165,9 @@ refreshes its data asynchronously.
     and caches the hierarchy items and refreshes them once cached.
 
     .. automethod:: _load_data
+    .. automethod:: destroy
+    .. automethod:: hard_refresh
+    .. automethod:: is_data_cached
 
     **Customizing the Hierarchy Items**
 
@@ -177,3 +183,5 @@ refreshes its data asynchronously.
     .. automethod:: _set_tooltip
 
     **Instance Methods**
+
+
