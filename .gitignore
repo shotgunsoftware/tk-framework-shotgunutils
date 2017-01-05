@@ -34,3 +34,9 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# PyCharm project settings
+.idea
+
+# Max OS X Desktop Services Store files
+.DS_Store
