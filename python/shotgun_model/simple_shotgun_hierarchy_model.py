@@ -63,3 +63,15 @@ class SimpleShotgunHierarchyModel(ShotgunHierarchyModel):
             path=path,
             entity_fields=entity_fields
         )
+
+    def reload_data(self):
+        """
+        Convenience method that reloads Shotgun data into the model
+        using the latest parameter values passed to :meth:`load_data()`.
+        """
+
+        super(SimpleShotgunHierarchyModel, self)._load_data(
+            self._seed_entity_field,
+            path=self._path,
+            entity_fields=self._entity_fields
+        )
