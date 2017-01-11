@@ -9,6 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
+import glob
 import urlparse
 import hashlib
 
@@ -152,7 +153,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         code - for a better solution, we recommend using the thumbnail retrieval
         that runs in a background thread.
 
-        Bcause Shotgun thumbnail urls have an expiry time, make sure to only
+        Because Shotgun thumbnail urls have an expiry time, make sure to only
         pass urls to this method that have been very recently retrieved via a Shotgun find call.
 
         :param url: The thumbnail url string that is associated with this thumbnail. This is
@@ -171,7 +172,15 @@ class ShotgunDataRetriever(QtCore.QObject):
 
             # download using standard core method. This will ensure that
             # proxy and connection settings as set in the SG API are used
+            # This method will also determine the correct file extension to
+            # download to, as that information may not be readily available
+            # from the url.
             sgtk.util.download_url(bundle.shotgun, url, path_to_cached_thumb)
+
+            # Look for the full path name including file extension.
+            cache_matches = glob.glob("%s.*" % path_to_cached_thumb)
+            if len(cache_matches) == 1:
+                path_to_cached_thumb = cache_matches[0]
 
             # modify the permissions of the file so it's writeable by others
             old_umask = os.umask(0)
@@ -442,7 +451,7 @@ class ShotgunDataRetriever(QtCore.QObject):
     def _add_task(self, task_cb, priority, task_args=None, task_kwargs=None):
         """
         Simplified wrapper to add a task to the task manager.  All tasks get added into
-        the same group (self._bg_tasks_group) and the returned task_id is case to a string
+        the same group (self._bg_tasks_group) and the returned task_id is cast to a string
         to retain backwards compatibility (it used to return a uuid string).
 
         :param task_cb:     The function to execute for the task
@@ -679,7 +688,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         # sharding methodology, see 
         # http://stackoverflow.com/questions/13841931/using-guids-as-folder-names-splitting-up
         #
-        # From the hash, generate paths on the form C1C2/C3C4/rest_of_hash.jpeg
+        # From the hash, generate paths on the form C1C2/C3C4/rest_of_hash
         # (where C1 is the first character of the hash.)
         # for a million evenly distributed items, this means ~15 items per folder
         first_folder = hash_str[0:2]
@@ -689,7 +698,9 @@ class ShotgunDataRetriever(QtCore.QObject):
         # If we were only asked to give back a directory path then we can
         # skip building and appending a file name.
         if not directory_only:
-            path_chunks.append("%s.jpeg" % hash_str[4:])
+            # Allow the download_url method to determine the file extension,
+            # as some url forms don't have this information at this point.
+            path_chunks.append("%s" % hash_str[4:])
 
         # establish the root path
         cache_path_items = [bundle.cache_location, "thumbs"]
@@ -697,6 +708,11 @@ class ShotgunDataRetriever(QtCore.QObject):
         cache_path_items.extend(path_chunks)
         # join up the path
         path_to_cached_thumb = os.path.join(*cache_path_items)
+        # since the file extension is omitted above, look for
+        # a match on disk to determine the full path.
+        cache_matches = glob.glob("%s.*" % path_to_cached_thumb)
+        if len(cache_matches) == 1:
+            path_to_cached_thumb = cache_matches[0]
 
         # perform a simple migration to check if the old path still exists. In that case, 
         # try to move it across to the new path. This is to help transition from the previous
