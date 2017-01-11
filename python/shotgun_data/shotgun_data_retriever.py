@@ -10,6 +10,7 @@
 
 import os
 import glob
+import urllib
 import urlparse
 import hashlib
 
@@ -177,8 +178,61 @@ class ShotgunDataRetriever(QtCore.QObject):
             # from the url.
             sgtk.util.download_url(bundle.shotgun, url, path_to_cached_thumb)
 
+            # modify the permissions of the file so it's writeable by others
+            old_umask = os.umask(0)
+            try:
+                os.chmod(path_to_cached_thumb, 0666)
+            finally:
+                os.umask(old_umask)
+
+        return path_to_cached_thumb
+
+    @staticmethod
+    def download_thumbnail_source(entity_type, entity_id, bundle):
+        """
+        Convenience and compatibility method for quick and easy synchrnous thumbnail download.
+        This will retrieve the source file for a shotgun thumbnail given an entity type and
+        id. If it already exists in the cache, a path to it will be returned instantly. If not,
+        it will be downloaded from Shotgun, placed in the standard cache location on disk and
+        its path will be returned.
+
+        This is a helper method meant to make it easy to port over synchronous legacy
+        code - for a better solution, we recommend using the thumbnail retrieval
+        that runs in a background thread.
+
+        :param str entity_type: Shotgun entity type with which the thumb is associated.
+        :param int entity_id: Shotgun entity id with which the thumb is associated.
+        :param bundle: App, Framework or Engine object requesting the download.
+
+        :returns: A path to the thumbnail on disk.
+        """
+
+        thumb_source_url = urlparse.urlunparse((
+            bundle.shotgun.config.scheme, bundle.shotgun.config.server,
+            "/thumbnail/full/%s/%s" % (urllib.quote(str(entity_type)),
+            urllib.quote(str(entity_id))), None, None, None
+        ))
+
+        path_to_cached_thumb = ShotgunDataRetriever._get_thumbnail_path(
+            thumb_source_url, bundle, use_default_extension=False
+        )
+
+        if not os.path.exists(path_to_cached_thumb):
+            # create folders on disk
+            bundle.ensure_folder_exists(os.path.dirname(path_to_cached_thumb))
+
+            # download using standard core method. This will ensure that
+            # proxy and connection settings as set in the SG API are used
+            # This method will also determine the correct file extension to
+            # download to, as that information may not be readily available
+            # from the url.
+            sgtk.util.download_url(
+                bundle.shotgun, thumb_source_url, path_to_cached_thumb, True
+            )
+
             # Look for the full path name including file extension.
-            cache_matches = glob.glob("%s.*" % path_to_cached_thumb)
+            cache_base = os.path.splitext(path_to_cached_thumb)[0]
+            cache_matches = glob.glob("%s.*" % cache_base)
             if len(cache_matches) == 1:
                 path_to_cached_thumb = cache_matches[0]
 
@@ -190,8 +244,6 @@ class ShotgunDataRetriever(QtCore.QObject):
                 os.umask(old_umask)
 
         return path_to_cached_thumb
-
-
 
     def start(self):
         """
@@ -560,7 +612,8 @@ class ShotgunDataRetriever(QtCore.QObject):
                                                     priority = self._CHECK_THUMB_PRIORITY,
                                                     group = self._bg_tasks_group,
                                                     task_kwargs = {"url":url, 
-                                                                   "load_image":load_image})
+                                                                   "load_image":load_image,
+                                                                   "use_default_extension":True})
 
         # Add download thumbnail task.  This is dependent on the check task above and will be passed
         # the returned results from that task in addition to the kwargs specified below.  This allows
@@ -573,7 +626,68 @@ class ShotgunDataRetriever(QtCore.QObject):
                                                                 "entity_type":entity_type, 
                                                                 "entity_id":entity_id,
                                                                 "field":field,
-                                                                "load_image":load_image
+                                                                "load_image":load_image,
+                                                                "use_default_extension":True
+                                                                #"thumb_path":<passed from check task>
+                                                                #"image":<passed from check task>
+                                                                })
+
+        # all results for requesting a thumbnail should be returned with the same id so use
+        # a mapping to track the 'primary' task id:
+        self._thumb_task_id_map[dl_task_id] = check_task_id
+
+        return str(check_task_id)
+
+    def request_thumbnail_source(self, entity_type, entity_id, load_image=False):
+        """
+        Downloads a thumbnail from Shotgun asynchronously or returns a cached thumbnail
+        if found.  Optionally loads the thumbnail into a QImage.
+
+        :param entity_type: Shotgun entity type with which the thumb is associated.
+        :param entity_id:   Shotgun entity id with which the thumb is associated.
+        :param load_image:  If set to True, the return data structure will contain a
+                            QImage object with the image data loaded.
+
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.
+        """
+        if not self._task_manager:
+            self._bundle.log_warning(
+                "No task manager has been associated with this data retriever. "
+                "Unable to request thumbnail."
+            )
+            return
+
+        # construct the url that refers to the thumbnail's source image
+        thumb_source_url = urlparse.urlunparse((
+            bundle.shotgun.config.scheme, bundle.shotgun.config.server,
+            "/thumbnail/full/%s/%s" % (urllib.quote(str(entity_type)),
+            urllib.quote(str(entity_id))), None, None, None
+        ))
+
+        # always add check for thumbnail already downloaded:
+        check_task_id = self._task_manager.add_task(self._task_check_thumbnail,
+                                                    priority = self._CHECK_THUMB_PRIORITY,
+                                                    group = self._bg_tasks_group,
+                                                    task_kwargs = {"url":thumb_source_url,
+                                                                   "load_image":load_image,
+                                                                   "use_default_extension":False,})
+
+        # Add download thumbnail task.  This is dependent on the check task above and will be passed
+        # the returned results from that task in addition to the kwargs specified below.  This allows
+        # a task dependency chain to be created with different priorities for the separate tasks.
+        dl_task_id = self._task_manager.add_task(self._task_download_thumbnail,
+                                                 upstream_task_ids = [check_task_id],
+                                                 priority = self._DOWNLOAD_THUMB_PRIORITY,
+                                                 group = self._bg_tasks_group,
+                                                 task_kwargs = {"url":thumb_source_url,
+                                                                "entity_type":entity_type,
+                                                                "entity_id":entity_id,
+                                                                "field":None,
+                                                                "load_image":load_image,
+                                                                "use_default_extension":False,
                                                                 #"thumb_path":<passed from check task>
                                                                 #"image":<passed from check task>
                                                                 })
@@ -587,7 +701,7 @@ class ShotgunDataRetriever(QtCore.QObject):
     # ------------------------------------------------------------------------------------------------
     # Background task management and methods
 
-    def _download_url(self, file_path, url, entity_type, entity_id, field):
+    def _download_url(self, file_path, url, entity_type, entity_id, field, use_default_extension):
         """
         Downloads a file located at the given url to the provided file path.
 
@@ -605,29 +719,45 @@ class ShotgunDataRetriever(QtCore.QObject):
         :param str field: The name of the field that contains the url. If
                           the url needs to be requeried, this field will be
                           where the fresh url is pulled from.
+        :param use_default_extension: Download the url to a local file path ending with the default
+                                      extension '.jpeg'. If set to False, use the file extension
+                                      from the resolved url instead.
         """
+        use_url_extension = not use_default_extension
         try:
-            sgtk.util.download_url(self._bundle.shotgun, url, file_path)
-        except TankError, e:
-            sg_data = self._bundle.shotgun.find_one(
-                entity_type,
-                [["id", "is", entity_id]],
-                [field],
+            sgtk.util.download_url(
+                self._bundle.shotgun, url, file_path, use_url_extension
             )
-
-            if sg_data is None or sg_data.get(field) is None:
-                # This means there's nothing in Shotgun for this field, which
-                # means we can't download anything.
-                raise IOError(
-                    "Field %s does not contain data for %s (id=%s)." % (
-                        field,
-                        entity_type,
-                        entity_id,
-                    )
+        except TankError, e:
+            if field is not None:
+                sg_data = self._bundle.shotgun.find_one(
+                    entity_type,
+                    [["id", "is", entity_id]],
+                    [field],
                 )
-            else:
-                url = sg_data[field]
-                sgtk.util.download_url(self._bundle.shotgun, url, file_path)
+
+                if sg_data is None or sg_data.get(field) is None:
+                    # This means there's nothing in Shotgun for this field, which
+                    # means we can't download anything.
+                    raise IOError(
+                        "Field %s does not contain data for %s (id=%s)." % (
+                            field,
+                            entity_type,
+                            entity_id,
+                        )
+                    )
+                else:
+                    url = sg_data[field]
+                    sgtk.util.download_url(
+                        self._bundle.shotgun, url, file_path, use_url_extension
+                    )
+
+        if use_url_extension:
+            # Look for the full path name including file extension.
+            file_base = os.path.splitext(file_path)[0]
+            cache_matches = glob.glob("%s.*" % file_base)
+            if len(cache_matches) == 1:
+                file_path = cache_matches[0]
 
         # now we have a thumbnail on disk, either via the direct download, or via the 
         # url-fresh-then-download approach.  Because the file is downloaded with user-only 
@@ -660,7 +790,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         return os.path.join(directory_path, file_name)
 
     @staticmethod
-    def _get_thumbnail_path(url, bundle, directory_only=False):
+    def _get_thumbnail_path(url, bundle, directory_only=False, use_default_extension=True):
         """
         Returns the location on disk suitable for a thumbnail given its url.
 
@@ -688,7 +818,8 @@ class ShotgunDataRetriever(QtCore.QObject):
         # sharding methodology, see 
         # http://stackoverflow.com/questions/13841931/using-guids-as-folder-names-splitting-up
         #
-        # From the hash, generate paths on the form C1C2/C3C4/rest_of_hash
+        # From the hash, generate paths on the form C1C2/C3C4/rest_of_hash or
+        # C1C2/C3C4/rest_of_hash.jpeg if use_default_extension is True
         # (where C1 is the first character of the hash.)
         # for a million evenly distributed items, this means ~15 items per folder
         first_folder = hash_str[0:2]
@@ -698,9 +829,9 @@ class ShotgunDataRetriever(QtCore.QObject):
         # If we were only asked to give back a directory path then we can
         # skip building and appending a file name.
         if not directory_only:
-            # Allow the download_url method to determine the file extension,
-            # as some url forms don't have this information at this point.
-            path_chunks.append("%s" % hash_str[4:])
+            path_chunks.append(
+                "%s%s" % (hash_str[4:], ".jpeg" if use_default_extension else "")
+            )
 
         # establish the root path
         cache_path_items = [bundle.cache_location, "thumbs"]
@@ -708,11 +839,13 @@ class ShotgunDataRetriever(QtCore.QObject):
         cache_path_items.extend(path_chunks)
         # join up the path
         path_to_cached_thumb = os.path.join(*cache_path_items)
-        # since the file extension is omitted above, look for
-        # a match on disk to determine the full path.
-        cache_matches = glob.glob("%s.*" % path_to_cached_thumb)
-        if len(cache_matches) == 1:
-            path_to_cached_thumb = cache_matches[0]
+        if not use_default_extension:
+            # since the file extension is omitted above, look for
+            # a match on disk to determine the full path.
+            cache_base = os.path.splitext(path_to_cached_thumb)[0]
+            cache_matches = glob.glob("%s.*" % cache_base)
+            if len(cache_matches) == 1:
+                path_to_cached_thumb = cache_matches[0]
 
         # perform a simple migration to check if the old path still exists. In that case, 
         # try to move it across to the new path. This is to help transition from the previous
@@ -947,13 +1080,16 @@ class ShotgunDataRetriever(QtCore.QObject):
 
         return data
 
-    def _task_check_thumbnail(self, url, load_image):
+    def _task_check_thumbnail(self, url, load_image, use_default_extension):
         """
         Check to see if a thumbnail exists for the specified url.  If it does then it is returned.
 
         :param url:         The url to return the cached path for
         :param load_image:  If True then if the thumbnail is found in the cache then the file will 
                             be loaded into a QImage
+        :param use_default_extension: Download the url to a local file path ending with the default
+                                      extension '.jpeg'. If set to False, use the file extension
+                                      from the resolved url instead.
         :returns:           A dictionary containing the cached path for the specified url and a QImage
                             if load_image is True and the thumbnail exists in the cache.
         """
@@ -963,7 +1099,9 @@ class ShotgunDataRetriever(QtCore.QObject):
             return {"action":"check_thumbnail", "thumb_path":None, "image":None}
 
         # first look up the path in the cache:
-        thumb_path = ShotgunDataRetriever._get_thumbnail_path(url, self._bundle)
+        thumb_path = ShotgunDataRetriever._get_thumbnail_path(
+            url, self._bundle, use_default_extension=use_default_extension
+        )
         thumb_image = None
         if thumb_path and os.path.exists(thumb_path):
             if load_image:
@@ -1010,7 +1148,10 @@ class ShotgunDataRetriever(QtCore.QObject):
             file_path=file_path,
         )
 
-    def _task_download_thumbnail(self, thumb_path, url, entity_type, entity_id, field, load_image, **kwargs):
+    def _task_download_thumbnail(
+            self, thumb_path, url, entity_type, entity_id, field, load_image,
+            use_default_extension, **kwargs
+        ):
         """
         Download the thumbnail for the specified entity type, id and field.  This downloads the
         thumbnail into the thumbnail cache directory and returns the cached path.
@@ -1025,6 +1166,9 @@ class ShotgunDataRetriever(QtCore.QObject):
         :param field:       The field on the entity that holds the url for the thumbnail to retrieve
         :param load_image:  If True then if the thumbnail is downloaded from Shotgun then the file will 
                             be loaded into a QImage
+        :param use_default_extension: Download the url to a local file path ending with the default
+                                      extension '.jpeg'. If set to False, use the file extension
+                                      from the resolved url instead.
         :returns:           A dictionary containing the cached path for the specified url and a QImage
                             if load_image is True and the thumbnail exists in the cache.
         """
@@ -1036,7 +1180,9 @@ class ShotgunDataRetriever(QtCore.QObject):
         # download the actual thumbnail. Because of S3, the url
         # may have expired - in that case fall back, get a fresh url
         # from shotgun and try again
-        thumb_path = self._get_thumbnail_path(url, self._bundle)
+        thumb_path = self._get_thumbnail_path(
+            url, self._bundle, use_default_extension=use_default_extension
+        )
 
         # If we have no path, then there's no thumbnail that exists.
         if not thumb_path:
@@ -1050,7 +1196,9 @@ class ShotgunDataRetriever(QtCore.QObject):
 
             # try to download based on the path we have
             try:
-                self._download_url(thumb_path, url, entity_type, entity_id, field)
+                self._download_url(
+                    thumb_path, url, entity_type, entity_id, field, use_default_extension
+                )
             except IOError:
                 thumb_path = None
 
