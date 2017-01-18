@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_model &mdash; tk-framework-shotgunutils v4.4.15 documentation</title>
+  <title>shotgun_model.shotgun_model &mdash; tk-framework-shotgunutils v5.0.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.4.15 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -93,7 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_hierarchy_model.html">Shotgun Hierarchy Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../task_manager.html">Background Task Processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../settings.html">Shotgun Toolkit Qt Settings Wrapper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_globals.html">Shotgun Globals Access</a></li>
 </ul>
 
@@ -116,7 +116,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.4.15.<br>
+    <b>tk-framework-shotgunutils</b> v5.0.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -183,13 +183,14 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">hashlib</span>
-<span class="kn">import</span> <span class="nn">weakref</span>
+
 
 <span class="kn">from</span> <span class="nn">sgtk.platform.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
 
+<span class="kn">from</span> <span class="nn">.shotgun_standard_item</span> <span class="kn">import</span> <span class="n">ShotgunStandardItem</span>
 <span class="kn">from</span> <span class="nn">.shotgun_query_model</span> <span class="kn">import</span> <span class="n">ShotgunQueryModel</span>
-<span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">get_sanitized_data</span><span class="p">,</span> <span class="n">get_sg_data</span><span class="p">,</span> <span class="n">sanitize_qt</span><span class="p">,</span> <span class="n">sanitize_for_qt_model</span>
-
+<span class="kn">from</span> <span class="nn">.data_handler_find</span> <span class="kn">import</span> <span class="n">ShotgunFindDataHandler</span>
+<span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">get_sanitized_data</span><span class="p">,</span> <span class="n">get_sg_data</span><span class="p">,</span> <span class="n">sanitize_for_qt_model</span>
 
 <div class="viewcode-block" id="ShotgunModel"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel">[docs]</a><span class="k">class</span> <span class="nc">ShotgunModel</span><span class="p">(</span><span class="n">ShotgunQueryModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -201,28 +202,17 @@
 
 <span class="sd">    In order to use this class, you normally subclass it and implement certain key data</span>
 <span class="sd">    methods for setting up queries, customizing etc. Then you connect your class to</span>
-<span class="sd">    a :class:`~PySide.QtGui.QAbstractItemView` of some sort which will display the result. If you need to do manipulations</span>
-<span class="sd">    such as sorting or filtering on the data, connect a proxy model (typically :class:`~PySide.QtGui.QSortFilterProxyModel`)</span>
+<span class="sd">    a :class:`~PySide.QtGui.QAbstractItemView` of some sort which will display the result.</span>
+<span class="sd">    If you need to do manipulations such as sorting or filtering on the data,</span>
+<span class="sd">    connect a proxy model (typically :class:`~PySide.QtGui.QSortFilterProxyModel`)</span>
 <span class="sd">    between your class and the view.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># data field that uniquely identifies an entity</span>
-    <span class="n">_SG_DATA_UNIQUE_ID_FIELD</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
-
     <span class="c1"># Custom model role that holds the associated value</span>
-    <span class="n">SG_ASSOCIATED_FIELD_ROLE</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span> <span class="o">+</span> <span class="mi">3</span>
+    <span class="n">SG_ASSOCIATED_FIELD_ROLE</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span> <span class="o">+</span> <span class="mi">10</span>
 
     <span class="c1"># header value for the first column</span>
     <span class="n">FIRST_COLUMN_HEADER</span> <span class="o">=</span> <span class="s2">&quot;Name&quot;</span>
-
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a string representation of this instance</span>
-<span class="sd">        :returns: A string representation of this instance</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2"> entity_type:</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">download_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -242,27 +232,23 @@
 <span class="sd">        :param bg_task_manager:  Background task manager to use for any asynchronous work. If</span>
 <span class="sd">                                 this is None then a task manager will be created as needed.</span>
 <span class="sd">        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ShotgunModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ShotgunModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">bg_load_thumbs</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="p">)</span>
 
         <span class="c1"># default value so that __repr__ can be used before load_data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__schema_generation</span> <span class="o">=</span> <span class="n">schema_generation</span>
 
-        <span class="c1"># is the model set up with a query?</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__has_query</span> <span class="o">=</span> <span class="bp">False</span>
-
-        <span class="c1"># flag to indicate a full refresh</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_request_full_refresh</span> <span class="o">=</span> <span class="bp">False</span>
-
         <span class="c1"># keep track of info for thumbnail download/load</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__download_thumbs</span> <span class="o">=</span> <span class="n">download_thumbs</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__bg_load_thumbs</span> <span class="o">=</span> <span class="n">bg_load_thumbs</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__thumb_map</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__current_work_id</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        String representation of this instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2"> entity_type:</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">)</span>
 
     <span class="c1">########################################################################################</span>
     <span class="c1"># public methods</span>
@@ -272,31 +258,33 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of entity ids that are part of this model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_all_item_unique_ids</span><span class="p">()</span>
-
-<div class="viewcode-block" id="ShotgunModel.destroy"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.destroy">[docs]</a>    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Call this method prior to destroying this object.</span>
-<span class="sd">        This will ensure all worker threads etc are stopped.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__current_work_id</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__thumb_map</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="nb">super</span><span class="p">(</span><span class="n">ShotgunModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span></div>
+        <span class="c1"># note that all of the ids may not be loaded into the actual model</span>
+        <span class="c1"># yet so we have to query the data handler for this.</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">get_entity_ids</span><span class="p">()</span>
 
 <div class="viewcode-block" id="ShotgunModel.item_from_entity"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.item_from_entity">[docs]</a>    <span class="k">def</span> <span class="nf">item_from_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns a :class:`~PySide.QtGui.QStandardItem` based on entity type and entity id</span>
-<span class="sd">        Returns none if not found.</span>
+<span class="sd">        Returns a :class:`~PySide.QtGui.QStandardItem` based on</span>
+<span class="sd">        entity type and entity id. Returns none if not found.</span>
 
 <span class="sd">        :param entity_type: Shotgun entity type to look for</span>
 <span class="sd">        :param entity_id: Shotgun entity id to look for</span>
 <span class="sd">        :returns: :class:`~PySide.QtGui.QStandardItem` or None if not found</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Resolving model item for entity </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">))</span>
+
         <span class="k">if</span> <span class="n">entity_type</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;...entity type is not part of this model!&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">None</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_item_by_unique_id</span><span class="p">(</span><span class="n">entity_id</span><span class="p">)</span></div>
+        <span class="n">uid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">get_uid_from_entity_id</span><span class="p">(</span><span class="n">entity_id</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">uid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># no match in data store</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;...entity id is not part of the data set&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_item_loaded</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunModel.index_from_entity"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.index_from_entity">[docs]</a>    <span class="k">def</span> <span class="nf">index_from_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -344,9 +332,39 @@
         <span class="n">p</span> <span class="o">=</span> <span class="n">item</span>
         <span class="k">while</span> <span class="n">p</span><span class="p">:</span>
             <span class="n">field_data</span> <span class="o">=</span> <span class="n">get_sanitized_data</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SG_ASSOCIATED_FIELD_ROLE</span><span class="p">)</span>
-            <span class="n">filters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">[</span> <span class="n">field_data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="s2">&quot;is&quot;</span><span class="p">,</span> <span class="n">field_data</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="p">]</span> <span class="p">)</span>
+            <span class="n">filters</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">field_data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="s2">&quot;is&quot;</span><span class="p">,</span> <span class="n">field_data</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]])</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">filters</span></div>
+
+<div class="viewcode-block" id="ShotgunModel.ensure_data_is_loaded"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.ensure_data_is_loaded">[docs]</a>    <span class="k">def</span> <span class="nf">ensure_data_is_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Recursively processes the model and ensures that all data</span>
+<span class="sd">        has been loaded into the model.</span>
+
+<span class="sd">        Beginning with v5, the Shotgun model defer loads its data into the model for</span>
+<span class="sd">        optimal performance. Normally, this is not an issue - the data is typically</span>
+<span class="sd">        requested prior to a user expanding a tree node in a view. In some cases,</span>
+<span class="sd">        however, it is necessary to pre-fetch parts of the tree. One example of this</span>
+<span class="sd">        is if you want to perform filtering via a</span>
+<span class="sd">        :class:`~PySide.QtGui.QSortFilterProxyModel`. Please note that for large</span>
+<span class="sd">        data sets, this operation may be slow.</span>
+
+<span class="sd">        .. versionadded:: 5.0.0</span>
+
+<span class="sd">        :param index: Model index for which to recursively load data.</span>
+<span class="sd">                      If set to None, the entire tree will be loaded.</span>
+<span class="sd">        :type index: :class:`~PySide.QtCore.QModelIndex`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># load everything</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">canFetchMore</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fetchMore</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">child_index</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rowCount</span><span class="p">(</span><span class="n">index</span><span class="p">)):</span>
+            <span class="n">child_model_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">child_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ensure_data_is_loaded</span><span class="p">(</span><span class="n">child_model_index</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunModel.get_entity_type"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.get_entity_type">[docs]</a>    <span class="k">def</span> <span class="nf">get_entity_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -365,40 +383,10 @@
 <span class="sd">            &quot;column_idx&quot;: the column number in the model associated with the additional field</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># column is one greater than the index because of the default initial column</span>
-        <span class="k">return</span> <span class="p">[{</span><span class="s2">&quot;column_idx&quot;</span><span class="p">:</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">}</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span><span class="p">)]</span></div>
-
-<div class="viewcode-block" id="ShotgunModel.hard_refresh"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.hard_refresh">[docs]</a>    <span class="k">def</span> <span class="nf">hard_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Clears any caches on disk, then refreshes the data.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__has_query</span><span class="p">:</span>
-            <span class="c1"># no query in this model yet</span>
-            <span class="k">return</span>
-
-        <span class="c1"># when data arrives, force full rebuild</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_request_full_refresh</span> <span class="o">=</span> <span class="bp">True</span>
-
-        <span class="nb">super</span><span class="p">(</span><span class="n">ShotgunModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">hard_refresh</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="p">[{</span><span class="s2">&quot;column_idx&quot;</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">}</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span><span class="p">)]</span></div>
 
     <span class="c1">########################################################################################</span>
-    <span class="c1"># methods overridden from the base class.</span>
-
-<div class="viewcode-block" id="ShotgunModel.clear"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Removes all items (including header items) from the model and</span>
-<span class="sd">        sets the number of rows and columns to zero.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-       <span class="c1"># clear thumbnail download lookup so we don&#39;t process any more results:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__thumb_map</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="c1"># we are not looking for any data from the async processor</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__current_work_id</span> <span class="o">=</span> <span class="bp">None</span>
-
-        <span class="nb">super</span><span class="p">(</span><span class="n">ShotgunModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
-
-    <span class="c1">########################################################################################</span>
-    <span class="c1"># protected methods not meant to be subclassed but meant to be called by subclasses</span>
+    <span class="c1"># protected methods</span>
 
 <div class="viewcode-block" id="ShotgunModel._load_data"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._load_data">[docs]</a>    <span class="k">def</span> <span class="nf">_load_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">hierarchy</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
@@ -484,7 +472,6 @@
         <span class="c1"># clear out old data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__has_query</span> <span class="o">=</span> <span class="bp">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span> <span class="o">=</span> <span class="n">entity_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__filters</span> <span class="o">=</span> <span class="n">filters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__fields</span> <span class="o">=</span> <span class="n">fields</span>
@@ -492,7 +479,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy</span> <span class="o">=</span> <span class="n">hierarchy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span> <span class="o">=</span> <span class="n">columns</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__editable_fields</span> <span class="o">=</span> <span class="n">editable_columns</span> <span class="ow">or</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__limit</span> <span class="o">=</span> <span class="n">limit</span> <span class="ow">or</span> <span class="mi">0</span> <span class="c1"># 0 means get all matches</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__limit</span> <span class="o">=</span> <span class="n">limit</span> <span class="ow">or</span> <span class="mi">0</span>  <span class="c1"># 0 means get all matches</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__additional_filter_presets</span> <span class="o">=</span> <span class="n">additional_filter_presets</span>
 
         <span class="c1"># make sure `editable_fields` is a subset of `column_fields`</span>
@@ -501,9 +488,6 @@
                 <span class="s2">&quot;The `editable_fields` argument is not a subset of &quot;</span>
                 <span class="s2">&quot;`column_fields`.&quot;</span>
             <span class="p">)</span>
-
-        <span class="c1"># get the cache path based on these new data query parameters</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_cache_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_data_cache_path</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Model Reset for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
@@ -516,6 +500,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Editable Columns: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__editable_fields</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Filter Presets: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__additional_filter_presets</span><span class="p">)</span>
 
+        <span class="c1"># get the cache path based on these new data query parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span> <span class="o">=</span> <span class="n">ShotgunFindDataHandler</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__filters</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__order</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__fields</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__download_thumbs</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__limit</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__additional_filter_presets</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__compute_cache_path</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># load up from disk</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Loading data from cache file into memory...&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">load_cache</span><span class="p">()</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;First population pass: Calling _load_external_data()&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_external_data</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;External data population done.&quot;</span><span class="p">)</span>
@@ -527,7 +527,22 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setHorizontalHeaderLabels</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_cached_data</span><span class="p">()</span></div>
+        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">()</span>
+
+        <span class="c1"># construct the top level nodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Creating model nodes for top level of data tree...&quot;</span><span class="p">)</span>
+        <span class="n">nodes_generated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">generate_child_nodes</span><span class="p">(</span>
+            <span class="bp">None</span><span class="p">,</span>
+            <span class="n">root</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_item</span>
+        <span class="p">)</span>
+
+        <span class="c1"># if we got some data, emit cache load signal</span>
+        <span class="k">if</span> <span class="n">nodes_generated</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache_loaded</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+
+        <span class="c1"># return true if cache is loaded false if not</span>
+        <span class="k">return</span> <span class="n">nodes_generated</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._refresh_data"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._refresh_data">[docs]</a>    <span class="k">def</span> <span class="nf">_refresh_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -549,97 +564,7 @@
 <span class="sd">        all existing items from the model are removed. This does affect view related</span>
 <span class="sd">        states such as selection.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_data_retriever</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">TankError</span><span class="p">(</span><span class="s2">&quot;Data retriever is not available!&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Stop any queued work that hasn&#39;t completed yet.  Note that we intentionally only stop the</span>
-        <span class="c1"># find query and not the thumbnail cache/download.  This is because the thumbnails returned</span>
-        <span class="c1"># are likely to still be valid for the current data in the model and if they are stopped then</span>
-        <span class="c1"># the pattern &#39;create model-&gt;load cached-&gt;refresh from sg&#39; would result in empty icons being</span>
-        <span class="c1"># presented to the user until the shotgun query has completed!</span>
-        <span class="c1">#</span>
-        <span class="c1"># This may result in unnecessary thumbnail downloads from Shotgun but in all likelihood, the</span>
-        <span class="c1"># thumbnails are going to be the same before and after the refresh and any additional overhead</span>
-        <span class="c1"># should be weighed against a cleaner user experience</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__current_work_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_sg_data_retriever</span><span class="o">.</span><span class="n">stop_work</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__current_work_id</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__current_work_id</span> <span class="o">=</span> <span class="bp">None</span>
-
-        <span class="c1"># emit that the data is refreshing.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_refreshing</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__filters</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="c1"># filters is None indicates that no data is desired.</span>
-            <span class="c1"># do not issue the sg request but pass straight to the callback</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__on_sg_data_arrived</span><span class="p">([])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># get data from shotgun - list/set cast to ensure unique fields</span>
-            <span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__download_thumbs</span><span class="p">:</span>
-                <span class="n">fields</span> <span class="o">=</span> <span class="n">fields</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span>
-            <span class="n">fields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">fields</span><span class="p">))</span>
-
-            <span class="n">find_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-                <span class="n">limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__limit</span><span class="p">,</span>
-            <span class="p">)</span>
-
-            <span class="c1"># We only want to include the filter presets kwarg if it was explicitly asked</span>
-            <span class="c1"># for. The reason for this is that it&#39;s a Shotgun 7.0 feature server side, and</span>
-            <span class="c1"># we don&#39;t want to break backwards compatibility with older versions of Shotgun.</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__additional_filter_presets</span><span class="p">:</span>
-                <span class="n">find_kwargs</span><span class="p">[</span><span class="s2">&quot;additional_filter_presets&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__additional_filter_presets</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">__current_work_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_data_retriever</span><span class="o">.</span><span class="n">execute_find</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__filters</span><span class="p">,</span>
-                <span class="n">fields</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__order</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">find_kwargs</span>
-            <span class="p">)</span></div>
-
-<div class="viewcode-block" id="ShotgunModel._request_thumbnail_download"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._request_thumbnail_download">[docs]</a>    <span class="k">def</span> <span class="nf">_request_thumbnail_download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Request that a thumbnail is downloaded for an item. If a thumbnail is successfully</span>
-<span class="sd">        retrieved, either from disk (cached) or via shotgun, the method _populate_thumbnail()</span>
-<span class="sd">        will be called. If you want to control exactly how your shotgun thumbnail is</span>
-<span class="sd">        to appear in the UI, you can subclass this method. For example, you can subclass</span>
-<span class="sd">        this method and perform image composition prior to the image being added to</span>
-<span class="sd">        the item object.</span>
-
-<span class="sd">        .. note:: This is an advanced method which you can use if you want to load thumbnail</span>
-<span class="sd">            data other than the standard &#39;image&#39; field. If that&#39;s what you need, simply make</span>
-<span class="sd">            sure that you set the download_thumbs parameter to true when you create the model</span>
-<span class="sd">            and standard thumbnails will be automatically downloaded. This method is either used</span>
-<span class="sd">            for linked thumb fields or if you want to download thumbnails for external model data</span>
-<span class="sd">            that doesn&#39;t come from Shotgun.</span>
-
-<span class="sd">        :param item: :class:`~PySide.QtGui.QStandardItem` which belongs to this model</span>
-<span class="sd">        :param field: Shotgun field where the thumbnail is stored. This is typically ``image`` but</span>
-<span class="sd">                      can also for example be ``sg_sequence.Sequence.image``.</span>
-<span class="sd">        :param url: thumbnail url</span>
-<span class="sd">        :param entity_type: Shotgun entity type</span>
-<span class="sd">        :param entity_id: Shotgun entity id</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="c1"># nothing to download. bad input. gracefully ignore this request.</span>
-            <span class="k">return</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_data_retriever</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">TankError</span><span class="p">(</span><span class="s2">&quot;Data retriever is not available!&quot;</span><span class="p">)</span>
-
-        <span class="n">uid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_data_retriever</span><span class="o">.</span><span class="n">request_thumbnail</span><span class="p">(</span><span class="n">url</span><span class="p">,</span>
-                                                         <span class="n">entity_type</span><span class="p">,</span>
-                                                         <span class="n">entity_id</span><span class="p">,</span>
-                                                         <span class="n">field</span><span class="p">,</span>
-                                                         <span class="bp">self</span><span class="o">.</span><span class="n">__bg_load_thumbs</span><span class="p">)</span>
-
-        <span class="c1"># keep tabs of this and call out later - note that we use a weakref to allow</span>
-        <span class="c1"># the model item to be gc&#39;d if it&#39;s removed from the model before the thumb</span>
-        <span class="c1"># request completes.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__thumb_map</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;item_ref&quot;</span><span class="p">:</span> <span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="n">item</span><span class="p">),</span> <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="n">field</span> <span class="p">}</span></div>
-
-    <span class="c1">########################################################################################</span>
-    <span class="c1"># methods to be implemented by subclasses</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_request_data</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._item_created"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._item_created">[docs]</a>    <span class="k">def</span> <span class="nf">_item_created</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -655,13 +580,29 @@
 <span class="sd">        :param item: The item that was just created.</span>
 <span class="sd">        :type item: :class:`~PySide.QtGui.QStandardItem`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="c1"># as per docs, call the base implementation</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ShotgunModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_item_created</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
-        <span class="c1"># request thumb</span>
+        <span class="c1"># request thumbnail for this item</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__download_thumbs</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__process_thumbnail_for_item</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
+            <span class="n">sg_data</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SG_DATA_ROLE</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">sg_data</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">sg_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="c1"># note: we check for all fields containing &quot;image&quot;</span>
+                    <span class="c1"># so that we&#39;ll catch a field such as &#39;sg_sequence.Sequence.image&#39;</span>
+                    <span class="c1"># as well as a straight &#39;image&#39; field</span>
+                    <span class="k">if</span> <span class="s2">&quot;image&quot;</span> <span class="ow">in</span> <span class="n">field</span> <span class="ow">and</span> <span class="n">sg_data</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="c1"># we have a thumb we are supposed to download!</span>
+                        <span class="c1"># get the thumbnail - store the unique id we get back from</span>
+                        <span class="c1"># the data retrieve in a dict for fast lookup later</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_request_thumbnail_download</span><span class="p">(</span>
+                            <span class="n">item</span><span class="p">,</span>
+                            <span class="n">field</span><span class="p">,</span>
+                            <span class="n">sg_data</span><span class="p">[</span><span class="n">field</span><span class="p">],</span>
+                            <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">),</span>
+                            <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+                        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._set_tooltip"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._set_tooltip">[docs]</a>    <span class="k">def</span> <span class="nf">_set_tooltip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">sg_item</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -700,7 +641,6 @@
 <span class="sd">        :param item: Shotgun model item that requires a tooltip.</span>
 <span class="sd">        :param sg_item: Dictionary of the entity associated with the Shotgun model item.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="n">data</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SG_ASSOCIATED_FIELD_ROLE</span><span class="p">)</span>
         <span class="n">field</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
 
@@ -730,59 +670,6 @@
                     <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
                 <span class="p">)</span>
             <span class="p">)</span></div>
-
-<div class="viewcode-block" id="ShotgunModel._populate_thumbnail"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._populate_thumbnail">[docs]</a>    <span class="k">def</span> <span class="nf">_populate_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Called whenever the real thumbnail for an item exists on disk. The following</span>
-<span class="sd">        execution sequence typically happens:</span>
-
-<span class="sd">        - :class:`~PySide.QtGui.QStandardItem` is created, either through a cache load from disk or</span>
-<span class="sd">          from a payload coming from the Shotgun API.</span>
-<span class="sd">        - After the item has been set up with its associated Shotgun data,</span>
-<span class="sd">          :meth:`_populate_default_thumbnail()` is called, allowing client code to set</span>
-<span class="sd">          up a default thumbnail that will be shown while potential real thumbnail</span>
-<span class="sd">          data is being loaded.</span>
-<span class="sd">        - The model will now start looking for the real thumbail.</span>
-<span class="sd">        - If the thumbnail is already cached on disk, :meth:`_populate_thumbnail()` is called very soon.</span>
-<span class="sd">        - If there isn&#39;t a thumbnail associated, :meth:`_populate_thumbnail()` will not be called.</span>
-<span class="sd">        - If there isn&#39;t a thumbnail cached, the model will asynchronously download</span>
-<span class="sd">          the thumbnail from Shotgun and then (after some time) call :meth:`_populate_thumbnail()`.</span>
-
-<span class="sd">        This method will be called for standard thumbnails if the model has been</span>
-<span class="sd">        instantiated with the download_thumbs flag set to be true. It will be called for</span>
-<span class="sd">        items which are associated with shotgun entities (in a tree data layout, this is typically</span>
-<span class="sd">        leaf nodes). It will also be called once the data requested via _request_thumbnail_download()</span>
-<span class="sd">        arrives.</span>
-
-<span class="sd">        This method makes it possible to control how the thumbnail is applied and associated</span>
-<span class="sd">        with the item. The default implementation will simply set the thumbnail to be icon</span>
-<span class="sd">        of the item, but this can be altered by subclassing this method.</span>
-
-<span class="sd">        :param item: :class:`~PySide.QtGui.QStandardItem` which is associated with the given thumbnail</span>
-<span class="sd">        :param field: The Shotgun field which the thumbnail is associated with.</span>
-<span class="sd">        :param path: A path on disk to the thumbnail. This is a file in jpeg format.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># the default implementation sets the icon</span>
-        <span class="n">thumb</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="n">item</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">thumb</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="ShotgunModel._populate_thumbnail_image"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._populate_thumbnail_image">[docs]</a>    <span class="k">def</span> <span class="nf">_populate_thumbnail_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Similar to :meth:`_populate_thumbnail()` but this method is called instead</span>
-<span class="sd">        when the bg_load_thumbs parameter has been set to true. In this case, no</span>
-<span class="sd">        loading of thumbnail data from disk is necessary - this has already been</span>
-<span class="sd">        carried out async and is passed in the form of a QImage object.</span>
-
-<span class="sd">        For further details, see :meth:`_populate_thumbnail()`</span>
-
-<span class="sd">        :param item: :class:`~PySide.QtGui.QStandardItem` which is associated with the given thumbnail</span>
-<span class="sd">        :param field: The Shotgun field which the thumbnail is associated with.</span>
-<span class="sd">        :param image: QImage object with the thumbnail loaded</span>
-<span class="sd">        :param path: A path on disk to the thumbnail. This is a file in jpeg format.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># the default implementation sets the icon</span>
-        <span class="n">thumb</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="o">.</span><span class="n">fromImage</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
-        <span class="n">item</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">thumb</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._get_additional_columns"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._get_additional_columns">[docs]</a>    <span class="k">def</span> <span class="nf">_get_additional_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primary_item</span><span class="p">,</span> <span class="n">is_leaf</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -818,7 +705,9 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">get_sg_data</span><span class="p">(</span><span class="n">primary_item</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
                 <span class="c1"># set the display role to the string representation of the value</span>
-                <span class="n">column_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SG_QUERY_MODEL_ITEM_CLASS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__generate_display_name</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+                <span class="n">column_item</span> <span class="o">=</span> <span class="n">ShotgunStandardItem</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__generate_display_name</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                <span class="p">)</span>
                 <span class="n">column_item</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="n">column</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__editable_fields</span><span class="p">)</span>
 
                 <span class="c1"># set associated field role to be the column value itself</span>
@@ -857,181 +746,90 @@
         <span class="n">row</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_additional_columns</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">is_leaf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">row</span></div>
 
-    <span class="k">def</span> <span class="nf">_on_data_retriever_work_failure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_create_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">data_item</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Asynchronous callback - the data retriever failed to do some work</span>
+<span class="sd">        Creates a model item for the tree given data out of the data store</span>
 
-<span class="sd">        :param uid: The unique id of the work that failed</span>
-<span class="sd">        :param msg: The error message returned for the failure</span>
+<span class="sd">        :param :class:`~PySide.QtGui.QStandardItem` parent: Model item to parent the node under</span>
+<span class="sd">        :param :class:`ShotgunItemData` data_item: Data to populate new item with</span>
+
+<span class="sd">        :returns: Model item</span>
+<span class="sd">        :rtype: :class:`ShotgunStandardItem`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">uid</span> <span class="o">=</span> <span class="n">sanitize_qt</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span> <span class="c1"># qstring on pyqt, str on pyside</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="n">sanitize_qt</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="c1"># construct tree view node object</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">ShotgunStandardItem</span><span class="p">()</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="n">data_item</span><span class="o">.</span><span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__editable_fields</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__current_work_id</span> <span class="o">!=</span> <span class="n">uid</span><span class="p">:</span>
-            <span class="c1"># not our job. ignore</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Retrieved error from data worker: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
-            <span class="k">return</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__current_work_id</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_item</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">data_item</span><span class="p">)</span>
 
-        <span class="n">full_msg</span> <span class="o">=</span> <span class="s2">&quot;Error retrieving data from Shotgun: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_refresh_fail</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">full_msg</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_warning</span><span class="p">(</span><span class="n">full_msg</span><span class="p">)</span>
+        <span class="c1"># run the finalizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_item</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_on_data_retriever_work_completed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">request_type</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c1"># get complete row containing all columns for the current item</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_columns</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">data_item</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">())</span>
+
+        <span class="c1"># and attach the node</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">item</span>
+
+    <span class="k">def</span> <span class="nf">_update_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">data_item</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Signaled whenever the data retriever completes some work.</span>
-<span class="sd">        This method will dispatch the work to different methods</span>
-<span class="sd">        depending on what async task has completed.</span>
+<span class="sd">        Updates a model item with the given data</span>
 
-<span class="sd">        :param uid:             The unique id of the work that completed</span>
-<span class="sd">        :param request_type:    Type of work completed</span>
-<span class="sd">        :param data:            Result of the work</span>
+<span class="sd">        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to update</span>
+<span class="sd">        :param :class:`ShotgunItemData` data_item: Data to update item with</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">uid</span> <span class="o">=</span> <span class="n">sanitize_qt</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span> <span class="c1"># qstring on pyqt, str on pyside</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">sanitize_qt</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Received worker payload of type </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">request_type</span><span class="p">)</span>
+        <span class="n">field_display_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__generate_display_name</span><span class="p">(</span><span class="n">data_item</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="n">data_item</span><span class="o">.</span><span class="n">shotgun_data</span><span class="p">)</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">field_display_name</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__current_work_id</span> <span class="o">==</span> <span class="n">uid</span><span class="p">:</span>
-            <span class="c1"># our data has arrived from sg!</span>
-            <span class="c1"># process the data</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__current_work_id</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="n">sg_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sg&quot;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__on_sg_data_arrived</span><span class="p">(</span><span class="n">sg_data</span><span class="p">)</span>
+        <span class="c1"># keep tabs of which items we are creating</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">IS_SG_MODEL_ROLE</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__thumb_map</span><span class="p">:</span>
-            <span class="c1"># a thumbnail is now present on disk!</span>
-            <span class="n">thumb_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__thumb_map</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span>
-            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__thumb_map</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span>
+        <span class="c1"># flag if item has children, for the fetchMore functionality</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="ow">not</span> <span class="n">data_item</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SG_ITEM_HAS_CHILDREN</span><span class="p">)</span>
 
-            <span class="n">thumbnail_path</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;thumb_path&quot;</span><span class="p">]</span>
-            <span class="n">thumbnail</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span>
+        <span class="c1"># transfer a unique id from the data backend so we can</span>
+        <span class="c1"># refer back to this node later on</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">data_item</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SG_ITEM_UNIQUE_ID</span><span class="p">)</span>
 
-            <span class="c1"># if the requested thumbnail has since dissapeared on the server,</span>
-            <span class="c1"># path and image will be None. In this case, skip processing</span>
-            <span class="k">if</span> <span class="n">thumbnail_path</span><span class="p">:</span>
-                <span class="c1"># get the model item from the weakref we stored in the thumb info:</span>
-                <span class="n">item</span> <span class="o">=</span> <span class="n">thumb_info</span><span class="p">[</span><span class="s2">&quot;item_ref&quot;</span><span class="p">]()</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
-                    <span class="c1"># the model item no longer exists so we can ignore this result!</span>
-                    <span class="k">return</span>
-                <span class="n">sg_field</span> <span class="o">=</span> <span class="n">thumb_info</span><span class="p">[</span><span class="s2">&quot;field&quot;</span><span class="p">]</span>
+        <span class="c1"># store the actual value we have</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">data_item</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">data_item</span><span class="o">.</span><span class="n">shotgun_data</span><span class="p">[</span><span class="n">data_item</span><span class="o">.</span><span class="n">field</span><span class="p">]},</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SG_ASSOCIATED_FIELD_ROLE</span>
+        <span class="p">)</span>
 
-                <span class="c1"># call our deriving class implementation</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bg_load_thumbs</span><span class="p">:</span>
-                    <span class="c1"># worker thread already loaded the thumbnail in as a QImage.</span>
-                    <span class="c1"># call a separate method.</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_populate_thumbnail_image</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">sg_field</span><span class="p">,</span> <span class="n">thumbnail</span><span class="p">,</span> <span class="n">thumbnail_path</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="c1"># worker thread only ensured that the image exists</span>
-                    <span class="c1"># call method to populate it</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_populate_thumbnail</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">sg_field</span><span class="p">,</span> <span class="n">thumbnail_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data_item</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">():</span>
+            <span class="c1"># this is the leaf level!</span>
+            <span class="c1"># attach the shotgun data so that we can access it later</span>
+            <span class="c1"># note: Qt automatically changes everything to be unicode</span>
+            <span class="c1"># according to strange rules of its own, so force convert</span>
+            <span class="c1"># all shotgun values to be proper unicode prior to setData</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">sanitize_for_qt_model</span><span class="p">(</span><span class="n">data_item</span><span class="o">.</span><span class="n">shotgun_data</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">SG_DATA_ROLE</span><span class="p">)</span>
+
+        <span class="c1"># Now we got the object set up. Now start calling custom methods:</span>
+
+        <span class="c1"># allow item customization prior to adding to model</span>
+        <span class="c1"># note: this now runs both on update and create, which may be</span>
+        <span class="c1">#       conceptually confusing.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_item_created</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+        <span class="c1"># set up default thumb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_populate_default_thumbnail</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+        <span class="c1"># run the populate item method</span>
+        <span class="k">if</span> <span class="n">data_item</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_populate_item</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">data_item</span><span class="o">.</span><span class="n">shotgun_data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_populate_item</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_tooltip</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">data_item</span><span class="o">.</span><span class="n">shotgun_data</span><span class="p">)</span>
 
     <span class="c1">########################################################################################</span>
     <span class="c1"># private methods</span>
 
-    <span class="k">def</span> <span class="nf">__on_sg_data_arrived</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sg_data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Handle asynchronous shotgun data arriving after a find request.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;--&gt; Shotgun data arrived. (</span><span class="si">%s</span><span class="s2"> records)&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">sg_data</span><span class="p">))</span>
-
-        <span class="c1"># pre-process data</span>
-        <span class="n">sg_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_before_data_processing</span><span class="p">(</span><span class="n">sg_data</span><span class="p">)</span>
-
-        <span class="c1"># ensure the data is clean</span>
-        <span class="n">sg_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_clean_data</span><span class="p">(</span><span class="n">sg_data</span><span class="p">)</span>
-
-        <span class="n">modifications_made</span> <span class="o">=</span> <span class="bp">False</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_all_item_unique_ids</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request_full_refresh</span><span class="p">:</span>
-            <span class="c1"># no items in the tree or full refresh requested.</span>
-
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sg_data</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="c1"># we have an empty tree and incoming sg data.</span>
-                <span class="c1"># Run the full recursive tree generation for performance.</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_request_full_refresh</span> <span class="o">=</span> <span class="bp">False</span> <span class="c1"># reset flag for next request</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;No cached items in tree! Creating full tree from Shotgun data...&quot;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__rebuild_whole_tree_from_sg_data</span><span class="p">(</span><span class="n">sg_data</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;...done!&quot;</span><span class="p">)</span>
-                <span class="n">modifications_made</span> <span class="o">=</span> <span class="bp">True</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># no data coming in from shotgun, so no need to rebuild the tree</span>
-                <span class="c1"># however still set the modifications flag (we went from an undefined</span>
-                <span class="c1"># tree to an empty tree, to trigger a zero-item cache to be saved</span>
-                <span class="n">modifications_made</span> <span class="o">=</span> <span class="bp">True</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># go through and see if there are any changes we should apply to the tree.</span>
-
-            <span class="c1"># check if anything has been deleted or added</span>
-            <span class="n">ids_from_shotgun</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">sg_data</span> <span class="p">])</span>
-            <span class="n">ids_in_tree</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_all_item_unique_ids</span><span class="p">())</span>
-
-            <span class="n">removed_ids</span> <span class="o">=</span> <span class="n">ids_in_tree</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">ids_from_shotgun</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">removed_ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Detected deleted items </span><span class="si">%s</span><span class="s2">. Rebuilding tree...&quot;</span> <span class="o">%</span> <span class="n">removed_ids</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__rebuild_whole_tree_from_sg_data</span><span class="p">(</span><span class="n">sg_data</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;...done!&quot;</span><span class="p">)</span>
-                <span class="n">modifications_made</span> <span class="o">=</span> <span class="bp">True</span>
-
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">added_ids</span> <span class="o">=</span> <span class="n">ids_from_shotgun</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">ids_in_tree</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">added_ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="c1"># wedge in the new items</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Detected added items. Adding them in-situ to tree...&quot;</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">sg_data</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">added_ids</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Adding </span><span class="si">%s</span><span class="s2"> to tree&quot;</span> <span class="o">%</span> <span class="n">d</span> <span class="p">)</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">__add_sg_item_to_tree</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;...done!&quot;</span><span class="p">)</span>
-                    <span class="n">modifications_made</span> <span class="o">=</span> <span class="bp">True</span>
-
-            <span class="c1"># check for modifications. At this point, the number of items in the tree and</span>
-            <span class="c1"># the sg data should match, except for any duplicate items in the tree which would</span>
-            <span class="c1"># effectively shadow each other. These can be safely ignored.</span>
-            <span class="c1">#</span>
-            <span class="c1"># Also note that we need to exclude any S3 urls from the comparison as these change</span>
-            <span class="c1"># all the time</span>
-            <span class="c1">#</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Checking for modifications...&quot;</span><span class="p">)</span>
-            <span class="n">detected_changes</span> <span class="o">=</span> <span class="bp">False</span>
-            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">sg_data</span><span class="p">:</span>
-                <span class="c1"># if there are modifications of any kind, we just rebuild the tree at the moment</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_item_by_unique_id</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
-                    <span class="n">existing_sg_data</span> <span class="o">=</span> <span class="n">get_sg_data</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_compare_data</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">existing_sg_data</span><span class="p">):</span>
-                        <span class="c1"># shotgun data has changed for this item! Rebuild the tree</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;SG data change: </span><span class="si">%s</span><span class="s2"> --&gt; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">existing_sg_data</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span>
-                        <span class="n">detected_changes</span> <span class="o">=</span> <span class="bp">True</span>
-                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_log_warning</span><span class="p">(</span><span class="s2">&quot;Shotgun item </span><span class="si">%s</span><span class="s2"> not appearing in tree - most likely because &quot;</span>
-                                          <span class="s2">&quot;there is another object in Shotgun with the same name.&quot;</span> <span class="o">%</span> <span class="n">d</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">detected_changes</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Detected modifications. Rebuilding tree...&quot;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__rebuild_whole_tree_from_sg_data</span><span class="p">(</span><span class="n">sg_data</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;...done!&quot;</span><span class="p">)</span>
-                <span class="n">modifications_made</span> <span class="o">=</span> <span class="bp">True</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;...no modifications found.&quot;</span><span class="p">)</span>
-
-        <span class="c1"># last step - save our tree to disk for fast caching next time!</span>
-        <span class="k">if</span> <span class="n">modifications_made</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Saving tree to disk </span><span class="si">%s</span><span class="s2">...&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache_path</span><span class="p">)</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_save_to_disk</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;...saving complete!&quot;</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_log_warning</span><span class="p">(</span><span class="s2">&quot;Couldn&#39;t save cache data to disk: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
-
-        <span class="c1"># and emit completion signal</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_refreshed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">modifications_made</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">__get_data_cache_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache_seed</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__compute_cache_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache_seed</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates and returns a cache path to use for this instance&#39;s query.</span>
 
@@ -1075,7 +873,6 @@
         <span class="c1"># now hash up the rest of the parameters and make that the filename</span>
         <span class="n">params_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
         <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__schema_generation</span><span class="p">))</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bg_load_thumbs</span><span class="p">))</span>
         <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fields</span><span class="p">))</span>
         <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__order</span><span class="p">))</span>
         <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy</span><span class="p">))</span>
@@ -1102,7 +899,7 @@
             <span class="s2">&quot;sg&quot;</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">,</span>
             <span class="n">params_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span>
-            <span class="n">filter_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+            <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filter_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span> <span class="n">ShotgunFindDataHandler</span><span class="o">.</span><span class="n">FORMAT_VERSION</span><span class="p">)</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;win32&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_cache_path</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">250</span><span class="p">:</span>
@@ -1112,244 +909,6 @@
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">data_cache_path</span>
-
-    <span class="c1">########################################################################################</span>
-    <span class="c1"># shotgun data processing and tree building</span>
-
-    <span class="k">def</span> <span class="nf">__add_sg_item_to_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sg_item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add a single item to the tree. This is a slow method.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">()</span>
-        <span class="c1"># now drill down recursively, create any missing nodes on the way</span>
-        <span class="c1"># and eventually add this as a leaf item</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__add_sg_item_to_tree_r</span><span class="p">(</span><span class="n">sg_item</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy</span><span class="p">)</span>
-
-
-    <span class="k">def</span> <span class="nf">__add_sg_item_to_tree_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sg_item</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">hierarchy</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add a shotgun item to the tree. Create intermediate nodes if neccessary.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># get the next field to display in tree view</span>
-        <span class="n">field</span> <span class="o">=</span> <span class="n">hierarchy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="c1"># get lower levels of values</span>
-        <span class="n">remaining_fields</span> <span class="o">=</span> <span class="n">hierarchy</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-
-        <span class="c1"># are we at leaf level or not?</span>
-        <span class="n">on_leaf_level</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining_fields</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
-
-        <span class="c1"># get the item we need at this level. Create it if not found.</span>
-        <span class="n">field_display_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__generate_display_name</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">sg_item</span><span class="p">)</span>
-        <span class="n">found_item</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="k">for</span> <span class="n">row_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
-            <span class="n">child</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">row_index</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">on_leaf_level</span><span class="p">:</span>
-                <span class="c1"># compare shotgun ids</span>
-                <span class="n">sg_data</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SG_DATA_ROLE</span><span class="p">)</span>
-
-                <span class="c1"># #25231 some clients reporting some child items don&#39;t have this data attached</span>
-                <span class="c1"># this is either because of a bug which we don&#39;t yet fully understand or beacuse</span>
-                <span class="c1"># of model data injected into the tree which does not have this property set</span>
-                <span class="c1"># so double check that the data actually is present.</span>
-                <span class="k">if</span> <span class="n">sg_data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_log_warning</span><span class="p">(</span><span class="s2">&quot;Found cached leaf node in tree with a missing SG_DATA_ROLE. Please report &quot;</span>
-                                       <span class="s2">&quot;to support on support@shotgunsoftware.com. If possible, please &quot;</span>
-                                       <span class="s2">&quot;make a copy of the file &#39;</span><span class="si">%s</span><span class="s2">&#39; and attach that with the support request. &quot;</span>
-                                       <span class="s2">&quot;Affected Node name: &#39;</span><span class="si">%s</span><span class="s2">&#39;. &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_path</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">text</span><span class="p">()))</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">sg_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">):</span>
-                        <span class="n">found_item</span> <span class="o">=</span> <span class="n">child</span>
-                        <span class="k">break</span>
-
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># not on leaf level. Just compare names</span>
-                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">text</span><span class="p">())</span> <span class="o">==</span> <span class="n">field_display_name</span><span class="p">:</span>
-                    <span class="n">found_item</span> <span class="o">=</span> <span class="n">child</span>
-                    <span class="k">break</span>
-
-        <span class="k">if</span> <span class="n">found_item</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-
-            <span class="c1"># didn&#39;t find item! So let&#39;s create it!</span>
-            <span class="n">found_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__create_item</span><span class="p">(</span><span class="n">field_display_name</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">on_leaf_level</span><span class="p">,</span> <span class="n">sg_item</span><span class="p">)</span>
-
-            <span class="c1"># get a complete row containing all columns for the current item</span>
-            <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_columns</span><span class="p">(</span><span class="n">found_item</span><span class="p">,</span> <span class="n">on_leaf_level</span><span class="p">)</span>
-
-            <span class="c1"># add it to the tree. At this point QT will fire off various signals to inform views etc.</span>
-            <span class="n">root</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">on_leaf_level</span><span class="p">:</span>
-            <span class="c1"># there are more levels that we should recurse down into</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__add_sg_item_to_tree_r</span><span class="p">(</span><span class="n">sg_item</span><span class="p">,</span> <span class="n">found_item</span><span class="p">,</span> <span class="n">remaining_fields</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">__process_thumbnail_for_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Schedule a thumb download for an item</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">sg_data</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SG_DATA_ROLE</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">sg_data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">return</span>
-
-        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">sg_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-
-            <span class="k">if</span> <span class="s2">&quot;image&quot;</span> <span class="ow">in</span> <span class="n">field</span> <span class="ow">and</span> <span class="n">sg_data</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="c1"># we have a thumb we are supposed to download!</span>
-                <span class="c1"># get the thumbnail - store the unique id we get back from</span>
-                <span class="c1"># the data retrieve in a dict for fast lookup later</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_request_thumbnail_download</span><span class="p">(</span><span class="n">item</span><span class="p">,</span>
-                                                 <span class="n">field</span><span class="p">,</span>
-                                                 <span class="n">sg_data</span><span class="p">[</span><span class="n">field</span><span class="p">],</span>
-                                                 <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">),</span>
-                                                 <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
-
-    <span class="k">def</span> <span class="nf">__rebuild_whole_tree_from_sg_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Clears the tree and rebuilds it from the given shotgun data.</span>
-<span class="sd">        Note that any selection and expansion states in the view will be lost.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># clear all internal memory storage</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-
-        <span class="c1"># get any external payload from deriving classes</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_load_external_data</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__populate_complete_tree</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">__create_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_display_name</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">is_leaf</span><span class="p">,</span> <span class="n">sg_item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Creates a model item for the tree.</span>
-
-<span class="sd">        :param field_display_name: Name of the entry in the UI.</span>
-<span class="sd">        :param field: Name of the field in the entity dictionary.</span>
-<span class="sd">        :param is_leaf: Is this a leaf item?</span>
-<span class="sd">        :param sg_item: Entity dictionary.</span>
-
-<span class="sd">        :returns: ShotgunStandardItem instance.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># construct tree view node object</span>
-        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SG_QUERY_MODEL_ITEM_CLASS</span><span class="p">(</span><span class="n">field_display_name</span><span class="p">)</span>
-        <span class="n">item</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__editable_fields</span><span class="p">)</span>
-
-        <span class="c1"># keep tabs of which items we are creating</span>
-        <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">IS_SG_MODEL_ROLE</span><span class="p">)</span>
-
-        <span class="c1"># store the actual value we have</span>
-        <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">sg_item</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="p">},</span> <span class="bp">self</span><span class="o">.</span><span class="n">SG_ASSOCIATED_FIELD_ROLE</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">is_leaf</span><span class="p">:</span>
-            <span class="c1"># this is the leaf level!</span>
-            <span class="c1"># attach the shotgun data so that we can access it later</span>
-            <span class="c1"># note: QT automatically changes everything to be unicode</span>
-            <span class="c1"># according to strange rules of its own, so force convert</span>
-            <span class="c1"># all shotgun values to be proper unicode prior to setData</span>
-            <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">sanitize_for_qt_model</span><span class="p">(</span><span class="n">sg_item</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">SG_DATA_ROLE</span><span class="p">)</span>
-
-        <span class="c1"># ---- now we got the object set up. Now start calling custom methods:</span>
-
-        <span class="c1"># allow item customization prior to adding to model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_item_created</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-
-        <span class="c1"># set up default thumb</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_populate_default_thumbnail</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-
-        <span class="c1"># run the populate item method (only runs at construction, not on cache restore)</span>
-        <span class="k">if</span> <span class="n">is_leaf</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_populate_item</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">sg_item</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_populate_item</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_tooltip</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">sg_item</span><span class="p">)</span>
-
-        <span class="c1"># run the finalizer (always runs on construction, even via cache)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_item</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">item</span>
-
-    <span class="k">def</span> <span class="nf">__realize_parent_child_hierarchy_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Inserts all children nodes alphabetically into their parent, recursively.</span>
-
-<span class="sd">        :param node: Dictionary with keys &#39;item&#39; and &#39;children&#39; representing a ShotgunStandardItem and a list</span>
-<span class="sd">            of ShotgunStandardItem to be appended as rows of &#39;item&#39;.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># If this is a leaf, there are no children.</span>
-        <span class="k">if</span> <span class="s2">&quot;children&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">node</span><span class="p">:</span>
-            <span class="k">return</span>
-
-        <span class="n">children</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="s2">&quot;children&quot;</span><span class="p">]</span>
-        <span class="c1"># process values in alphabetical order by name, case insensitive, so that</span>
-        <span class="c1"># children are always sorted alphabetically underneath their parent.</span>
-        <span class="k">for</span> <span class="n">child_key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">children</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="nb">cmp</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">:</span> <span class="nb">cmp</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">lower</span><span class="p">())):</span>
-            <span class="n">child</span> <span class="o">=</span> <span class="n">children</span><span class="p">[</span><span class="n">child_key</span><span class="p">]</span>
-
-            <span class="n">on_leaf_level</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;children&quot;</span><span class="p">))</span>
-            <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_columns</span><span class="p">(</span><span class="n">child</span><span class="p">[</span><span class="s2">&quot;item&quot;</span><span class="p">],</span> <span class="n">on_leaf_level</span><span class="p">)</span>
-            <span class="n">node</span><span class="p">[</span><span class="s2">&quot;item&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__realize_parent_child_hierarchy_r</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">__populate_complete_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sg_data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Generate tree model data structure based on Shotgun data.</span>
-
-<span class="sd">        :param sg_data: List of shotgun entity dictionairies.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># The tree is built in a two pass approach. We are first building the</span>
-        <span class="c1"># individual ShotgunStandardItems and a tree of dictionaries. Each</span>
-        <span class="c1"># dictionary has a key named &#39;item&#39; which is the ShotgunStandardItem and</span>
-        <span class="c1"># another key named &#39;children&#39; which holds a dictionary of all the direct</span>
-        <span class="c1"># children this node has. These children are keyed by their name in the</span>
-        <span class="c1"># dictionary. This dictionary of dictionaries approach is recursive from the</span>
-        <span class="c1"># root to the leaves. Using a dictionary of children allows us to do a quick</span>
-        <span class="c1"># lookup to see if a child node needs to be created or can be reused. We will</span>
-        <span class="c1"># be actually parenting the ShotgunStandardItems to other ShotgunStandardItems</span>
-        <span class="c1"># in the second pass when we have the complete list of children and can</span>
-        <span class="c1"># proceed on sorting them by name before insertion into the parent.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Note that in the following algorithm two different non-leaf entities with</span>
-        <span class="c1"># the same name will be considered to be the same. Only leaf nodes with the</span>
-        <span class="c1"># same name are differentiated by appending an id to their name.</span>
-
-        <span class="c1"># and add the shotgun data</span>
-        <span class="n">tree</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;item&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">(),</span>
-            <span class="s2">&quot;children&quot;</span><span class="p">:</span> <span class="p">{}</span>
-        <span class="p">}</span>
-
-        <span class="c1"># For each item that need to go inside the tree</span>
-        <span class="k">for</span> <span class="n">sg_item</span> <span class="ow">in</span> <span class="n">sg_data</span><span class="p">:</span>
-            <span class="n">sub_tree</span> <span class="o">=</span> <span class="n">tree</span>
-
-            <span class="c1"># Create model items by drilling down the hierarchy</span>
-            <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy</span><span class="p">:</span>
-                <span class="n">on_leaf_level</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">field_name</span><span class="p">)</span>
-                <span class="c1"># Get the value of field</span>
-                <span class="n">field_display_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__generate_display_name</span><span class="p">(</span><span class="n">field_name</span><span class="p">,</span> <span class="n">sg_item</span><span class="p">)</span>
-
-                <span class="c1"># If we are at the leaf and there is already an item with the same name make</span>
-                <span class="c1"># this new item unique.</span>
-                <span class="k">if</span> <span class="n">on_leaf_level</span> <span class="ow">and</span> <span class="n">field_display_name</span> <span class="ow">in</span> <span class="n">sub_tree</span><span class="p">[</span><span class="s2">&quot;children&quot;</span><span class="p">]:</span>
-                    <span class="n">field_display_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> (id </span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">field_display_name</span><span class="p">,</span> <span class="n">sg_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
-
-                <span class="c1"># If this section of the tree has never seen this value</span>
-                <span class="k">if</span> <span class="n">field_display_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sub_tree</span><span class="p">[</span><span class="s2">&quot;children&quot;</span><span class="p">]:</span>
-
-                    <span class="c1"># Create the item.</span>
-                    <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__create_item</span><span class="p">(</span><span class="n">field_display_name</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">on_leaf_level</span><span class="p">,</span> <span class="n">sg_item</span><span class="p">)</span>
-
-                    <span class="n">sub_tree</span><span class="p">[</span><span class="s2">&quot;children&quot;</span><span class="p">][</span><span class="n">field_display_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                        <span class="s2">&quot;item&quot;</span><span class="p">:</span> <span class="n">item</span><span class="p">,</span>
-                        <span class="s2">&quot;children&quot;</span><span class="p">:</span> <span class="p">{}</span>
-                    <span class="p">}</span>
-
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">on_leaf_level</span><span class="p">:</span>
-                    <span class="n">sub_tree</span> <span class="o">=</span> <span class="n">sub_tree</span><span class="p">[</span><span class="s2">&quot;children&quot;</span><span class="p">][</span><span class="n">field_display_name</span><span class="p">]</span>
-
-        <span class="c1"># The second pass here consists of actually adding the children ShotgunStandardItem</span>
-        <span class="c1"># inside their parent, all sorted by name.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__realize_parent_child_hierarchy_r</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__generate_display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">sg_data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1392,7 +951,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># everything else just cast to string</span>
             <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
-
 </pre></div>
 
            </div>
@@ -1404,7 +962,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Autodesk.
+        &copy; Copyright 2017, Autodesk.
 
     </p>
   </div> 
@@ -1425,7 +983,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v4.4.15',
+            VERSION:'v5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -1,4 +1,4 @@
-Shotgun Toolkit QT Settings Wrapper
+Shotgun Toolkit Qt Settings Wrapper
 ######################################
 
 

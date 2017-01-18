@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v4.4.15 documentation</title>
+  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v5.0.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v4.4.15 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -93,7 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_hierarchy_model.html">Shotgun Hierarchy Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../task_manager.html">Background Task Processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../settings.html">Shotgun Toolkit QT Settings Wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../settings.html">Shotgun Toolkit Qt Settings Wrapper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_globals.html">Shotgun Globals Access</a></li>
 </ul>
 
@@ -116,7 +116,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v4.4.15.<br>
+    <b>tk-framework-shotgunutils</b> v5.0.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -992,7 +992,7 @@
 <span class="sd">                            returned by the find() call</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sg_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span><span class="s2">&quot;find&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span><span class="n">sg_res</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;find&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_execute_find_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1005,7 +1005,7 @@
 <span class="sd">                            returned by the find_one() call</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sg_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span><span class="s2">&quot;find_one&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span><span class="n">sg_res</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;find_one&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_execute_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1018,7 +1018,7 @@
 <span class="sd">                            returned by the update() call</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sg_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span><span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span><span class="n">sg_res</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_execute_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1031,7 +1031,7 @@
 <span class="sd">                            returned by the create() call</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sg_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span><span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span><span class="n">sg_res</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_execute_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1044,7 +1044,7 @@
 <span class="sd">                            returned by the delete() call</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sg_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span><span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span><span class="n">sg_res</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_execute_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">method_args</span><span class="p">,</span> <span class="n">method_kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1058,7 +1058,7 @@
 <span class="sd">                                returned by the method</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="o">*</span><span class="n">method_args</span><span class="p">,</span> <span class="o">**</span><span class="n">method_kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span><span class="s2">&quot;method&quot;</span><span class="p">,</span> <span class="s2">&quot;result&quot;</span><span class="p">:</span><span class="n">res</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;method&quot;</span><span class="p">,</span> <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="n">res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_execute_nav_expand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1071,7 +1071,7 @@
 <span class="sd">            returned by the find() call</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sg_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">nav_expand</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span><span class="s2">&quot;nav_expand&quot;</span><span class="p">,</span> <span class="s2">&quot;nav_result&quot;</span><span class="p">:</span><span class="n">sg_res</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;nav_expand&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_check_attachment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attachment_entity</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1238,25 +1238,32 @@
             <span class="k">return</span>
 
         <span class="n">action</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;action&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;find&quot;</span><span class="p">,</span> <span class="s2">&quot;find_one&quot;</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span> <span class="n">action</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;sg&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;sg_result&quot;</span><span class="p">]})</span>
-        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;nav_expand&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span> <span class="s2">&quot;nav_expand&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;nav&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;nav_result&quot;</span><span class="p">]})</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;find&quot;</span><span class="p">,</span> <span class="s2">&quot;find_one&quot;</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="s2">&quot;nav_expand&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span>
+                <span class="n">action</span><span class="p">,</span>
+                <span class="p">{</span><span class="s2">&quot;sg&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;sg_result&quot;</span><span class="p">]}</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span> <span class="s2">&quot;schema&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;fields&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;fields&quot;</span><span class="p">],</span> <span class="s2">&quot;types&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;types&quot;</span><span class="p">]})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span>
+                <span class="s2">&quot;schema&quot;</span><span class="p">,</span>
+                <span class="p">{</span><span class="s2">&quot;fields&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;fields&quot;</span><span class="p">],</span> <span class="s2">&quot;types&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;types&quot;</span><span class="p">]}</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;method&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span> <span class="s2">&quot;method&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;return_value&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span>
+                <span class="s2">&quot;method&quot;</span><span class="p">,</span>
+                <span class="p">{</span><span class="s2">&quot;return_value&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]}</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;check_thumbnail&quot;</span><span class="p">:</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;thumb_path&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
                 <span class="c1"># check found a thumbnail!</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
                     <span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span>
-                    <span class="s2">&quot;find&quot;</span><span class="p">,</span>
-                    <span class="nb">dict</span><span class="p">(</span>
-                        <span class="n">thumb_path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
-                        <span class="n">image</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">],</span>
-                    <span class="p">),</span>
+                    <span class="s2">&quot;check_thumbnail&quot;</span><span class="p">,</span>
+                    <span class="p">{</span><span class="s2">&quot;thumb_path&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]}</span>
                 <span class="p">)</span>
         <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;download_thumbnail&quot;</span><span class="p">:</span>
             <span class="c1"># look up the primary thumbnail task id in the map:</span>
@@ -1265,19 +1272,16 @@
                 <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_task_id_map</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
                     <span class="nb">str</span><span class="p">(</span><span class="n">thumb_task_id</span><span class="p">),</span>
-                    <span class="s2">&quot;find&quot;</span><span class="p">,</span> 
-                    <span class="nb">dict</span><span class="p">(</span>
-                        <span class="n">thumb_path</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;thumb_path&quot;</span><span class="p">],</span>
-                        <span class="n">image</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">],</span>
-                    <span class="p">),</span>
+                    <span class="s2">&quot;download_thumbnail&quot;</span><span class="p">,</span>
+                    <span class="p">{</span><span class="s2">&quot;thumb_path&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;thumb_path&quot;</span><span class="p">],</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]}</span>
                 <span class="p">)</span>
         <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;check_attachment&quot;</span><span class="p">:</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;file_path&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
                     <span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span>
-                    <span class="s2">&quot;find&quot;</span><span class="p">,</span>
-                    <span class="nb">dict</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="n">path</span><span class="p">),</span>
+                    <span class="s2">&quot;check_attachment&quot;</span><span class="p">,</span>
+                    <span class="p">{</span><span class="s2">&quot;file_path&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">},</span>
                 <span class="p">)</span>
         <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;download_attachment&quot;</span><span class="p">:</span>
             <span class="n">attachment_task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attachment_task_id_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
@@ -1285,8 +1289,8 @@
                 <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attachment_task_id_map</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
                     <span class="nb">str</span><span class="p">(</span><span class="n">attachment_task_id</span><span class="p">),</span>
-                    <span class="s2">&quot;find&quot;</span><span class="p">,</span>
-                    <span class="nb">dict</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;file_path&quot;</span><span class="p">]),</span>
+                    <span class="s2">&quot;download_attachment&quot;</span><span class="p">,</span>
+                    <span class="p">{</span><span class="s2">&quot;file_path&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;file_path&quot;</span><span class="p">]},</span>
                 <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_on_task_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
@@ -1328,7 +1332,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Autodesk.
+        &copy; Copyright 2017, Autodesk.
 
     </p>
   </div> 
@@ -1349,7 +1353,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v4.4.15',
+            VERSION:'v5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
