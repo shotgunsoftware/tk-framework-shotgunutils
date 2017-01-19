@@ -173,9 +173,6 @@ class ShotgunDataRetriever(QtCore.QObject):
 
             # download using standard core method. This will ensure that
             # proxy and connection settings as set in the SG API are used
-            # This method will also determine the correct file extension to
-            # download to, as that information may not be readily available
-            # from the url.
             sgtk.util.download_url(bundle.shotgun, url, path_to_cached_thumb)
 
             # modify the permissions of the file so it's writeable by others
@@ -220,8 +217,9 @@ class ShotgunDataRetriever(QtCore.QObject):
             # download using standard core method. This will ensure that
             # proxy and connection settings as set in the SG API are used
             # Also force this method to determine the correct file extension
-            # to download to, since that information cannot be parsed from
-            # the thumbnail source url.
+            # to download to, since that information cannot be determined from
+            # the thumbnail source url, typically in the form of:
+            # https://my-site.shotgunstudio.com/thumbnail/full/Asset/2929
             try:
                 path_to_cached_thumb = sgtk.util.download_url(
                     bundle.shotgun, thumb_source_url, path_to_cached_thumb, True
@@ -650,13 +648,6 @@ class ShotgunDataRetriever(QtCore.QObject):
                   work_completed and work_failure signals, making it
                   possible to match them up.
         """
-        if not self._task_manager:
-            self._bundle.log_warning(
-                "No task manager has been associated with this data retriever. "
-                "Unable to request thumbnail."
-            )
-            return
-
         # construct the url that refers to the thumbnail's source image
         thumb_source_url = urlparse.urlunparse((
             bundle.shotgun.config.scheme, bundle.shotgun.config.server,
@@ -664,34 +655,9 @@ class ShotgunDataRetriever(QtCore.QObject):
             urllib.quote(str(entity_id))), None, None, None
         ))
 
-        # always add check for thumbnail already downloaded:
-        check_task_id = self._task_manager.add_task(self._task_check_thumbnail,
-                                                    priority = self._CHECK_THUMB_PRIORITY,
-                                                    group = self._bg_tasks_group,
-                                                    task_kwargs = {"url":thumb_source_url,
-                                                                   "load_image":load_image})
-
-        # Add download thumbnail task.  This is dependent on the check task above and will be passed
-        # the returned results from that task in addition to the kwargs specified below.  This allows
-        # a task dependency chain to be created with different priorities for the separate tasks.
-        dl_task_id = self._task_manager.add_task(self._task_download_thumbnail,
-                                                 upstream_task_ids = [check_task_id],
-                                                 priority = self._DOWNLOAD_THUMB_PRIORITY,
-                                                 group = self._bg_tasks_group,
-                                                 task_kwargs = {"url":thumb_source_url,
-                                                                "entity_type":entity_type,
-                                                                "entity_id":entity_id,
-                                                                "field":None,
-                                                                "load_image":load_image
-                                                                #"thumb_path":<passed from check task>
-                                                                #"image":<passed from check task>
-                                                                })
-
-        # all results for requesting a thumbnail should be returned with the same id so use
-        # a mapping to track the 'primary' task id:
-        self._thumb_task_id_map[dl_task_id] = check_task_id
-
-        return str(check_task_id)
+        return self.request_thumbnail(
+            thumb_source_url, entity_type, entity_id, None, load_image
+        )
 
     # ------------------------------------------------------------------------------------------------
     # Background task management and methods
@@ -842,7 +808,7 @@ class ShotgunDataRetriever(QtCore.QObject):
             else:
                 # Look for an existing cache file to determine what extension
                 # to use.
-                cache_base = os.path.join(*cache_path_items, path_base)
+                cache_base = os.path.join(*(cache_path_items + [path_base]))
                 cache_matches = glob.glob("%s.*" % cache_base)
                 if len(cache_matches) == 1:
                     cache_path_items.append(os.path.basename(cache_matches[0]))
