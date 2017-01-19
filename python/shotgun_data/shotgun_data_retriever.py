@@ -1149,9 +1149,7 @@ class ShotgunDataRetriever(QtCore.QObject):
             file_path=file_path,
         )
 
-    def _task_download_thumbnail(
-            self, thumb_path, url, entity_type, entity_id, field, load_image, **kwargs
-        ):
+    def _task_download_thumbnail(self, thumb_path, url, entity_type, entity_id, field, load_image, **kwargs):
         """
         Download the thumbnail for the specified entity type, id and field.  This downloads the
         thumbnail into the thumbnail cache directory and returns the cached path.
