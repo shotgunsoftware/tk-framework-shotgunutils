@@ -222,9 +222,18 @@ class ShotgunDataRetriever(QtCore.QObject):
             # Also force this method to determine the correct file extension
             # to download to, since that information cannot be parsed from
             # the thumbnail source url.
-            path_to_cached_thumb = sgtk.util.download_url(
-                bundle.shotgun, thumb_source_url, path_to_cached_thumb, True
-            )
+            try:
+                path_to_cached_thumb = sgtk.util.download_url(
+                    bundle.shotgun, thumb_source_url, path_to_cached_thumb, True
+                )
+            except TypeError, e:
+                # This means an older version of core is being used that
+                # does not have the authentication support to download the
+                # source thumbnail url spec.
+                raise TankError(
+                    "Unable to download source thumbnail URL: %s. "
+                    "Must update to newer version of Core." % thumb_source_url
+                )
 
             # modify the permissions of the file so it's writeable by others
             old_umask = os.umask(0)
@@ -710,9 +719,16 @@ class ShotgunDataRetriever(QtCore.QObject):
                   differed from what was specified.
         """
         try:
-            file_path = sgtk.util.download_url(
+            download_path = sgtk.util.download_url(
                 self._bundle.shotgun, url, file_path, True
             )
+            file_path = download_path
+        except TypeError:
+            # Probably an older version of core that doesn't have the
+            # sgtk.util.download_url() `use_url_exension` arg implemented.
+            # Try running without that arg value
+            sgtk.util.download_url(self._bundle.shotgun, url, file_path)
+
         except TankError, e:
             if field is not None:
                 sg_data = self._bundle.shotgun.find_one(
@@ -733,9 +749,16 @@ class ShotgunDataRetriever(QtCore.QObject):
                     )
                 else:
                     url = sg_data[field]
-                    file_path = sgtk.util.download_url(
-                        self._bundle.shotgun, url, file_path, True
-                    )
+                    try:
+                        download_path = sgtk.util.download_url(
+                            self._bundle.shotgun, url, file_path, True
+                        )
+                        file_path = download_path
+                    except TypeError:
+                        # Probably an older version of core that doesn't have the
+                        # sgtk.util.download_url() `use_url_exension` arg implemented.
+                        # Try running without that arg value.
+                        sgtk.util.download_url(self._bundle.shotgun, url, file_path)
 
         # now we have a thumbnail on disk, either via the direct download, or via the 
         # url-fresh-then-download approach.  Because the file is downloaded with user-only 
