@@ -180,7 +180,8 @@ class ShotgunDataRetriever(QtCore.QObject):
             # proxy and connection settings as set in the SG API are used
             try:
                 # Ask sgtk.util.download_url() to append the file type extension
-                # to the input filebase path to get the full path to the cache file.
+                # to the input path_to_cached_thumb to get the full path to the
+                # cache file.
                 full_path = sgtk.util.download_url(
                     bundle.shotgun, url, path_to_cached_thumb, True
                 )
@@ -723,7 +724,7 @@ class ShotgunDataRetriever(QtCore.QObject):
             # proxy and connection settings as set in the SG API are used
             try:
                 # Ask sgtk.util.download_url() to append the file type extension
-                # to the input filebase path to get the full path to the cache file.
+                # to the input file_path to get the full path to the cache file.
                 download_path = sgtk.util.download_url(
                     self._bundle.shotgun, url, file_path, True
                 )
@@ -762,7 +763,7 @@ class ShotgunDataRetriever(QtCore.QObject):
                     url = sg_data[field]
                     try:
                         # Ask sgtk.util.download_url() to append the file type extension
-                        # to the input filebase path to get the full path to the cache file.
+                        # to the input file_path to get the full path to the cache file.
                         download_path = sgtk.util.download_url(
                             self._bundle.shotgun, url, file_path, True
                         )
