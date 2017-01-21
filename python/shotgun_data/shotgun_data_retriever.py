@@ -179,6 +179,8 @@ class ShotgunDataRetriever(QtCore.QObject):
             # download using standard core method. This will ensure that
             # proxy and connection settings as set in the SG API are used
             try:
+                # Ask sgtk.util.download_url() to append the file type extension
+                # to the input filebase path to get the full path to the cache file.
                 full_path = sgtk.util.download_url(
                     bundle.shotgun, url, path_to_cached_thumb, True
                 )
@@ -720,6 +722,8 @@ class ShotgunDataRetriever(QtCore.QObject):
             # download using standard core method. This will ensure that
             # proxy and connection settings as set in the SG API are used
             try:
+                # Ask sgtk.util.download_url() to append the file type extension
+                # to the input filebase path to get the full path to the cache file.
                 download_path = sgtk.util.download_url(
                     self._bundle.shotgun, url, file_path, True
                 )
@@ -757,6 +761,8 @@ class ShotgunDataRetriever(QtCore.QObject):
                     # proxy and connection settings as set in the SG API are used.
                     url = sg_data[field]
                     try:
+                        # Ask sgtk.util.download_url() to append the file type extension
+                        # to the input filebase path to get the full path to the cache file.
                         download_path = sgtk.util.download_url(
                             self._bundle.shotgun, url, file_path, True
                         )
@@ -817,7 +823,7 @@ class ShotgunDataRetriever(QtCore.QObject):
             Where return data ``(path, cache_exists) = ('/tmp/xx/yy/1245/6678', False)``
 
             This will always return a file path without an extension. Since the cache
-            file does not exist, download it using :meth:`~tank.util.download_url()`, setting
+            file does not exist, download it using sgtk.util.download_url(), setting
             the ``use_url_extension`` arg to True, which will return the full path to the
             cached file:
 
