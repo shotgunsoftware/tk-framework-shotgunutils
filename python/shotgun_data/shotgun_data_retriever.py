@@ -894,6 +894,14 @@ class ShotgunDataRetriever(QtCore.QObject):
                 # Cache file exists, so append the full file name (e.g. rest_of_hash.png)
                 cache_path_items.append(os.path.basename(cache_matches[0]))
                 cached_thumb_exists = True
+                if len(cache_matches) > 1:
+                    # More than one cache match could generate unexpected results.
+                    # This is generally fixed by manually clearing the user's cache.
+                    bundle.log_warning(
+                        "More than one cached file found for url '%s':\n%s\nUsing '%s'."
+                        "If this is incorrect, try clearing your local site cache." %
+                        (url, cache_matches, cache_matches[0])
+                    )
             else:
                 # Cache file does not exist, so only append the basename of the cached
                 # thumbnail that does NOT include the file type extension (e.g. rest_of_hash).
