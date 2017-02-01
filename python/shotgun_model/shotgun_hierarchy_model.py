@@ -88,8 +88,11 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # they are not clickable. This makes goes outside the typical bounds of
         # the model by pulling the palette colors from the app instance. This
         # can be overridden in subclasses via ``_finalize_item()`` though.
-        base_color = QtGui.QApplication.instance().palette().base().color()
-        text_color = QtGui.QApplication.instance().palette().text().color()
+        # Note that "palette()" is a static method that needs to be accessed
+        # through "QApplication" rather than "QApplication.instance()" to
+        # make sure we are compatible with both Qt 4 and Qt 5.
+        base_color = QtGui.QApplication.palette().base().color()
+        text_color = QtGui.QApplication.palette().text().color()
 
         # local import to avoid doc generation issues
         from ..utils import color_mix
