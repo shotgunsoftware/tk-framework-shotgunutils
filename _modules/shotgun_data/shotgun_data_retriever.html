@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v5.0.1 documentation</title>
+  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v5.1.0 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.0.1 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.1.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -116,7 +116,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.0.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.1.0.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -179,6 +179,8 @@
 <span class="c1"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
 <span class="kn">import</span> <span class="nn">urlparse</span>
 <span class="kn">import</span> <span class="nn">hashlib</span>
 
@@ -318,11 +320,16 @@
 <span class="sd">        a path to it will be returned instantly. If not, it will be downloaded from Shotgun,</span>
 <span class="sd">        placed in the standard cache location on disk and its path will be returned.</span>
 
+<span class="sd">        This method returns the transcoded version of the thumbnail originally uploaded to</span>
+<span class="sd">        Shotgun. The image returned will always be a fixed-sized jpeg. To retrieve the thumbnail</span>
+<span class="sd">        file in its original format and resolution, use :meth:`ShotgunDataRetriever.download_thumbnail_source`</span>
+<span class="sd">        instead.</span>
+
 <span class="sd">        This is a helper method meant to make it easy to port over synchronous legacy</span>
 <span class="sd">        code - for a better solution, we recommend using the thumbnail retrieval</span>
 <span class="sd">        that runs in a background thread.</span>
 
-<span class="sd">        Bcause Shotgun thumbnail urls have an expiry time, make sure to only</span>
+<span class="sd">        Because Shotgun thumbnail urls have an expiry time, make sure to only</span>
 <span class="sd">        pass urls to this method that have been very recently retrieved via a Shotgun find call.</span>
 
 <span class="sd">        :param url: The thumbnail url string that is associated with this thumbnail. This is</span>
@@ -332,16 +339,32 @@
 <span class="sd">        :returns: A path to the thumbnail on disk.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">path_to_cached_thumb</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">):</span>
-
+        <span class="n">path_to_cached_thumb</span><span class="p">,</span> <span class="n">thumb_exists</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_get_thumbnail_path</span><span class="p">(</span>
+            <span class="n">url</span><span class="p">,</span> <span class="n">bundle</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">thumb_exists</span><span class="p">:</span>
             <span class="c1"># create folders on disk</span>
             <span class="n">bundle</span><span class="o">.</span><span class="n">ensure_folder_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">))</span>
 
             <span class="c1"># download using standard core method. This will ensure that</span>
             <span class="c1"># proxy and connection settings as set in the SG API are used</span>
-            <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span><span class="n">bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">path_to_cached_thumb</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Ask sgtk.util.download_url() to append the file type extension</span>
+                <span class="c1"># to the input path_to_cached_thumb to get the full path to the</span>
+                <span class="c1"># cache file.</span>
+                <span class="n">full_path</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span>
+                    <span class="n">bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">path_to_cached_thumb</span><span class="p">,</span> <span class="bp">True</span>
+                <span class="p">)</span>
+                <span class="n">path_to_cached_thumb</span> <span class="o">=</span> <span class="n">full_path</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                <span class="c1"># This may be raised if an older version of core is in use</span>
+                <span class="c1"># that doesn&#39;t have the final `use_url_extension` arg implemented</span>
+                <span class="c1"># in sgtk.util.download_url() (set to True above). Since the url</span>
+                <span class="c1"># is not being checked for an extension, also revert to the</span>
+                <span class="c1"># previous behavior of _get_thumbnail_path() which hard-coded a</span>
+                <span class="c1"># &quot;.jpeg&quot; extension to the thumbnail file path.</span>
+                <span class="n">path_to_cached_thumb</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.jpeg&quot;</span> <span class="o">%</span> <span class="n">path_to_cached_thumb</span>
+                <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span><span class="n">bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">path_to_cached_thumb</span><span class="p">)</span>
 
             <span class="c1"># modify the permissions of the file so it&#39;s writeable by others</span>
             <span class="n">old_umask</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -352,7 +375,77 @@
 
         <span class="k">return</span> <span class="n">path_to_cached_thumb</span></div>
 
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ShotgunDataRetriever.download_thumbnail_source"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.download_thumbnail_source">[docs]</a>    <span class="k">def</span> <span class="nf">download_thumbnail_source</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">bundle</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convenience and compatibility method for quick and easy synchronous thumbnail download.</span>
+<span class="sd">        This will retrieve the source file for a thumbnail given a shotgun entity type and id.</span>
+<span class="sd">        If the resolved thumbnail source file has already been cached, a path to it will be</span>
+<span class="sd">        returned instantly. Otherwise, it will be downloaded from Shotgun and placed in the</span>
+<span class="sd">        standard cache location on disk. The full path to cached thumbnail is returned. </span>
 
+<span class="sd">        This method returns the thumbnail file in the original format and resolution it was</span>
+<span class="sd">        uploaded to Shotgun as, which should be considered arbitrary. To retrieve a transcoded</span>
+<span class="sd">        fixed-size jpeg version of the thumbnail, use :meth:`ShotgunDataRetriever.download_thumbnail`</span>
+<span class="sd">        instead.</span>
+
+<span class="sd">        This is a helper method meant to make it easy to port over synchronous legacy</span>
+<span class="sd">        code - for a better solution, we recommend using the thumbnail retrieval</span>
+<span class="sd">        that runs in a background thread.</span>
+
+<span class="sd">        :param str entity_type: Shotgun entity type with which the thumb is associated.</span>
+<span class="sd">        :param int entity_id: Shotgun entity id with which the thumb is associated.</span>
+<span class="sd">        :param bundle: App, Framework or Engine object requesting the download.</span>
+
+<span class="sd">        :returns: A path to the thumbnail on disk.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">thumb_source_url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urlunparse</span><span class="p">((</span>
+            <span class="n">bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">scheme</span><span class="p">,</span> <span class="n">bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">server</span><span class="p">,</span>
+            <span class="s2">&quot;/thumbnail/full/</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)),</span>
+            <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">entity_id</span><span class="p">))),</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+        <span class="p">))</span>
+
+        <span class="n">path_to_cached_thumb</span><span class="p">,</span> <span class="n">thumb_exists</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_get_thumbnail_path</span><span class="p">(</span>
+            <span class="n">thumb_source_url</span><span class="p">,</span> <span class="n">bundle</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">thumb_exists</span><span class="p">:</span>
+            <span class="c1"># create folders on disk</span>
+            <span class="n">bundle</span><span class="o">.</span><span class="n">ensure_folder_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">))</span>
+
+            <span class="c1"># download using standard core method. This will ensure that</span>
+            <span class="c1"># proxy and connection settings as set in the SG API are used.</span>
+            <span class="c1"># Allow the core method to determine the file type extension</span>
+            <span class="c1"># for the url about to be downloaded. Capture the full path to the</span>
+            <span class="c1"># thumbnail file as returned by sgtk.util.download_url().</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">full_path</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span>
+                    <span class="n">bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="n">thumb_source_url</span><span class="p">,</span> <span class="n">path_to_cached_thumb</span><span class="p">,</span> <span class="bp">True</span>
+                <span class="p">)</span>
+                <span class="n">path_to_cached_thumb</span> <span class="o">=</span> <span class="n">full_path</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c1"># This may be raised if an older version of core is in use</span>
+                <span class="c1"># that doesn&#39;t have the final `use_url_extension` arg implemented</span>
+                <span class="c1"># in sgtk.util.download_url() (set to True above). Since the source</span>
+                <span class="c1"># thumbnail url spec does not contain the file type extension, there</span>
+                <span class="c1"># is no way to determine the proper file name to download to.</span>
+                <span class="c1"># Raise a TankError indicating that a newer version of core must be</span>
+                <span class="c1"># used in conjunction with this method.</span>
+                <span class="k">raise</span> <span class="n">TankError</span><span class="p">(</span>
+                    <span class="s2">&quot;Caught error: </span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;Unable to download source thumbnail URL &#39;</span><span class="si">%s</span><span class="s2">&#39; because the &quot;</span>
+                    <span class="s2">&quot;file type extension cannot be determined. Must update to a &quot;</span>
+                    <span class="s2">&quot;newer version of core to use ShotgunDataRetriever.&quot;</span>
+                    <span class="s2">&quot;download_thumbnail_source().&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">thumb_source_url</span><span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="c1"># modify the permissions of the file so it&#39;s writeable by others</span>
+            <span class="n">old_umask</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">,</span> <span class="mo">0666</span><span class="p">)</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">old_umask</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">path_to_cached_thumb</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.start"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -612,7 +705,7 @@
     <span class="k">def</span> <span class="nf">_add_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_cb</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">task_args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">task_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Simplified wrapper to add a task to the task manager.  All tasks get added into</span>
-<span class="sd">        the same group (self._bg_tasks_group) and the returned task_id is case to a string</span>
+<span class="sd">        the same group (self._bg_tasks_group) and the returned task_id is cast to a string</span>
 <span class="sd">        to retain backwards compatibility (it used to return a uuid string).</span>
 
 <span class="sd">        :param task_cb:     The function to execute for the task</span>
@@ -745,6 +838,32 @@
 
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">check_task_id</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="ShotgunDataRetriever.request_thumbnail_source"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.request_thumbnail_source">[docs]</a>    <span class="k">def</span> <span class="nf">request_thumbnail_source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">load_image</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Downloads a thumbnail from Shotgun asynchronously or returns a cached thumbnail</span>
+<span class="sd">        if found.  Optionally loads the thumbnail into a QImage.</span>
+
+<span class="sd">        :param entity_type: Shotgun entity type with which the thumb is associated.</span>
+<span class="sd">        :param entity_id:   Shotgun entity id with which the thumb is associated.</span>
+<span class="sd">        :param load_image:  If set to True, the return data structure will contain a</span>
+<span class="sd">                            QImage object with the image data loaded.</span>
+
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># construct the url that refers to the thumbnail&#39;s source image</span>
+        <span class="n">thumb_source_url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urlunparse</span><span class="p">((</span>
+            <span class="n">bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">scheme</span><span class="p">,</span> <span class="n">bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">server</span><span class="p">,</span>
+            <span class="s2">&quot;/thumbnail/full/</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)),</span>
+            <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">entity_id</span><span class="p">))),</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+        <span class="p">))</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">request_thumbnail</span><span class="p">(</span>
+            <span class="n">thumb_source_url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">load_image</span>
+        <span class="p">)</span></div>
+
     <span class="c1"># ------------------------------------------------------------------------------------------------</span>
     <span class="c1"># Background task management and methods</span>
 
@@ -766,29 +885,68 @@
 <span class="sd">        :param str field: The name of the field that contains the url. If</span>
 <span class="sd">                          the url needs to be requeried, this field will be</span>
 <span class="sd">                          where the fresh url is pulled from.</span>
+<span class="sd">        :returns: Full path the downloaded file. This value may be different</span>
+<span class="sd">                  than the input `file_path` if the resolved url&#39;s extension</span>
+<span class="sd">                  differed from what was specified.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
-        <span class="k">except</span> <span class="n">TankError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">sg_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span>
-                <span class="n">entity_type</span><span class="p">,</span>
-                <span class="p">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;is&quot;</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">]],</span>
-                <span class="p">[</span><span class="n">field</span><span class="p">],</span>
-            <span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">sg_data</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="c1"># This means there&#39;s nothing in Shotgun for this field, which</span>
-                <span class="c1"># means we can&#39;t download anything.</span>
-                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span>
-                    <span class="s2">&quot;Field </span><span class="si">%s</span><span class="s2"> does not contain data for </span><span class="si">%s</span><span class="s2"> (id=</span><span class="si">%s</span><span class="s2">).&quot;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">field</span><span class="p">,</span>
-                        <span class="n">entity_type</span><span class="p">,</span>
-                        <span class="n">entity_id</span><span class="p">,</span>
-                    <span class="p">)</span>
+            <span class="c1"># download using standard core method. This will ensure that</span>
+            <span class="c1"># proxy and connection settings as set in the SG API are used</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Ask sgtk.util.download_url() to append the file type extension</span>
+                <span class="c1"># to the input file_path to get the full path to the cache file.</span>
+                <span class="n">download_path</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="bp">True</span>
                 <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">url</span> <span class="o">=</span> <span class="n">sg_data</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+                <span class="n">file_path</span> <span class="o">=</span> <span class="n">download_path</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                <span class="c1"># This may be raised if an older version of core is in use</span>
+                <span class="c1"># that doesn&#39;t have the final `use_url_extension` arg implemented</span>
+                <span class="c1"># in sgtk.util.download_url() (set to True above). Since the url</span>
+                <span class="c1"># is not being checked for an extension, also revert to the</span>
+                <span class="c1"># previous behavior of _get_thumbnail_path() which hard-coded a</span>
+                <span class="c1"># &quot;.jpeg&quot; extension to the thumbnail file path.</span>
+                <span class="n">file_path</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.jpeg&quot;</span> <span class="o">%</span> <span class="n">file_path</span>
                 <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="n">TankError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">field</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">sg_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span>
+                    <span class="n">entity_type</span><span class="p">,</span>
+                    <span class="p">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;is&quot;</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">]],</span>
+                    <span class="p">[</span><span class="n">field</span><span class="p">],</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">sg_data</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="c1"># This means there&#39;s nothing in Shotgun for this field, which</span>
+                    <span class="c1"># means we can&#39;t download anything.</span>
+                    <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span>
+                        <span class="s2">&quot;Field </span><span class="si">%s</span><span class="s2"> does not contain data for </span><span class="si">%s</span><span class="s2"> (id=</span><span class="si">%s</span><span class="s2">).&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">field</span><span class="p">,</span>
+                            <span class="n">entity_type</span><span class="p">,</span>
+                            <span class="n">entity_id</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Again, download using standard core method. This will ensure that</span>
+                    <span class="c1"># proxy and connection settings as set in the SG API are used.</span>
+                    <span class="n">url</span> <span class="o">=</span> <span class="n">sg_data</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># Ask sgtk.util.download_url() to append the file type extension</span>
+                        <span class="c1"># to the input file_path to get the full path to the cache file.</span>
+                        <span class="n">download_path</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="bp">True</span>
+                        <span class="p">)</span>
+                        <span class="n">file_path</span> <span class="o">=</span> <span class="n">download_path</span>
+                    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                        <span class="c1"># This may be raised if an older version of core is in use</span>
+                        <span class="c1"># that doesn&#39;t have the final `use_url_extension` arg implemented</span>
+                        <span class="c1"># in sgtk.util.download_url() (set to True above). Since the url</span>
+                        <span class="c1"># is not being checked for an extension, also revert to the</span>
+                        <span class="c1"># previous behavior of _get_thumbnail_path() which hard-coded a</span>
+                        <span class="c1"># &quot;.jpeg&quot; extension to the thumbnail file path.</span>
+                        <span class="n">file_path</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.jpeg&quot;</span> <span class="o">%</span> <span class="n">file_path</span>
+                        <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">download_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
 
         <span class="c1"># now we have a thumbnail on disk, either via the direct download, or via the </span>
         <span class="c1"># url-fresh-then-download approach.  Because the file is downloaded with user-only </span>
@@ -798,6 +956,8 @@
             <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="mo">0666</span><span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">old_umask</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">file_path</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_get_attachment_path</span><span class="p">(</span><span class="n">attachment_entity</span><span class="p">,</span> <span class="n">bundle</span><span class="p">):</span>
@@ -812,7 +972,7 @@
         <span class="n">url</span> <span class="o">=</span> <span class="n">attachment_entity</span><span class="p">[</span><span class="s2">&quot;this_file&quot;</span><span class="p">][</span><span class="s2">&quot;url&quot;</span><span class="p">]</span>
         <span class="n">file_name</span> <span class="o">=</span> <span class="n">attachment_entity</span><span class="p">[</span><span class="s2">&quot;this_file&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
 
-        <span class="n">directory_path</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_get_thumbnail_path</span><span class="p">(</span>
+        <span class="n">directory_path</span><span class="p">,</span> <span class="n">path_exists</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_get_thumbnail_path</span><span class="p">(</span>
             <span class="n">url</span><span class="p">,</span>
             <span class="n">bundle</span><span class="p">,</span>
             <span class="n">directory_only</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
@@ -823,7 +983,34 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">,</span> <span class="n">directory_only</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the location on disk suitable for a thumbnail given its url.</span>
+<span class="sd">        Returns the location on disk suitable for a thumbnail given its url and</span>
+<span class="sd">        whether a cached file for the specified ``url`` already exists. Two cases</span>
+<span class="sd">        are handled:</span>
+
+<span class="sd">        Case A: ``directory_only`` is set to False and the ``url`` cache file does not exist:</span>
+
+<span class="sd">            &gt;&gt;&gt; (path, cache_exists) = _get_thumbnail_path(&quot;https://foo/bar/baz.jpg&quot;)</span>
+
+<span class="sd">            Where return data ``(path, cache_exists) = (&#39;/tmp/xx/yy/1245/6678&#39;, False)``</span>
+
+<span class="sd">            This will always return a file path without an extension. Since the cache</span>
+<span class="sd">            file does not exist, download it using sgtk.util.download_url(), setting</span>
+<span class="sd">            the ``use_url_extension`` arg to True, which will return the full path to the</span>
+<span class="sd">            cached file:</span>
+
+<span class="sd">            &gt;&gt;&gt; full_path = sgtk.util.download_url(sg, &quot;https://foo/bar/baz.jpg&quot;, path, True)</span>
+
+<span class="sd">            Where ``full_path`` now contains a file extension: /tmp/xx/yy/1245/6678.jpg</span>
+
+<span class="sd">        Case B: ``directory_only`` is set to False and the ``url`` cache file does exist:</span>
+
+<span class="sd">            &gt;&gt;&gt; (path, cache_exists) = _get_thumbnail_path(&quot;https://foo/bar/baz.jpg&quot;)</span>
+
+<span class="sd">            Where return data ``(path, cache_exists) = (&#39;/tmp/xx/yy/1245/6678.jpg&#39;, True)``</span>
+
+<span class="sd">            This will always return the full path to the cached file, so no need to</span>
+<span class="sd">            do any addtional work.</span>
+
 
 <span class="sd">        :param str url: Path to a thumbnail</span>
 <span class="sd">        :param bundle: App, Engine or Framework instance</span>
@@ -832,7 +1019,8 @@
 <span class="sd">                                    indicates a full file path, including</span>
 <span class="sd">                                    file name, will be returned.</span>
 
-<span class="sd">        :returns: Path as a string.</span>
+<span class="sd">        :returns: Tuple (str, bool) Path or path with basename as a string,</span>
+<span class="sd">                                    cached thumbnail exists on disk</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># If we don&#39;t have a URL, then we know we don&#39;t</span>
         <span class="c1"># have a thumbnail to worry about.</span>
@@ -849,23 +1037,52 @@
         <span class="c1"># sharding methodology, see </span>
         <span class="c1"># http://stackoverflow.com/questions/13841931/using-guids-as-folder-names-splitting-up</span>
         <span class="c1">#</span>
-        <span class="c1"># From the hash, generate paths on the form C1C2/C3C4/rest_of_hash.jpeg</span>
-        <span class="c1"># (where C1 is the first character of the hash.)</span>
-        <span class="c1"># for a million evenly distributed items, this means ~15 items per folder</span>
+        <span class="c1"># From the hash, generate paths on the form C1C2/C3C4/rest_of_hash</span>
+        <span class="c1"># (where C1 is the first character of the hash). For a million evenly distributed</span>
+        <span class="c1"># items, this means ~15 items per folder.</span>
         <span class="n">first_folder</span> <span class="o">=</span> <span class="n">hash_str</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
         <span class="n">second_folder</span> <span class="o">=</span> <span class="n">hash_str</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
-        <span class="n">path_chunks</span> <span class="o">=</span> <span class="p">[</span><span class="n">first_folder</span><span class="p">,</span> <span class="n">second_folder</span><span class="p">]</span>
 
+        <span class="c1"># Establish the cache path directory</span>
+        <span class="n">cache_path_items</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">bundle</span><span class="o">.</span><span class="n">cache_location</span><span class="p">,</span> <span class="s2">&quot;thumbs&quot;</span><span class="p">,</span> <span class="n">first_folder</span><span class="p">,</span> <span class="n">second_folder</span>
+        <span class="p">]</span>
+
+        <span class="n">cached_thumb_exists</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="c1"># If we were only asked to give back a directory path then we can</span>
         <span class="c1"># skip building and appending a file name.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">directory_only</span><span class="p">:</span>
-            <span class="n">path_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.jpeg&quot;</span> <span class="o">%</span> <span class="n">hash_str</span><span class="p">[</span><span class="mi">4</span><span class="p">:])</span>
+            <span class="c1"># Look for an existing cache file. Use the glob module since</span>
+            <span class="c1"># we do not know what the file type of the cache file is.</span>
+            <span class="n">path_base</span> <span class="o">=</span> <span class="n">hash_str</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+            <span class="n">cache_base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">cache_path_items</span> <span class="o">+</span> <span class="p">[</span><span class="n">path_base</span><span class="p">]))</span>
 
-        <span class="c1"># establish the root path</span>
-        <span class="n">cache_path_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">bundle</span><span class="o">.</span><span class="n">cache_location</span><span class="p">,</span> <span class="s2">&quot;thumbs&quot;</span><span class="p">]</span>
-        <span class="c1"># append the folders</span>
-        <span class="n">cache_path_items</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">path_chunks</span><span class="p">)</span>
-        <span class="c1"># join up the path</span>
+            <span class="c1"># Attempt to match something that looks like:</span>
+            <span class="c1">#   /bundle_cache_location/thumbs/C1C2/C3C4/rest_of_hash.*</span>
+            <span class="n">cache_matches</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.*&quot;</span> <span class="o">%</span> <span class="n">cache_base</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cache_matches</span><span class="p">):</span>
+                <span class="c1"># Cache file exists, so append the full file name (e.g. rest_of_hash.png)</span>
+                <span class="n">cache_path_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">cache_matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="n">cached_thumb_exists</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cache_matches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="c1"># More than one cache match could generate unexpected results.</span>
+                    <span class="c1"># This is generally fixed by manually clearing the user&#39;s cache.</span>
+                    <span class="n">bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span>
+                        <span class="s2">&quot;More than one cached file found for url &#39;</span><span class="si">%s</span><span class="s2">&#39;:</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s2">Using &#39;</span><span class="si">%s</span><span class="s2">&#39;.&quot;</span>
+                        <span class="s2">&quot;If this is incorrect, try clearing your local site cache.&quot;</span> <span class="o">%</span>
+                        <span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">cache_matches</span><span class="p">,</span> <span class="n">cache_matches</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Cache file does not exist, so only append the basename of the cached</span>
+                <span class="c1"># thumbnail that does NOT include the file type extension (e.g. rest_of_hash).</span>
+                <span class="c1"># The extension will be appended later by a call to sgtk.util.download_url()</span>
+                <span class="n">cache_path_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path_base</span><span class="p">)</span>
+
+        <span class="c1"># Join up the path cache items which result in either a directory like</span>
+        <span class="c1"># &#39;/bundle_cache_location/thumbs/C1C2/C3C4&#39; or a file path like</span>
+        <span class="c1"># &#39;/bundle_cache_location/thumbs/C1C2/C3C4/rest_of_hash&#39; if the cache file</span>
+        <span class="c1"># does not exist or &#39;/bundle_cache_location/thumbs/C1C2/C3C4/rest_of_hash.ext&#39;</span>
+        <span class="c1"># if it does.</span>
         <span class="n">path_to_cached_thumb</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="n">cache_path_items</span><span class="p">)</span>
 
         <span class="c1"># perform a simple migration to check if the old path still exists. In that case, </span>
@@ -890,7 +1107,7 @@
                 <span class="c1"># ignore any errors in the transfer</span>
                 <span class="k">pass</span>
 
-        <span class="k">return</span> <span class="n">path_to_cached_thumb</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">,</span> <span class="n">cached_thumb_exists</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_get_thumbnail_path_old</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">):</span>
@@ -1117,9 +1334,9 @@
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span><span class="s2">&quot;check_thumbnail&quot;</span><span class="p">,</span> <span class="s2">&quot;thumb_path&quot;</span><span class="p">:</span><span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span><span class="bp">None</span><span class="p">}</span>
 
         <span class="c1"># first look up the path in the cache:</span>
-        <span class="n">thumb_path</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="p">)</span>
+        <span class="n">thumb_path</span><span class="p">,</span> <span class="n">thumb_exists</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="p">)</span>
         <span class="n">thumb_image</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="k">if</span> <span class="n">thumb_path</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">thumb_exists</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">load_image</span><span class="p">:</span>
                 <span class="c1"># load the thumbnail into a QImage:</span>
                 <span class="n">thumb_image</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">()</span>
@@ -1190,27 +1407,26 @@
         <span class="c1"># download the actual thumbnail. Because of S3, the url</span>
         <span class="c1"># may have expired - in that case fall back, get a fresh url</span>
         <span class="c1"># from shotgun and try again</span>
-        <span class="n">thumb_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="p">)</span>
+        <span class="n">thumb_path</span><span class="p">,</span> <span class="n">thumb_exists</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="p">)</span>
 
         <span class="c1"># If we have no path, then there&#39;s no thumbnail that exists.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">thumb_path</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{}</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">ensure_folder_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">))</span>
-
         <span class="c1"># there may be a case where another process has alrady downloaded the thumbnail for us, so </span>
         <span class="c1"># make sure that we aren&#39;t doing any extra work :)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">thumb_exists</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">ensure_folder_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">))</span>
 
             <span class="c1"># try to download based on the path we have</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_download_url</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+                <span class="n">thumb_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_download_url</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
                 <span class="n">thumb_path</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="c1"># finally, see if we should also load in the image</span>
         <span class="n">thumb_image</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="k">if</span> <span class="n">thumb_path</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">thumb_path</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">load_image</span><span class="p">:</span>
                 <span class="c1"># load the thumbnail into a QImage:</span>
                 <span class="n">thumb_image</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">()</span>
@@ -1353,7 +1569,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.0.1',
+            VERSION:'v5.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

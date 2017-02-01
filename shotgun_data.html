@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Asynchronous Data Retriever &mdash; tk-framework-shotgunutils v5.0.1 documentation</title>
+  <title>Shotgun Asynchronous Data Retriever &mdash; tk-framework-shotgunutils v5.1.0 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.0.1 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.1.0 documentation" href="index.html"/>
         <link rel="next" title="Background Task Processing" href="task_manager.html"/>
         <link rel="prev" title="Shotgun Hierarchy Model" href="shotgun_hierarchy_model.html"/> 
 
@@ -122,7 +122,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.0.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.1.0.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -307,10 +307,14 @@ id returned by the corresponding request call.</p>
 This will retrieve a shotgun thumbnail given a url - if it already exists in the cache,
 a path to it will be returned instantly. If not, it will be downloaded from Shotgun,
 placed in the standard cache location on disk and its path will be returned.</p>
+<p>This method returns the transcoded version of the thumbnail originally uploaded to
+Shotgun. The image returned will always be a fixed-sized jpeg. To retrieve the thumbnail
+file in its original format and resolution, use <a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.download_thumbnail_source" title="shotgun_data.ShotgunDataRetriever.download_thumbnail_source"><code class="xref py py-meth docutils literal"><span class="pre">ShotgunDataRetriever.download_thumbnail_source()</span></code></a>
+instead.</p>
 <p>This is a helper method meant to make it easy to port over synchronous legacy
 code - for a better solution, we recommend using the thumbnail retrieval
 that runs in a background thread.</p>
-<p>Bcause Shotgun thumbnail urls have an expiry time, make sure to only
+<p>Because Shotgun thumbnail urls have an expiry time, make sure to only
 pass urls to this method that have been very recently retrieved via a Shotgun find call.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -319,6 +323,39 @@ pass urls to this method that have been very recently retrieved via a Shotgun fi
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>url</strong> &#8211; The thumbnail url string that is associated with this thumbnail. This is
 the field value as returned by a Shotgun query.</li>
+<li><strong>bundle</strong> &#8211; App, Framework or Engine object requesting the download.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A path to the thumbnail on disk.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="shotgun_data.ShotgunDataRetriever.download_thumbnail_source">
+<em class="property">static </em><code class="descname">download_thumbnail_source</code><span class="sig-paren">(</span><em>entity_type</em>, <em>entity_id</em>, <em>bundle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.download_thumbnail_source"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.download_thumbnail_source" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience and compatibility method for quick and easy synchronous thumbnail download.
+This will retrieve the source file for a thumbnail given a shotgun entity type and id.
+If the resolved thumbnail source file has already been cached, a path to it will be
+returned instantly. Otherwise, it will be downloaded from Shotgun and placed in the
+standard cache location on disk. The full path to cached thumbnail is returned.</p>
+<p>This method returns the thumbnail file in the original format and resolution it was
+uploaded to Shotgun as, which should be considered arbitrary. To retrieve a transcoded
+fixed-size jpeg version of the thumbnail, use <a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.download_thumbnail" title="shotgun_data.ShotgunDataRetriever.download_thumbnail"><code class="xref py py-meth docutils literal"><span class="pre">ShotgunDataRetriever.download_thumbnail()</span></code></a>
+instead.</p>
+<p>This is a helper method meant to make it easy to port over synchronous legacy
+code - for a better solution, we recommend using the thumbnail retrieval
+that runs in a background thread.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Shotgun entity type with which the thumb is associated.</li>
+<li><strong>entity_id</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; Shotgun entity id with which the thumb is associated.</li>
 <li><strong>bundle</strong> &#8211; App, Framework or Engine object requesting the download.</li>
 </ul>
 </td>
@@ -665,6 +702,33 @@ possible to match them up.</p>
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.request_thumbnail_source">
+<code class="descname">request_thumbnail_source</code><span class="sig-paren">(</span><em>entity_type</em>, <em>entity_id</em>, <em>load_image=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.request_thumbnail_source"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.request_thumbnail_source" title="Permalink to this definition">¶</a></dt>
+<dd><p>Downloads a thumbnail from Shotgun asynchronously or returns a cached thumbnail
+if found.  Optionally loads the thumbnail into a QImage.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>entity_type</strong> &#8211; Shotgun entity type with which the thumb is associated.</li>
+<li><strong>entity_id</strong> &#8211; Shotgun entity id with which the thumb is associated.</li>
+<li><strong>load_image</strong> &#8211; If set to True, the return data structure will contain a
+QImage object with the image data loaded.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A unique identifier representing this request. This
+identifier is also part of the payload sent via the
+work_completed and work_failure signals, making it
+possible to match them up.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -710,7 +774,7 @@ possible to match them up.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v5.0.1',
+            VERSION:'v5.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
