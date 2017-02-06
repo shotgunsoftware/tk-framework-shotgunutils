@@ -892,21 +892,14 @@ class ShotgunDataRetriever(QtCore.QObject):
             cache_matches = glob.glob("%s.*" % cache_base)
             if len(cache_matches):
                 if len(cache_matches) > 1:
-                    # There may be a legacy ".jpeg" file cached here. If so, remove it.
-                    old_cache_file = "%s.jpeg" % cache_base
-                    if old_cache_file in cache_matches:
-                        bundle.log_warning("Removing legacy '.jpeg' cache file : %s" % old_cache_file)
-                        cache_matches.remove(old_cache_file)
-                        os.remove(old_cache_file)
-
-                    # Now if more than one cache match is found, log a warning.
-                    if len(cache_matches) > 1:
-                        bundle.log_warning("More than one cached file found for url '%s':" % url)
-                        [bundle.log_warning("    %s" % cache_match) for cache_match in cache_matches]
-                        bundle.log_warning(
-                            "Using '%s'.  If this is incorrect, try clearing your local site cache." %
-                            cache_matches[0]
-                        )
+                    # If somehow more than one cache file exists, the wrong icon may be displayed.
+                    # Log some information about how to resolve this problem.
+                    bundle.log_debug("More than one cached file found for url '%s':" % url)
+                    [bundle.log_debug("    %s" % cache_match) for cache_match in cache_matches]
+                    bundle.log_debug("Using '%s'. "
+                        "If this is incorrect, manually remove the undesired cache file." %
+                        cache_matches[0]
+                    )
 
                 # Cache file exists, so append the full file name (e.g. rest_of_hash.png)
                 cache_path_items.append(os.path.basename(cache_matches[0]))
