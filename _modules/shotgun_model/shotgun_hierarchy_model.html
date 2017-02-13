@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.1.0 documentation</title>
+  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.1.2 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.1.0 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.1.2 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -116,7 +116,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.1.0.<br>
+    <b>tk-framework-shotgunutils</b> v5.1.2.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -221,14 +221,14 @@
 <span class="sd">    found in Shotgun as configured in each project&#39;s</span>
 <span class="sd">    `Tracking Settings &lt;https://support.shotgunsoftware.com/hc/en-us/articles/219031138-Project-Tracking-Settings&gt;`_.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the Hierarcy model.</span>
 
 <span class="sd">        :param parent: The model&#39;s parent.</span>
 <span class="sd">        :type parent: :class:`~PySide.QtGui.QObject`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ShotgunHierarchyModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ShotgunHierarchyModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="p">)</span>
 
         <span class="c1"># check for hierarchy support</span>
         <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy_is_supported</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy_not_supported_reason</span><span class="p">)</span> <span class="o">=</span> \
@@ -258,19 +258,22 @@
         <span class="c1"># they are not clickable. This makes goes outside the typical bounds of</span>
         <span class="c1"># the model by pulling the palette colors from the app instance. This</span>
         <span class="c1"># can be overridden in subclasses via ``_finalize_item()`` though.</span>
-        <span class="n">base_color</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span><span class="o">.</span><span class="n">base</span><span class="p">()</span><span class="o">.</span><span class="n">color</span><span class="p">()</span>
-        <span class="n">text_color</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">.</span><span class="n">color</span><span class="p">()</span>
+        <span class="c1"># Note that &quot;palette()&quot; is a static method that needs to be accessed</span>
+        <span class="c1"># through &quot;QApplication&quot; rather than &quot;QApplication.instance()&quot; to</span>
+        <span class="c1"># make sure we are compatible with both Qt 4 and Qt 5.</span>
+        <span class="n">base_color</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span><span class="o">.</span><span class="n">base</span><span class="p">()</span><span class="o">.</span><span class="n">color</span><span class="p">()</span>
+        <span class="n">text_color</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">.</span><span class="n">color</span><span class="p">()</span>
 
         <span class="c1"># local import to avoid doc generation issues</span>
         <span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">color_mix</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_empty_item_color</span> <span class="o">=</span> <span class="n">color_mix</span><span class="p">(</span><span class="n">text_color</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">base_color</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        String representation of this instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2"> path:</span><span class="si">%s</span><span class="s2"> seed:</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seed_entity_field</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seed_entity_field</span><span class="p">)</span>
 
     <span class="c1">############################################################################</span>
     <span class="c1"># public methods</span>
@@ -692,7 +695,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.1.0',
+            VERSION:'v5.1.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

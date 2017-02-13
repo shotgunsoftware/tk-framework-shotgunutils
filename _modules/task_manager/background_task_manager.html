@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>task_manager.background_task_manager &mdash; tk-framework-shotgunutils v5.1.0 documentation</title>
+  <title>task_manager.background_task_manager &mdash; tk-framework-shotgunutils v5.1.2 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.1.0 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.1.2 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -116,7 +116,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.1.0.<br>
+    <b>tk-framework-shotgunutils</b> v5.1.2.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -227,7 +227,7 @@
     <span class="c1"># signal emitted when all tasks in a group have finished</span>
     <span class="n">task_group_finished</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span><span class="c1"># group</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">start_processing</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">max_threads</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">start_processing</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">max_threads</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param parent:              The parent QObject for this instance</span>
 <span class="sd">        :type parent:               :class:`~PySide.QtGui.QWidget`</span>
@@ -235,7 +235,7 @@
 <span class="sd">        :param max_threads:         The maximum number of threads the task manager will use at any</span>
 <span class="sd">                                    time.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_bundle</span><span class="p">()</span>
 
@@ -785,7 +785,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.1.0',
+            VERSION:'v5.1.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

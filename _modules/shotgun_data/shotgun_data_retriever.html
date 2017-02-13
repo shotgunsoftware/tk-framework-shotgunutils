@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v5.1.0 documentation</title>
+  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v5.1.2 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.1.0 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.1.2 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -116,7 +116,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.1.0.<br>
+    <b>tk-framework-shotgunutils</b> v5.1.2.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -286,7 +286,7 @@
     <span class="n">_DOWNLOAD_THUMB_PRIORITY</span>        <span class="o">=</span> <span class="mi">20</span>
 
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sg</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sg</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param parent: Parent object</span>
 <span class="sd">        :type parent: :class:`~PySide.QtGui.QWidget`</span>
@@ -294,7 +294,7 @@
 <span class="sd">        :param bg_task_manager: Optional Task manager</span>
 <span class="sd">        :class bg_task_manager: :class:`~task_manager.BackgroundTaskManager`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_bundle</span><span class="p">()</span>
 
         <span class="c1"># set up the background task manager:</span>
@@ -1061,17 +1061,19 @@
             <span class="c1">#   /bundle_cache_location/thumbs/C1C2/C3C4/rest_of_hash.*</span>
             <span class="n">cache_matches</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.*&quot;</span> <span class="o">%</span> <span class="n">cache_base</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cache_matches</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cache_matches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="c1"># If somehow more than one cache file exists, the wrong icon may be displayed.</span>
+                    <span class="c1"># Log some information about how to resolve this problem.</span>
+                    <span class="n">bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;More than one cached file found for url &#39;</span><span class="si">%s</span><span class="s2">&#39;:&quot;</span> <span class="o">%</span> <span class="n">url</span><span class="p">)</span>
+                    <span class="p">[</span><span class="n">bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;    </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">cache_match</span><span class="p">)</span> <span class="k">for</span> <span class="n">cache_match</span> <span class="ow">in</span> <span class="n">cache_matches</span><span class="p">]</span>
+                    <span class="n">bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Using &#39;</span><span class="si">%s</span><span class="s2">&#39;. &quot;</span>
+                        <span class="s2">&quot;If this is incorrect, manually remove the undesired cache file.&quot;</span> <span class="o">%</span>
+                        <span class="n">cache_matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="p">)</span>
+
                 <span class="c1"># Cache file exists, so append the full file name (e.g. rest_of_hash.png)</span>
                 <span class="n">cache_path_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">cache_matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
                 <span class="n">cached_thumb_exists</span> <span class="o">=</span> <span class="bp">True</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cache_matches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="c1"># More than one cache match could generate unexpected results.</span>
-                    <span class="c1"># This is generally fixed by manually clearing the user&#39;s cache.</span>
-                    <span class="n">bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span>
-                        <span class="s2">&quot;More than one cached file found for url &#39;</span><span class="si">%s</span><span class="s2">&#39;:</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s2">Using &#39;</span><span class="si">%s</span><span class="s2">&#39;.&quot;</span>
-                        <span class="s2">&quot;If this is incorrect, try clearing your local site cache.&quot;</span> <span class="o">%</span>
-                        <span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">cache_matches</span><span class="p">,</span> <span class="n">cache_matches</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Cache file does not exist, so only append the basename of the cached</span>
                 <span class="c1"># thumbnail that does NOT include the file type extension (e.g. rest_of_hash).</span>
@@ -1085,94 +1087,7 @@
         <span class="c1"># if it does.</span>
         <span class="n">path_to_cached_thumb</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="n">cache_path_items</span><span class="p">)</span>
 
-        <span class="c1"># perform a simple migration to check if the old path still exists. In that case, </span>
-        <span class="c1"># try to move it across to the new path. This is to help transition from the previous</span>
-        <span class="c1"># thumb caching structures and should be removed at some point in the future in order</span>
-        <span class="c1"># to avoid I/O operations. </span>
-        <span class="c1">#</span>
-        <span class="c1"># NOTE! This check means that the _get_thumbnail_path() isn&#39;t </span>
-        <span class="c1"># just calculating a path for a thumbnail but may have the side effect that it will</span>
-        <span class="c1"># move files around. </span>
-        <span class="n">old_path</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_get_thumbnail_path_old</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">old_path</span><span class="p">):</span>
-            <span class="c1"># move the file across</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">old_umask</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">bundle</span><span class="o">.</span><span class="n">ensure_folder_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">))</span>
-                    <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">old_path</span><span class="p">,</span> <span class="n">path_to_cached_thumb</span><span class="p">)</span>
-                <span class="k">finally</span><span class="p">:</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">old_umask</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="c1"># ignore any errors in the transfer</span>
-                <span class="k">pass</span>
-
         <span class="k">return</span> <span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">,</span> <span class="n">cached_thumb_exists</span><span class="p">)</span>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_get_thumbnail_path_old</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        March 2015 - Previous implementation of thumbnail caching logic.</span>
-<span class="sd">        This has now been replaced by a new, improved sharding algorithm.</span>
-<span class="sd">        In the interest of disk management, keep this method around so that</span>
-<span class="sd">        the new logic can attempt to over files over into the new scheme </span>
-<span class="sd">        if at all possible.</span>
-
-<span class="sd">        :param url:     Path to a thumbnail</span>
-<span class="sd">        :param bundle:  App, Engine or Framework instance</span>
-<span class="sd">        :returns:       Path as a string.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">url_obj</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-        <span class="n">url_path</span> <span class="o">=</span> <span class="n">url_obj</span><span class="o">.</span><span class="n">path</span>
-        <span class="n">path_chunks</span> <span class="o">=</span> <span class="n">url_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
-
-        <span class="n">CHUNK_LEN</span> <span class="o">=</span> <span class="mi">16</span>
-
-        <span class="c1"># post process the path</span>
-        <span class="c1"># old (pre-S3) style result:</span>
-        <span class="c1"># path_chunks: [ &quot;&quot;, &quot;thumbs&quot;, &quot;1&quot;, &quot;2&quot;, &quot;2.jpg&quot;]</span>
-
-        <span class="c1"># s3 result, form 1:</span>
-        <span class="c1"># path_chunks: [u&#39;&#39;,</span>
-        <span class="c1">#               u&#39;9902b5f5f336fae2fb248e8a8748fcd9aedd822e&#39;,</span>
-        <span class="c1">#               u&#39;be4236b8f198ae84df2366920e7ee327cc0a567e&#39;,</span>
-        <span class="c1">#               u&#39;render_0400_t.jpg&#39;]</span>
-
-        <span class="c1"># s3 result, form 2:</span>
-        <span class="c1"># path_chunks: [u&#39;&#39;, u&#39;thumbnail&#39;, u&#39;api_image&#39;, u&#39;150&#39;]</span>
-
-        <span class="k">def</span> <span class="nf">_to_chunks</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-            <span class="c1">#split the string &#39;abcdefghxx&#39; into [&#39;abcdefgh&#39;, &#39;xx&#39;]</span>
-            <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">CHUNK_LEN</span><span class="p">):</span>
-                <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">s</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="n">CHUNK_LEN</span><span class="p">]</span> <span class="p">)</span>
-            <span class="k">return</span> <span class="n">chunks</span>
-
-        <span class="n">new_chunks</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">path_chunks</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span> <span class="c1"># skip the file name</span>
-            <span class="k">if</span> <span class="n">folder</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-                <span class="k">continue</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">CHUNK_LEN</span><span class="p">:</span>
-                <span class="c1"># long url path segment like 9902b5f5f336fae2fb248e8a8748fcd9aedd822e</span>
-                <span class="c1"># split it into chunks for 4</span>
-                <span class="n">new_chunks</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">_to_chunks</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span> <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">new_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
-
-        <span class="c1"># establish the root path</span>
-        <span class="n">cache_path_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">bundle</span><span class="o">.</span><span class="n">cache_location</span><span class="p">,</span> <span class="s2">&quot;thumbnails&quot;</span><span class="p">]</span>
-        <span class="c1"># append the folders</span>
-        <span class="n">cache_path_items</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">new_chunks</span><span class="p">)</span>
-        <span class="c1"># and append the file name</span>
-        <span class="c1"># all sg thumbs are jpegs so append extension too - some url forms don&#39;t have this.</span>
-        <span class="n">cache_path_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.jpeg&quot;</span> <span class="o">%</span> <span class="n">path_chunks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-
-        <span class="c1"># join up the path</span>
-        <span class="n">path_to_cached_thumb</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="n">cache_path_items</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">path_to_cached_thumb</span>
-
 
     <span class="k">def</span> <span class="nf">_task_get_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1569,7 +1484,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.1.0',
+            VERSION:'v5.1.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
