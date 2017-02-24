@@ -103,6 +103,9 @@ class ShotgunDataRetriever(QtCore.QObject):
     # next the priority for any other Shotgun calls (e.g. find, create, 
     # update, delete, etc.)
     _SG_CALL_PRIORITY               = 30
+    # Create has a higher priority to allow for quick creation of a series
+    # of notes with other shotgun tasks in progress.
+    _SG_CREATE_CALL_PRIORITY        = 31
 
     # Attachment downloads are not necessarily fast (but might be), but unlike
     # thumbnails they will be required for functionality in the calling code.
@@ -412,6 +415,13 @@ class ShotgunDataRetriever(QtCore.QObject):
         return self._add_task(self._task_execute_method, 
                               priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
                               task_kwargs = task_kwargs)
+
+    def execute_method_with_priority(self, method, priority, *args, **kwargs):
+        task_kwargs = {"method":method, "method_args":args, "method_kwargs":kwargs}
+        return self._add_task(self._task_execute_method, 
+                              priority = priority,
+                              task_kwargs = task_kwargs)
+
 
     def execute_nav_expand(self, *args, **kwargs):
         """
