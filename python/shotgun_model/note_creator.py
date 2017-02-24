@@ -27,7 +27,9 @@ class NoteCreator(QtCore.QObject):
     # provided.
     #
     # dict(entity_type="Note", id=1234)
-    entity_created = QtCore.Signal(object)
+    #
+    # userdata (bytes) passed in to the `submit` call
+    entity_created = QtCore.Signal(object, object)
 
     def __init__(self):
         QtCore.QObject.__init__(self)
@@ -36,7 +38,7 @@ class NoteCreator(QtCore.QObject):
         self._bundle = sgtk.platform.current_bundle()
         
         # state variables
-        self._processing_ids = Set()     # async task ids
+        self._processing_ids = dict()
         self._cleanup_after_upload = []
 
         # create a separate sg data handler for submission
@@ -76,15 +78,16 @@ class NoteCreator(QtCore.QObject):
     def set_outgoing_task_tracker(self, tasks):
         self._outgoing_tasks = tasks
 
-    def submit(self, data):
+    def submit(self, data, userdata):
         """
         Creates items in Shotgun.
         """
 
         # ask the data retriever to execute an async callback
         if self.__sg_data_retriever:
-            task_id = self.__sg_data_retriever.execute_method(self._async_submit, data)
-            self._processing_ids.add(task_id)
+            task_id = self.__sg_data_retriever.execute_method_with_priority(self._async_submit,
+                ShotgunDataRetriever._SG_CREATE_CALL_PRIORITY, data)
+            self._processing_ids[task_id] = userdata
             if self._outgoing_tasks:
                 self._outgoing_tasks.add(task_id)
         else:
@@ -418,7 +421,7 @@ class NoteCreator(QtCore.QObject):
         if uid in self._processing_ids:
             # all done!
             self._bundle.log_debug("Update call complete! Return data: %s" % data)
-            self.entity_created.emit(data["return_value"])
+            self.entity_created.emit(data["return_value"], self._processing_ids[uid])
             if self._outgoing_tasks and self._outgoing_tasks.has(uid):
                 self._outgoing_tasks.remove(uid)
-            self._processing_ids.remove(uid)
+            del self._processing_ids[uid]
