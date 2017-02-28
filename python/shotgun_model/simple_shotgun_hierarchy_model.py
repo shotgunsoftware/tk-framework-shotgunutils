@@ -40,6 +40,9 @@ class SimpleShotgunHierarchyModel(ShotgunHierarchyModel):
             of ``Version.entity`` would cause the model to display a hierarchy
             where the leaves match the entity value of Version entities.
 
+            NOTE: This value is currently limited to either ``Version.entity``
+            or ``PublishedFile.entity``
+
         :param str path: The path to the root of the hierarchy to display.
             This corresponds to the ``path`` argument of the
             :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` api method.

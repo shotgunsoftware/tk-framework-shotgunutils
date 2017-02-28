@@ -112,8 +112,8 @@ class ShotgunHierarchyItem(ShotgunStandardItem):
         ``target_entities``.
 
         This dictionary stores information that can be used to query the
-        entities targeted when the containing hierarchy model was created.
-        It includes a key called `additional_filter_presets` with a value
+        entities targeted when the containing hierarchy model was created. 
+        It includes a key called ``additional_filter_presets`` with a value
         that can be provided to the shotgun python-api's ``find()`` call to
         tell the server exactly which entities exist under this item's branch
         in the hierarchy. The value is a list of dictionaries with server-side
@@ -122,21 +122,19 @@ class ShotgunHierarchyItem(ShotgunStandardItem):
         The dictionary also stores a ``type`` key whose value is the type of
         entity being targeted.
 
-        An example value returned by this method::
+        A common usage of this is to respond to selection changed signals
+        on a view showing a shotgun hierarchy. For example, the data returned
+        can be fed to a separate shotgun model view.
 
-            'target_entities': {
-                'additional_filter_presets': [
-                    {
-                        'path': '/Project/65/Asset/sg_asset_type/Character',
-                        'preset_name': 'NAV_ENTRIES',
-                        'seed': {
-                            'field': 'entity',
-                            'type': 'Version'
-                        }
-                    }
-                ],
-                'type': 'Version'
-            },
+        Example usage::
+
+            target_entities = selected_item.target_entities()
+
+            sg_model.load_data(
+                target_entities.get("type"),
+                additional_filter_presets=target_entities.get("additional_filter_presets"),
+            )
+            
         """
 
         data = self.data()
