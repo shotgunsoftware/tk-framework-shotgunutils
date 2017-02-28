@@ -122,16 +122,16 @@ class ShotgunHierarchyItem(ShotgunStandardItem):
         The dictionary also stores a ``type`` key whose value is the type of
         entity being targeted.
 
-        A common usage of this is to respond to selection changed signals
-        on a view showing a shotgun hierarchy. For example, the data returned
-        can be fed to a separate shotgun model view.
+        A common usage of this is to respond to selection-changed signals
+        on a view showing a Shotgun hierarchy. For example, the data returned
+        can be fed to a separate Shotgun model view.
 
         Example usage::
 
             target_entities = selected_item.target_entities()
 
             sg_model.load_data(
-                target_entities.get("type"),
+                target_entities["type"],
                 additional_filter_presets=target_entities.get("additional_filter_presets"),
             )
             
