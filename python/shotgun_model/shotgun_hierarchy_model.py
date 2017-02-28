@@ -209,7 +209,10 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         :param str seed_entity_field: This is a string that corresponds to the
             field on an entity used to seed the hierarchy. For example, a value
             of ``Version.entity`` would cause the model to display a hierarchy
-            where the leaves match the entity value of Version entities.
+            where the leaves match the entity value of Version entities. 
+            
+            NOTE: This value is currently limited to either ``Version.entity``
+            or ``PublishedFile.entity``
 
         :param str path: The path to the root of the hierarchy to display.
             This corresponds to the ``path`` argument of the
