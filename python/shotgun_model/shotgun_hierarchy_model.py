@@ -155,10 +155,10 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # default, root path
         path = "/"
 
-        current_engine = sgtk.platform.current_engine()
-        if current_engine:
+        current_bundle = sgtk.platform.current_bundle()
+        if current_bundle:
             # an engine is running
-            project = current_engine.context.project
+            project = current_bundle.context.project
             if project:
                 # we have a project in the context
                 path = "/Project/%s" % (project["id"])
@@ -481,8 +481,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             will be a string explaining why.
 
         """
-        current_engine = sgtk.platform.current_engine()
-        sg_connection = current_engine.shotgun
+        current_bundle = sgtk.platform.current_bundle()
+        sg_connection = current_bundle.shotgun
         server_caps = sg_connection.server_caps
 
         # make sure we're greater than or equal to SG v7.0.2
