@@ -532,6 +532,33 @@ class ShotgunDataRetriever(QtCore.QObject):
             task_kwargs=kwargs
         )
 
+    def execute_nav_search_string(self, *args, **kwargs):
+        """
+        Executes a Shotgun ``nav_search_string`` query asynchronously.
+
+        See the python api documentation here:
+            https://github.com/shotgunsoftware/python-api/wiki
+
+        This method takes the same parameters as the Shotgun ``nav_search_string()`` call.
+
+        The query will be queued up and once processed, either a
+        work_completed or work_failure signal will be emitted.
+
+        :param ``*args``: args to be passed to the Shotgun ``nav_search_string()`` call
+        :param ``**kwargs``: Named parameters to be passed to the Shotgun ``nav_search_string()`` call
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.
+        """
+        return self._add_task(
+            self._task_execute_nav_expand,
+            priority=ShotgunDataRetriever._SG_CALL_PRIORITY,
+            task_args=args,
+            task_kwargs=kwargs
+        )
+
+
     def _add_task(self, task_cb, priority, task_args=None, task_kwargs=None):
         """
         Simplified wrapper to add a task to the task manager.  All tasks get added into
@@ -1034,6 +1061,19 @@ class ShotgunDataRetriever(QtCore.QObject):
         """
         sg_res = self._bundle.shotgun.nav_expand(*args, **kwargs)
         return {"action": "nav_expand", "sg_result": sg_res}
+
+    def _task_execute_nav_search_string(self, *args, **kwargs):
+        """
+        Method that gets executed in a background task/thread to perform a Shotgun
+        ``nav_search_string`` query
+
+        :param ``*args``: Unnamed arguments to be passed to the ``nav_search_string()`` call
+        :param ``**kwargs``: Named arguments to be passed to the ``nav_search_string()`` call
+        :returns: Dictionary containing the 'action' together with result
+            returned by the find() call
+        """
+        sg_res = self._bundle.shotgun.nav_search_string(*args, **kwargs)
+        return {"action": "nav_search_string", "sg_result": sg_res}
 
     def _task_check_attachment(self, attachment_entity):
         """
