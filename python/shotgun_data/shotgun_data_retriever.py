@@ -1080,7 +1080,7 @@ class ShotgunDataRetriever(QtCore.QObject):
     def _task_execute_text_search(self, *args, **kwargs):
         """
         Method that gets executed in a background task/thread to perform a Shotgun
-        ``text_serach`` query
+        ``text_search`` query
 
         :param ``*args``: Unnamed arguments to be passed to the ``text_search()`` call
         :param ``**kwargs``: Named arguments to be passed to the ``text_search()`` call
