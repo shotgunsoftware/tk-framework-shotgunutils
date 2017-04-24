@@ -69,7 +69,7 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
         :param data_retriever: :class:`~tk-framework-shotgunutils:shotgun_data.ShotgunDataRetriever` instance.
         :returns: Request id or None if no work is needed
         """
-        self._log_debug("generate_data_request for path %s" % path)
+        print("generate_data_request for path %s" % path)
 
         worker_id = data_retriever.execute_nav_expand(
             path,

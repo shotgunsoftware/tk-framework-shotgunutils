@@ -141,7 +141,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             # our node is refreshed.
             model._node_refreshed.connect(self._node_refreshed)
 
-            self.parent()._log_debug("Fetching more on %s" % path_to_refresh[0])
+            print("Fetching more on %s" % path_to_refresh[0])
             # Fetch data from this path's parent.
             model.fetchMore(
                 model.item_from_path(path_to_refresh[0]).index()
@@ -151,8 +151,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         def _node_refreshed(self, item):
             if item.data(self.parent()._SG_ITEM_UNIQUE_ID) != self._path_to_refresh[1]:
+                print "skipping node", item.data(self.parent()._SG_ITEM_UNIQUE_ID)
                 return
-            self.parent()._log_debug(
+            print(
                 "Model item refreshed: %s" % item.data(self.parent()._SG_ITEM_UNIQUE_ID)
             )
             self.parent()._node_refreshed.disconnect(self._node_refreshed)
@@ -169,7 +170,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         if not paths:
             return
 
-        self._log_debug("Async loading of %s" % paths)
+        print("Async loading of %s" % paths)
 
         for idx, path in enumerate(paths):
             # Iterate on every path.
@@ -182,11 +183,12 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             # This time around this node will already have been refreshed
             # and the code will dig deeper. At some point the last entry
             # in the list will be reached and we will emit the item.
-            self._log_debug("Refreshing paths: %s" % paths)
+            print("Refreshing paths: %s" % paths[idx - 1:])
             self._NodeRefresher(paths[idx - 1:], self)
             return
 
         print("Deep load has been completed for %s" % paths[-1])
+        print("Here's the winner: %s" % item)
         # If everything is loaded, emit the signal.
         self.deep_load_completed.emit(item)
 
@@ -460,6 +462,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # todo: hierarchy model to handle multiple rows?
         parent.appendRow(item)
 
+        self._node_refreshed.emit(item)
+
     def _update_item(self, item, data_item):
         """
         Updates a model item with the given data
@@ -492,7 +496,11 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # run the finalizer (always runs on construction, even via cache)
         self._finalize_item(item)
 
-        self._node_refreshed.emit(item)
+        # If this is a node that already existed and is being refreshed, notify.
+        # If the node is not parented yet, this is because we're in the middle
+        # of a create_item call, which WILL refresh the node.
+        if item.parent():
+            self._node_refreshed.emit(item)
 
     ############################################################################
     # private methods
