@@ -11,6 +11,7 @@
 import hashlib
 import os
 import sys
+import pprint
 
 # toolkit imports
 import sgtk
@@ -159,9 +160,41 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             self.parent()._node_refreshed.disconnect(self._node_refreshed)
             self.deleteLater()
             # Try again to async deep load the node and the next tokens.
-            self.parent().async_deep_load(self._path_to_refresh)
+            self.parent().async_load_paths(self._path_to_refresh)
 
-    def async_deep_load(self, paths):
+    def async_load_entity(self, entity):
+        """
+        """
+        paths = self._resolve_entity_paths(entity)
+        self.async_load_paths(paths)
+
+    def _resolve_entity_paths(self, entity):
+        if entity:
+            # FIXME: Unfortunately we can't call the endpoint directly because there is a bug in it.
+            # We've written a workaround for it in the ShotgunDataRetriever, which we will be
+            # using here.
+
+            sg_result = self._sg_data_retriever._task_execute_nav_search_entity("/", entity)["sg_result"]
+
+            if len(sg_result) == 0:
+                self._log_debug("Entity %s not found. Picking /.", entity)
+            else:
+                sg_data = sg_result[0]
+                # The last link in the chain is always the complete link to the entity we seek.
+
+                if len(sg_result) > 1:
+                    self._log_debug(
+                        "Entity %s found %d times with nav_search_entity endpoint. Picking %s.",
+                        entity, len(sg_result), pprint.pformat(sg_data)
+                    )
+
+                return sg_data["incremental_path"]
+
+        # All error code paths fallback here.
+        # Do not request the server for the path to the site root, this will always be /.
+        return ["/"]
+
+    def async_load_paths(self, paths):
         """
         Takes a list of paths that incrementally dig deeper into the
         model and signals when the node is found and loaded in memory.
@@ -190,9 +223,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         print("Deep load has been completed for %s" % paths[-1])
         print("Here's the winner: %s" % item)
         # If everything is loaded, emit the signal.
-        self.deep_load_completed.emit(item)
+        self.async_load_completed.emit(item)
 
-    deep_load_completed = QtCore.Signal(object)
+    async_load_completed = QtCore.Signal(object)
 
     def fetchMore(self, index):
         """
@@ -332,31 +365,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # clear out old data
         self.clear()
 
-        if root:
-            # FIXME: Unfortunately we can't call the endpoint directly because there is a bug in it.
-            # We've written a workaround for it in the ShotgunDataRetriever, which we will be
-            # using here.
-            sg_result = self._sg_data_retriever._task_execute_nav_search_entity("/", root)["sg_result"]
-
-            if len(sg_result) == 0:
-                self._log_debug("Entity %s not found. Picking /.", root)
-                self._path = "/"
-                self._root = None
-            else:
-                sg_data = sg_result[0]
-                # The last link in the chain is always the complete link to the entity we seek.
-                self._path = sg_data["incremental_path"][-1]
-                self._root = root
-
-                if len(sg_result) > 1:
-                    self._log_debug(
-                        "Entity %s found %d times with nav_search_entity endpoint. Picking %s.",
-                        root, len(sg_data), self._path
-                    )
-        else:
-            # Do not request the server for the path to the site root, this will always be /.
-            self._path = "/"
-            self._root = None
+        self._path = self._resolve_entity_paths(root)[-1]
+        self._root = root if self._path != "/" else None
 
         self._seed_entity_field = seed_entity_field
         self._entity_fields = entity_fields or {}
