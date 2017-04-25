@@ -472,8 +472,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # todo: hierarchy model to handle multiple rows?
         parent.appendRow(item)
 
-        parent.setData(not item.is_empty_kind(), self._SG_ITEM_HAS_CHILDREN)
-
         self._node_refreshed.emit(item)
 
     def _update_item(self, item, data_item):

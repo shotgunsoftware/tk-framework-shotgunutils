@@ -40,14 +40,6 @@ class ShotgunHierarchyItem(ShotgunStandardItem):
 
         return data.get("has_children", False)
 
-    def is_empty_kind(self):
-        """
-        Returns ``True`` if the item indicates an empty folder node. An empty
-        folder node is a node with the mention ``No <entity-type>``, which indicates
-        the parent folder doesn't have any entities.
-        """
-        return self.kind() == "empty"
-
     def is_entity_related(self):
         """
         Returns ``True`` if the item is entity related, ``False`` otherwise.
