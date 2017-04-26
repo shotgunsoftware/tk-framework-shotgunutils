@@ -51,8 +51,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     `Tracking Settings <https://support.shotgunsoftware.com/hc/en-us/articles/219031138-Project-Tracking-Settings>`_.
 
     :signal: async_item_retrieval_completed (:class:`ShotgunHierarchyModel`): Emitted when a query to
-        :method:`ShotgunHierarchyModel.async_item_from_entity` or
-        :method:`ShotgunHierarchyModel.async_item_from_paths` has completed.
+        :meth:`ShotgunHierarchyModel.async_item_from_entity` or
+        :meth:`ShotgunHierarchyModel.async_item_from_paths` has completed.
     """
 
     # Signal emitted internally whenever a node is updated inside the model. This is used
