@@ -213,17 +213,17 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             sg_result = self._sg_data_retriever._task_execute_nav_search_entity("/", entity)["sg_result"]
 
             if len(sg_result) == 0:
-                logger.warning("Entity %s not found. Picking /.", entity)
+                self._logger.warning("Entity %s not found. Picking /.", entity)
             else:
                 sg_data = sg_result[0]
                 # The last link in the chain is always the complete link to the entity we seek.
 
                 if len(sg_result) > 1:
-                    logger.info(
+                    self._logger.info(
                         "Entity %s found %d times with nav_search_entity endpoint. Picking %s.",
                         entity, len(sg_result), pprint.pformat(sg_data)
                     )
-                    logger.info("Other choices were %s", sg_result[1:])
+                    self._logger.info("Other choices were %s", sg_result[1:])
 
                 return sg_data["incremental_path"]
 
