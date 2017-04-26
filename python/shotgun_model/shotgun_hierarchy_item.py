@@ -8,6 +8,8 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+import sgtk
+
 from .shotgun_standard_item import ShotgunStandardItem
 
 
@@ -110,7 +112,7 @@ class ShotgunHierarchyItem(ShotgunStandardItem):
         ``target_entities``.
 
         This dictionary stores information that can be used to query the
-        entities targeted when the containing hierarchy model was created.
+        entities targeted when the containing hierarchy model was created. 
         It includes a key called ``additional_filter_presets`` with a value
         that can be provided to the shotgun python-api's ``find()`` call to
         tell the server exactly which entities exist under this item's branch
@@ -132,6 +134,7 @@ class ShotgunHierarchyItem(ShotgunStandardItem):
                 target_entities["type"],
                 additional_filter_presets=target_entities.get("additional_filter_presets"),
             )
+            
         """
 
         data = self.data()
@@ -175,3 +178,5 @@ class ShotgunHierarchyItem(ShotgunStandardItem):
             return data.get("value")
 
         return entity_type
+
+

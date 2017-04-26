@@ -24,6 +24,9 @@ from .data_handler_nav import ShotgunNavDataHandler
 from .util import sanitize_for_qt_model
 
 
+logger = sgtk.platform.get_logger(__name__)
+
+
 class ShotgunHierarchyModel(ShotgunQueryModel):
     """
     A Qt Model representing a Shotgun hierarchy.
@@ -49,11 +52,17 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     python-api method. The structure of items in the hierarchy mimics what is
     found in Shotgun as configured in each project's
     `Tracking Settings <https://support.shotgunsoftware.com/hc/en-us/articles/219031138-Project-Tracking-Settings>`_.
+
+    :signal: async_item_retrieval_completed (:class:`ShotgunHierarchyModel`): Emitted when a query to
+        :method:`ShotgunHierarchyModel.async_item_from_entity` or
+        :method:`ShotgunHierarchyModel.async_item_from_paths` has completed.
     """
 
     # Signal emitted internally whenever a node is updated inside the model. This is used
     # to keep track of nodes refreshed during an async_deep_load call.
     _node_refreshed = QtCore.Signal(object)
+
+    async_item_retrieval_completed = QtCore.Signal(object)
 
     def __init__(self, parent, schema_generation=0, bg_task_manager=None):
         """
@@ -123,7 +132,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` method.
         :returns: :class:`~PySide.QtGui.QStandardItem` or ``None`` if not found
         """
-        self._log_debug("Resolving model item for path %s" % path)
+        logger.debug("Resolving model item for path %s" % path)
 
         if path == self._path:
             return self.invisibleRootItem()
@@ -137,12 +146,18 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         """
 
         def __init__(self, path_to_refresh, model):
+            """
+            Triggers a fetchMore on the first node in the paths to refresh.
+
+            :param list(str) path_to_refresh: List of nodes to refresh asynchronously.
+            :param model: ``ShotgunHierarchyModel`` we are requesting the nodes for.
+            """
             super(ShotgunHierarchyModel._NodeRefresher, self).__init__(model)
             # Connect to the node refreshed signal so we know when
             # our node is refreshed.
             model._node_refreshed.connect(self._node_refreshed)
 
-            print("Fetching more on %s" % path_to_refresh[0])
+            self.parent()._log_debug("Fetching more on %s" % path_to_refresh[0])
             # Fetch data from this path's parent.
             model.fetchMore(
                 model.item_from_path(path_to_refresh[0]).index()
@@ -151,24 +166,46 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             self._path_to_refresh = path_to_refresh
 
         def _node_refreshed(self, item):
+            """
+            Called when the ``async_item_retrieval_completed`` signal is emitted.
+
+            :param item: The ShotgunHierarchyItem that was loaded.
+            """
             if item.data(self.parent()._SG_ITEM_UNIQUE_ID) != self._path_to_refresh[1]:
-                print "skipping node", item.data(self.parent()._SG_ITEM_UNIQUE_ID)
+                logger.debug("Skipping node %s", item.data(self.parent()._SG_ITEM_UNIQUE_ID))
                 return
-            print(
-                "Model item refreshed: %s" % item.data(self.parent()._SG_ITEM_UNIQUE_ID)
+            logger.debug(
+                "Model item refreshed: %s", item.data(self.parent()._SG_ITEM_UNIQUE_ID)
             )
             self.parent()._node_refreshed.disconnect(self._node_refreshed)
             self.deleteLater()
             # Try again to async deep load the node and the next tokens.
             self.parent().async_load_paths(self._path_to_refresh)
 
-    def async_load_entity(self, entity):
+    def async_item_from_entity(self, entity):
         """
+        Asynchronously loads an entity's node and all its parents and emits a signal with the
+        associated :class:`ShotgunHierarchyItem` when the node is loaded.
+
+        :param dict entity: Entity dictionary with keys ``type`` and ``id``.
+
+        :signals: ``async_item_retrieval_completed``
         """
         paths = self._resolve_entity_paths(entity)
         self.async_load_paths(paths)
 
     def _resolve_entity_paths(self, entity):
+        """
+        Resolves an entities path in the nav hierarchy.
+
+        .. note::
+            This method is executed in the current thread.
+
+        :param dict entity: Entity dictionary with keys ``type`` and ``id``.
+
+        :returns: The path to the entity in the nav api.
+        :rtype: str
+        """
         if entity:
             # FIXME: Unfortunately we can't call the endpoint directly because there is a bug in it.
             # We've written a workaround for it in the ShotgunDataRetriever, which we will be
@@ -177,33 +214,39 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             sg_result = self._sg_data_retriever._task_execute_nav_search_entity("/", entity)["sg_result"]
 
             if len(sg_result) == 0:
-                self._log_debug("Entity %s not found. Picking /.", entity)
+                logger.warning("Entity %s not found. Picking /.", entity)
             else:
                 sg_data = sg_result[0]
                 # The last link in the chain is always the complete link to the entity we seek.
 
                 if len(sg_result) > 1:
-                    self._log_debug(
+                    logger.info(
                         "Entity %s found %d times with nav_search_entity endpoint. Picking %s.",
                         entity, len(sg_result), pprint.pformat(sg_data)
                     )
+                    logger.info("Other choices were %s", sg_result[1:])
 
                 return sg_data["incremental_path"]
 
-        # All error code paths fallback here.
+        # Fallback for when the root was requested or no entity was found.
         # Do not request the server for the path to the site root, this will always be /.
         return ["/"]
 
-    def async_load_paths(self, paths):
+    def async_item_from_paths(self, paths):
         """
         Takes a list of paths that incrementally dig deeper into the
         model and signals when the node is found and loaded in memory.
+
+        :param list(str): List of paths from the nav api that drill down further
+            and further into the tree.
+
+        :signals: ``async_item_retrieval_completed``
         """
         # Nothing to async load, return early.
         if not paths:
             return
 
-        print("Async loading of %s" % paths)
+        logger.debug("Async loading of %s", paths)
 
         for idx, path in enumerate(paths):
             # Iterate on every path.
@@ -216,16 +259,14 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             # This time around this node will already have been refreshed
             # and the code will dig deeper. At some point the last entry
             # in the list will be reached and we will emit the item.
-            print("Refreshing paths: %s" % paths[idx - 1:])
+            logger.debug("Refreshing paths: %s", paths[idx - 1:])
             self._NodeRefresher(paths[idx - 1:], self)
             return
 
-        print("Deep load has been completed for %s" % paths[-1])
-        print("Here's the winner: %s" % item)
+        logger.debug("Deep load has been completed for %s", paths[-1])
+        logger.debug("Selected items: %s", item)
         # If everything is loaded, emit the signal.
-        self.async_load_completed.emit(item)
-
-    async_load_completed = QtCore.Signal(object)
+        self.async_item_retrieval_completed.emit(item)
 
     def fetchMore(self, index):
         """
@@ -371,12 +412,12 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         self._seed_entity_field = seed_entity_field
         self._entity_fields = entity_fields or {}
 
-        self._log_debug("")
-        self._log_debug("Model Reset for: %s" % (self,))
-        self._log_debug("Root: %s" % (self._root))
-        self._log_debug("Path: %s" % (self._path,))
-        self._log_debug("Seed entity field: %s" % (self._seed_entity_field,))
-        self._log_debug("Entity fields: %s" % (self._entity_fields,))
+        logger.debug("")
+        logger.debug("Model Reset for: %s" % (self,))
+        logger.debug("Root: %s" % (self._root))
+        logger.debug("Path: %s" % (self._path,))
+        logger.debug("Seed entity field: %s" % (self._seed_entity_field,))
+        logger.debug("Entity fields: %s" % (self._entity_fields,))
 
         # get the cache path based on these new data query parameters
         self._data_handler = ShotgunNavDataHandler(
@@ -387,12 +428,12 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         )
 
         # load up from disk
-        self._log_debug("Loading data from cache file into memory...")
+        logger.debug("Loading data from cache file into memory...")
         self._data_handler.load_cache()
 
-        self._log_debug("First population pass: Calling _load_external_data()")
+        logger.debug("First population pass: Calling _load_external_data()")
         self._load_external_data()
-        self._log_debug("External data population done.")
+        logger.debug("External data population done.")
 
         # only one column. give it a default value
         self.setHorizontalHeaderLabels(
@@ -402,7 +443,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         root = self.invisibleRootItem()
 
         # construct the top level nodes
-        self._log_debug("Creating model nodes for top level of data tree...")
+        logger.debug("Creating model nodes for top level of data tree...")
         nodes_generated = self._data_handler.generate_child_nodes(
             None,
             root,
