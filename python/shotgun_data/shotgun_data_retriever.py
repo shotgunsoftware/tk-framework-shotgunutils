@@ -18,6 +18,7 @@ import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 from sgtk import TankError
 
+
 class ShotgunDataRetriever(QtCore.QObject):
     """
     Asynchronous data retriever class which can be used to retrieve data and 
@@ -585,6 +586,33 @@ class ShotgunDataRetriever(QtCore.QObject):
         )
 
 
+    def execute_nav_search_entity(self, *args, **kwargs):
+        """
+        Executes a Shotgun ``nav_search_entity`` query asynchronously.
+
+        See the python api documentation here:
+            https://github.com/shotgunsoftware/python-api/wiki
+
+        This method takes the same parameters as the Shotgun ``nav_search_entity()`` call.
+
+        The query will be queued up and once processed, either a
+        work_completed or work_failure signal will be emitted.
+
+        :param ``*args``: args to be passed to the Shotgun ``nav_search_entity()`` call
+        :param ``**kwargs``: Named parameters to be passed to the Shotgun ``nav_search_entity()`` call
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.
+        """
+        return self._add_task(
+            self._task_execute_nav_search_entity,
+            priority=ShotgunDataRetriever._SG_CALL_PRIORITY,
+            task_args=args,
+            task_kwargs=kwargs
+        )
+
+
     def _add_task(self, task_cb, priority, task_args=None, task_kwargs=None):
         """
         Simplified wrapper to add a task to the task manager.  All tasks get added into
@@ -1115,6 +1143,35 @@ class ShotgunDataRetriever(QtCore.QObject):
         """
         sg_res = self._bundle.shotgun.nav_search_string(*args, **kwargs)
         return {"action": "nav_search_string", "sg_result": sg_res}
+
+    def _task_execute_nav_search_entity(self, *args, **kwargs):
+        """
+        Method that gets executed in a background task/thread to perform a Shotgun
+        ``nav_search_entity`` query
+
+        :param ``*args``: Unnamed arguments to be passed to the ``nav_search_entity()`` call
+        :param ``**kwargs``: Named arguments to be passed to the ``nav_search_entity()`` call
+        :returns: Dictionary containing the 'action' together with result
+            returned by the find() call
+        """
+        # FIXME: Project can't be resolved with the API right now due to a bug on the Shotgun-side.
+        # Mock the call instead.
+        if args[1]["type"] == "Project":
+            project_id = args[1]["id"]
+            sg_data = self._bundle.shotgun.find_one("Project", [["id", "is", project_id]], ["name"])
+            sg_res = [
+                {
+                    "incremental_path": ["/Project/%d" % project_id],
+                    "label": sg_data["name"],
+                    "path_label": "",
+                    "project_id": project_id,
+                    "ref": sg_data
+                }
+            ]
+        else:
+            sg_res = self._bundle.shotgun.nav_search_entity(*args, **kwargs)
+
+        return {"action": "nav_search_entity", "sg_result": sg_res}
 
     def _task_check_attachment(self, attachment_entity):
         """
