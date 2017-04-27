@@ -24,6 +24,9 @@ from .data_handler_nav import ShotgunNavDataHandler
 from .util import sanitize_for_qt_model
 
 
+logger = sgtk.platform.get_logger(__name__)
+
+
 class ShotgunHierarchyModel(ShotgunQueryModel):
     """
     A Qt Model representing a Shotgun hierarchy.
@@ -70,7 +73,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         """
         super(ShotgunHierarchyModel, self).__init__(parent, bg_task_manager)
 
-        self._logger = sgtk.platform.get_logger(__name__)
+        logger = sgtk.platform.get_logger(__name__)
 
         # check for hierarchy support
         (self._hierarchy_is_supported, self._hierarchy_not_supported_reason) = \
@@ -131,7 +134,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` method.
         :returns: :class:`~PySide.QtGui.QStandardItem` or ``None`` if not found
         """
-        self._logger.debug("Resolving model item for path %s" % path)
+        logger.debug("Resolving model item for path %s" % path)
 
         if path == self._path:
             return self.invisibleRootItem()
@@ -156,7 +159,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             # our node is refreshed.
             model._node_refreshed.connect(self._node_refreshed)
 
-            self.parent()._logger.debug("Fetching more on %s" % path_to_refresh[0])
+            logger.debug("Fetching more on %s" % path_to_refresh[0])
             # Fetch data from this path's parent.
             model.fetchMore(
                 model.item_from_path(path_to_refresh[0]).index()
@@ -171,9 +174,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             :param item: The ShotgunHierarchyItem that was loaded.
             """
             if item.data(self.parent()._SG_ITEM_UNIQUE_ID) != self._path_to_refresh[1]:
-                self.parent()._logger.debug("Skipping node %s", item.data(self.parent()._SG_ITEM_UNIQUE_ID))
+                logger.debug("Skipping node %s", item.data(self.parent()._SG_ITEM_UNIQUE_ID))
                 return
-            self.parent()._logger.debug(
+            logger.debug(
                 "Model item refreshed: %s", item.data(self.parent()._SG_ITEM_UNIQUE_ID)
             )
             self.parent()._node_refreshed.disconnect(self._node_refreshed)
@@ -213,17 +216,17 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             sg_result = self._sg_data_retriever._task_execute_nav_search_entity("/", entity)["sg_result"]
 
             if len(sg_result) == 0:
-                self._logger.warning("Entity %s not found. Picking /.", entity)
+                logger.warning("Entity %s not found. Picking /.", entity)
             else:
                 sg_data = sg_result[0]
                 # The last link in the chain is always the complete link to the entity we seek.
 
                 if len(sg_result) > 1:
-                    self._logger.info(
+                    logger.info(
                         "Entity %s found %d times with nav_search_entity endpoint. Picking %s.",
                         entity, len(sg_result), pprint.pformat(sg_data)
                     )
-                    self._logger.info("Other choices were %s", sg_result[1:])
+                    logger.info("Other choices were %s", sg_result[1:])
 
                 return sg_data["incremental_path"]
 
@@ -245,7 +248,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         if not paths:
             return
 
-        self._logger.debug("Async loading of %s", paths)
+        logger.debug("Async loading of %s", paths)
 
         for idx, path in enumerate(paths):
             # Iterate on every path.
@@ -258,12 +261,12 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             # This time around this node will already have been refreshed
             # and the code will dig deeper. At some point the last entry
             # in the list will be reached and we will emit the item.
-            self._logger.debug("Refreshing paths: %s", paths[idx - 1:])
+            logger.debug("Refreshing paths: %s", paths[idx - 1:])
             self._NodeRefresher(paths[idx - 1:], self)
             return
 
-        self._logger.debug("Deep load has been completed for %s", paths[-1])
-        self._logger.debug("Selected items: %s", item)
+        logger.debug("Deep load has been completed for %s", paths[-1])
+        logger.debug("Selected items: %s", item)
         # If everything is loaded, emit the signal.
         self.async_item_retrieval_completed.emit(item)
 
@@ -411,12 +414,12 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         self._seed_entity_field = seed_entity_field
         self._entity_fields = entity_fields or {}
 
-        self._logger.debug("")
-        self._logger.debug("Model Reset for: %s" % (self,))
-        self._logger.debug("Root: %s" % (self._root))
-        self._logger.debug("Path: %s" % (self._path,))
-        self._logger.debug("Seed entity field: %s" % (self._seed_entity_field,))
-        self._logger.debug("Entity fields: %s" % (self._entity_fields,))
+        logger.debug("")
+        logger.debug("Model Reset for: %s" % (self,))
+        logger.debug("Root: %s" % (self._root))
+        logger.debug("Path: %s" % (self._path,))
+        logger.debug("Seed entity field: %s" % (self._seed_entity_field,))
+        logger.debug("Entity fields: %s" % (self._entity_fields,))
 
         # get the cache path based on these new data query parameters
         self._data_handler = ShotgunNavDataHandler(
@@ -427,12 +430,12 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         )
 
         # load up from disk
-        self._logger.debug("Loading data from cache file into memory...")
+        logger.debug("Loading data from cache file into memory...")
         self._data_handler.load_cache()
 
-        self._logger.debug("First population pass: Calling _load_external_data()")
+        logger.debug("First population pass: Calling _load_external_data()")
         self._load_external_data()
-        self._logger.debug("External data population done.")
+        logger.debug("External data population done.")
 
         # only one column. give it a default value
         self.setHorizontalHeaderLabels(
@@ -442,7 +445,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         root = self.invisibleRootItem()
 
         # construct the top level nodes
-        self._logger.debug("Creating model nodes for top level of data tree...")
+        logger.debug("Creating model nodes for top level of data tree...")
         nodes_generated = self._data_handler.generate_child_nodes(
             None,
             root,
