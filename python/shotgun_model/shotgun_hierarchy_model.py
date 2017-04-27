@@ -73,8 +73,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         """
         super(ShotgunHierarchyModel, self).__init__(parent, bg_task_manager)
 
-        logger = sgtk.platform.get_logger(__name__)
-
         # check for hierarchy support
         (self._hierarchy_is_supported, self._hierarchy_not_supported_reason) = \
             self.__hierarchy_is_supported()
@@ -182,7 +180,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             self.parent()._node_refreshed.disconnect(self._node_refreshed)
             self.deleteLater()
             # Try again to async deep load the node and the next tokens.
-            self.parent().async_load_paths(self._path_to_refresh)
+            self.parent().async_item_from_paths(self._path_to_refresh)
 
     def async_item_from_entity(self, entity):
         """
@@ -194,7 +192,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         :signals: ``async_item_retrieval_completed``
         """
         paths = self._resolve_entity_paths(entity)
-        self.async_load_paths(paths)
+        self.async_item_from_paths(paths)
 
     def _resolve_entity_paths(self, entity):
         """
