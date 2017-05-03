@@ -1141,7 +1141,13 @@ class ShotgunDataRetriever(QtCore.QObject):
         :returns: Dictionary containing the 'action' together with result
             returned by the find() call
         """
-        sg_res = self._bundle.shotgun.nav_search_string(*args, **kwargs)
+        try:
+            sg_res = self._bundle.shotgun.nav_search_string(*args, **kwargs)
+        except AttributeError:
+            # running an older core which doesn't come with a
+            # sg API which has a nav_search_string() method
+            sg_res = []
+
         return {"action": "nav_search_string", "sg_result": sg_res}
 
     def _task_execute_nav_search_entity(self, *args, **kwargs):
@@ -1169,7 +1175,12 @@ class ShotgunDataRetriever(QtCore.QObject):
                 }
             ]
         else:
-            sg_res = self._bundle.shotgun.nav_search_entity(*args, **kwargs)
+            try:
+                sg_res = self._bundle.shotgun.nav_search_entity(*args, **kwargs)
+            except AttributeError:
+                # running an older core which doesn't come with a
+                # sg API which has a nav_search_string() method
+                sg_res = []
 
         return {"action": "nav_search_entity", "sg_result": sg_res}
 
