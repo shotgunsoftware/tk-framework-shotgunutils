@@ -8,6 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+import copy
 import gc
 
 from .data_handler import ShotgunDataHandler, log_timing
@@ -31,7 +32,7 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
     _SG_PATH_FIELD = "path"
     _SG_PARENT_PATH_FIELD = "parent_path"
 
-    def __init__(self, root_path, seed_entity_field, entity_fields, cache_path):
+    def __init__(self, root_path, seed_entity_field, entity_fields, cache_path, include_root=None):
         """
         :param str root_path: The path to the root of the hierarchy to display.
             This corresponds to the ``path`` argument of the
@@ -52,11 +53,22 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
             of field names to return.
 
         :param str cache_path: Path to cache file location.
+
+        :param str include_root: Defines the name of an additional, top-level
+            model item that represents the root. In views, this item will appear
+            as a sibling to top-level children of the root. This allows for
+            UX whereby a user can select an item representing the root without
+            having a UI that shows a single, top-level item. An example would
+            be displaying published file entity hierarchy with top level items:
+            "Assets", "Shots", and "Project Publishes". In this example, the
+            supplied arg would look like: ``include_root="Project Publishes"``.
+            If ``include_root`` is ``None``, no root item will be added.
         """
         super(ShotgunNavDataHandler, self).__init__(cache_path)
         self.__root_path = root_path
         self.__seed_entity_field = seed_entity_field
         self.__entity_fields = entity_fields
+        self.__include_root = include_root
 
     def generate_data_request(self, data_retriever, path):
         """
@@ -132,12 +144,6 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
 
         self._log_debug("Generating new tree in memory...")
 
-        if item_path == self.__root_path:
-            self._log_debug("This is the root of the tree.")
-            parent_uid = None
-        else:
-            parent_uid = item_path
-
         # create a brand new tree rather than trying to be clever
         # about how we cull intermediate nodes for deleted items
         diff_list = []
@@ -146,10 +152,40 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
         num_modifications = 0
 
         new_uids = set()
+
+        # a list of sg data dicts to display items for
+        child_data = []
+
+        if item_path == self.__root_path:
+            self._log_debug("This is the root of the tree.")
+            parent_uid = None
+
+            if self.__include_root:
+                # the calling code has requested that the root of the tree be
+                # displayed as a top-level sibling (to make it easy to discover
+                # hierarchy targets attached to the root entity). To do this, we
+                # simply make a copy of the root item dictionary (sans children)
+                # and add it as an additional child to display. We also set the
+                # label to the supplied value.
+                root_item = copy.deepcopy(sg_data)
+                root_item["label"] = self.__include_root
+
+                # get rid of child data since it'll be displayed as a sibling
+                root_item["has_children"] = False
+                del root_item["children"]
+
+                # add the root dict to the list of data to build items for
+                child_data.append(root_item)
+        else:
+            parent_uid = item_path
+
         previous_uids = set(self._cache.get_child_uids(parent_uid))
 
+        # process all the children
+        child_data.extend(sg_data["children"])
+
         # analyze the incoming shotgun data
-        for sg_item in sg_data["children"]:
+        for sg_item in child_data:
 
             if self._SG_PATH_FIELD not in sg_item:
                 # note: leaf nodes of kind 'empty' don't have a path
