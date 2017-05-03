@@ -11,6 +11,7 @@
 import hashlib
 import os
 import sys
+import pprint
 
 # toolkit imports
 import sgtk
@@ -18,11 +19,12 @@ from sgtk.platform.qt import QtCore, QtGui
 
 # framework imports
 from .shotgun_hierarchy_item import ShotgunHierarchyItem
-from .shotgun_standard_item import ShotgunStandardItem
 from .shotgun_query_model import ShotgunQueryModel
 from .data_handler_nav import ShotgunNavDataHandler
-from .data_item import ShotgunItemData
-from .util import get_sg_data, sanitize_for_qt_model
+from .util import sanitize_for_qt_model
+
+
+logger = sgtk.platform.get_logger(__name__)
 
 
 class ShotgunHierarchyModel(ShotgunQueryModel):
@@ -43,14 +45,25 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     In order to use this class, you normally subclass it and implement certain
     key data methods for setting up queries, customizing etc. Then you connect
     your class to a :class:`~PySide.QtGui.QAbstractItemView` of some sort which
-    will display the result. 
+    will display the result.
 
     The model stores a single column, lazy-loaded Shotgun Hierarchy as queried
     via the :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`
     python-api method. The structure of items in the hierarchy mimics what is
     found in Shotgun as configured in each project's
     `Tracking Settings <https://support.shotgunsoftware.com/hc/en-us/articles/219031138-Project-Tracking-Settings>`_.
+
+    :signal: async_item_retrieval_completed (:class:`ShotgunHierarchyModel`): Emitted when a query to
+        :meth:`ShotgunHierarchyModel.async_item_from_entity` or
+        :meth:`ShotgunHierarchyModel.async_item_from_paths` has completed.
     """
+
+    # Signal emitted internally whenever a node is updated inside the model. This is used
+    # to keep track of nodes refreshed during an async_deep_load call.
+    _node_refreshed = QtCore.Signal(object)
+
+    async_item_retrieval_completed = QtCore.Signal(object)
+
     def __init__(self, parent, schema_generation=0, bg_task_manager=None):
         """
         Initialize the Hierarcy model.
@@ -119,8 +132,141 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` method.
         :returns: :class:`~PySide.QtGui.QStandardItem` or ``None`` if not found
         """
-        self._log_debug("Resolving model item for path %s" % path)
-        return self._ensure_item_loaded(path)
+        logger.debug("Resolving model item for path %s" % path)
+
+        if path == self._path:
+            return self.invisibleRootItem()
+        else:
+            return self._ensure_item_loaded(path)
+
+    class _NodeRefresher(QtCore.QObject):
+        """
+        This class is used to launch a refresh request to the model and try
+        again to resolve the node when the refresh has happened.
+        """
+
+        def __init__(self, path_to_refresh, model):
+            """
+            Triggers a fetchMore on the first node in the paths to refresh.
+
+            :param list(str) path_to_refresh: List of nodes to refresh asynchronously.
+            :param model: ``ShotgunHierarchyModel`` we are requesting the nodes for.
+            """
+            super(ShotgunHierarchyModel._NodeRefresher, self).__init__(model)
+            # Connect to the node refreshed signal so we know when
+            # our node is refreshed.
+            model._node_refreshed.connect(self._node_refreshed)
+
+            logger.debug("Fetching more on %s" % path_to_refresh[0])
+            # Fetch data from this path's parent.
+            model.fetchMore(
+                model.item_from_path(path_to_refresh[0]).index()
+            )
+
+            self._path_to_refresh = path_to_refresh
+
+        def _node_refreshed(self, item):
+            """
+            Called when the ``async_item_retrieval_completed`` signal is emitted.
+
+            :param item: The ShotgunHierarchyItem that was loaded.
+            """
+            if item.data(self.parent()._SG_ITEM_UNIQUE_ID) != self._path_to_refresh[1]:
+                logger.debug("Skipping node %s", item.data(self.parent()._SG_ITEM_UNIQUE_ID))
+                return
+            logger.debug(
+                "Model item refreshed: %s", item.data(self.parent()._SG_ITEM_UNIQUE_ID)
+            )
+            self.parent()._node_refreshed.disconnect(self._node_refreshed)
+            self.deleteLater()
+            # Try again to async deep load the node and the next tokens.
+            self.parent().async_item_from_paths(self._path_to_refresh)
+
+    def async_item_from_entity(self, entity):
+        """
+        Asynchronously loads an entity's node and all its parents and emits a signal with the
+        associated :class:`ShotgunHierarchyItem` when the node is loaded.
+
+        :param dict entity: Entity dictionary with keys ``type`` and ``id``.
+
+        :signals: ``async_item_retrieval_completed``
+        """
+        paths = self._resolve_entity_paths(entity)
+        self.async_item_from_paths(paths)
+
+    def _resolve_entity_paths(self, entity):
+        """
+        Resolves an entities path in the nav hierarchy.
+
+        .. note::
+            This method is executed in the current thread.
+
+        :param dict entity: Entity dictionary with keys ``type`` and ``id``.
+
+        :returns: The path to the entity in the nav api.
+        :rtype: str
+        """
+        if entity:
+            # FIXME: Unfortunately we can't call the endpoint directly because there is a bug in it.
+            # We've written a workaround for it in the ShotgunDataRetriever, which we will be
+            # using here.
+
+            sg_result = self._sg_data_retriever._task_execute_nav_search_entity("/", entity)["sg_result"]
+
+            if len(sg_result) == 0:
+                logger.warning("Entity %s not found. Picking /.", entity)
+            else:
+                sg_data = sg_result[0]
+                # The last link in the chain is always the complete link to the entity we seek.
+
+                if len(sg_result) > 1:
+                    logger.info(
+                        "Entity %s found %d times with nav_search_entity endpoint. Picking %s.",
+                        entity, len(sg_result), pprint.pformat(sg_data)
+                    )
+                    logger.info("Other choices were %s", sg_result[1:])
+
+                return sg_data["incremental_path"]
+
+        # Fallback for when the root was requested or no entity was found.
+        # Do not request the server for the path to the site root, this will always be /.
+        return ["/"]
+
+    def async_item_from_paths(self, paths):
+        """
+        Takes a list of paths that incrementally dig deeper into the
+        model and signals when the node is found and loaded in memory.
+
+        :param list(str): List of paths from the nav api that drill down further
+            and further into the tree.
+
+        :signals: ``async_item_retrieval_completed``
+        """
+        # Nothing to async load, return early.
+        if not paths:
+            return
+
+        logger.debug("Async loading of %s", paths)
+
+        for idx, path in enumerate(paths):
+            # Iterate on every path.
+            item = self.item_from_path(path)
+            # If an item is already loaded, move to the next one.
+            if item:
+                continue
+            # Send a refresh request and return. When the node is refreshed,
+            # this method will be called a second time with the same parameters.
+            # This time around this node will already have been refreshed
+            # and the code will dig deeper. At some point the last entry
+            # in the list will be reached and we will emit the item.
+            logger.debug("Refreshing paths: %s", paths[idx - 1:])
+            self._NodeRefresher(paths[idx - 1:], self)
+            return
+
+        logger.debug("Deep load has been completed for %s", paths[-1])
+        logger.debug("Selected items: %s", item)
+        # If everything is loaded, emit the signal.
+        self.async_item_retrieval_completed.emit(item)
 
     def fetchMore(self, index):
         """
@@ -132,7 +278,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # now request the subtree to refresh itself
         if index.isValid():
             item = self.itemFromIndex(index)
-            if isinstance(item, ShotgunHierarchyItem):
+            if isinstance(item, ShotgunHierarchyItem) and self.canFetchMore(index):
                 self._request_data(item.path())
 
         return super(ShotgunHierarchyModel, self).fetchMore(index)
@@ -155,10 +301,10 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # default, root path
         path = "/"
 
-        current_engine = sgtk.platform.current_engine()
-        if current_engine:
+        current_bundle = sgtk.platform.current_bundle()
+        if current_bundle:
             # an engine is running
-            project = current_engine.context.project
+            project = current_bundle.context.project
             if project:
                 # we have a project in the context
                 path = "/Project/%s" % (project["id"])
@@ -188,7 +334,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     def _load_data(
         self,
         seed_entity_field,
-        path=None,
+        root=None,
         entity_fields=None,
         cache_seed=None
     ):
@@ -209,20 +355,15 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         :param str seed_entity_field: This is a string that corresponds to the
             field on an entity used to seed the hierarchy. For example, a value
             of ``Version.entity`` would cause the model to display a hierarchy
-            where the leaves match the entity value of Version entities. 
-            
+            where the leaves match the entity value of Version entities.
+
             NOTE: This value is currently limited to either ``Version.entity``
             or ``PublishedFile.entity``
 
-        :param str path: The path to the root of the hierarchy to display.
-            This corresponds to the ``path`` argument of the
-            :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`
-            api method. For example, ``/Project/65`` would correspond to a
-            project on you shotgun site with id of ``65``. By default, this
-            value is ``None`` and the project from the current project will
-            be used. If no project can be determined, the path will default
-            to ``/`` which is the root path, meaning all projects will be
-            represented as top-level items in the model.
+        :param dict root: This is the entity that will be at the root
+            of the hierarchy view. By default, this value is ``None``, which
+            means the root of the hierarchy will be at the site level. Only
+            projects can be set as the root of a hierarchy model.
 
         :param dict entity_fields: A dictionary that identifies what fields to
             include on returned entities. Since the hierarchy can include any
@@ -265,15 +406,18 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # clear out old data
         self.clear()
 
-        self._path = path or self._get_default_path()
+        self._path = self._resolve_entity_paths(root)[-1]
+        self._root = root if self._path != "/" else None
+
         self._seed_entity_field = seed_entity_field
         self._entity_fields = entity_fields or {}
 
-        self._log_debug("")
-        self._log_debug("Model Reset for: %s" % (self,))
-        self._log_debug("Path: %s" % (self._path,))
-        self._log_debug("Seed entity field: %s" % (self._seed_entity_field,))
-        self._log_debug("Entity fields: %s" % (self._entity_fields,))
+        logger.debug("")
+        logger.debug("Model Reset for: %s" % (self,))
+        logger.debug("Root: %s" % (self._root))
+        logger.debug("Path: %s" % (self._path,))
+        logger.debug("Seed entity field: %s" % (self._seed_entity_field,))
+        logger.debug("Entity fields: %s" % (self._entity_fields,))
 
         # get the cache path based on these new data query parameters
         self._data_handler = ShotgunNavDataHandler(
@@ -284,12 +428,12 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         )
 
         # load up from disk
-        self._log_debug("Loading data from cache file into memory...")
+        logger.debug("Loading data from cache file into memory...")
         self._data_handler.load_cache()
 
-        self._log_debug("First population pass: Calling _load_external_data()")
+        logger.debug("First population pass: Calling _load_external_data()")
         self._load_external_data()
-        self._log_debug("External data population done.")
+        logger.debug("External data population done.")
 
         # only one column. give it a default value
         self.setHorizontalHeaderLabels(
@@ -299,7 +443,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         root = self.invisibleRootItem()
 
         # construct the top level nodes
-        self._log_debug("Creating model nodes for top level of data tree...")
+        logger.debug("Creating model nodes for top level of data tree...")
         nodes_generated = self._data_handler.generate_child_nodes(
             None,
             root,
@@ -369,8 +513,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # todo: hierarchy model to handle multiple rows?
         parent.appendRow(item)
 
-        return item
-
+        self._node_refreshed.emit(item)
 
     def _update_item(self, item, data_item):
         """
@@ -404,6 +547,11 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # run the finalizer (always runs on construction, even via cache)
         self._finalize_item(item)
 
+        # If this is a node that already existed and is being refreshed, notify.
+        # If the node is not parented yet, this is because we're in the middle
+        # of a create_item call, which WILL refresh the node.
+        if item.parent():
+            self._node_refreshed.emit(item)
 
     ############################################################################
     # private methods
@@ -481,18 +629,18 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             will be a string explaining why.
 
         """
-        current_engine = sgtk.platform.current_engine()
-        sg_connection = current_engine.shotgun
+        current_bundle = sgtk.platform.current_bundle()
+        sg_connection = current_bundle.shotgun
         server_caps = sg_connection.server_caps
 
         # make sure we're greater than or equal to SG v7.0.2
         if not (hasattr(sg_connection, "server_caps") and
                 server_caps.version and
                 server_caps.version >= (7, 0, 2)):
-            return (False, "The version of SG being used does not support querying for the project hierarchy. v7.0.2 is required.")
+            return (False, "The version of SG being used does not support querying for the project "
+                    "hierarchy. v7.0.2 is required.")
         elif not hasattr(sg_connection, "nav_expand"):
-            return (False, "The version of the python-api being used does not support querying for the project hierarchy.")
+            return (False, "The version of the python-api being used does not support querying for "
+                    "the project hierarchy.")
 
         return (True, None)
-
-

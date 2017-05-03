@@ -13,7 +13,7 @@ your production hierarchy.
 .. image:: images/hierarchy_model.png
 
 The Shotgun Hierarchy Model is a custom Qt Model specialized to represent your
-Shotugn production hierarchy as defined in your site's
+Shotgun production hierarchy as defined in your site's
 `Tracking Settings <https://support.shotgunsoftware.com/hc/en-us/articles/219031138-Project-Tracking-Settings>`_.
 The hierarchy represented by the model is dynamically constructed based on
 a ``seed_entity_field`` which represents the target of the hierarchy (i.e. what

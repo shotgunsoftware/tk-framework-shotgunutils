@@ -18,6 +18,7 @@ import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 from sgtk import TankError
 
+
 class ShotgunDataRetriever(QtCore.QObject):
     """
     Asynchronous data retriever class which can be used to retrieve data and 
@@ -506,6 +507,32 @@ class ShotgunDataRetriever(QtCore.QObject):
                               priority = ShotgunDataRetriever._SG_CALL_PRIORITY,
                               task_kwargs = task_kwargs)
 
+    def execute_text_search(self, *args, **kwargs):
+        """
+        Executes a Shotgun ``text_search`` query asynchronously.
+
+        See the python api documentation here:
+            https://github.com/shotgunsoftware/python-api/wiki
+
+        This method takes the same parameters as the Shotgun ``text_search()`` call.
+
+        The query will be queued up and once processed, either a
+        work_completed or work_failure signal will be emitted.
+
+        :param ``*args``: args to be passed to the Shotgun ``text_search()`` call
+        :param ``**kwargs``: Named parameters to be passed to the Shotgun ``text_search()`` call
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.
+        """
+        return self._add_task(
+            self._task_execute_text_search,
+            priority=ShotgunDataRetriever._SG_CALL_PRIORITY,
+            task_args=args,
+            task_kwargs=kwargs
+        )
+
     def execute_nav_expand(self, *args, **kwargs):
         """
         Executes a Shotgun ``nav_expand`` query asynchronously.
@@ -531,6 +558,60 @@ class ShotgunDataRetriever(QtCore.QObject):
             task_args=args,
             task_kwargs=kwargs
         )
+
+    def execute_nav_search_string(self, *args, **kwargs):
+        """
+        Executes a Shotgun ``nav_search_string`` query asynchronously.
+
+        See the python api documentation here:
+            https://github.com/shotgunsoftware/python-api/wiki
+
+        This method takes the same parameters as the Shotgun ``nav_search_string()`` call.
+
+        The query will be queued up and once processed, either a
+        work_completed or work_failure signal will be emitted.
+
+        :param ``*args``: args to be passed to the Shotgun ``nav_search_string()`` call
+        :param ``**kwargs``: Named parameters to be passed to the Shotgun ``nav_search_string()`` call
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.
+        """
+        return self._add_task(
+            self._task_execute_nav_search_string,
+            priority=ShotgunDataRetriever._SG_CALL_PRIORITY,
+            task_args=args,
+            task_kwargs=kwargs
+        )
+
+
+    def execute_nav_search_entity(self, *args, **kwargs):
+        """
+        Executes a Shotgun ``nav_search_entity`` query asynchronously.
+
+        See the python api documentation here:
+            https://github.com/shotgunsoftware/python-api/wiki
+
+        This method takes the same parameters as the Shotgun ``nav_search_entity()`` call.
+
+        The query will be queued up and once processed, either a
+        work_completed or work_failure signal will be emitted.
+
+        :param ``*args``: args to be passed to the Shotgun ``nav_search_entity()`` call
+        :param ``**kwargs``: Named parameters to be passed to the Shotgun ``nav_search_entity()`` call
+        :returns: A unique identifier representing this request. This
+                  identifier is also part of the payload sent via the
+                  work_completed and work_failure signals, making it
+                  possible to match them up.
+        """
+        return self._add_task(
+            self._task_execute_nav_search_entity,
+            priority=ShotgunDataRetriever._SG_CALL_PRIORITY,
+            task_args=args,
+            task_kwargs=kwargs
+        )
+
 
     def _add_task(self, task_cb, priority, task_args=None, task_kwargs=None):
         """
@@ -685,9 +766,11 @@ class ShotgunDataRetriever(QtCore.QObject):
         """
         # construct the url that refers to the thumbnail's source image
         thumb_source_url = urlparse.urlunparse((
-            bundle.shotgun.config.scheme, bundle.shotgun.config.server,
-            "/thumbnail/full/%s/%s" % (urllib.quote(str(entity_type)),
-            urllib.quote(str(entity_id))), None, None, None
+            self._bundle.shotgun.config.scheme, self._bundle.shotgun.config.server,
+            "/thumbnail/full/%s/%s" % (
+                urllib.quote(str(entity_type)),
+                urllib.quote(str(entity_id))
+            ), None, None, None
         ))
 
         return self.request_thumbnail(
@@ -1022,6 +1105,19 @@ class ShotgunDataRetriever(QtCore.QObject):
         res = method(self._bundle.shotgun, *method_args, **method_kwargs)
         return {"action": "method", "result": res}
 
+    def _task_execute_text_search(self, *args, **kwargs):
+        """
+        Method that gets executed in a background task/thread to perform a Shotgun
+        ``text_search`` query
+
+        :param ``*args``: Unnamed arguments to be passed to the ``text_search()`` call
+        :param ``**kwargs``: Named arguments to be passed to the ``text_search()`` call
+        :returns: Dictionary containing the 'action' together with result
+            returned by the find() call
+        """
+        sg_res = self._bundle.shotgun.text_search(*args, **kwargs)
+        return {"action": "text_search", "sg_result": sg_res}
+
     def _task_execute_nav_expand(self, *args, **kwargs):
         """
         Method that gets executed in a background task/thread to perform a Shotgun
@@ -1034,6 +1130,59 @@ class ShotgunDataRetriever(QtCore.QObject):
         """
         sg_res = self._bundle.shotgun.nav_expand(*args, **kwargs)
         return {"action": "nav_expand", "sg_result": sg_res}
+
+    def _task_execute_nav_search_string(self, *args, **kwargs):
+        """
+        Method that gets executed in a background task/thread to perform a Shotgun
+        ``nav_search_string`` query
+
+        :param ``*args``: Unnamed arguments to be passed to the ``nav_search_string()`` call
+        :param ``**kwargs``: Named arguments to be passed to the ``nav_search_string()`` call
+        :returns: Dictionary containing the 'action' together with result
+            returned by the find() call
+        """
+        try:
+            sg_res = self._bundle.shotgun.nav_search_string(*args, **kwargs)
+        except AttributeError:
+            # running an older core which doesn't come with a
+            # sg API which has a nav_search_string() method
+            sg_res = []
+
+        return {"action": "nav_search_string", "sg_result": sg_res}
+
+    def _task_execute_nav_search_entity(self, *args, **kwargs):
+        """
+        Method that gets executed in a background task/thread to perform a Shotgun
+        ``nav_search_entity`` query
+
+        :param ``*args``: Unnamed arguments to be passed to the ``nav_search_entity()`` call
+        :param ``**kwargs``: Named arguments to be passed to the ``nav_search_entity()`` call
+        :returns: Dictionary containing the 'action' together with result
+            returned by the find() call
+        """
+        # FIXME: Project can't be resolved with the API right now due to a bug on the Shotgun-side.
+        # Mock the call instead.
+        if args[1]["type"] == "Project":
+            project_id = args[1]["id"]
+            sg_data = self._bundle.shotgun.find_one("Project", [["id", "is", project_id]], ["name"])
+            sg_res = [
+                {
+                    "incremental_path": ["/Project/%d" % project_id],
+                    "label": sg_data["name"],
+                    "path_label": "",
+                    "project_id": project_id,
+                    "ref": sg_data
+                }
+            ]
+        else:
+            try:
+                sg_res = self._bundle.shotgun.nav_search_entity(*args, **kwargs)
+            except AttributeError:
+                # running an older core which doesn't come with a
+                # sg API which has a nav_search_string() method
+                sg_res = []
+
+        return {"action": "nav_search_entity", "sg_result": sg_res}
 
     def _task_check_attachment(self, attachment_entity):
         """
@@ -1199,7 +1348,10 @@ class ShotgunDataRetriever(QtCore.QObject):
             return
 
         action = result.get("action")
-        if action in ["find", "find_one", "create", "delete", "update", "nav_expand"]:
+        if action in [
+            "find", "find_one", "create", "delete", "update",
+            "nav_expand", "nav_search_string", "text_search"
+        ]:
             self.work_completed.emit(
                 str(task_id),
                 action,
