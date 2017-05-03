@@ -64,12 +64,36 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
     async_item_retrieval_completed = QtCore.Signal(object)
 
-    def __init__(self, parent, schema_generation=0, bg_task_manager=None):
+    def __init__(self, parent, schema_generation=0, bg_task_manager=None, include_root=None):
         """
         Initialize the Hierarcy model.
 
         :param parent: The model's parent.
         :type parent: :class:`~PySide.QtGui.QObject`
+
+        :param schema_generation: Schema generation number. Advanced parameter.
+            If your shotgun model contains logic in subclassed methods that
+            modify the shotgun data prior to it being put into the cache system
+            that the ShotgunModel maintains, you can use this option to ensure
+            that different versions of the code access different caches. If you
+            change your custom business logic around and update the generation
+            number, both new and old versions of the code will work correctly
+            against the cached data.
+
+        :param bg_task_manager:  Background task manager to use for any
+            asynchronous work. If this is None then a task manager will be
+            created as needed.
+        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
+
+        :param str include_root: Defines the name of an additional, top-level
+            model item that represents the root. In views, this item will appear
+            as a sibling to top-level children of the root. This allows for
+            UX whereby a user can select an item representing the root without
+            having a UI that shows a single, top-level item. An example would
+            be displaying published file entity hierarchy with top level items:
+            "Assets", "Shots", and "Project Publishes". In this example, the
+            supplied arg would look like: ``include_root="Project Publishes"``.
+            If ``include_root`` is `None`, no root item will be added.
         """
         super(ShotgunHierarchyModel, self).__init__(parent, bg_task_manager)
 
@@ -83,6 +107,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         self._path = None
         self._seed_entity_field = None
         self._entity_fields = None
+        self._include_root = include_root
 
         self._schema_generation = schema_generation
 
@@ -424,7 +449,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             self._path,
             self._seed_entity_field,
             self._entity_fields,
-            self.__compute_cache_path(cache_seed)
+            self.__compute_cache_path(cache_seed),
+            include_root=self._include_root
         )
 
         # load up from disk
