@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Model &mdash; tk-framework-shotgunutils v5.1.3 documentation</title>
+  <title>Shotgun Model &mdash; tk-framework-shotgunutils v5.2.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.1.3 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.2.1 documentation" href="index.html"/>
         <link rel="next" title="Shotgun Hierarchy Model" href="shotgun_hierarchy_model.html"/>
         <link rel="prev" title="The Shotgun Utilities Framework" href="index.html"/> 
 
@@ -130,7 +130,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.1.3.<br>
+    <b>tk-framework-shotgunutils</b> v5.2.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -260,13 +260,13 @@ things.</li>
 search criteria, use a Proxy Model (typically <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QSortFilterProxyModel.html#PySide.QtGui.QSortFilterProxyModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QSortFilterProxyModel</span></code></a>).</li>
 <li>If you want to control the way items are displayed in the view, consider using the Shotgun delegates
 module which is part of the Qt widgets framework. For more information, see
-<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/views.html#views.WidgetDelegate" title="(in tk-framework-qtwidgets vv2.5.15)"><code class="xref py py-class docutils literal"><span class="pre">WidgetDelegate</span></code></a></li>
+<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/views.html#views.WidgetDelegate" title="(in tk-framework-qtwidgets vv2.6.2)"><code class="xref py py-class docutils literal"><span class="pre">WidgetDelegate</span></code></a></li>
 </ul>
 </div>
 <div class="section" id="progress-spinner">
 <h3>Progress Spinner<a class="headerlink" href="#progress-spinner" title="Permalink to this headline">¶</a></h3>
 <p>The model emits several signals at various points in its refresh cycle. If you want a spinner
-to pop up to indicate that data is being loaded, simply add a <a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/overlay_widget.html#overlay_widget.ShotgunModelOverlayWidget" title="(in tk-framework-qtwidgets vv2.5.15)"><code class="xref py py-class docutils literal"><span class="pre">ShotgunModelOverlayWidget</span></code></a>
+to pop up to indicate that data is being loaded, simply add a <a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/overlay_widget.html#overlay_widget.ShotgunModelOverlayWidget" title="(in tk-framework-qtwidgets vv2.6.2)"><code class="xref py py-class docutils literal"><span class="pre">ShotgunModelOverlayWidget</span></code></a>
 between your view and model, like this:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">overlay_widget</span> <span class="o">=</span> <span class="n">tank</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s2">&quot;tk-framework-qtwidgets&quot;</span><span class="p">,</span> <span class="s2">&quot;overlay_widget&quot;</span><span class="p">)</span>
 
@@ -366,10 +366,10 @@ subclassed implementation.</li>
 parameter, this can be used to effectively cap the data set that the model
 is handling, allowing a user to for example show the twenty most recent notes or
 similar.</li>
-<li><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; List of Shotgun fields names to use to populate the model columns</li>
+<li><strong>columns</strong> (<em>list</em>) &#8211; List of Shotgun fields names to use to populate the model columns</li>
 <li><strong>additional_filter_presets</strong> &#8211; List of Shotgun filter presets to apply, e.g.
 <code class="docutils literal"><span class="pre">[{&quot;preset_name&quot;:&quot;LATEST&quot;,&quot;latest_by&quot;:&quot;BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT&quot;}]</span></code></li>
-<li><strong>editable_columns</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; A subset of <code class="docutils literal"><span class="pre">columns</span></code> that will be editable in views that use this model.</li>
+<li><strong>editable_columns</strong> (<em>list</em>) &#8211; A subset of <code class="docutils literal"><span class="pre">columns</span></code> that will be editable in views that use this model.</li>
 </ul>
 </td>
 </tr>
@@ -603,13 +603,13 @@ an external string via this parameter which will be added to the seed.</li>
 parameter, this can be used to effectively cap the data set that the model
 is handling, allowing a user to for example show the twenty most recent notes or
 similar.</li>
-<li><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; If columns is specified, then any leaf row in the model will have columns created where
+<li><strong>columns</strong> (<em>list</em>) &#8211; If columns is specified, then any leaf row in the model will have columns created where
 each column in the row contains the value for the corresponding field from columns. This means
 that the data from the loaded entity will be available field by field. Subclasses can modify
 this behavior by overriding _get_additional_columns.</li>
 <li><strong>additional_filter_presets</strong> &#8211; List of Shotgun filter presets to apply, e.g.
 <code class="docutils literal"><span class="pre">[{&quot;preset_name&quot;:&quot;LATEST&quot;,&quot;latest_by&quot;:&quot;BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT&quot;}]</span></code></li>
-<li><strong>editable_columns</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; A subset of <code class="docutils literal"><span class="pre">columns</span></code> that will be editable in views that use this model.</li>
+<li><strong>editable_columns</strong> (<em>list</em>) &#8211; A subset of <code class="docutils literal"><span class="pre">columns</span></code> that will be editable in views that use this model.</li>
 </ul>
 </td>
 </tr>
@@ -1229,7 +1229,7 @@ level tree node, it may return:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v5.1.3',
+            VERSION:'v5.2.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Hierarchy Model &mdash; tk-framework-shotgunutils v5.1.3 documentation</title>
+  <title>Shotgun Hierarchy Model &mdash; tk-framework-shotgunutils v5.2.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.1.3 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.2.1 documentation" href="index.html"/>
         <link rel="next" title="Shotgun Asynchronous Data Retriever" href="shotgun_data.html"/>
         <link rel="prev" title="Shotgun Model" href="shotgun_model.html"/> 
 
@@ -127,7 +127,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.1.3.<br>
+    <b>tk-framework-shotgunutils</b> v5.2.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -185,7 +185,7 @@ applications quickly, leveraging Qt&#8217;s built-in model/view framework to rep
 your production hierarchy.</p>
 <img alt="_images/hierarchy_model.png" src="_images/hierarchy_model.png" />
 <p>The Shotgun Hierarchy Model is a custom Qt Model specialized to represent your
-Shotugn production hierarchy as defined in your site&#8217;s
+Shotgun production hierarchy as defined in your site&#8217;s
 <a class="reference external" href="https://support.shotgunsoftware.com/hc/en-us/articles/219031138-Project-Tracking-Settings">Tracking Settings</a>.
 The hierarchy represented by the model is dynamically constructed based on
 a <code class="docutils literal"><span class="pre">seed_entity_field</span></code> which represents the target of the hierarchy (i.e. what
@@ -281,7 +281,7 @@ matching a particular search criteria, use a Proxy Model (typically
 <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QSortFilterProxyModel.html#PySide.QtGui.QSortFilterProxyModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QSortFilterProxyModel</span></code></a>).</li>
 <li>If you want to control the way items are displayed in the view, consider using
 the Shotgun delegates module which is part of the Qt widgets framework. For
-more information, see <a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/views.html#views.WidgetDelegate" title="(in tk-framework-qtwidgets vv2.5.15)"><code class="xref py py-class docutils literal"><span class="pre">WidgetDelegate</span></code></a></li>
+more information, see <a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/views.html#views.WidgetDelegate" title="(in tk-framework-qtwidgets vv2.6.2)"><code class="xref py py-class docutils literal"><span class="pre">WidgetDelegate</span></code></a></li>
 </ul>
 </div>
 </div>
@@ -300,7 +300,7 @@ methods available in the normal ShotgunModel can also be subclassed from this
 class.</p>
 <dl class="class">
 <dt id="shotgun_model.SimpleShotgunHierarchyModel">
-<em class="property">class </em><code class="descclassname">shotgun_model.</code><code class="descname">SimpleShotgunHierarchyModel</code><span class="sig-paren">(</span><em>parent</em>, <em>schema_generation=0</em>, <em>bg_task_manager=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/simple_shotgun_hierarchy_model.html#SimpleShotgunHierarchyModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.SimpleShotgunHierarchyModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">shotgun_model.</code><code class="descname">SimpleShotgunHierarchyModel</code><span class="sig-paren">(</span><em>parent</em>, <em>schema_generation=0</em>, <em>bg_task_manager=None</em>, <em>include_root=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/simple_shotgun_hierarchy_model.html#SimpleShotgunHierarchyModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.SimpleShotgunHierarchyModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">shotgun_model.shotgun_hierarchy_model.ShotgunHierarchyModel</span></code></p>
 <p>Convenience wrapper around the Shotgun Hierarchy model for quick and easy
 access.</p>
@@ -320,13 +320,36 @@ can also be subclassed from this class.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> (<code class="xref py py-class docutils literal"><span class="pre">QObject</span></code>) &#8211; The model&#8217;s parent.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parent</strong> (<code class="xref py py-class docutils literal"><span class="pre">QObject</span></code>) &#8211; The model&#8217;s parent.</li>
+<li><strong>schema_generation</strong> &#8211; Schema generation number. Advanced parameter.
+If your shotgun model contains logic in subclassed methods that
+modify the shotgun data prior to it being put into the cache system
+that the ShotgunModel maintains, you can use this option to ensure
+that different versions of the code access different caches. If you
+change your custom business logic around and update the generation
+number, both new and old versions of the code will work correctly
+against the cached data.</li>
+<li><strong>bg_task_manager</strong> (<a class="reference internal" href="task_manager.html#task_manager.BackgroundTaskManager" title="task_manager.BackgroundTaskManager"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a>) &#8211; Background task manager to use for any
+asynchronous work. If this is None then a task manager will be
+created as needed.</li>
+<li><strong>include_root</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Defines the name of an additional, top-level
+model item that represents the root. In views, this item will appear
+as a sibling to top-level children of the root. This allows for
+UX whereby a user can select an item representing the root without
+having a UI that shows a single, top-level item. An example would
+be displaying published file entity hierarchy with top level items:
+&#8220;Assets&#8221;, &#8220;Shots&#8221;, and &#8220;Project Publishes&#8221;. In this example, the
+supplied arg would look like: <code class="docutils literal"><span class="pre">include_root=&quot;Project</span> <span class="pre">Publishes&quot;</span></code>.
+If <code class="docutils literal"><span class="pre">include_root</span></code> is <cite>None</cite>, no root item will be added.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="shotgun_model.SimpleShotgunHierarchyModel.load_data">
-<code class="descname">load_data</code><span class="sig-paren">(</span><em>seed_entity_field</em>, <em>path=None</em>, <em>entity_fields=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/simple_shotgun_hierarchy_model.html#SimpleShotgunHierarchyModel.load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.SimpleShotgunHierarchyModel.load_data" title="Permalink to this definition">¶</a></dt>
+<code class="descname">load_data</code><span class="sig-paren">(</span><em>seed_entity_field</em>, <em>root=None</em>, <em>entity_fields=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/simple_shotgun_hierarchy_model.html#SimpleShotgunHierarchyModel.load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.SimpleShotgunHierarchyModel.load_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads shotgun data into the model, using the cache if possible.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -340,15 +363,10 @@ where the leaves match the entity value of Version entities.</p>
 <p>NOTE: This value is currently limited to either <code class="docutils literal"><span class="pre">Version.entity</span></code>
 or <code class="docutils literal"><span class="pre">PublishedFile.entity</span></code></p>
 </li>
-<li><strong>path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The path to the root of the hierarchy to display.
-This corresponds to the <code class="docutils literal"><span class="pre">path</span></code> argument of the
-<code class="xref py py-meth docutils literal"><span class="pre">shotgun_api3.Shotgun.nav_expand</span></code> api method.
-For example, <code class="docutils literal"><span class="pre">/Project/65</span></code> would correspond to a project on you
-shotgun site with id of <code class="docutils literal"><span class="pre">65</span></code>. By default, this value is <code class="docutils literal"><span class="pre">None</span></code>
-and the project from the current project will be used. If no project
-can be determined, the path will default to <code class="docutils literal"><span class="pre">/</span></code> which is the root
-path, meaning all projects will be represented as top-level items in
-the model.</li>
+<li><strong>root</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; This is the entity that will be at the root
+of the hierarchy view. By default, this value is <code class="docutils literal"><span class="pre">None</span></code>, which
+means the root of the hierarchy will be at the site level. Only
+projects can be set as the root of a hierarchy model.</li>
 <li><strong>entity_fields</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; A dictionary that identifies what fields to
 include on returned entities. Since the hierarchy can include any
 entity structure, this argument allows for specification of
@@ -374,7 +392,7 @@ specialized to hold the contents of a particular shotgun API
 refreshes its data asynchronously.</p>
 <dl class="class">
 <dt id="shotgun_model.ShotgunHierarchyModel">
-<em class="property">class </em><code class="descclassname">shotgun_model.</code><code class="descname">ShotgunHierarchyModel</code><span class="sig-paren">(</span><em>parent</em>, <em>schema_generation=0</em>, <em>bg_task_manager=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">shotgun_model.</code><code class="descname">ShotgunHierarchyModel</code><span class="sig-paren">(</span><em>parent</em>, <em>schema_generation=0</em>, <em>bg_task_manager=None</em>, <em>include_root=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>A Qt Model representing a Shotgun hierarchy.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
@@ -395,12 +413,45 @@ via the <code class="xref py py-meth docutils literal"><span class="pre">shotgun
 python-api method. The structure of items in the hierarchy mimics what is
 found in Shotgun as configured in each project&#8217;s
 <a class="reference external" href="https://support.shotgunsoftware.com/hc/en-us/articles/219031138-Project-Tracking-Settings">Tracking Settings</a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Signal:</th><td class="field-body">async_item_retrieval_completed (<a class="reference internal" href="#shotgun_model.ShotgunHierarchyModel" title="shotgun_model.ShotgunHierarchyModel"><code class="xref py py-class docutils literal"><span class="pre">ShotgunHierarchyModel</span></code></a>): Emitted when a query to
+<a class="reference internal" href="#shotgun_model.ShotgunHierarchyModel.async_item_from_entity" title="shotgun_model.ShotgunHierarchyModel.async_item_from_entity"><code class="xref py py-meth docutils literal"><span class="pre">ShotgunHierarchyModel.async_item_from_entity()</span></code></a> or
+<a class="reference internal" href="#shotgun_model.ShotgunHierarchyModel.async_item_from_paths" title="shotgun_model.ShotgunHierarchyModel.async_item_from_paths"><code class="xref py py-meth docutils literal"><span class="pre">ShotgunHierarchyModel.async_item_from_paths()</span></code></a> has completed.</td>
+</tr>
+</tbody>
+</table>
 <p>Initialize the Hierarcy model.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> (<code class="xref py py-class docutils literal"><span class="pre">QObject</span></code>) &#8211; The model&#8217;s parent.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parent</strong> (<code class="xref py py-class docutils literal"><span class="pre">QObject</span></code>) &#8211; The model&#8217;s parent.</li>
+<li><strong>schema_generation</strong> &#8211; Schema generation number. Advanced parameter.
+If your shotgun model contains logic in subclassed methods that
+modify the shotgun data prior to it being put into the cache system
+that the ShotgunModel maintains, you can use this option to ensure
+that different versions of the code access different caches. If you
+change your custom business logic around and update the generation
+number, both new and old versions of the code will work correctly
+against the cached data.</li>
+<li><strong>bg_task_manager</strong> (<a class="reference internal" href="task_manager.html#task_manager.BackgroundTaskManager" title="task_manager.BackgroundTaskManager"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a>) &#8211; Background task manager to use for any
+asynchronous work. If this is None then a task manager will be
+created as needed.</li>
+<li><strong>include_root</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Defines the name of an additional, top-level
+model item that represents the root. In views, this item will appear
+as a sibling to top-level children of the root. This allows for
+UX whereby a user can select an item representing the root without
+having a UI that shows a single, top-level item. An example would
+be displaying published file entity hierarchy with top level items:
+&#8220;Assets&#8221;, &#8220;Shots&#8221;, and &#8220;Project Publishes&#8221;. In this example, the
+supplied arg would look like: <code class="docutils literal"><span class="pre">include_root=&quot;Project</span> <span class="pre">Publishes&quot;</span></code>.
+If <code class="docutils literal"><span class="pre">include_root</span></code> is <cite>None</cite>, no root item will be added.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -409,7 +460,7 @@ found in Shotgun as configured in each project&#8217;s
 and caches the hierarchy items and refreshes them once cached.</p>
 <dl class="method">
 <dt id="shotgun_model.ShotgunHierarchyModel._load_data">
-<code class="descname">_load_data</code><span class="sig-paren">(</span><em>seed_entity_field</em>, <em>path=None</em>, <em>entity_fields=None</em>, <em>cache_seed=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel._load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._load_data" title="Permalink to this definition">¶</a></dt>
+<code class="descname">_load_data</code><span class="sig-paren">(</span><em>seed_entity_field</em>, <em>root=None</em>, <em>entity_fields=None</em>, <em>cache_seed=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel._load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._load_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the main method to use to configure the hierarchy model. You
 basically pass a specific <code class="xref py py-meth docutils literal"><span class="pre">shotgun_api3.Shotgun.nav_expand</span></code>
 query to the model and it will start tracking this particular set of parameters.</p>
@@ -431,15 +482,10 @@ where the leaves match the entity value of Version entities.</p>
 <p>NOTE: This value is currently limited to either <code class="docutils literal"><span class="pre">Version.entity</span></code>
 or <code class="docutils literal"><span class="pre">PublishedFile.entity</span></code></p>
 </li>
-<li><strong>path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The path to the root of the hierarchy to display.
-This corresponds to the <code class="docutils literal"><span class="pre">path</span></code> argument of the
-<code class="xref py py-meth docutils literal"><span class="pre">shotgun_api3.Shotgun.nav_expand</span></code>
-api method. For example, <code class="docutils literal"><span class="pre">/Project/65</span></code> would correspond to a
-project on you shotgun site with id of <code class="docutils literal"><span class="pre">65</span></code>. By default, this
-value is <code class="docutils literal"><span class="pre">None</span></code> and the project from the current project will
-be used. If no project can be determined, the path will default
-to <code class="docutils literal"><span class="pre">/</span></code> which is the root path, meaning all projects will be
-represented as top-level items in the model.</li>
+<li><strong>root</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; This is the entity that will be at the root
+of the hierarchy view. By default, this value is <code class="docutils literal"><span class="pre">None</span></code>, which
+means the root of the hierarchy will be at the site level. Only
+projects can be set as the root of a hierarchy model.</li>
 <li><strong>entity_fields</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; A dictionary that identifies what fields to
 include on returned entities. Since the hierarchy can include any
 entity structure, this argument allows for specification of
@@ -679,6 +725,41 @@ used by and returned from the python-api&#8217;s
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.async_item_from_entity">
+<code class="descname">async_item_from_entity</code><span class="sig-paren">(</span><em>entity</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel.async_item_from_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.async_item_from_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Asynchronously loads an entity&#8217;s node and all its parents and emits a signal with the
+associated <code class="xref py py-class docutils literal"><span class="pre">ShotgunHierarchyItem</span></code> when the node is loaded.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; Entity dictionary with keys <code class="docutils literal"><span class="pre">type</span></code> and <code class="docutils literal"><span class="pre">id</span></code>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Signals:</th><td class="field-body"><code class="docutils literal"><span class="pre">async_item_retrieval_completed</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.async_item_from_paths">
+<code class="descname">async_item_from_paths</code><span class="sig-paren">(</span><em>paths</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel.async_item_from_paths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.async_item_from_paths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a list of paths that incrementally dig deeper into the
+model and signals when the node is found and loaded in memory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>list(str)</strong> &#8211; List of paths from the nav api that drill down further
+and further into the tree.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Signals:</th><td class="field-body"><code class="docutils literal"><span class="pre">async_item_retrieval_completed</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -724,7 +805,7 @@ used by and returned from the python-api&#8217;s
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v5.1.3',
+            VERSION:'v5.2.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

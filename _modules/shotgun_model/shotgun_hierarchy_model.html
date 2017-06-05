@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.1.3 documentation</title>
+  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.2.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.1.3 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.2.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -116,7 +116,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.1.3.<br>
+    <b>tk-framework-shotgunutils</b> v5.2.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -181,6 +181,7 @@
 <span class="kn">import</span> <span class="nn">hashlib</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
 
 <span class="c1"># toolkit imports</span>
 <span class="kn">import</span> <span class="nn">sgtk</span>
@@ -188,11 +189,12 @@
 
 <span class="c1"># framework imports</span>
 <span class="kn">from</span> <span class="nn">.shotgun_hierarchy_item</span> <span class="kn">import</span> <span class="n">ShotgunHierarchyItem</span>
-<span class="kn">from</span> <span class="nn">.shotgun_standard_item</span> <span class="kn">import</span> <span class="n">ShotgunStandardItem</span>
 <span class="kn">from</span> <span class="nn">.shotgun_query_model</span> <span class="kn">import</span> <span class="n">ShotgunQueryModel</span>
 <span class="kn">from</span> <span class="nn">.data_handler_nav</span> <span class="kn">import</span> <span class="n">ShotgunNavDataHandler</span>
-<span class="kn">from</span> <span class="nn">.data_item</span> <span class="kn">import</span> <span class="n">ShotgunItemData</span>
-<span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">get_sg_data</span><span class="p">,</span> <span class="n">sanitize_for_qt_model</span>
+<span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">sanitize_for_qt_model</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ShotgunHierarchyModel"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel">[docs]</a><span class="k">class</span> <span class="nc">ShotgunHierarchyModel</span><span class="p">(</span><span class="n">ShotgunQueryModel</span><span class="p">):</span>
@@ -213,20 +215,55 @@
 <span class="sd">    In order to use this class, you normally subclass it and implement certain</span>
 <span class="sd">    key data methods for setting up queries, customizing etc. Then you connect</span>
 <span class="sd">    your class to a :class:`~PySide.QtGui.QAbstractItemView` of some sort which</span>
-<span class="sd">    will display the result. </span>
+<span class="sd">    will display the result.</span>
 
 <span class="sd">    The model stores a single column, lazy-loaded Shotgun Hierarchy as queried</span>
 <span class="sd">    via the :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`</span>
 <span class="sd">    python-api method. The structure of items in the hierarchy mimics what is</span>
 <span class="sd">    found in Shotgun as configured in each project&#39;s</span>
 <span class="sd">    `Tracking Settings &lt;https://support.shotgunsoftware.com/hc/en-us/articles/219031138-Project-Tracking-Settings&gt;`_.</span>
+
+<span class="sd">    :signal: async_item_retrieval_completed (:class:`ShotgunHierarchyModel`): Emitted when a query to</span>
+<span class="sd">        :meth:`ShotgunHierarchyModel.async_item_from_entity` or</span>
+<span class="sd">        :meth:`ShotgunHierarchyModel.async_item_from_paths` has completed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="c1"># Signal emitted internally whenever a node is updated inside the model. This is used</span>
+    <span class="c1"># to keep track of nodes refreshed during an async_deep_load call.</span>
+    <span class="n">_node_refreshed</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+
+    <span class="n">async_item_retrieval_completed</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">include_root</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the Hierarcy model.</span>
 
 <span class="sd">        :param parent: The model&#39;s parent.</span>
 <span class="sd">        :type parent: :class:`~PySide.QtGui.QObject`</span>
+
+<span class="sd">        :param schema_generation: Schema generation number. Advanced parameter.</span>
+<span class="sd">            If your shotgun model contains logic in subclassed methods that</span>
+<span class="sd">            modify the shotgun data prior to it being put into the cache system</span>
+<span class="sd">            that the ShotgunModel maintains, you can use this option to ensure</span>
+<span class="sd">            that different versions of the code access different caches. If you</span>
+<span class="sd">            change your custom business logic around and update the generation</span>
+<span class="sd">            number, both new and old versions of the code will work correctly</span>
+<span class="sd">            against the cached data.</span>
+
+<span class="sd">        :param bg_task_manager:  Background task manager to use for any</span>
+<span class="sd">            asynchronous work. If this is None then a task manager will be</span>
+<span class="sd">            created as needed.</span>
+<span class="sd">        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`</span>
+
+<span class="sd">        :param str include_root: Defines the name of an additional, top-level</span>
+<span class="sd">            model item that represents the root. In views, this item will appear</span>
+<span class="sd">            as a sibling to top-level children of the root. This allows for</span>
+<span class="sd">            UX whereby a user can select an item representing the root without</span>
+<span class="sd">            having a UI that shows a single, top-level item. An example would</span>
+<span class="sd">            be displaying published file entity hierarchy with top level items:</span>
+<span class="sd">            &quot;Assets&quot;, &quot;Shots&quot;, and &quot;Project Publishes&quot;. In this example, the</span>
+<span class="sd">            supplied arg would look like: ``include_root=&quot;Project Publishes&quot;``.</span>
+<span class="sd">            If ``include_root`` is `None`, no root item will be added.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ShotgunHierarchyModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="p">)</span>
 
@@ -240,6 +277,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_seed_entity_field</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_entity_fields</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_include_root</span> <span class="o">=</span> <span class="n">include_root</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_schema_generation</span> <span class="o">=</span> <span class="n">schema_generation</span>
 
@@ -289,8 +327,141 @@
 <span class="sd">            :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` method.</span>
 <span class="sd">        :returns: :class:`~PySide.QtGui.QStandardItem` or ``None`` if not found</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Resolving model item for path </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_item_loaded</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Resolving model item for path </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">path</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_item_loaded</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+    <span class="k">class</span> <span class="nc">_NodeRefresher</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This class is used to launch a refresh request to the model and try</span>
+<span class="sd">        again to resolve the node when the refresh has happened.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_refresh</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Triggers a fetchMore on the first node in the paths to refresh.</span>
+
+<span class="sd">            :param list(str) path_to_refresh: List of nodes to refresh asynchronously.</span>
+<span class="sd">            :param model: ``ShotgunHierarchyModel`` we are requesting the nodes for.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">ShotgunHierarchyModel</span><span class="o">.</span><span class="n">_NodeRefresher</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="c1"># Connect to the node refreshed signal so we know when</span>
+            <span class="c1"># our node is refreshed.</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">_node_refreshed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_node_refreshed</span><span class="p">)</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Fetching more on </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">path_to_refresh</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="c1"># Fetch data from this path&#39;s parent.</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">fetchMore</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">item_from_path</span><span class="p">(</span><span class="n">path_to_refresh</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">index</span><span class="p">()</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_path_to_refresh</span> <span class="o">=</span> <span class="n">path_to_refresh</span>
+
+        <span class="k">def</span> <span class="nf">_node_refreshed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Called when the ``async_item_retrieval_completed`` signal is emitted.</span>
+
+<span class="sd">            :param item: The ShotgunHierarchyItem that was loaded.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">_SG_ITEM_UNIQUE_ID</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path_to_refresh</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Skipping node </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">_SG_ITEM_UNIQUE_ID</span><span class="p">))</span>
+                <span class="k">return</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s2">&quot;Model item refreshed: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">_SG_ITEM_UNIQUE_ID</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">_node_refreshed</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_node_refreshed</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deleteLater</span><span class="p">()</span>
+            <span class="c1"># Try again to async deep load the node and the next tokens.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">async_item_from_paths</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path_to_refresh</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ShotgunHierarchyModel.async_item_from_entity"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel.async_item_from_entity">[docs]</a>    <span class="k">def</span> <span class="nf">async_item_from_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Asynchronously loads an entity&#39;s node and all its parents and emits a signal with the</span>
+<span class="sd">        associated :class:`ShotgunHierarchyItem` when the node is loaded.</span>
+
+<span class="sd">        :param dict entity: Entity dictionary with keys ``type`` and ``id``.</span>
+
+<span class="sd">        :signals: ``async_item_retrieval_completed``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">paths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_entity_paths</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">async_item_from_paths</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_resolve_entity_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resolves an entities path in the nav hierarchy.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            This method is executed in the current thread.</span>
+
+<span class="sd">        :param dict entity: Entity dictionary with keys ``type`` and ``id``.</span>
+
+<span class="sd">        :returns: The path to the entity in the nav api.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">entity</span><span class="p">:</span>
+            <span class="c1"># FIXME: Unfortunately we can&#39;t call the endpoint directly because there is a bug in it.</span>
+            <span class="c1"># We&#39;ve written a workaround for it in the ShotgunDataRetriever, which we will be</span>
+            <span class="c1"># using here.</span>
+
+            <span class="n">sg_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_data_retriever</span><span class="o">.</span><span class="n">_task_execute_nav_search_entity</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">entity</span><span class="p">)[</span><span class="s2">&quot;sg_result&quot;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sg_result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Entity </span><span class="si">%s</span><span class="s2"> not found. Picking /.&quot;</span><span class="p">,</span> <span class="n">entity</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sg_data</span> <span class="o">=</span> <span class="n">sg_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="c1"># The last link in the chain is always the complete link to the entity we seek.</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sg_result</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="s2">&quot;Entity </span><span class="si">%s</span><span class="s2"> found </span><span class="si">%d</span><span class="s2"> times with nav_search_entity endpoint. Picking </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span>
+                        <span class="n">entity</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sg_result</span><span class="p">),</span> <span class="n">pprint</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span><span class="n">sg_data</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Other choices were </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sg_result</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+                <span class="k">return</span> <span class="n">sg_data</span><span class="p">[</span><span class="s2">&quot;incremental_path&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Fallback for when the root was requested or no entity was found.</span>
+        <span class="c1"># Do not request the server for the path to the site root, this will always be /.</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;/&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ShotgunHierarchyModel.async_item_from_paths"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel.async_item_from_paths">[docs]</a>    <span class="k">def</span> <span class="nf">async_item_from_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes a list of paths that incrementally dig deeper into the</span>
+<span class="sd">        model and signals when the node is found and loaded in memory.</span>
+
+<span class="sd">        :param list(str): List of paths from the nav api that drill down further</span>
+<span class="sd">            and further into the tree.</span>
+
+<span class="sd">        :signals: ``async_item_retrieval_completed``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Nothing to async load, return early.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">paths</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Async loading of </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">paths</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">paths</span><span class="p">):</span>
+            <span class="c1"># Iterate on every path.</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">item_from_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="c1"># If an item is already loaded, move to the next one.</span>
+            <span class="k">if</span> <span class="n">item</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="c1"># Send a refresh request and return. When the node is refreshed,</span>
+            <span class="c1"># this method will be called a second time with the same parameters.</span>
+            <span class="c1"># This time around this node will already have been refreshed</span>
+            <span class="c1"># and the code will dig deeper. At some point the last entry</span>
+            <span class="c1"># in the list will be reached and we will emit the item.</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Refreshing paths: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">paths</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_NodeRefresher</span><span class="p">(</span><span class="n">paths</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:],</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Deep load has been completed for </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">paths</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Selected items: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+        <span class="c1"># If everything is loaded, emit the signal.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">async_item_retrieval_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">fetchMore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -302,7 +473,7 @@
         <span class="c1"># now request the subtree to refresh itself</span>
         <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
             <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">itemFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">ShotgunHierarchyItem</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">ShotgunHierarchyItem</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">canFetchMore</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_request_data</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">path</span><span class="p">())</span>
 
         <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ShotgunHierarchyModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">fetchMore</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
@@ -325,10 +496,10 @@
         <span class="c1"># default, root path</span>
         <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span>
 
-        <span class="n">current_engine</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_engine</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">current_engine</span><span class="p">:</span>
+        <span class="n">current_bundle</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_bundle</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">current_bundle</span><span class="p">:</span>
             <span class="c1"># an engine is running</span>
-            <span class="n">project</span> <span class="o">=</span> <span class="n">current_engine</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">project</span>
+            <span class="n">project</span> <span class="o">=</span> <span class="n">current_bundle</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">project</span>
             <span class="k">if</span> <span class="n">project</span><span class="p">:</span>
                 <span class="c1"># we have a project in the context</span>
                 <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;/Project/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">project</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
@@ -358,7 +529,7 @@
 <div class="viewcode-block" id="ShotgunHierarchyModel._load_data"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel._load_data">[docs]</a>    <span class="k">def</span> <span class="nf">_load_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">seed_entity_field</span><span class="p">,</span>
-        <span class="n">path</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">root</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
         <span class="n">entity_fields</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
         <span class="n">cache_seed</span><span class="o">=</span><span class="bp">None</span>
     <span class="p">):</span>
@@ -379,20 +550,15 @@
 <span class="sd">        :param str seed_entity_field: This is a string that corresponds to the</span>
 <span class="sd">            field on an entity used to seed the hierarchy. For example, a value</span>
 <span class="sd">            of ``Version.entity`` would cause the model to display a hierarchy</span>
-<span class="sd">            where the leaves match the entity value of Version entities. </span>
-<span class="sd">            </span>
+<span class="sd">            where the leaves match the entity value of Version entities.</span>
+
 <span class="sd">            NOTE: This value is currently limited to either ``Version.entity``</span>
 <span class="sd">            or ``PublishedFile.entity``</span>
 
-<span class="sd">        :param str path: The path to the root of the hierarchy to display.</span>
-<span class="sd">            This corresponds to the ``path`` argument of the</span>
-<span class="sd">            :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`</span>
-<span class="sd">            api method. For example, ``/Project/65`` would correspond to a</span>
-<span class="sd">            project on you shotgun site with id of ``65``. By default, this</span>
-<span class="sd">            value is ``None`` and the project from the current project will</span>
-<span class="sd">            be used. If no project can be determined, the path will default</span>
-<span class="sd">            to ``/`` which is the root path, meaning all projects will be</span>
-<span class="sd">            represented as top-level items in the model.</span>
+<span class="sd">        :param dict root: This is the entity that will be at the root</span>
+<span class="sd">            of the hierarchy view. By default, this value is ``None``, which</span>
+<span class="sd">            means the root of the hierarchy will be at the site level. Only</span>
+<span class="sd">            projects can be set as the root of a hierarchy model.</span>
 
 <span class="sd">        :param dict entity_fields: A dictionary that identifies what fields to</span>
 <span class="sd">            include on returned entities. Since the hierarchy can include any</span>
@@ -435,31 +601,35 @@
         <span class="c1"># clear out old data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_default_path</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_entity_paths</span><span class="p">(</span><span class="n">root</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="n">root</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">!=</span> <span class="s2">&quot;/&quot;</span> <span class="k">else</span> <span class="bp">None</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_seed_entity_field</span> <span class="o">=</span> <span class="n">seed_entity_field</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_entity_fields</span> <span class="o">=</span> <span class="n">entity_fields</span> <span class="ow">or</span> <span class="p">{}</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Model Reset for: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Path: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Seed entity field: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seed_entity_field</span><span class="p">,))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Entity fields: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entity_fields</span><span class="p">,))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Model Reset for: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Root: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_root</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Path: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Seed entity field: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seed_entity_field</span><span class="p">,))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Entity fields: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entity_fields</span><span class="p">,))</span>
 
         <span class="c1"># get the cache path based on these new data query parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span> <span class="o">=</span> <span class="n">ShotgunNavDataHandler</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_seed_entity_field</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_entity_fields</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__compute_cache_path</span><span class="p">(</span><span class="n">cache_seed</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__compute_cache_path</span><span class="p">(</span><span class="n">cache_seed</span><span class="p">),</span>
+            <span class="n">include_root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_include_root</span>
         <span class="p">)</span>
 
         <span class="c1"># load up from disk</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Loading data from cache file into memory...&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Loading data from cache file into memory...&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">load_cache</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;First population pass: Calling _load_external_data()&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;First population pass: Calling _load_external_data()&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_external_data</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;External data population done.&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;External data population done.&quot;</span><span class="p">)</span>
 
         <span class="c1"># only one column. give it a default value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setHorizontalHeaderLabels</span><span class="p">(</span>
@@ -469,7 +639,7 @@
         <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">()</span>
 
         <span class="c1"># construct the top level nodes</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Creating model nodes for top level of data tree...&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Creating model nodes for top level of data tree...&quot;</span><span class="p">)</span>
         <span class="n">nodes_generated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">generate_child_nodes</span><span class="p">(</span>
             <span class="bp">None</span><span class="p">,</span>
             <span class="n">root</span><span class="p">,</span>
@@ -539,8 +709,7 @@
         <span class="c1"># todo: hierarchy model to handle multiple rows?</span>
         <span class="n">parent</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">item</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">_node_refreshed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_update_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">data_item</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -574,6 +743,11 @@
         <span class="c1"># run the finalizer (always runs on construction, even via cache)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_item</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
+        <span class="c1"># If this is a node that already existed and is being refreshed, notify.</span>
+        <span class="c1"># If the node is not parented yet, this is because we&#39;re in the middle</span>
+        <span class="c1"># of a create_item call, which WILL refresh the node.</span>
+        <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_node_refreshed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
     <span class="c1">############################################################################</span>
     <span class="c1"># private methods</span>
@@ -651,21 +825,21 @@
 <span class="sd">            will be a string explaining why.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">current_engine</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_engine</span><span class="p">()</span>
-        <span class="n">sg_connection</span> <span class="o">=</span> <span class="n">current_engine</span><span class="o">.</span><span class="n">shotgun</span>
+        <span class="n">current_bundle</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_bundle</span><span class="p">()</span>
+        <span class="n">sg_connection</span> <span class="o">=</span> <span class="n">current_bundle</span><span class="o">.</span><span class="n">shotgun</span>
         <span class="n">server_caps</span> <span class="o">=</span> <span class="n">sg_connection</span><span class="o">.</span><span class="n">server_caps</span>
 
         <span class="c1"># make sure we&#39;re greater than or equal to SG v7.0.2</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">sg_connection</span><span class="p">,</span> <span class="s2">&quot;server_caps&quot;</span><span class="p">)</span> <span class="ow">and</span>
                 <span class="n">server_caps</span><span class="o">.</span><span class="n">version</span> <span class="ow">and</span>
                 <span class="n">server_caps</span><span class="o">.</span><span class="n">version</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)):</span>
-            <span class="k">return</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;The version of SG being used does not support querying for the project hierarchy. v7.0.2 is required.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;The version of SG being used does not support querying for the project &quot;</span>
+                    <span class="s2">&quot;hierarchy. v7.0.2 is required.&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sg_connection</span><span class="p">,</span> <span class="s2">&quot;nav_expand&quot;</span><span class="p">):</span>
-            <span class="k">return</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;The version of the python-api being used does not support querying for the project hierarchy.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;The version of the python-api being used does not support querying for &quot;</span>
+                    <span class="s2">&quot;the project hierarchy.&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span></div>
-
-
 </pre></div>
 
            </div>
@@ -698,7 +872,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.1.3',
+            VERSION:'v5.2.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v5.1.3 documentation</title>
+  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v5.2.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.1.3 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.2.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -116,7 +116,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.1.3.<br>
+    <b>tk-framework-shotgunutils</b> v5.2.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -187,6 +187,7 @@
 <span class="kn">import</span> <span class="nn">sgtk</span>
 <span class="kn">from</span> <span class="nn">sgtk.platform.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
 <span class="kn">from</span> <span class="nn">sgtk</span> <span class="kn">import</span> <span class="n">TankError</span>
+
 
 <div class="viewcode-block" id="ShotgunDataRetriever"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever">[docs]</a><span class="k">class</span> <span class="nc">ShotgunDataRetriever</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -676,6 +677,32 @@
                               <span class="n">priority</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_CALL_PRIORITY</span><span class="p">,</span>
                               <span class="n">task_kwargs</span> <span class="o">=</span> <span class="n">task_kwargs</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="ShotgunDataRetriever.execute_text_search"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_text_search">[docs]</a>    <span class="k">def</span> <span class="nf">execute_text_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a Shotgun ``text_search`` query asynchronously.</span>
+
+<span class="sd">        See the python api documentation here:</span>
+<span class="sd">            https://github.com/shotgunsoftware/python-api/wiki</span>
+
+<span class="sd">        This method takes the same parameters as the Shotgun ``text_search()`` call.</span>
+
+<span class="sd">        The query will be queued up and once processed, either a</span>
+<span class="sd">        work_completed or work_failure signal will be emitted.</span>
+
+<span class="sd">        :param ``*args``: args to be passed to the Shotgun ``text_search()`` call</span>
+<span class="sd">        :param ``**kwargs``: Named parameters to be passed to the Shotgun ``text_search()`` call</span>
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_task</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_task_execute_text_search</span><span class="p">,</span>
+            <span class="n">priority</span><span class="o">=</span><span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_CALL_PRIORITY</span><span class="p">,</span>
+            <span class="n">task_args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+            <span class="n">task_kwargs</span><span class="o">=</span><span class="n">kwargs</span>
+        <span class="p">)</span></div>
+
 <div class="viewcode-block" id="ShotgunDataRetriever.execute_nav_expand"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_nav_expand">[docs]</a>    <span class="k">def</span> <span class="nf">execute_nav_expand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Executes a Shotgun ``nav_expand`` query asynchronously.</span>
@@ -701,6 +728,60 @@
             <span class="n">task_args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
             <span class="n">task_kwargs</span><span class="o">=</span><span class="n">kwargs</span>
         <span class="p">)</span></div>
+
+<div class="viewcode-block" id="ShotgunDataRetriever.execute_nav_search_string"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_nav_search_string">[docs]</a>    <span class="k">def</span> <span class="nf">execute_nav_search_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a Shotgun ``nav_search_string`` query asynchronously.</span>
+
+<span class="sd">        See the python api documentation here:</span>
+<span class="sd">            https://github.com/shotgunsoftware/python-api/wiki</span>
+
+<span class="sd">        This method takes the same parameters as the Shotgun ``nav_search_string()`` call.</span>
+
+<span class="sd">        The query will be queued up and once processed, either a</span>
+<span class="sd">        work_completed or work_failure signal will be emitted.</span>
+
+<span class="sd">        :param ``*args``: args to be passed to the Shotgun ``nav_search_string()`` call</span>
+<span class="sd">        :param ``**kwargs``: Named parameters to be passed to the Shotgun ``nav_search_string()`` call</span>
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_task</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_task_execute_nav_search_string</span><span class="p">,</span>
+            <span class="n">priority</span><span class="o">=</span><span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_CALL_PRIORITY</span><span class="p">,</span>
+            <span class="n">task_args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+            <span class="n">task_kwargs</span><span class="o">=</span><span class="n">kwargs</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ShotgunDataRetriever.execute_nav_search_entity"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_nav_search_entity">[docs]</a>    <span class="k">def</span> <span class="nf">execute_nav_search_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a Shotgun ``nav_search_entity`` query asynchronously.</span>
+
+<span class="sd">        See the python api documentation here:</span>
+<span class="sd">            https://github.com/shotgunsoftware/python-api/wiki</span>
+
+<span class="sd">        This method takes the same parameters as the Shotgun ``nav_search_entity()`` call.</span>
+
+<span class="sd">        The query will be queued up and once processed, either a</span>
+<span class="sd">        work_completed or work_failure signal will be emitted.</span>
+
+<span class="sd">        :param ``*args``: args to be passed to the Shotgun ``nav_search_entity()`` call</span>
+<span class="sd">        :param ``**kwargs``: Named parameters to be passed to the Shotgun ``nav_search_entity()`` call</span>
+<span class="sd">        :returns: A unique identifier representing this request. This</span>
+<span class="sd">                  identifier is also part of the payload sent via the</span>
+<span class="sd">                  work_completed and work_failure signals, making it</span>
+<span class="sd">                  possible to match them up.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_task</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_task_execute_nav_search_entity</span><span class="p">,</span>
+            <span class="n">priority</span><span class="o">=</span><span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_SG_CALL_PRIORITY</span><span class="p">,</span>
+            <span class="n">task_args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+            <span class="n">task_kwargs</span><span class="o">=</span><span class="n">kwargs</span>
+        <span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="nf">_add_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_cb</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">task_args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">task_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -855,9 +936,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># construct the url that refers to the thumbnail&#39;s source image</span>
         <span class="n">thumb_source_url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urlunparse</span><span class="p">((</span>
-            <span class="n">bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">scheme</span><span class="p">,</span> <span class="n">bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">server</span><span class="p">,</span>
-            <span class="s2">&quot;/thumbnail/full/</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)),</span>
-            <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">entity_id</span><span class="p">))),</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">scheme</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">server</span><span class="p">,</span>
+            <span class="s2">&quot;/thumbnail/full/</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)),</span>
+                <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">entity_id</span><span class="p">))</span>
+            <span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
         <span class="p">))</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">request_thumbnail</span><span class="p">(</span>
@@ -1192,6 +1275,19 @@
         <span class="n">res</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="p">,</span> <span class="o">*</span><span class="n">method_args</span><span class="p">,</span> <span class="o">**</span><span class="n">method_kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;method&quot;</span><span class="p">,</span> <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="n">res</span><span class="p">}</span>
 
+    <span class="k">def</span> <span class="nf">_task_execute_text_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
+<span class="sd">        ``text_search`` query</span>
+
+<span class="sd">        :param ``*args``: Unnamed arguments to be passed to the ``text_search()`` call</span>
+<span class="sd">        :param ``**kwargs``: Named arguments to be passed to the ``text_search()`` call</span>
+<span class="sd">        :returns: Dictionary containing the &#39;action&#39; together with result</span>
+<span class="sd">            returned by the find() call</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sg_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">text_search</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;text_search&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
+
     <span class="k">def</span> <span class="nf">_task_execute_nav_expand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
@@ -1204,6 +1300,59 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sg_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">nav_expand</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;nav_expand&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_task_execute_nav_search_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
+<span class="sd">        ``nav_search_string`` query</span>
+
+<span class="sd">        :param ``*args``: Unnamed arguments to be passed to the ``nav_search_string()`` call</span>
+<span class="sd">        :param ``**kwargs``: Named arguments to be passed to the ``nav_search_string()`` call</span>
+<span class="sd">        :returns: Dictionary containing the &#39;action&#39; together with result</span>
+<span class="sd">            returned by the find() call</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sg_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">nav_search_string</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="c1"># running an older core which doesn&#39;t come with a</span>
+            <span class="c1"># sg API which has a nav_search_string() method</span>
+            <span class="n">sg_res</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;nav_search_string&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_task_execute_nav_search_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
+<span class="sd">        ``nav_search_entity`` query</span>
+
+<span class="sd">        :param ``*args``: Unnamed arguments to be passed to the ``nav_search_entity()`` call</span>
+<span class="sd">        :param ``**kwargs``: Named arguments to be passed to the ``nav_search_entity()`` call</span>
+<span class="sd">        :returns: Dictionary containing the &#39;action&#39; together with result</span>
+<span class="sd">            returned by the find() call</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># FIXME: Project can&#39;t be resolved with the API right now due to a bug on the Shotgun-side.</span>
+        <span class="c1"># Mock the call instead.</span>
+        <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Project&quot;</span><span class="p">:</span>
+            <span class="n">project_id</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+            <span class="n">sg_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span><span class="s2">&quot;Project&quot;</span><span class="p">,</span> <span class="p">[[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;is&quot;</span><span class="p">,</span> <span class="n">project_id</span><span class="p">]],</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+            <span class="n">sg_res</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;incremental_path&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;/Project/</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">project_id</span><span class="p">],</span>
+                    <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="n">sg_data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;path_label&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;project_id&quot;</span><span class="p">:</span> <span class="n">project_id</span><span class="p">,</span>
+                    <span class="s2">&quot;ref&quot;</span><span class="p">:</span> <span class="n">sg_data</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">sg_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">nav_search_entity</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="c1"># running an older core which doesn&#39;t come with a</span>
+                <span class="c1"># sg API which has a nav_search_string() method</span>
+                <span class="n">sg_res</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;nav_search_entity&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_check_attachment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attachment_entity</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1369,7 +1518,10 @@
             <span class="k">return</span>
 
         <span class="n">action</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;action&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;find&quot;</span><span class="p">,</span> <span class="s2">&quot;find_one&quot;</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="s2">&quot;nav_expand&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s2">&quot;find&quot;</span><span class="p">,</span> <span class="s2">&quot;find_one&quot;</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;nav_expand&quot;</span><span class="p">,</span> <span class="s2">&quot;nav_search_string&quot;</span><span class="p">,</span> <span class="s2">&quot;text_search&quot;</span>
+        <span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
                 <span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span>
                 <span class="n">action</span><span class="p">,</span>
@@ -1484,7 +1636,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.1.3',
+            VERSION:'v5.2.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
