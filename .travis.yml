@@ -10,6 +10,11 @@ install:
     - pushd /tmp/tk-core
     - git checkout master
     - popd
+    # install pyside - from https://stackoverflow.com/questions/24489588
+    - sudo apt-get install libqt4-dev
+    - pip install PySide --no-index --find-links https://parkin.github.io/python-wheelhouse/;
+    # Travis CI servers use virtualenvs, so we need to finish the install by the following
+    - python ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/pyside_postinstall.py -install
 
 # command to run tests
 script: cd tests && ./run_travis_tests.sh
