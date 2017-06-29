@@ -1,3 +1,5 @@
+<img src='https://travis-ci.org/shotgunsoftware/tk-framework-shotgunutils.svg?branch=master'>
+
 ## Documentation
 This repository is a part of the Shotgun Pipeline Toolkit.
 
