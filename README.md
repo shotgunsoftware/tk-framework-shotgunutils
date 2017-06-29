@@ -1,4 +1,4 @@
-<img src='https://travis-ci.org/shotgunsoftware/tk-framework-shotgunutils.svg?branch=master'>
+[![Build Status](https://travis-ci.org/shotgunsoftware/tk-framework-shotgunutils.svg?branch=master)](https://travis-ci.org/shotgunsoftware/tk-framework-shotgunutils)
 
 ## Documentation
 This repository is a part of the Shotgun Pipeline Toolkit.
