@@ -67,7 +67,7 @@ class WorkerThread(QtCore.QThread):
         """
         The main thread run function.  Loops over tasks until asked to exit.
         """
-        while True:
+        while True and self._results_dispatcher is not None:
             # get the next task to process:
             task_to_process = None
             self._mutex.lock()
