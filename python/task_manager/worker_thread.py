@@ -67,44 +67,56 @@ class WorkerThread(QtCore.QThread):
         """
         The main thread run function.  Loops over tasks until asked to exit.
         """
-        while True and self._results_dispatcher is not None:
-            # get the next task to process:
-            task_to_process = None
-            self._mutex.lock()
-            try:
-                while self._process_tasks and not task_to_process:
-                    task_to_process = self._task
-                    self._task = None
-                    if not task_to_process:
-                        # wait until we have something to do...
-                        self._wait_condition.wait(self._mutex)
-
-                if not self._process_tasks:
-                    # stop processing
-                    break
-            finally:
-                self._mutex.unlock()
-
-            # run the task:
-            try:
-                result = task_to_process.run()
-
+        try:
+            while True and self._results_dispatcher is not None:
+                # get the next task to process:
+                task_to_process = None
                 self._mutex.lock()
                 try:
+                    while self._process_tasks and not task_to_process:
+                        task_to_process = self._task
+                        self._task = None
+                        if not task_to_process:
+                            # wait until we have something to do...
+                            self._wait_condition.wait(self._mutex)
+
                     if not self._process_tasks:
+                        # stop processing
                         break
-                    # emit the result (non-blocking):
-                    self._results_dispatcher.emit_completed(self, task_to_process, result)
                 finally:
                     self._mutex.unlock()
-            except Exception, e:
-                # something went wrong so emit failed signal:
-                self._mutex.lock()
+
+                # run the task:
                 try:
-                    if not self._process_tasks:
-                        break
-                    tb = traceback.format_exc()
-                    # emit failed signal (non-blocking):
-                    self._results_dispatcher.emit_failure(self, task_to_process, str(e), tb)
-                finally:
-                    self._mutex.unlock()
+                    result = task_to_process.run()
+
+                    self._mutex.lock()
+                    try:
+                        if not self._process_tasks:
+                            break
+                        # emit the result (non-blocking):
+                        self._results_dispatcher.emit_completed(self, task_to_process, result)
+                    finally:
+                        self._mutex.unlock()
+                except Exception, e:
+                    # something went wrong so emit failed signal:
+                    self._mutex.lock()
+                    try:
+                        if not self._process_tasks:
+                            break
+                        tb = traceback.format_exc()
+                        # emit failed signal (non-blocking):
+                        self._results_dispatcher.emit_failure(self, task_to_process, str(e), tb)
+                    finally:
+                        self._mutex.unlock()
+        except RuntimeError:
+            # We have a situation in Qt5 where it appears that the thread
+            # is being garbage collected more quickly than in Qt4. In this
+            # case, we can be pretty sure that we're being shut down, and
+            # can simply return out of the run loop.
+            return
+
+
+
+
+
