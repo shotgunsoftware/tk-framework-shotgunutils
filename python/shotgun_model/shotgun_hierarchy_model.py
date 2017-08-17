@@ -203,7 +203,13 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
                 "Model item refreshed: %s", item.data(self.parent()._SG_ITEM_UNIQUE_ID)
             )
             self.parent()._node_refreshed.disconnect(self._node_refreshed)
-            self.deleteLater()
+            # We've seen problems in Qt5 with deleteLater causing
+            # garbage collection of Qt objects out from under Python
+            # objects that still have active references. If we're not
+            # in Qt4, then we're going to let Qt/Python decide when to
+            # clean up instead of forcing it ourselves.
+            if QtCore.__version__.startswith("4."):
+                self.deleteLater()
             # Try again to async deep load the node and the next tokens.
             self.parent().async_item_from_paths(self._path_to_refresh)
 
