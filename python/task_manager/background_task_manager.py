@@ -160,7 +160,7 @@ class BackgroundTaskManager(QtCore.QObject):
         for thread in self._all_threads:
             thread.shut_down()
         self._available_threads = []
-        # self._all_threads = []
+        self._all_threads = []
 
         # Shut down the dispatcher thread
         self._results_dispatcher.shut_down()
