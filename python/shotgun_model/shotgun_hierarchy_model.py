@@ -22,9 +22,8 @@ from .shotgun_hierarchy_item import ShotgunHierarchyItem
 from .shotgun_query_model import ShotgunQueryModel
 from .data_handler_nav import ShotgunNavDataHandler
 from .util import sanitize_for_qt_model
-from ..utils import safe_delete_later
 
-
+utils = sgtk.platform.current_bundle().import_module("utils")
 logger = sgtk.platform.get_logger(__name__)
 
 
@@ -204,7 +203,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
                 "Model item refreshed: %s", item.data(self.parent()._SG_ITEM_UNIQUE_ID)
             )
             self.parent()._node_refreshed.disconnect(self._node_refreshed)
-            safe_delete_later(self)
+            utils.safe_delete_later(self)
 
             # Try again to async deep load the node and the next tokens.
             self.parent().async_item_from_paths(self._path_to_refresh)
