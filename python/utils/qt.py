@@ -8,8 +8,6 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-from sgtk.platform.qt import QtCore
-
 def safe_delete_later(widget):
     """
     Will call the deleteLater method on the given widget, but only if
@@ -19,6 +17,7 @@ def safe_delete_later(widget):
 
     :param widget: The widget to potentially call deleteLater on.
     """
+    from sgtk.platform.qt import QtCore
     if QtCore.__version__.startswith("4."):
         widget.deleteLater()
 
