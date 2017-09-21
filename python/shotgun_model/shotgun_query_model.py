@@ -10,6 +10,17 @@
 # toolkit imports
 import sgtk
 import weakref
+import datetime
+
+# NOTE: This is a dummy call to work around a known bug in datetime
+# whereby there is code imported at call time that is done so in a
+# manner that is not threadsafe. Calling it here, where we know we
+# are in the main thread, means the non-threadsafe stuff is out of
+# the way later on when it might be used from a thread.
+#
+# https://stackoverflow.com/questions/16309650/python-importerror-for-strptime-in-spyder-for-windows-7
+datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
+
 from sgtk.platform.qt import QtCore, QtGui
 
 from .util import sanitize_qt
