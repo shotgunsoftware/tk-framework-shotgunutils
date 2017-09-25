@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_query_model &mdash; tk-framework-shotgunutils v5.2.2 documentation</title>
+  <title>shotgun_model.shotgun_query_model &mdash; tk-framework-shotgunutils v5.2.3 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.2.2 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.2.3 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -116,7 +116,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.2.2.<br>
+    <b>tk-framework-shotgunutils</b> v5.2.3.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -180,6 +180,17 @@
 <span class="c1"># toolkit imports</span>
 <span class="kn">import</span> <span class="nn">sgtk</span>
 <span class="kn">import</span> <span class="nn">weakref</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+
+<span class="c1"># NOTE: This is a dummy call to work around a known bug in datetime</span>
+<span class="c1"># whereby there is code imported at call time that is done so in a</span>
+<span class="c1"># manner that is not threadsafe. Calling it here, where we know we</span>
+<span class="c1"># are in the main thread, means the non-threadsafe stuff is out of</span>
+<span class="c1"># the way later on when it might be used from a thread.</span>
+<span class="c1">#</span>
+<span class="c1"># https://stackoverflow.com/questions/16309650/python-importerror-for-strptime-in-spyder-for-windows-7</span>
+<span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;2012-01-01&#39;</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+
 <span class="kn">from</span> <span class="nn">sgtk.platform.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
 
 <span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">sanitize_qt</span>
@@ -1219,7 +1230,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.2.2',
+            VERSION:'v5.2.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
