@@ -11,6 +11,7 @@
 import sgtk
 import weakref
 import datetime
+import copy
 
 # NOTE: This is a dummy call to work around a known bug in datetime
 # whereby there is code imported at call time that is done so in a
@@ -957,6 +958,11 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         # pre-process data
         sg_data = self._before_data_processing(sg_data)
 
+        # take a copy of the data cache before we add any new items to it.
+        # this is so we can compare the pre updated cache against the current items in the model
+        # So we can work out if we want add the new items now, or wait until the fetchMore adds all the cached items
+        pre_update_cache = copy.copy(self._data_handler._cache)
+
         # push shotgun data into our data handler which will figure out
         # if there are any changes
         self._log_debug("Updating data model with new shotgun data...")
@@ -1003,8 +1009,32 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                     if parent_model_item:
                         # the parent exists in the view. So add the child
                         # note: becuase of lazy loading, parent may not always exist.
-                        self._log_debug("Creating new model item for %s" % data_item)
-                        self._create_item(parent_model_item, data_item)
+
+                        # Due to the way the model is populated differently when adding items from the cache
+                        # and adding new items that weren't in previously in the cache, and also the order in which
+                        # this happens We need to check it we actually want to add the item now or wait for the
+                        # FetchMore method to add our new item for us.
+                        # If the tree is set to autoexpand then the cached items will already be added to the model
+                        # by the time we get round to adding any new items, so if this is the case we want to add the
+                        # new items now. However if the tree is set to be collapsed by default, then the new items
+                        # check will run before the cached items are added to the model, if this the case we only want
+                        # to add our new item to the cache and the let the fetchMore method add it to the model.
+
+                        uid = parent_model_item.data(self._SG_ITEM_UNIQUE_ID)
+
+                        # get a set of UIDs that are already added to the model
+                        current_child_items = set(
+                            [parent_model_item.child(row).data(self._SG_ITEM_UNIQUE_ID) for row in range(parent_model_item.rowCount())])
+
+                        # get a set of UIDs that existed in the cache before the new items were added
+                        cached_child_items = set(pre_update_cache.get_child_uids(uid))
+
+                        # check if the cached items have already been added to the model, and if they have
+                        # then we should add our new item right now, rather than waiting for fetchMore to do it
+                        # for us
+                        if len(cached_child_items - current_child_items) == 0:
+                            self._log_debug("Creating new model item for %s" % data_item)
+                            self._create_item(parent_model_item, data_item)
 
                 elif item["mode"] == self._data_handler.DELETED:
                     # see if the node exists in the tree, in that case delete it.
