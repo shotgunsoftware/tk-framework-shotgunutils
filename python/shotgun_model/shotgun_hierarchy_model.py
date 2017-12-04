@@ -625,10 +625,20 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         seed_entity_field_path = os.path.join(
             *self._seed_entity_field.split("."))
 
-        # organize files on disk based on the seed_entity field path segment and
+        # Organize files on disk based on the seed_entity field path segment and
         # then param and entity field hashes
+
+        # Try to share the cache at the site level which was introduced in tk-core
+        # > 0.18.118.
+        # If not available, fallback on per project/pipeline config/plugin id
+        # caching.
+        if hasattr(self._bundle, "site_cache_location"):
+            cache_location = self._bundle.site_cache_location
+        else:
+            cache_location = self._bundle.cache_location
+
         data_cache_path = os.path.join(
-            self._bundle.cache_location,
+            cache_location,
             "sg_nav",
             seed_entity_field_path,
             params_hash.hexdigest(),
