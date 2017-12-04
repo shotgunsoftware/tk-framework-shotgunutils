@@ -721,11 +721,19 @@ class ShotgunModel(ShotgunQueryModel):
         filter_hash.update(str(self.__additional_filter_presets))
         params_hash.update(str(cache_seed))
 
-        # organize files on disk based on entity type and then filter hash
+        # Organize files on disk based on entity type and then filter hash
         # keep extension names etc short in order to stay away from MAX_PATH
         # on windows.
+        # Try to share the cache at the site level which was introduced in tk-core
+        # > 0.18.118.
+        # If not available, fallback on per project/pipeline config/plugin id
+        # caching.
+        if hasattr(self._bundle, "site_cache_location"):
+            cache_location = self._bundle.site_cache_location
+        else:
+            cache_location = self._bundle.cache_location
         data_cache_path = os.path.join(
-            self._bundle.cache_location,
+            cache_location,
             "sg",
             self.__entity_type,
             params_hash.hexdigest(),

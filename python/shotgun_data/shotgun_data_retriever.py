@@ -957,9 +957,19 @@ class ShotgunDataRetriever(QtCore.QObject):
         second_folder = hash_str[2:4]
 
         # Establish the cache path directory
-        cache_path_items = [
-            bundle.cache_location, "thumbs", first_folder, second_folder
-        ]
+        # If possible we share thumbnails at the site cache level.
+        # Site cache location was introduced in tk-core > v0.18.118, to not
+        # introduce a dependency on a tk-core release, we simply check if the method
+        # is available or not.
+        if hasattr(bundle, "site_cache_location"):
+            cache_path_items = [
+                bundle.site_cache_location, "thumbs", first_folder, second_folder
+            ]
+        else:
+            # Fallback to caching per project/pipeline config/plugin id.
+            cache_path_items = [
+                bundle.cache_location, "thumbs", first_folder, second_folder
+            ]
 
         cached_thumb_exists = False
         # If we were only asked to give back a directory path then we can
