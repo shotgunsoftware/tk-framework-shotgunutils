@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v5.2.3 documentation</title>
+  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v5.2.4 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.2.3 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.2.4 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -99,7 +99,9 @@
 
             
           
-       
+
+    <a href='genindex.html'>Alphabetic Index</a>
+
     <div style='margin-top: 50px;
                 margin-left: 10px;
                 margin-right: 10px;
@@ -116,7 +118,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.2.3.<br>
+    <b>tk-framework-shotgunutils</b> v5.2.4.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -126,6 +128,8 @@
     <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
 
     </div>
+
+
 
         </div>
       </div>
@@ -1127,9 +1131,19 @@
         <span class="n">second_folder</span> <span class="o">=</span> <span class="n">hash_str</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
 
         <span class="c1"># Establish the cache path directory</span>
-        <span class="n">cache_path_items</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">bundle</span><span class="o">.</span><span class="n">cache_location</span><span class="p">,</span> <span class="s2">&quot;thumbs&quot;</span><span class="p">,</span> <span class="n">first_folder</span><span class="p">,</span> <span class="n">second_folder</span>
-        <span class="p">]</span>
+        <span class="c1"># If possible we share thumbnails at the site cache level.</span>
+        <span class="c1"># Site cache location was introduced in tk-core &gt; v0.18.118, to not</span>
+        <span class="c1"># introduce a dependency on a tk-core release, we simply check if the method</span>
+        <span class="c1"># is available or not.</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">bundle</span><span class="p">,</span> <span class="s2">&quot;site_cache_location&quot;</span><span class="p">):</span>
+            <span class="n">cache_path_items</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">bundle</span><span class="o">.</span><span class="n">site_cache_location</span><span class="p">,</span> <span class="s2">&quot;thumbs&quot;</span><span class="p">,</span> <span class="n">first_folder</span><span class="p">,</span> <span class="n">second_folder</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Fallback to caching per project/pipeline config/plugin id.</span>
+            <span class="n">cache_path_items</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">bundle</span><span class="o">.</span><span class="n">cache_location</span><span class="p">,</span> <span class="s2">&quot;thumbs&quot;</span><span class="p">,</span> <span class="n">first_folder</span><span class="p">,</span> <span class="n">second_folder</span>
+            <span class="p">]</span>
 
         <span class="n">cached_thumb_exists</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="c1"># If we were only asked to give back a directory path then we can</span>
@@ -1636,7 +1650,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.2.3',
+            VERSION:'v5.2.4',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
