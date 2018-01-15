@@ -203,7 +203,12 @@ class ShotgunDataRetriever(QtCore.QObject):
                 os.chmod(path_to_cached_thumb, 0666)
             finally:
                 os.umask(old_umask)
-
+        else:
+            # Update access and modified time to "now" so the file will be kept
+            # around when culling old files in the cache.
+            # `_get_thumbnail_path` returns a full path with the extension if
+            # the thumb exists.
+            os.utime(path_to_cached_thumb, None)
         return path_to_cached_thumb
 
     @staticmethod
@@ -275,7 +280,12 @@ class ShotgunDataRetriever(QtCore.QObject):
                 os.chmod(path_to_cached_thumb, 0666)
             finally:
                 os.umask(old_umask)
-
+        else:
+            # Update access and modified time to "now" so the file will be kept
+            # around when culling old files in the cache.
+            # `_get_thumbnail_path` returns a full path with the extension if
+            # the thumb exists.
+            os.utime(path_to_cached_thumb, None)
         return path_to_cached_thumb
 
     def start(self):
@@ -629,7 +639,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         if not self._task_manager:
             raise TankError("Data retriever does not have a task manager to add the task to!")
 
-        task_id = self._task_manager.add_task(task_cb, 
+        task_id = self._task_manager.add_task(task_cb,
                                               priority, 
                                               group = self._bg_tasks_group,
                                               task_args = task_args,
@@ -1218,6 +1228,9 @@ class ShotgunDataRetriever(QtCore.QObject):
         )
 
         if file_path and os.path.exists(file_path):
+            # Update access and modified time to "now" so the file will be kept
+            # around when culling old files in the cache.
+            os.utime(file_path, None)
             data["file_path"] = file_path
 
         return data
@@ -1241,6 +1254,9 @@ class ShotgunDataRetriever(QtCore.QObject):
         thumb_path, thumb_exists = ShotgunDataRetriever._get_thumbnail_path(url, self._bundle)
         thumb_image = None
         if thumb_exists:
+            # Update access and modified time to "now" so the file will be kept
+            # around when culling old files in the cache.
+            os.utime(thumb_path, None)
             if load_image:
                 # load the thumbnail into a QImage:
                 thumb_image = QtGui.QImage()
@@ -1274,6 +1290,10 @@ class ShotgunDataRetriever(QtCore.QObject):
 
         self._bundle.ensure_folder_exists(os.path.dirname(file_path))
 
+        # Even if `_task_check_attachment` didn't see the target file, we check
+        # again if it exists as the attachment might have been downloaded in the
+        # mean time. We don't update the modification time on the file to prevent
+        # it to be culled in cache cleanup, as it has been freshly downloaded.
         if not os.path.exists(file_path):
             self._bundle.shotgun.download_attachment(
                 attachment=attachment_entity,
@@ -1317,8 +1337,11 @@ class ShotgunDataRetriever(QtCore.QObject):
         if not thumb_path:
             return {}
 
-        # there may be a case where another process has alrady downloaded the thumbnail for us, so 
+        # There may be a case where another process has alrady downloaded the thumbnail for us, so
         # make sure that we aren't doing any extra work :)
+        # If it is the case, we don't have to update the file modification time
+        # to prevent it to be culled in cache clean up: it has been freshly
+        # downloaded as our `_task_check_thumbnail` task didn't see it.
         if not thumb_exists:
             self._bundle.ensure_folder_exists(os.path.dirname(thumb_path))
 
