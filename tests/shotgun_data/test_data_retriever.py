@@ -75,6 +75,14 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         # Checking the thumbnail should refresh its modification time to now
         now = datetime.now()
         result = retriever._task_check_thumbnail("https:://foo/bar/blah.png", False)
+        if datetime.fromtimestamp(os.path.getmtime(thumb_path)) < now:
+            raise RuntimeError(
+                "Modification time %s (from timestamp %s) is smaller than %s" % (
+                    datetime.fromtimestamp(os.path.getmtime(thumb_path)),
+                    os.path.getmtime(thumb_path),
+                    now
+                )
+            )
         self.assertTrue(
             datetime.fromtimestamp(os.path.getmtime(thumb_path)) >= now
         )
@@ -87,16 +95,8 @@ class TestDataRetriever(TestShotgunUtilsFramework):
             retriever.download_thumbnail("https:://foo/bar/blah.png", self.framework),
             thumb_path
         )
-        if not datetime.fromtimestamp(os.path.getmtime(thumb_path)) >= now:
-            raise RuntimeError(
-                "Modification time %s (from timestamp %s) is smaller than %s" % (
-                    datetime.fromtimestamp(os.path.getmtime(thumb_path)),
-                    os.path.getmtime(thumb_path),
-                    now
-                )
-            )
-        self.assertFalse(
-            datetime.fromtimestamp(os.path.getmtime(thumb_path)) < now
+        self.assertTrue(
+            datetime.fromtimestamp(os.path.getmtime(thumb_path)) >= now
         )
         os.utime(thumb_path, (0,0))
         self.assertEqual(int(os.path.getmtime(thumb_path)), 0)
