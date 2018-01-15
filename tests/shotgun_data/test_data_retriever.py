@@ -87,6 +87,14 @@ class TestDataRetriever(TestShotgunUtilsFramework):
             retriever.download_thumbnail("https:://foo/bar/blah.png", self.framework),
             thumb_path
         )
+        if datetime.fromtimestamp(os.path.getmtime(thumb_path)) < now:
+            raise RuntimeError(
+                "Modification time %s (from timestamp %s) is smaller than %s" % (
+                    datetime.fromtimestamp(os.path.getmtime(thumb_path)),
+                    os.path.getmtime(thumb_path),
+                    now
+                )
+            )
         self.assertTrue(
             datetime.fromtimestamp(os.path.getmtime(thumb_path)) >= now
         )
