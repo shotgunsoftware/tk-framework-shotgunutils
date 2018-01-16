@@ -7,7 +7,7 @@
 
 import sys
 import os
-from datetime import datetime
+import time
 
 import sgtk
 import shutil
@@ -73,18 +73,18 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         os.utime(thumb_path, (0,0))
         self.assertEqual(int(os.path.getmtime(thumb_path)), 0)
         # Checking the thumbnail should refresh its modification time to now
-        now = datetime.now()
+        now = time.time()
         result = retriever._task_check_thumbnail("https:://foo/bar/blah.png", False)
-        if datetime.fromtimestamp(os.path.getmtime(thumb_path)) < now:
+        # Temporary test to display values in case of failure of the test.
+        if os.path.getmtime(thumb_path) < now:
             raise RuntimeError(
-                "Modification time %s (from timestamp %s) is smaller than %s" % (
-                    datetime.fromtimestamp(os.path.getmtime(thumb_path)),
+                "Modification time timestamp %s is smaller than %s" % (
                     os.path.getmtime(thumb_path),
                     now
                 )
             )
         self.assertTrue(
-            datetime.fromtimestamp(os.path.getmtime(thumb_path)) >= now
+            os.path.getmtime(thumb_path) >= now
         )
         # Cause download attempts to raise an error and try other methods updating
         # thumbnails and check that the modification time is updated.
@@ -96,7 +96,7 @@ class TestDataRetriever(TestShotgunUtilsFramework):
             thumb_path
         )
         self.assertTrue(
-            datetime.fromtimestamp(os.path.getmtime(thumb_path)) >= now
+            os.path.getmtime(thumb_path) >= now
         )
         os.utime(thumb_path, (0,0))
         self.assertEqual(int(os.path.getmtime(thumb_path)), 0)
@@ -110,7 +110,7 @@ class TestDataRetriever(TestShotgunUtilsFramework):
             thumb_path
         )
         self.assertTrue(
-            datetime.fromtimestamp(os.path.getmtime(thumb_path)) >= now
+            os.path.getmtime(thumb_path) >= now
         )
         # download_thumbnail_source seems to have a slightly different logic
         # for the file name, do a first faked download first and check updates.
@@ -124,5 +124,5 @@ class TestDataRetriever(TestShotgunUtilsFramework):
             thumb_path
         )
         self.assertTrue(
-            datetime.fromtimestamp(os.path.getmtime(thumb_path)) >= now
+            os.path.getmtime(thumb_path) >= now
         )
