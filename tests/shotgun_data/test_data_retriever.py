@@ -70,22 +70,13 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         result = retriever._task_check_thumbnail("https:://foo/bar/blah.png", False)
         self.assertEqual(result["thumb_path"], thumb_path)
         # Reset the access and modification time on the cached file to the epoch
-        os.utime(thumb_path, (0,0))
+        os.utime(thumb_path, (0, 0))
         self.assertEqual(int(os.path.getmtime(thumb_path)), 0)
         # Checking the thumbnail should refresh its modification time to now
-        now = time.time()
+        # Convert to int to avoid precision problems with floats
+        now = int(time.time())
         result = retriever._task_check_thumbnail("https:://foo/bar/blah.png", False)
-        # Temporary test to display values in case of failure of the test.
-        if os.path.getmtime(thumb_path) < now:
-            raise RuntimeError(
-                "Modification time timestamp %s is smaller than %s" % (
-                    os.path.getmtime(thumb_path),
-                    now
-                )
-            )
-        self.assertTrue(
-            os.path.getmtime(thumb_path) >= now
-        )
+        self.assertGreaterEqual(os.path.getmtime(thumb_path), now)
         # Cause download attempts to raise an error and try other methods updating
         # thumbnails and check that the modification time is updated.
         patched.side_effect = RuntimeError
@@ -95,9 +86,7 @@ class TestDataRetriever(TestShotgunUtilsFramework):
             retriever.download_thumbnail("https:://foo/bar/blah.png", self.framework),
             thumb_path
         )
-        self.assertTrue(
-            os.path.getmtime(thumb_path) >= now
-        )
+        self.assertGreaterEqual(os.path.getmtime(thumb_path), now)
         os.utime(thumb_path, (0,0))
         self.assertEqual(int(os.path.getmtime(thumb_path)), 0)
         self.assertEqual(
@@ -109,9 +98,7 @@ class TestDataRetriever(TestShotgunUtilsFramework):
             })["file_path"],
             thumb_path
         )
-        self.assertTrue(
-            os.path.getmtime(thumb_path) >= now
-        )
+        self.assertGreaterEqual(os.path.getmtime(thumb_path), now)
         # download_thumbnail_source seems to have a slightly different logic
         # for the file name, do a first faked download first and check updates.
         patched.side_effect = _download_url
@@ -123,6 +110,5 @@ class TestDataRetriever(TestShotgunUtilsFramework):
             retriever.download_thumbnail_source("Asset", 1, self.framework),
             thumb_path
         )
-        self.assertTrue(
-            os.path.getmtime(thumb_path) >= now
-        )
+        self.assertGreaterEqual(os.path.getmtime(thumb_path), now)
+
