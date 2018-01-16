@@ -33,7 +33,6 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         super(TestDataRetriever, self).setUp()
         self.shotgun_data = self.framework.import_module("shotgun_data")
 
-    @skip_if_pyside_missing
     @patch("sgtk.util.download_url")
     def test_thumbnail_cache(self, patched):
         """
@@ -100,7 +99,7 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         )
         self.assertGreaterEqual(os.path.getmtime(thumb_path), now)
         # download_thumbnail_source seems to have a slightly different logic
-        # for the file name, do a first faked download first and check updates.
+        # for the file name, do a faked download first and check updates.
         patched.side_effect = _download_url
         thumb_path = retriever.download_thumbnail_source("Asset", 1, self.framework)
         os.utime(thumb_path, (0,0))
@@ -111,4 +110,3 @@ class TestDataRetriever(TestShotgunUtilsFramework):
             thumb_path
         )
         self.assertGreaterEqual(os.path.getmtime(thumb_path), now)
-
