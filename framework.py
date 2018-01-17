@@ -18,12 +18,17 @@ import time
 
 class ShotgunUtilsFramework(sgtk.platform.Framework):
     
-    # A list of file names which should never be deleted when cleaning up old
-    # cached data.
-    _ALWAYS_KEEP_CACHED_FILES = [
-        "sg_schema.pickle",
-        "sg_status.pickle",
+    # List of top folders in the cache which should be considered for old
+    # data clean up.
+    _CLEANUP_FOLDERS = [
+        "sg",
+        "sg_nav",
+        "thumbs",
     ]
+    # Number of days a file without modification should be kept around
+    # before being considered for clean up.
+    _CLEANUP_GRACE_PERIOD = 60
+
     ##########################################################################################
     # init and destroy
             
@@ -75,31 +80,31 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
         except Exception as e:
             self.log_warning("Unable to post data clean up: %s" % e)
 
-    def _remove_old_cached_data(self, grace_period=7):
+    def _remove_old_cached_data(self):
         """
         Remove old data files cached by this bundle.
 
         A file is considered old if it was not modified in the last number of days
-        specified by the `grace_period` value, which must be at least 1 (one day).
+        specified by the `_CLEANUP_GRACE_PERIOD` class member value, which must
+        be at least 1 (one day).
 
         It is the responsability of the implementation to ensure that modification
         times for the files which should be kept are recent.
-        Typically, when re-using a cached file, the bundle should use
+        Typically, when re-using a cached file, the framework should use
         `os.utime(cached_file_path, None)` to update the modification time to the
         current time.
 
-        If some files should never be deleted, their name should be added to the
-        `_ALWAYS_KEEP_CACHED_FILES` class member.
+        The list of top folders to consider for clean up is explicitly defined in
+        the `_CLEANUP_FOLDERS` class member list, anything outside of those will
+        never be removed by the clean up.
 
-        :param int grace_period: The number of days files without any modification
-                                 should be kept around before being deleted.
-        :raises: ValueError if the grace_period is smaller than 1.
+        :raises: ValueError if the grace period is smaller than 1.
         """
+        grace_period = self._CLEANUP_GRACE_PERIOD
         if grace_period < 1:
             raise ValueError(
                 "Invalid grace period value %d, it must be a least 1" % grace_period
             )
-        self.logger.debug("Starting old data cleanup...")
         now_timestamp = time.time()
         now = datetime.datetime.now()
         delta = datetime.timedelta(days=grace_period)
@@ -109,16 +114,28 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
             delta.microseconds + (delta.seconds + delta.days * 24 * 3600) * 10**6
         ) / 10**6
 
-        # Clean up the site cache and the project cache locations.
-        for cache_location in [self.site_cache_location, self.cache_location]:
+        # Clean up the site cache and the project cache locations, only consider
+        # folders specified in _CLEANUP_FOLDERS
+        cache_locations = [
+            os.path.join(self.site_cache_location, folder) for folder in self._CLEANUP_FOLDERS
+        ]
+        cache_locations.extend([
+            os.path.join(self.cache_location, folder) for folder in self._CLEANUP_FOLDERS
+        ])
+        self.logger.debug(
+            "Cleaning all files with a modification date older than %s under locations "
+            "%s" % ((now - delta), ", ".join(cache_locations))
+        )
+        # Check if we should stop and bail out immediately if so.
+        if self._stop_cleanup:
+            return
+        for cache_location in cache_locations:
             # Go bottom up in the hierarchy and delete old files
             for folder, dirs, files in os.walk(cache_location, topdown=False):
                 for name in files:
                     # Check if we should stop and bail out immediately if so.
                     if self._stop_cleanup:
                         return
-                    if name in self._ALWAYS_KEEP_CACHED_FILES:
-                        continue
                     file_path = os.path.join(folder, name)
                     try:
                         file_stats = os.stat(file_path)

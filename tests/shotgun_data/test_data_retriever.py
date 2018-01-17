@@ -120,25 +120,41 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         bundle = self.framework
         # Create dummy cached data
         cache_folder = bundle.site_cache_location
-        os.mkdir(os.path.join(cache_folder, "test"))
-        dummy_files = [
-            "foo.txt",
-            "blah.text",
-            os.path.join("test", "foo.txt"),
-            os.path.join("test", "blah.txt"),
+        top_cleanup_folders = []
+        for folder in bundle._CLEANUP_FOLDERS:
+            top_cleanup_folders.append(os.path.join(bundle.site_cache_location, folder))
+            os.mkdir(top_cleanup_folders[-1])
+            top_cleanup_folders.append(os.path.join(bundle.cache_location, folder))
+            os.mkdir(top_cleanup_folders[-1])
+
+        dummy_files = []
+        for folder in top_cleanup_folders:
+            dummy_files.extend([
+                os.path.join(folder, "foo.txt"),
+                os.path.join(folder, "blah.txt"),
+                os.path.join(folder, "test", "foo.txt"),
+                os.path.join(folder, "test", "blah.txt")
+            ])
+        os.mkdir(os.path.join(bundle.site_cache_location, "test"))
+        preserved_files = [
+            os.path.join(bundle.site_cache_location, "test", "foo.txt"),
+            os.path.join(bundle.site_cache_location, "blah.txt"),
+            os.path.join(bundle.cache_location, "test", "foo.txt"),
+            os.path.join(bundle.cache_location, "blah.txt")
         ]
-        preserved_files = [ os.path.join("test", name) for name in bundle._ALWAYS_KEEP_CACHED_FILES]
         for dummy_file in dummy_files + preserved_files:
-            self.create_file(os.path.join(cache_folder, dummy_file))
+            self.create_file(dummy_file)
         # Test we can't use bad values
+        bundle._CLEANUP_GRACE_PERIOD = -1
         with self.assertRaisesRegexp(ValueError, "Invalid grace period value"):
-            bundle._remove_old_cached_data(-1)
+            bundle._remove_old_cached_data()
         # One day grace period clean up shouldn't delete anything
-        bundle._remove_old_cached_data(1)
+        bundle._CLEANUP_GRACE_PERIOD = 1
+        bundle._remove_old_cached_data()
         for dummy_file in dummy_files:
-            self.assertTrue(os.path.exists(os.path.join(cache_folder, dummy_file)))
+            self.assertTrue(os.path.exists(dummy_file))
         # Change the modification time for a file and clean it up
-        dummy_file = os.path.join(cache_folder, dummy_files.pop())
+        dummy_file = dummy_files.pop()
         one_day_delta = datetime.timedelta(days=1)
         # Datetime total_seconds was introduced in Python 2.7, so compute the
         # value ourself
@@ -150,28 +166,22 @@ class TestDataRetriever(TestShotgunUtilsFramework):
             dummy_file,
             (day_before_timestamp, day_before_timestamp)
         )
-        bundle._remove_old_cached_data(1)
+        bundle._remove_old_cached_data()
         # It should be gone, but all the others kept
+        print dummy_file
         self.assertFalse(os.path.exists(dummy_file))
         for dummy_file in dummy_files:
-            self.assertTrue(os.path.exists(os.path.join(cache_folder, dummy_file)))
+            self.assertTrue(os.path.exists(dummy_file))
         # Test that cleaning up all files work but keep the files we should never
         # delete.
         for dummy_file in dummy_files + preserved_files:
             os.utime(
-                os.path.join(cache_folder, dummy_file),
+                dummy_file,
                 (day_before_timestamp, day_before_timestamp)
             )
-        bundle._remove_old_cached_data(1)
+        bundle._remove_old_cached_data()
         for dummy_file in dummy_files:
-            self.assertFalse(os.path.exists(os.path.join(cache_folder, dummy_file)))
+            self.assertFalse(os.path.exists(dummy_file))
         # Preserved files should be still here, whatever the modification time
         for dummy_file in preserved_files:
-            self.assertTrue(os.path.exists(os.path.join(cache_folder, dummy_file)))
-            # Delete them as we go for next test below
-            os.remove(os.path.join(cache_folder, dummy_file))
-        bundle._remove_old_cached_data(1)
-        # The test folder should be gone as well
-        self.assertFalse(os.path.exists(os.path.join(cache_folder, "test")))
-        # But the cache folder should still be there
-        self.assertTrue(os.path.exists(cache_folder))
+            self.assertTrue(os.path.exists(dummy_file))
