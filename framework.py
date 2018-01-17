@@ -9,22 +9,45 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
+from sgtk.util import filesystem
+
 import threading
 import datetime
 import os
 
 class ShotgunUtilsFramework(sgtk.platform.Framework):
     
+    # A list of file names which should never be deleted when cleaning up old
+    # cached data.
+    _ALWAYS_KEEP_CACHED_FILES = [
+        "sg_schema.pickle",
+        "sg_status.pickle",
+    ]
     ##########################################################################################
     # init and destroy
             
     def init_framework(self):
+        """
+        Init this framework.
+
+        Post an old cached data cleanup in the background
+        """
         self.log_debug("%s: Initializing..." % self)
+        self._stop_cleanup = False
         self._bg_cleanup_thread = None
         self._post_old_data_cleanup()
     
     def destroy_framework(self):
+        """
+        Destroy this framework.
+
+        If an old cached data cleanup was posted in the background, stop it
+        immediately.
+        """
         self.log_debug("%s: Destroying..." % self)
+        # Please note that we are modifying a member which is read in another
+        # thread which should be fine in Python with the GIL protecting its access.
+        self._stop_cleanup = True
         if self._bg_cleanup_thread:
             if self._bg_cleanup_thread.isAlive():
                 # If the clean up is not completed yet, log why we are waiting.
@@ -33,16 +56,15 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
     
     def _post_old_data_cleanup(self):
         """
-        If the current tk-core version supports it, and running in tk-desktop,
-        post a cleanup of old data in the background.
+        Post a cleanup of old cached data in the background.
         """
-        return
         try:
-            self.log_info(
-                "Posting old cached data clean up for engine %s...." % self.engine.instance_name
+            self.log_debug(
+                "Posting old cached data clean up..."
             )
+            self._stop_cleanup = False
             # Qt might not be yet available at this stage (e.g. in tk-desktop),
-            # so we can't use a background task manager or a QThread, we use
+            # so we can't use a background task manager or a QThread, use instead
             # regular Python Thread to post the clean up in the background.
             self._bg_cleanup_thread = threading.Thread(
                 target=self._remove_old_cached_data,
@@ -51,7 +73,6 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
             self._bg_cleanup_thread.start()
         except Exception as e:
             self.log_warning("Unable to post data clean up: %s" % e)
-            pass
 
     def _remove_old_cached_data(self, grace_period=7):
         """
@@ -84,6 +105,11 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
             # Go bottom up in the hierarchy and delete old files
             for folder, dirs, files in os.walk(cache_location, topdown=False):
                 for name in files:
+                    # Check if we should stop and bail out immediately if so.
+                    if self._stop_cleanup:
+                        return
+                    if name in self._ALWAYS_KEEP_CACHED_FILES:
+                        continue
                     file_path = os.path.join(folder, name)
                     try:
                         file_stats = os.stat(file_path)
@@ -106,6 +132,9 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
                         pass
 
                 for name in dirs:
+                    # Check if we should stop and bail out immediately if so.
+                    if self._stop_cleanup:
+                        return
                     # Try to remove empty directories
                     dir_path = os.path.join(folder, name)
                     try:
