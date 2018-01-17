@@ -76,18 +76,19 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
 
     def _remove_old_cached_data(self, grace_period=7):
         """
-        Remove data old files cached by this bundle.
+        Remove old data files cached by this bundle.
 
         A file is considered old if it was not modified in the last number of days
-        specified by the `grace_period` value.
+        specified by the `grace_period` value, which must be at least 1 (one day).
 
-        The `grace_period` value must be at least 1 (one day).
-
-        It is the responsability of the bundle implementation to ensure that
-        modification times for the files which should be kept are recent.
+        It is the responsability of the implementation to ensure that modification
+        times for the files which should be kept are recent.
         Typically, when re-using a cached file, the bundle should use
         `os.utime(cached_file_path, None)` to update the modification time to the
         current time.
+
+        If some files should never be deleted, their name should be added to the
+        `_ALWAYS_KEEP_CACHED_FILES` class member.
 
         :param int grace_period: The number of days files without any modification
                                  should be kept around before being deleted.

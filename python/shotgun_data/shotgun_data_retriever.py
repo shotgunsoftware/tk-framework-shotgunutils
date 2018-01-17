@@ -18,6 +18,12 @@ import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 from sgtk import TankError
 
+def _indicate_resource_accessed(file_path):
+    """
+    Helper to indicate a resource was accessed and shouldn't be considered
+    old when cleaning up old cached data.
+    """
+    os.utime(file_path, None)
 
 class ShotgunDataRetriever(QtCore.QObject):
     """
@@ -208,7 +214,7 @@ class ShotgunDataRetriever(QtCore.QObject):
             # around when culling old files in the cache.
             # `_get_thumbnail_path` returns a full path with the extension if
             # the thumb exists.
-            os.utime(path_to_cached_thumb, None)
+            _indicate_resource_accessed(path_to_cached_thumb)
         return path_to_cached_thumb
 
     @staticmethod
@@ -285,7 +291,7 @@ class ShotgunDataRetriever(QtCore.QObject):
             # around when culling old files in the cache.
             # `_get_thumbnail_path` returns a full path with the extension if
             # the thumb exists.
-            os.utime(path_to_cached_thumb, None)
+            _indicate_resource_accessed(path_to_cached_thumb)
         return path_to_cached_thumb
 
     def start(self):
@@ -1230,7 +1236,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         if file_path and os.path.exists(file_path):
             # Update access and modified time to "now" so the file will be kept
             # around when culling old files in the cache.
-            os.utime(file_path, None)
+            _indicate_resource_accessed(file_path)
             data["file_path"] = file_path
 
         return data
@@ -1256,7 +1262,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         if thumb_exists:
             # Update access and modified time to "now" so the file will be kept
             # around when culling old files in the cache.
-            os.utime(thumb_path, None)
+            _indicate_resource_accessed(thumb_path)
             if load_image:
                 # load the thumbnail into a QImage:
                 thumb_image = QtGui.QImage()

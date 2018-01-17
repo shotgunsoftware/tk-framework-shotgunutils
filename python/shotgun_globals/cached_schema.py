@@ -191,9 +191,6 @@ class CachedShotgunSchema(QtCore.QObject):
         if os.path.exists(status_cache_path):
             try:
                 self._bundle.log_debug("Loading cached status from '%s'" % status_cache_path)
-                # Reset the file modification time to prevent it to be removed
-                # by old data cleanup.
-                os.utime(status_cache_path, None)
                 with open(status_cache_path, "rb") as fh:
                     status_data = pickle.load(fh)
                     # Check to make sure the structure of the data
@@ -225,9 +222,6 @@ class CachedShotgunSchema(QtCore.QObject):
         if os.path.exists(schema_cache_path):
             try:
                 self._bundle.log_debug("Loading cached schema from '%s'" % schema_cache_path)
-                # Reset the file modification time to prevent it to be removed
-                # by old data cleanup.
-                os.utime(schema_cache_path, None)
                 with open(schema_cache_path, "rb") as fh:
                     data = pickle.load(fh)
                     self._field_schema[project_id] = data["field_schema"]
