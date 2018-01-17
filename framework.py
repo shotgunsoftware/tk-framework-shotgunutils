@@ -14,6 +14,7 @@ from sgtk.util import filesystem
 import threading
 import datetime
 import os
+import time
 
 class ShotgunUtilsFramework(sgtk.platform.Framework):
     
@@ -99,8 +100,15 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
                 "Invalid grace period value %d, it must be a least 1" % grace_period
             )
         self.logger.debug("Starting old data cleanup...")
+        now_timestamp = time.time()
         now = datetime.datetime.now()
-        grace_period_delta = datetime.timedelta(days=grace_period)
+        delta = datetime.timedelta(days=grace_period)
+        # Datetime total_seconds was introduced in Python 2.7, so compute the
+        # value ourself.
+        grace_in_seconds = (
+            delta.microseconds + (delta.seconds + delta.days * 24 * 3600) * 10**6
+        ) / 10**6
+
         # Clean up the site cache and the project cache locations.
         for cache_location in [self.site_cache_location, self.cache_location]:
             # Go bottom up in the hierarchy and delete old files
@@ -114,12 +122,8 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
                     file_path = os.path.join(folder, name)
                     try:
                         file_stats = os.stat(file_path)
-                        # Convert the timestamp to a datetime
-                        last_modif_time = datetime.datetime.fromtimestamp(
-                            int(file_stats.st_mtime)
-                        )
                         # Is it old enough to be removed?
-                        if now - last_modif_time > grace_period_delta:
+                        if now_timestamp - file_stats.st_mtime > grace_in_seconds:
                             filesystem.safe_delete_file(file_path)
                     except Exception as e:
                         # Log the error for debug purpose
@@ -129,8 +133,6 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
                             ),
                             exc_info=True,
                         )
-                        # And ignore it
-                        pass
 
                 for name in dirs:
                     # Check if we should stop and bail out immediately if so.
