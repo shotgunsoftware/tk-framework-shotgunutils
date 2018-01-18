@@ -1003,7 +1003,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                     if parent_model_item:
                         # The parent exists in the view. It might not because of
                         # lazy loading.
-                        # If its children were alreayd populated we need to add
+                        # If its children were already populated we need to add
                         # the new ones now. If not, we let fetchMore does its job
                         # later in lazy loading mode.
                         if not self.canFetchMore(parent_model_item.index()):
