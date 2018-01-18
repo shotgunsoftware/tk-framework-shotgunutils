@@ -1001,10 +1001,14 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                         parent_model_item = self._get_item_by_unique_id(parent_data_item.unique_id)
 
                     if parent_model_item:
-                        # the parent exists in the view. So add the child
-                        # note: becuase of lazy loading, parent may not always exist.
-                        self._log_debug("Creating new model item for %s" % data_item)
-                        self._create_item(parent_model_item, data_item)
+                        # The parent exists in the view. It might not because of
+                        # lazy loading.
+                        # If its children were already populated we need to add
+                        # the new ones now. If not, we let fetchMore does its job
+                        # later in lazy loading mode.
+                        if not self.canFetchMore(parent_model_item.index()):
+                            self._log_debug("Creating new model item for %s" % data_item)
+                            self._create_item(parent_model_item, data_item)
 
                 elif item["mode"] == self._data_handler.DELETED:
                     # see if the node exists in the tree, in that case delete it.
