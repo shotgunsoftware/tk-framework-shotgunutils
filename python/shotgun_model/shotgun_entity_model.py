@@ -213,14 +213,15 @@ class ShotgunEntityModel(ShotgunModel):
                 if colour and isinstance(colour, tuple) and len(colour) == 3:
                     # get the icon for this colour from the cache:
                     if colour not in self._step_swatch_icons:
-                        # build icon and add to cache:
+                        # Build icon and add to cache:
+                        # Add a bit of transparency otherwise the step color is
+                        # too bright.
+                        colour = colour + (200,)
                         pm = QtGui.QPixmap(16, 16)
                         pm.fill(QtCore.Qt.transparent)
                         painter = QtGui.QPainter(pm)
                         try:
-                            painter.setBrush(QtGui.QBrush(QtGui.QColor(colour[0], colour[1], colour[2])))
-                            painter.setPen(QtCore.Qt.black)
-                            painter.drawRect(2, 2, 12, 12)
+                            painter.fillRect(2, 2, 12, 12, QtGui.QColor(*colour))
                         finally:
                             painter.end()
                         self._step_swatch_icons[colour] = QtGui.QIcon(pm)
