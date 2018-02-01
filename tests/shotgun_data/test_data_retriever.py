@@ -145,12 +145,10 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         for dummy_file in dummy_files + preserved_files:
             self.create_file(dummy_file)
         # Test we can't use bad values
-        bundle._CLEANUP_GRACE_PERIOD = -1
         with self.assertRaisesRegexp(ValueError, "Invalid grace period value"):
-            bundle._remove_old_cached_data()
+            bundle._remove_old_cached_data(-1, *top_cleanup_folders)
         # One day grace period clean up shouldn't delete anything
-        bundle._CLEANUP_GRACE_PERIOD = 1
-        bundle._remove_old_cached_data()
+        bundle._remove_old_cached_data(1, *top_cleanup_folders)
         for dummy_file in dummy_files:
             self.assertTrue(os.path.exists(dummy_file))
         # Change the modification time for a file and clean it up
@@ -166,9 +164,8 @@ class TestDataRetriever(TestShotgunUtilsFramework):
             dummy_file,
             (day_before_timestamp, day_before_timestamp)
         )
-        bundle._remove_old_cached_data()
+        bundle._remove_old_cached_data(1, *top_cleanup_folders)
         # It should be gone, but all the others kept
-        print dummy_file
         self.assertFalse(os.path.exists(dummy_file))
         for dummy_file in dummy_files:
             self.assertTrue(os.path.exists(dummy_file))
@@ -179,7 +176,7 @@ class TestDataRetriever(TestShotgunUtilsFramework):
                 dummy_file,
                 (day_before_timestamp, day_before_timestamp)
             )
-        bundle._remove_old_cached_data()
+        bundle._remove_old_cached_data(1, *top_cleanup_folders)
         for dummy_file in dummy_files:
             self.assertFalse(os.path.exists(dummy_file))
         # Preserved files should be still here, whatever the modification time

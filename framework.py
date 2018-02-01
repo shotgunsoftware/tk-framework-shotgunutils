@@ -83,19 +83,10 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
                 "Posting old cached data clean up..."
             )
             self._stop_cleanup = False
+
             grace_period = self._CLEANUP_GRACE_PERIOD
-            if grace_period < 1:
-                raise ValueError(
-                    "Invalid grace period value %d, it must be a least 1" % grace_period
-                )
-            now_timestamp = time.time()
-            now = datetime.datetime.now()
             delta = datetime.timedelta(days=grace_period)
-            # Datetime total_seconds was introduced in Python 2.7, so compute the
-            # value ourself.
-            grace_in_seconds = (
-                delta.microseconds + (delta.seconds + delta.days * 24 * 3600) * 10**6
-            ) / 10**6
+            now = datetime.datetime.now()
 
             # Clean up the site cache and the project cache locations, only consider
             # folders specified in _CLEANUP_FOLDERS
@@ -114,21 +105,33 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
             # regular Python Thread to post the clean up in the background.
             self._bg_cleanup_thread = threading.Thread(
                 target=self._remove_old_cached_data,
-                args=[grace_in_seconds] + cache_locations,
+                args=[grace_period] + cache_locations,
                 name="%s Clean Up" % self.name
             )
             self._bg_cleanup_thread.start()
         except Exception as e:
             self.log_warning("Unable to post data clean up: %s" % e)
 
-    def _remove_old_cached_data(self, grace_in_seconds, *cache_locations):
+    def _remove_old_cached_data(self, grace_period, *cache_locations):
         """
         Remove old data files cached by this bundle in the given cache locations.
 
-        :param int grace_in_seconds: Time period, in seconds, a file without
+        :param int grace_period: Time period, in days, a file without
                                      modification should be kept around.
         :param cache_locations: A list of cache locations to clean up.
+        :raises: ValueError if the grace period is smalled than one day.
         """
+        if grace_period < 1:
+            raise ValueError(
+                "Invalid grace period value %d, it must be a least 1" % grace_period
+            )
+        delta = datetime.timedelta(days=grace_period)
+        # Datetime total_seconds was introduced in Python 2.7, so compute the
+        # value ourself.
+        grace_in_seconds = (
+            delta.microseconds + (delta.seconds + delta.days * 24 * 3600) * 10**6
+        ) / 10**6
+
         # Please note that we can't log any message from this background thread
         # without the risk of causing deadlocks.
         now_timestamp = time.time()
