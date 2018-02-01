@@ -119,7 +119,7 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
         :param int grace_period: Time period, in days, a file without
                                      modification should be kept around.
         :param cache_locations: A list of cache locations to clean up.
-        :raises: ValueError if the grace period is smalled than one day.
+        :raises: ValueError if the grace period is smaller than one day.
         """
         if grace_period < 1:
             raise ValueError(
