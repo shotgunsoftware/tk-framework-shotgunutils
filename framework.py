@@ -90,9 +90,13 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
 
             # Clean up the site cache and the project cache locations, only consider
             # folders specified in _CLEANUP_FOLDERS
-            cache_locations = [
-                os.path.join(self.site_cache_location, folder) for folder in self._CLEANUP_FOLDERS
-            ]
+            cache_locations = []
+            if hasattr(self, "site_cache_location"):
+                # This was introduced in tk-core v0.18.119 but we don't have an
+                # explicit dependency to it, so check if the attribute is available.
+                cache_locations.extend([
+                    os.path.join(self.site_cache_location, folder) for folder in self._CLEANUP_FOLDERS
+                ])
             cache_locations.extend([
                 os.path.join(self.cache_location, folder) for folder in self._CLEANUP_FOLDERS
             ])
