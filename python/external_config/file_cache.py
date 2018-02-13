@@ -96,7 +96,7 @@ def get_cache_path(identifier_dict):
 
     cache_location = sgtk.platform.current_bundle().cache_location
 
-    if prefix in identifier_dict:
+    if "prefix" in identifier_dict:
         data_cache_path = os.path.join(
             cache_location,
             "external_cfg",

@@ -19,7 +19,7 @@ from ..errors import RemoteConfigParseError, RemoteConfigNotAccessibleError
 
 logger = sgtk.platform.get_logger(__name__)
 
-CONFIGURATION_GENERATION = 3
+CONFIGURATION_GENERATION = 4
 
 
 def create_from_pipeline_configuration_data(parent, bg_task_manager, plugin_id, configuration_data):
@@ -95,8 +95,9 @@ def serialize(config_object):
         "GENERATION": CONFIGURATION_GENERATION,
         "plugin_id": config_object.plugin_id,
         "pipeline_config_id": config_object.pipeline_configuration_id,
+        "pipeline_config_name": config_object.pipeline_configuration_name,
         "config_uri": config_object.descriptor_uri,
-        "python_interpreter": config_object._pipeline_config_interpreter,  # todo - fix
+        "python_interpreter": config_object._pipeline_config_interpreter,  # todo fix
         "class_name": config_object.__class__.__name__
     }
 

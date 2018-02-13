@@ -63,6 +63,13 @@ class RemoteConfiguration(QtCore.QObject):
         return None
 
     @property
+    def pipeline_configuration_name(self):
+        """
+        The name of the associated pipeline configuration or None if not defined.
+        """
+        return None
+
+    @property
     def descriptor_uri(self):
         """
         The descriptor uri associated with this pipeline configuration. For

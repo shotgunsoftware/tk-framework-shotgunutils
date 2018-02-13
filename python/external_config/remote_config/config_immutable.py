@@ -64,6 +64,13 @@ class ImmutableRemoteConfiguration(RemoteConfiguration):
         """
         return self._pipeline_configuration_id
 
+    @property
+    def pipeline_configuration_name(self):
+        """
+        The name of the associated pipeline configuration or None if not defined.
+        """
+        return self._pipeline_config_name
+
     def _compute_config_hash(self, engine, entity_type, entity_id, link_entity_type):
         """
         Generates a hash to uniquely identify the configuration.
