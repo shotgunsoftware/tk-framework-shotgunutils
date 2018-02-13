@@ -8,23 +8,34 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-
 import sgtk
-import sys
-import os
 from sgtk.platform.qt import QtCore, QtGui
 
 logger = sgtk.platform.get_logger(__name__)
 
 from .configuration_state import ConfigurationState
-from .remote_config import RemoteConfiguration
 from . import file_cache
 from .errors import RemoteConfigNotAccessibleError, RemoteConfigParseError
 from . import remote_config
 
 class RemoteConfigurationLoader(QtCore.QObject):
     """
-    class for managing commands across contexts.
+    Class for loading configurations across contexts.
+
+    Signal Interface
+    ----------------
+
+    :signal configurations_loaded(project_id, configs): Gets emitted configurations
+        have been loaded for the given project. The parameters passed is the
+        project id and a list of :class:`RemoteConfiguration` instances.
+
+    :signal configurations_changed(): Gets emitted whenever the class
+        has detected a change to the state of shotgun which could invalidate
+        any existing :class:`RemoteConfiguration` instances. This can be
+        emitted at startup or typically after :meth:`refresh` has been called.
+        Any implementation which caches :class:`RemoteConfiguration` instances
+        can use this signal to invalidate their caches.
+
     """
 
     # signal emitted to indicate that an update has been detected
@@ -38,6 +49,8 @@ class RemoteConfigurationLoader(QtCore.QObject):
 
     def __init__(self, plugin_id, base_config, bg_task_manager, parent):
         """
+        Initialize the class with the following parameters:
+
         :param plugin_id: Plugin id of the current environment
         :param base_config: base_config
         :param bg_task_manager: Task manager to use for background work
@@ -65,14 +78,15 @@ class RemoteConfigurationLoader(QtCore.QObject):
 
     def shut_down(self):
         """
-        Deallocate and shut down.
+        Should be called prior to shutdown.
+        Deallocates any internal data and shuts down active workers.
         """
         self._config_state.shut_down()
 
     def refresh(self):
         """
         Requests a refresh. If things have changed, this may result in a
-        configuration_changed being emitted.
+        ``configuration_changed`` signal being emitted.
         """
         self._config_state.refresh()
 
@@ -80,6 +94,15 @@ class RemoteConfigurationLoader(QtCore.QObject):
         """
         Requests a list of configuration objects for the given project.
         a configuration_changed signal will be emitted with the result.
+
+        Emits a ``configurations_loaded`` signal when the configurations
+        have been loaded.
+
+        :param project_id: Project to request configurations for.
+        :param force: If ``True``, force reload the configuration data.
+            If ``False`` (default), use a cached representation. This
+            cache is refreshed at startup and whenever :meth:`refresh`
+            is called.
         """
         # load existing cache file if it exists
         config_cache_key = {

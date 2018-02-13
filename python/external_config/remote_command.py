@@ -16,7 +16,9 @@ logger = sgtk.platform.get_logger(__name__)
 
 class RemoteCommand(object):
     """
-    Instance representing a remote Toolkit command object
+    Represents a remote Toolkit command (e.g. menu option).
+
+    These objects are emitted by :class:`RemoteConfiguration`.
     """
 
     @classmethod
@@ -79,33 +81,47 @@ class RemoteCommand(object):
         self._bundle = sgtk.platform.current_bundle()
         self._name = name
 
+    def __repr__(self):
+        return "<RemoteCommand>"
+
     @classmethod
-    def from_string(cls, chunk):
+    def from_string(cls, data):
         """
-        Create
+        Creates a :class:`RemoteCommand` instance given some serialized data.
+
+        :param str data: Data created by :meth:`to_string`
+        :returns: Remote Command instance.
+        :rtype: :class:`RemoteCommand`
         """
         return RemoteCommand("foo")
 
     def to_string(self):
         """
-        Serialialize
+        Serializes the current object into a string.
+
+        For use with :meth:`from_string`.
+
+        :returns: String representing the current instance.
+        :rtype: str
         """
         return "foooo"
 
-    def __repr__(self):
-        return "<RemoteCommand>"
-
     @property
     def name(self):
+        """
+        The name of the command
+        """
         return self._name
 
     def tooltip(self):
+        """
+        The tooltip for the command
+        """
         return "foo"
 
     def execute(self):
         """
-        Execute the remote command
-        @return:
+        Executes the remote command
         """
         logger.debug("%s: execute command" % self)
 

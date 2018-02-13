@@ -10,34 +10,41 @@ This module contains classes and methods for efficiently inspecting
 remote pipeline configurations and runtime environments.
 
 
-Class BackgroundTaskManager
+Class RemoteConfigurationLoader
 ============================================
-
-.. note::
-
-    Import the module into your Toolkit App using the following statement::
-
-        task_manager = sgtk.platform.import_framework("tk-framework-shotgunutils", "multi_context")
-
-
-.. autoclass:: MultiConfigurationLoader
+.. autoclass:: RemoteConfigurationLoader
     :members:
     :inherited-members:
 
-.. autofunction:: create_default
-
-.. autofunction:: create_from_pipeline_configuration_data
-
-.. autofunction:: serialize
-
-.. autofunction:: deserialize
+Class RemoteConfiguration
+============================================
 
 .. autoclass:: RemoteConfiguration
     :members:
     :inherited-members:
 
+Class RemoteCommand
+============================================
+
 .. autoclass:: RemoteCommand
     :members:
     :inherited-members:
+    :exclude-members: serialize_command, create,
+
+Exceptions
+============================================
+
+The following exception types are raised:
+
+.. autoclass:: RemoteConfigParseError
+    :show-inheritance:
+    :inherited-members:
+    :members:
+
+.. autoclass:: RemoteConfigNotAccessibleError
+    :show-inheritance:
+    :inherited-members:
+    :members:
+
 
 

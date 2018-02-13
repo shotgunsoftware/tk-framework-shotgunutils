@@ -22,7 +22,15 @@ logger = sgtk.platform.get_logger(__name__)
 
 class RemoteConfiguration(QtCore.QObject):
     """
-    Base class for a remote pipeline configuration
+    Object wrapping a remote pipeline configuration.
+
+    Signal Interface
+    ----------------
+
+    :signal commands_loaded(commands): Gets emitted after :meth:`request_commands` has
+        been called and once commands have been loaded for the configuration. The
+        commands parameter contains a list of :class:`RemoteCommand` instances.
+
     """
     TASK_GROUP = "tk-framework-shotgunutils.external_config.RemoteConfiguration"
 
@@ -36,6 +44,9 @@ class RemoteConfiguration(QtCore.QObject):
             pipeline_config_interpreter,
     ):
         """
+        .. note:: This class is constructed by :class:`RemoteConfigurationLoader`.
+            Do not construct objects by hand.
+
         :param parent: Qt parent object
         :param bg_task_manager: Background task runner instance
         :param str plugin_id: Associated bootstrap plugin id
@@ -81,13 +92,15 @@ class RemoteConfiguration(QtCore.QObject):
     @property
     def plugin_id(self):
         """
-        The plugin id assocaited with the configuration.
+        The plugin id associated with the configuration.
         """
         return self._plugin_id
 
     def request_commands(self, engine, entity_type, entity_id, link_entity_type):
         """
         Request commands for the given object.
+
+        A ``commands_loaded`` signal will be emitted once the commands are available.
 
         :param str engine: Engine to run
         :param str entity_type: Associated entity type
