@@ -8,11 +8,10 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-from . import shotgun_model
-from . import shotgun_data
-from . import settings
-from . import shotgun_globals
-from . import task_manager
-from . import utils
-from . import external_config
-
+from .remote_config_loader import RemoteConfigurationLoader
+from .remote_command import RemoteCommand
+from .remote_config import RemoteConfiguration, \
+    create_default, \
+    create_from_pipeline_configuration_data, \
+    serialize, \
+    deserialize

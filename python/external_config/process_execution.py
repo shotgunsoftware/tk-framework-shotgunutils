@@ -20,7 +20,7 @@ import sgtk
 logger = sgtk.platform.get_logger(__name__)
 
 
-class ReadThread(Thread):
+class _ReadThread(Thread):
     """
     Thread that reads a pipe.
     """
@@ -42,12 +42,15 @@ class ReadThread(Thread):
         """
         while True:
             line = self.pipe.readline()         # blocking read
-            if line == '':
+            if line == "":
                 break
             self.target_queue.put(line)
 
 
-class Command(object):
+class ProcessRunner(object):
+    """
+    External process execution.
+    """
 
     @staticmethod
     def _create_temp_file():
@@ -85,12 +88,13 @@ class Command(object):
         # handled on Windows and Unix, we'll provide two implementations. See the Windows
         # implementation for more details.
         if sys.platform == "win32":
-            ret, stdout_lines, stderr_lines = Command._call_cmd_win32(args, env)
+            ret, stdout_lines, stderr_lines = ProcessRunner._call_cmd_win32(args, env)
         else:
-            ret, stdout_lines, stderr_lines = Command._call_cmd_unix(args, env)
+            ret, stdout_lines, stderr_lines = ProcessRunner._call_cmd_unix(args, env)
 
-        out = ''.join(stdout_lines)
-        err = ''.join(stderr_lines)
+        print "process running done"
+        out = "".join(stdout_lines)
+        err = "".join(stderr_lines)
 
         return ret, out, err
 
@@ -121,11 +125,11 @@ class Command(object):
             stdout_q = Queue()
             stderr_q = Queue()
 
-            stdout_t = ReadThread(process.stdout, stdout_q)
+            stdout_t = _ReadThread(process.stdout, stdout_q)
             stdout_t.setDaemon(True)
             stdout_t.start()
 
-            stderr_t = ReadThread(process.stderr, stderr_q)
+            stderr_t = _ReadThread(process.stderr, stderr_q)
             stderr_t.setDaemon(True)
             stderr_t.start()
 
@@ -177,8 +181,8 @@ class Command(object):
         stdout_lines = []
         stderr_lines = []
         try:
-            stdout_path = Command._create_temp_file()
-            stderr_path = Command._create_temp_file()
+            stdout_path = ProcessRunner._create_temp_file()
+            stderr_path = ProcessRunner._create_temp_file()
 
             # On Windows, file descriptors like sockets can be inherited by child
             # process and are only closed when the main process and all child

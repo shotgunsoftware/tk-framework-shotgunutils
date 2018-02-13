@@ -43,6 +43,11 @@ class ConfigurationState(QtCore.QObject):
         self._pipeline_config_model.data_refreshed.connect(self._on_pipeline_configs_refreshed)
 
     def refresh(self):
+        """
+        Trigger an asynchronous background check of the Shotgun site
+        configuration state. If a change is detected, indicating that
+        configurations should be recomputed, a state_changed signal is emitted.
+        """
         self._pipeline_config_model.load()
         self._software_model.load()
 
@@ -64,7 +69,6 @@ class ConfigurationState(QtCore.QObject):
         Software entity model is updated
         :param has_changed:
         """
-        logger.error("SW HAS CHANGED: %s" % has_changed)
         if has_changed:
             logger.debug("Shotgun software entity change detected.")
             self.state_changed.emit()
@@ -74,10 +78,10 @@ class ConfigurationState(QtCore.QObject):
         Software entity model is updated
         :param has_changed:
         """
-        logger.error("PC HAS CHANGED: %s" % has_changed)
         if has_changed:
             logger.debug("Shotgun pipeline config change detected.")
             self.state_changed.emit()
+
 
 class SoftwareModel(ShotgunModel):
     """
@@ -88,17 +92,12 @@ class SoftwareModel(ShotgunModel):
         """
         :param parent: QT parent object
         """
-        super(SoftwareModel, self).__init__(
-            parent,
-            download_thumbs=False,
-            bg_task_manager=bg_task_manager
-        )
+        super(SoftwareModel, self).__init__(parent, download_thumbs=False, bg_task_manager=bg_task_manager)
 
     def load(self):
         """
         Load all pipeline configuration data into model.
         """
-        app = sgtk.platform.current_bundle()
         hierarchy = ["id"]
         fields = ["code", "updated_at"]
         self._load_data("Software", [], hierarchy, fields)
@@ -106,7 +105,7 @@ class SoftwareModel(ShotgunModel):
 
     def get_sg_data(self):
         """
-        Access current user shotgun data.
+        Access shotgun data.
 
         :returns: The sg data dictionary for the associated item,
                   None if not available.
@@ -118,7 +117,6 @@ class SoftwareModel(ShotgunModel):
             for idx in range(self.rowCount()):
                 item = self.item(idx)
                 data.append(item.get_sg_data())
-
         return data
 
     def get_hash(self):
@@ -142,17 +140,12 @@ class PipelineConfigModel(ShotgunModel):
         """
         :param parent: QT parent object
         """
-        super(PipelineConfigModel, self).__init__(
-            parent,
-            download_thumbs=False,
-            bg_task_manager=bg_task_manager
-        )
+        super(PipelineConfigModel, self).__init__(parent, download_thumbs=False, bg_task_manager=bg_task_manager)
 
     def load(self):
         """
         Load all pipeline configuration data into model.
         """
-        app = sgtk.platform.current_bundle()
         hierarchy = ["id"]
         fields = ["code", "updated_at"]
         self._load_data("PipelineConfiguration", [], hierarchy, fields)
@@ -160,7 +153,7 @@ class PipelineConfigModel(ShotgunModel):
 
     def get_sg_data(self):
         """
-        Access current user shotgun data.
+        Access current shotgun data.
 
         :returns: The sg data dictionary for the associated item,
                   None if not available.

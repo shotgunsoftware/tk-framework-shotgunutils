@@ -11,17 +11,15 @@
 import os
 import sgtk
 import fnmatch
-from sgtk.platform.qt import QtCore, QtGui
-from . import file_cache
-from .config_base import BaseConfiguration
+from .config_base import RemoteConfiguration
 
 logger = sgtk.platform.get_logger(__name__)
 
 
-
-class LiveConfiguration(BaseConfiguration):
+class LiveRemoteConfiguration(RemoteConfiguration):
     """
-    Class for loading and caching registered commands for a given
+    Represents a remote configuration which is which is linked to
+    a mutable descriptor and a locaation on disk.
     """
 
     def __init__(
@@ -29,42 +27,63 @@ class LiveConfiguration(BaseConfiguration):
             parent,
             bg_task_manager,
             plugin_id,
-            project_id,
             pipeline_config_id,
             pipeline_config_name,
             pipeline_config_uri,
+            pipeline_config_folder,
             pipeline_config_interpreter,
-            local_path,
     ):
         """
-        :param parent:
-        :param bg_task_manager:
-        :param plugin_id:
-        :param project_id:
-        :param pipeline_config_id:
-        :param pipeline_config_name:
-        :param pipeline_config_uri:
-        :param pipeline_config_interpreter:
-        :param local_path:
+        :param parent: Qt parent object
+        :param bg_task_manager: Background task runner instance
+        :param str plugin_id: Associated bootstrap plugin id
+        :param id pipeline_config_id: Pipeline Configuration id
+        :param are pipeline_config_name: Pipeline Configuration name
+        :param str pipeline_config_uri: Descriptor URI string for the config
+        :param str pipeline_config_folder: Folder where the configuration is located
+        :param pipeline_config_interpreter: Path to the python interpreter
+            associated with the config
         """
-        super(LiveConfiguration, self).__init__(
+        super(LiveRemoteConfiguration, self).__init__(
             parent,
             bg_task_manager,
             plugin_id,
-            project_id,
-            pipeline_config_id,
-            pipeline_config_name,
-            pipeline_config_uri,
             pipeline_config_interpreter,
-            local_path,
         )
+
+        self._pipeline_configuration_id = pipeline_config_id
+        self._pipeline_config_name = pipeline_config_name
+        self._pipeline_config_uri = pipeline_config_uri
+        self._pipeline_config_folder = pipeline_config_folder
+
+    def __repr__(self):
+        return "<LiveRemoteConfiguration id %d@%s>" % (
+            self._pipeline_configuration_id,
+            self._pipeline_config_uri
+        )
+
+    @property
+    def pipeline_configuration_id(self):
+        """
+        The associated pipeline configuration id or None if not defined.
+        """
+        return self._pipeline_configuration_id
 
     def _compute_config_hash(self, engine, entity_type, entity_id, link_entity_type):
         """
-        Returns a cache key
+        Generates a hash to uniquely identify the configuration.
+        Implemented by subclasses.
+
+        :param str engine: Engine to run
+        :param str entity_type: Associated entity type
+        :param int entity_id: Associated entity id
+        :param str link_entity_type: Entity type that the item is linked to.
+            This is typically provided for things such as task, versions or notes,
+            where caching it per linked type can be beneficial.
+        :returns: dictionary of values to use for hash computation
         """
         cache_key = {
-            "config_id": self.id,
+            "config_id": self.pipeline_configuration_id,
             "engine": engine,
             "uri": self.descriptor_uri,
             "type": entity_type,
@@ -92,14 +111,11 @@ class LiveConfiguration(BaseConfiguration):
                 ...
             }
 
-        :param config_descriptor: The descriptor object for the config to get
-            yml file data for.
-
         :returns: A dictionary keyed by yml file path, set to the file's mtime
             at the time the data was cached.
         :rtype: dict
         """
-        env_path = os.path.join(self.path, "config", "env")
+        env_path = os.path.join(self._pipeline_config_folder, "env")
         logger.debug("Looking for env files in %s" % env_path)
 
         yml_files = {}

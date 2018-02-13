@@ -16,10 +16,6 @@ import base64
 import functools
 import copy
 
-# Special, non-engine commands that we'll need to handle ourselves.
-CORE_INFO_COMMAND = "__core_info"
-UPGRADE_CHECK_COMMAND = "__upgrade_check"
-LOGGING_PREFIX = None
 
 # NOTE: Inheriting from both Formatter and object here because, before
 # Python 2.7, logging.Formatter was an old-style class. This means that
@@ -42,120 +38,6 @@ class _Formatter(logging.Formatter, object):
         """
         result = super(_Formatter, self).format(*args, **kwargs)
         return "%s%s" % (LOGGING_PREFIX, base64.b64encode(result))
-
-def app_upgrade_info(engine):
-    """
-    Logs a message for the user that tells them how to check for app updates.
-    This is provided for legacy purposes for "classic" SGTK setups.
-
-    :param engine: The currently-running engine instance.
-    """
-    # NOTE: The output here is in Slack-style markdown syntax. This means that
-    # we can do things like *Show this stuff in bold!* and when it makes it to
-    # the web app, the markdown will be handled and we'll end up with a bold
-    # message.
-    engine.log_info(
-        "In order to check if your installed apps and engines are up to date, "
-        "you can run the following command in a console:"
-    )
-
-    config_root = engine.sgtk.pipeline_configuration.get_path()
-
-    if sys.platform == "win32":
-        tank_cmd = os.path.join(config_root, "tank.bat")
-    else:
-        tank_cmd = os.path.join(config_root, "tank")
-
-    engine.log_info("*%s updates*" % tank_cmd)
-
-def core_info(engine):
-    """
-    Builds and logs a report on whether the currently-installed core is up to
-    data with what's in the app_store.
-
-    :param engine: The currently-running engine instance.
-    """
-    try:
-        from sgtk.commands.core_upgrade import TankCoreUpdater
-    except ImportError:
-        engine.log_debug("Legacy core detected, importing from sgtk.deploy.tank_commands.")
-        try:
-            from sgtk.deploy.tank_commands.core_upgrade import TankCoreUpdater
-        except ImportError:
-            # EVEN MORE LEGACY. In 0.16.x cores, the class is named differently.
-            # We also have changes to method names, which we'll monkey patch.
-            from sgtk.deploy.tank_commands.core_upgrade import TankCoreUpgrader
-            TankCoreUpdater = TankCoreUpgrader
-            TankCoreUpdater.UPDATE_BLOCKED_BY_SG = TankCoreUpdater.UPGRADE_BLOCKED_BY_SG
-            TankCoreUpdater.UPDATE_POSSIBLE = TankCoreUpdater.UPGRADE_POSSIBLE
-            TankCoreUpdater.get_update_version_number = TankCoreUpdater.get_latest_version_number
-            TankCoreUpdater.get_required_sg_version_for_update = TankCoreUpdater.get_required_sg_version_for_upgrade
-
-    # Create an upgrader instance that we can query if the install is up to date.
-    install_root = engine.sgtk.pipeline_configuration.get_install_location()
-
-    # Note the use of engine.sgtk.log below. Since we don't know for certain
-    # that we're using a v0.18+ tk-core, we can't rely on engine.logger existing.
-    # As such, we're getting at the logger in a way that works with older cores,
-    # even dating back to v0.16.x. This is an approach that is warrented here,
-    # given the backwards-compatibility requirements, and the fact that the
-    # tk-shotgun engine is generally treated as "special" in general.
-    installer = TankCoreUpdater(
-        install_root,
-        engine.sgtk.log,
-    )
-
-    cv = installer.get_current_version_number()
-
-    # The interface for the core updater changed with the release of tk-core
-    # 0.17.x. If we know we're dealing with a core that's 0.16.x, we need to
-    # call a different method to get the same information.
-    lv = installer.get_update_version_number()
-
-    # NOTE: The output here is in Slack-style markdown syntax. This means that
-    # we can do things like *Show this stuff in bold!* and when it makes it to
-    # the web app, the markdown will be handled and we'll end up with a bold
-    # message.
-    engine.log_info(
-        "You are currently running version %s of the Shotgun Pipeline Toolkit." % cv
-    )
-
-    if not engine.sgtk.pipeline_configuration.is_localized():
-        engine.log_info(
-            "Your core API is located in `%s` and is shared with other "
-            "projects." % install_root
-        )
-
-    status = installer.get_update_status()
-
-    if status == TankCoreUpdater.UP_TO_DATE:
-        engine.log_info(
-            "*You are up to date! There is no need to update the Toolkit "
-            "Core API at this time!*"
-        )
-    elif status == TankCoreUpdater.UPDATE_BLOCKED_BY_SG:
-        req_sg = installer.get_required_sg_version_for_update()
-        engine.log_warning(
-            "*A new version (%s) of the core API is available however "
-            "it requires a more recent version (%s) of Shotgun!*" % (lv, req_sg)
-        )
-    elif status == TankCoreUpdater.UPDATE_POSSIBLE:
-        (summary, url) = installer.get_release_notes()
-
-        engine.log_info("*A new version of the Toolkit API (%s) is available!*" % lv)
-        engine.log_info(
-            "*Change Summary:* %s [Click for detailed Release Notes](%s)" % (summary, url)
-        )
-        engine.log_info("In order to upgrade, execute the following command in a shell:")
-
-        if sys.platform == "win32":
-            tank_cmd = os.path.join(install_root, "tank.bat")
-        else:
-            tank_cmd = os.path.join(install_root, "tank")
-
-        engine.log_info("*%s core*" % tank_cmd)
-    else:
-        raise sgtk.TankError("Unknown Upgrade state!")
 
 def pre_engine_start_callback(logger, context):
     """
@@ -239,7 +121,6 @@ def bootstrap(config, base_configuration, entity, engine_name, bundle_cache_fall
     logger.debug("Engine %s started using entity %s", engine, entity)
 
     return engine
-
 
 def execute(config, project, name, entities, base_configuration, engine_name, bundle_cache_fallback_paths):
     """
