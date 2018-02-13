@@ -95,11 +95,21 @@ def get_cache_path(identifier_dict):
         params_hash.update(str(v))
 
     cache_location = sgtk.platform.current_bundle().cache_location
-    data_cache_path = os.path.join(
-        cache_location,
-        "external_cfg",
-        "%s.pkl" % params_hash.hexdigest()
-    )
+
+    if prefix in identifier_dict:
+        data_cache_path = os.path.join(
+            cache_location,
+            "external_cfg",
+            identifier_dict["prefix"]
+            "%s.pkl" % params_hash.hexdigest()
+        )
+    else:
+        data_cache_path = os.path.join(
+            cache_location,
+            "external_cfg",
+            "%s.pkl" % params_hash.hexdigest()
+        )
+
     logger.debug(
         "Resolved cache path for %s to %s" % (identifier_dict, data_cache_path)
     )

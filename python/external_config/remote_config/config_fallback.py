@@ -68,6 +68,7 @@ class FallbackRemoteConfiguration(RemoteConfiguration):
         :returns: dictionary of values to use for hash computation
         """
         cache_key = {
+            "prefix": "base",
             "engine": engine,
             "uri": self.descriptor_uri,
             "type": entity_type,

@@ -78,7 +78,7 @@ class ImmutableRemoteConfiguration(RemoteConfiguration):
         :returns: dictionary of values to use for hash computation
         """
         return {
-            "config_id": self.pipeline_configuration_id,
+            "prefix": "id_%s" % self.pipeline_configuration_id,
             "engine": engine,
             "uri": self.descriptor_uri,
             "type": entity_type,

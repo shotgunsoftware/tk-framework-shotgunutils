@@ -83,7 +83,7 @@ class LiveRemoteConfiguration(RemoteConfiguration):
         :returns: dictionary of values to use for hash computation
         """
         cache_key = {
-            "config_id": self.pipeline_configuration_id,
+            "prefix": "id_%s" % self.pipeline_configuration_id,
             "engine": engine,
             "uri": self.descriptor_uri,
             "type": entity_type,
