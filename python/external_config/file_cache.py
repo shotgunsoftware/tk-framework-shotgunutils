@@ -100,7 +100,7 @@ def get_cache_path(identifier_dict):
         data_cache_path = os.path.join(
             cache_location,
             "external_cfg",
-            identifier_dict["prefix"]
+            identifier_dict["prefix"],
             "%s.pkl" % params_hash.hexdigest()
         )
     else:
