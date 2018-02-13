@@ -117,7 +117,6 @@ class RemoteConfiguration(QtCore.QObject):
 
         if cached_data:
             # got some cached data that we can emit
-            print "cached data emit"
             self.commands_loaded.emit(
                 [RemoteCommand.create(d) for d in cached_data]
             )
