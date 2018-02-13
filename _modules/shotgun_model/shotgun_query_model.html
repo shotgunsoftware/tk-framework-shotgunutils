@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_query_model &mdash; tk-framework-shotgunutils v5.2.4 documentation</title>
+  <title>shotgun_model.shotgun_query_model &mdash; tk-framework-shotgunutils v5.3.4 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.2.4 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.3.4 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -118,7 +118,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.2.4.<br>
+    <b>tk-framework-shotgunutils</b> v5.3.4.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -1175,10 +1175,14 @@
                         <span class="n">parent_model_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_item_by_unique_id</span><span class="p">(</span><span class="n">parent_data_item</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span>
 
                     <span class="k">if</span> <span class="n">parent_model_item</span><span class="p">:</span>
-                        <span class="c1"># the parent exists in the view. So add the child</span>
-                        <span class="c1"># note: becuase of lazy loading, parent may not always exist.</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Creating new model item for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">data_item</span><span class="p">)</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_create_item</span><span class="p">(</span><span class="n">parent_model_item</span><span class="p">,</span> <span class="n">data_item</span><span class="p">)</span>
+                        <span class="c1"># The parent exists in the view. It might not because of</span>
+                        <span class="c1"># lazy loading.</span>
+                        <span class="c1"># If its children were already populated we need to add</span>
+                        <span class="c1"># the new ones now. If not, we let fetchMore does its job</span>
+                        <span class="c1"># later in lazy loading mode.</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">canFetchMore</span><span class="p">(</span><span class="n">parent_model_item</span><span class="o">.</span><span class="n">index</span><span class="p">()):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Creating new model item for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">data_item</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_create_item</span><span class="p">(</span><span class="n">parent_model_item</span><span class="p">,</span> <span class="n">data_item</span><span class="p">)</span>
 
                 <span class="k">elif</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">DELETED</span><span class="p">:</span>
                     <span class="c1"># see if the node exists in the tree, in that case delete it.</span>
@@ -1213,7 +1217,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Autodesk.
+        &copy; Copyright 2018, Autodesk.
 
     </p>
   </div> 
@@ -1234,7 +1238,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.2.4',
+            VERSION:'v5.3.4',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

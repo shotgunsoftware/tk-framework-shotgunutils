@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_entity_model &mdash; tk-framework-shotgunutils v5.2.4 documentation</title>
+  <title>shotgun_model.shotgun_entity_model &mdash; tk-framework-shotgunutils v5.3.4 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.2.4 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.3.4 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -118,7 +118,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.2.4.<br>
+    <b>tk-framework-shotgunutils</b> v5.3.4.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -387,14 +387,15 @@
                 <span class="k">if</span> <span class="n">colour</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">colour</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">colour</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                     <span class="c1"># get the icon for this colour from the cache:</span>
                     <span class="k">if</span> <span class="n">colour</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_swatch_icons</span><span class="p">:</span>
-                        <span class="c1"># build icon and add to cache:</span>
+                        <span class="c1"># Build icon and add to cache:</span>
+                        <span class="c1"># Add a bit of transparency otherwise the step color is</span>
+                        <span class="c1"># too bright.</span>
+                        <span class="n">colour</span> <span class="o">=</span> <span class="n">colour</span> <span class="o">+</span> <span class="p">(</span><span class="mi">200</span><span class="p">,)</span>
                         <span class="n">pm</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
                         <span class="n">pm</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">transparent</span><span class="p">)</span>
                         <span class="n">painter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="n">pm</span><span class="p">)</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="n">painter</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QBrush</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">colour</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">colour</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">colour</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
-                            <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">black</span><span class="p">)</span>
-                            <span class="n">painter</span><span class="o">.</span><span class="n">drawRect</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+                            <span class="n">painter</span><span class="o">.</span><span class="n">fillRect</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="o">*</span><span class="n">colour</span><span class="p">))</span>
                         <span class="k">finally</span><span class="p">:</span>
                             <span class="n">painter</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_step_swatch_icons</span><span class="p">[</span><span class="n">colour</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">pm</span><span class="p">)</span>
@@ -416,7 +417,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Autodesk.
+        &copy; Copyright 2018, Autodesk.
 
     </p>
   </div> 
@@ -437,7 +438,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.2.4',
+            VERSION:'v5.3.4',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

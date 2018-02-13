@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v5.2.4 documentation</title>
+  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v5.3.4 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.2.4 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.3.4 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -118,7 +118,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.2.4.<br>
+    <b>tk-framework-shotgunutils</b> v5.3.4.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -192,6 +192,12 @@
 <span class="kn">from</span> <span class="nn">sgtk.platform.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
 <span class="kn">from</span> <span class="nn">sgtk</span> <span class="kn">import</span> <span class="n">TankError</span>
 
+<span class="k">def</span> <span class="nf">_indicate_resource_accessed</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper to indicate a resource was accessed and shouldn&#39;t be considered</span>
+<span class="sd">    old when cleaning up old cached data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">utime</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ShotgunDataRetriever"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever">[docs]</a><span class="k">class</span> <span class="nc">ShotgunDataRetriever</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -377,7 +383,12 @@
                 <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">,</span> <span class="mo">0666</span><span class="p">)</span>
             <span class="k">finally</span><span class="p">:</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">old_umask</span><span class="p">)</span>
-
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Update access and modified time to &quot;now&quot; so the file will be kept</span>
+            <span class="c1"># around when culling old files in the cache.</span>
+            <span class="c1"># `_get_thumbnail_path` returns a full path with the extension if</span>
+            <span class="c1"># the thumb exists.</span>
+            <span class="n">_indicate_resource_accessed</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">path_to_cached_thumb</span></div>
 
     <span class="nd">@staticmethod</span>
@@ -449,7 +460,12 @@
                 <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">,</span> <span class="mo">0666</span><span class="p">)</span>
             <span class="k">finally</span><span class="p">:</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">old_umask</span><span class="p">)</span>
-
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Update access and modified time to &quot;now&quot; so the file will be kept</span>
+            <span class="c1"># around when culling old files in the cache.</span>
+            <span class="c1"># `_get_thumbnail_path` returns a full path with the extension if</span>
+            <span class="c1"># the thumb exists.</span>
+            <span class="n">_indicate_resource_accessed</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">path_to_cached_thumb</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.start"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -803,7 +819,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TankError</span><span class="p">(</span><span class="s2">&quot;Data retriever does not have a task manager to add the task to!&quot;</span><span class="p">)</span>
 
-        <span class="n">task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">task_cb</span><span class="p">,</span> 
+        <span class="n">task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">task_cb</span><span class="p">,</span>
                                               <span class="n">priority</span><span class="p">,</span> 
                                               <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bg_tasks_group</span><span class="p">,</span>
                                               <span class="n">task_args</span> <span class="o">=</span> <span class="n">task_args</span><span class="p">,</span>
@@ -1392,6 +1408,9 @@
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">file_path</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+            <span class="c1"># Update access and modified time to &quot;now&quot; so the file will be kept</span>
+            <span class="c1"># around when culling old files in the cache.</span>
+            <span class="n">_indicate_resource_accessed</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
             <span class="n">data</span><span class="p">[</span><span class="s2">&quot;file_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">file_path</span>
 
         <span class="k">return</span> <span class="n">data</span>
@@ -1415,6 +1434,9 @@
         <span class="n">thumb_path</span><span class="p">,</span> <span class="n">thumb_exists</span> <span class="o">=</span> <span class="n">ShotgunDataRetriever</span><span class="o">.</span><span class="n">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="p">)</span>
         <span class="n">thumb_image</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">if</span> <span class="n">thumb_exists</span><span class="p">:</span>
+            <span class="c1"># Update access and modified time to &quot;now&quot; so the file will be kept</span>
+            <span class="c1"># around when culling old files in the cache.</span>
+            <span class="n">_indicate_resource_accessed</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">load_image</span><span class="p">:</span>
                 <span class="c1"># load the thumbnail into a QImage:</span>
                 <span class="n">thumb_image</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">()</span>
@@ -1448,6 +1470,10 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">ensure_folder_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file_path</span><span class="p">))</span>
 
+        <span class="c1"># Even if `_task_check_attachment` didn&#39;t see the target file, we check</span>
+        <span class="c1"># again if it exists as the attachment might have been downloaded in the</span>
+        <span class="c1"># mean time. We don&#39;t update the modification time on the file to prevent</span>
+        <span class="c1"># it to be culled in cache cleanup, as it has been freshly downloaded.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">download_attachment</span><span class="p">(</span>
                 <span class="n">attachment</span><span class="o">=</span><span class="n">attachment_entity</span><span class="p">,</span>
@@ -1491,8 +1517,11 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">thumb_path</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{}</span>
 
-        <span class="c1"># there may be a case where another process has alrady downloaded the thumbnail for us, so </span>
+        <span class="c1"># There may be a case where another process has alrady downloaded the thumbnail for us, so</span>
         <span class="c1"># make sure that we aren&#39;t doing any extra work :)</span>
+        <span class="c1"># If it is the case, we don&#39;t have to update the file modification time</span>
+        <span class="c1"># to prevent it to be culled in cache clean up: it has been freshly</span>
+        <span class="c1"># downloaded as our `_task_check_thumbnail` task didn&#39;t see it.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">thumb_exists</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">ensure_folder_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">thumb_path</span><span class="p">))</span>
 
@@ -1629,7 +1658,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Autodesk.
+        &copy; Copyright 2018, Autodesk.
 
     </p>
   </div> 
@@ -1650,7 +1679,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.2.4',
+            VERSION:'v5.3.4',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
