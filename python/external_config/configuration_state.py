@@ -39,7 +39,7 @@ class ConfigurationState(QtCore.QObject):
         self._software_model = SoftwareModel(bg_task_manager, parent)
         self._software_model.data_refreshed.connect(self._on_software_refreshed)
 
-        self._pipeline_config_model = SoftwareModel(bg_task_manager, parent)
+        self._pipeline_config_model = PipelineConfigModel(bg_task_manager, parent)
         self._pipeline_config_model.data_refreshed.connect(self._on_pipeline_configs_refreshed)
 
     def refresh(self):

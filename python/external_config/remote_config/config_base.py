@@ -96,6 +96,14 @@ class RemoteConfiguration(QtCore.QObject):
         """
         return self._plugin_id
 
+    @property
+    def associated_python_interpreter(self):
+        """
+        The path to a python interpreter that should be used when
+        executing commands.
+        """
+        return self._pipeline_config_interpreter
+
     def request_commands(self, engine, entity_type, entity_id, link_entity_type):
         """
         Request commands for the given object.
@@ -118,7 +126,7 @@ class RemoteConfiguration(QtCore.QObject):
         if cached_data:
             # got some cached data that we can emit
             self.commands_loaded.emit(
-                [RemoteCommand.create(d) for d in cached_data]
+                [RemoteCommand.create(self, d) for d in cached_data]
             )
 
         else:
@@ -221,7 +229,7 @@ class RemoteConfiguration(QtCore.QObject):
         if cached_data:
             # got some cached data.
             self.commands_loaded.emit(
-                [RemoteCommand.create(d) for d in cached_data]
+                [RemoteCommand.create(self, d) for d in cached_data]
             )
         else:
             logger.error("TODO: handle this")

@@ -81,7 +81,12 @@ def main(
         engine.log_debug("Processing command: %s" % cmd_name)
 
         commands.append(
-            remote_command.RemoteCommand.serialize_command(cmd_name, data)
+            remote_command.RemoteCommand.serialize_command(
+                {"type": entity_type, "id": entity_id},
+                engine_name,
+                cmd_name,
+                data["properties"]
+            )
         )
 
     engine.log_debug("Engine commands processed.")

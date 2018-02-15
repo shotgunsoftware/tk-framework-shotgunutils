@@ -97,12 +97,12 @@ def serialize(config_object):
         "pipeline_config_id": config_object.pipeline_configuration_id,
         "pipeline_config_name": config_object.pipeline_configuration_name,
         "config_uri": config_object.descriptor_uri,
-        "python_interpreter": config_object._pipeline_config_interpreter,  # todo fix
+        "python_interpreter": config_object.associated_python_interpreter,
         "class_name": config_object.__class__.__name__
     }
 
     if isinstance(config_object, LiveRemoteConfiguration):
-        data["config_path"] = config_object._pipeline_config_folder
+        data["config_path"] = config_object.path
 
     return data
 

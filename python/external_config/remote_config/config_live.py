@@ -76,6 +76,13 @@ class LiveRemoteConfiguration(RemoteConfiguration):
         """
         return self._pipeline_config_name
 
+    @property
+    def path(self):
+        """
+        The path on disk to where this configuration is located.
+        """
+        return self._pipeline_config_folder
+
     def _compute_config_hash(self, engine, entity_type, entity_id, link_entity_type):
         """
         Generates a hash to uniquely identify the configuration.
