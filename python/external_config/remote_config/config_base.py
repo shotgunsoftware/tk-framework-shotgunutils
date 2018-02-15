@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Shotgun Software Inc.
+# Copyright (c) 2018 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -15,6 +15,7 @@ import cPickle
 from sgtk.platform.qt import QtCore, QtGui
 from ..process_execution import ProcessRunner
 from ..remote_command import RemoteCommand
+from ..util import create_parameter_file
 from .. import file_cache
 
 logger = sgtk.platform.get_logger(__name__)
@@ -47,10 +48,12 @@ class RemoteConfiguration(QtCore.QObject):
         .. note:: This class is constructed by :class:`RemoteConfigurationLoader`.
             Do not construct objects by hand.
 
-        :param parent: Qt parent object
-        :param bg_task_manager: Background task runner instance
+        :param parent: QT parent object.
+        :type parent: :class:`~PySide.QtGui.QObject`
+        :param bg_task_manager: Background task manager to use for any asynchronous work.
+        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         :param str plugin_id: Associated bootstrap plugin id
-        :param pipeline_config_interpreter: Path to the python interpreter
+        :param str pipeline_config_interpreter: Path to the python interpreter
             associated with the config
         """
         super(RemoteConfiguration, self).__init__(parent)
@@ -69,23 +72,23 @@ class RemoteConfiguration(QtCore.QObject):
     @property
     def pipeline_configuration_id(self):
         """
-        The associated pipeline configuration id or None if not defined.
+        The associated pipeline configuration id or ``None`` if not defined.
         """
         return None
 
     @property
     def pipeline_configuration_name(self):
         """
-        The name of the associated pipeline configuration or None if not defined.
+        The name of the associated pipeline configuration or ``None`` if not defined.
         """
         return None
 
     @property
     def descriptor_uri(self):
         """
-        The descriptor uri associated with this pipeline configuration. For
-        configurations that have an associated pipeline configuration ids,
-        this returns None.
+        The descriptor URI associated with this pipeline configuration. For
+        configurations that have an associated :meth:`pipeline_configuration_id`,
+        this returns ``None``.
         """
         return None
 
@@ -110,7 +113,7 @@ class RemoteConfiguration(QtCore.QObject):
 
         A ``commands_loaded`` signal will be emitted once the commands are available.
 
-        :param str engine: Engine to run
+        :param str engine: Engine to run.
         :param str entity_type: Associated entity type
         :param int entity_id: Associated entity id
         :param str link_entity_type: Entity type that the item is linked to.
@@ -146,7 +149,6 @@ class RemoteConfiguration(QtCore.QObject):
     def _compute_config_hash(self, engine, entity_type, entity_id, link_entity_type):
         """
         Generates a hash to uniquely identify the configuration.
-        Implemented by subclasses.
 
         :param str engine: Engine to run
         :param str entity_type: Associated entity type
@@ -156,11 +158,15 @@ class RemoteConfiguration(QtCore.QObject):
             where caching it per linked type can be beneficial.
         :returns: dictionary of values to use for hash computation
         """
+        # Implemented by subclasses.
         raise NotImplementedError("_compute_config_hash is not implemented.")
 
     @sgtk.LogManager.log_timing
     def _cache_commands(self, engine, entity_type, entity_id, cache_path):
         """
+        Execution, runs in a separate thread and launches an external
+        process to cache commands.
+
         :param str engine: Engine to run
         :param str entity_type: Associated entity type
         :param int entity_id: Associated entity id
@@ -169,7 +175,7 @@ class RemoteConfiguration(QtCore.QObject):
         logger.debug("Begin caching commands")
 
         if os.path.exists(cache_path):
-            # no need to cache
+            # no need to cache - another process got there first.
             return cache_path
 
         script = os.path.abspath(
@@ -181,7 +187,7 @@ class RemoteConfiguration(QtCore.QObject):
             )
         )
 
-        args_file = self._get_arguments_file(
+        args_file = create_parameter_file(
             dict(
                 core_path=sgtk.bootstrap.ToolkitManager.get_core_python_path(),
                 cache_path=cache_path,
@@ -215,13 +221,16 @@ class RemoteConfiguration(QtCore.QObject):
 
     def _task_completed(self, unique_id, group, result):
         """
-        Called when a task completes
+        Called after command caching completes.
+
+        :param str unique_id: unique task id
+        :param str group: task group
+        :param str result: return data from worker
         """
         if group != self.TASK_GROUP:
-            # not for us
+            # this was not for us
             return
 
-        logger.debug("Got configuration info!")
         # the return value from the process is the cache path
         cache_path = result
         cached_data = file_cache.load_cache_file(cache_path)
@@ -236,36 +245,16 @@ class RemoteConfiguration(QtCore.QObject):
 
     def _task_failed(self, unique_id, group, message, traceback_str):
         """
-        When a task fails
-        @param unique_id:
-        @param group:
-        @param message:
-        @param traceback_str:
-        @return:
+        Called if command caching fails.
+
+        :param str unique_id: unique task id
+        :param str group: task group
+        :param message:
+        :param traceback_str:
         """
         if group != self.TASK_GROUP:
             # not for us
             return
 
         logger.error("TASK FAILED %s %s " % (message, traceback_str))
-
-    def _get_arguments_file(self, args_data):
-        """
-        Dumps out a temporary file containing the provided data structure.
-
-        :param args_data: The data to serialize to disk.
-
-        :returns: File path
-        :rtype: str
-        """
-        args_file = tempfile.mkstemp()[1]
-
-        with open(args_file, "wb") as fh:
-            cPickle.dump(
-                args_data,
-                fh,
-                cPickle.HIGHEST_PROTOCOL,
-            )
-
-        return args_file
 

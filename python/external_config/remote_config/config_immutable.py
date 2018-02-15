@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Shotgun Software Inc.
+# Copyright (c) 2018 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -16,8 +16,8 @@ logger = sgtk.platform.get_logger(__name__)
 
 class ImmutableRemoteConfiguration(RemoteConfiguration):
     """
-    Represents a shotgun pipeline configuration which is
-    linked to an immutable descriptor
+    Represents a Shotgun pipeline configuration
+    linked to an immutable descriptor.
     """
 
     def __init__(
@@ -31,8 +31,13 @@ class ImmutableRemoteConfiguration(RemoteConfiguration):
             pipeline_config_interpreter,
     ):
         """
-        :param parent: Qt parent object
-        :param bg_task_manager: Background task runner instance
+        .. note:: This class is constructed by :class:`RemoteConfigurationLoader`.
+            Do not construct objects by hand.
+
+        :param parent: QT parent object.
+        :type parent: :class:`~PySide.QtGui.QObject`
+        :param bg_task_manager: Background task manager to use for any asynchronous work.
+        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         :param str plugin_id: Associated bootstrap plugin id
         :param id pipeline_config_id: Pipeline Configuration id
         :param are pipeline_config_name: Pipeline Configuration name
@@ -52,6 +57,9 @@ class ImmutableRemoteConfiguration(RemoteConfiguration):
         self._pipeline_config_uri = pipeline_config_uri
 
     def __repr__(self):
+        """
+        String representation
+        """
         return "<ImmutableRemoteConfiguration id %d@%s>" % (
             self._pipeline_configuration_id,
             self._pipeline_config_uri
@@ -60,21 +68,20 @@ class ImmutableRemoteConfiguration(RemoteConfiguration):
     @property
     def pipeline_configuration_id(self):
         """
-        The associated pipeline configuration id or None if not defined.
+        The associated pipeline configuration id or ``None`` if not defined.
         """
         return self._pipeline_configuration_id
 
     @property
     def pipeline_configuration_name(self):
         """
-        The name of the associated pipeline configuration or None if not defined.
+        The name of the associated pipeline configuration or ``None`` if not defined.
         """
         return self._pipeline_config_name
 
     def _compute_config_hash(self, engine, entity_type, entity_id, link_entity_type):
         """
         Generates a hash to uniquely identify the configuration.
-        Implemented by subclasses.
 
         :param str engine: Engine to run
         :param str entity_type: Associated entity type

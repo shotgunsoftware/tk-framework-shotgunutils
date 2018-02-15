@@ -39,10 +39,9 @@ class ConfigurationState(QtCore.QObject):
 
     def __init__(self, bg_task_manager, parent):
         """
-        :param bg_task_manager: Background task manager to use for any asynchronous work. If
-            this is None then a task manager will be created as needed.
+        :param bg_task_manager: Background task manager to use for any asynchronous work.
         :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
-        :param parent: The model's parent.
+        :param parent: QT parent object.
         :type parent: :class:`~PySide.QtGui.QObject`
         """
         super(ConfigurationState, self).__init__(parent)
@@ -107,7 +106,10 @@ class SoftwareModel(ShotgunModel):
     """
     def __init__(self, bg_task_manager, parent):
         """
-        :param parent: QT parent object
+        :param bg_task_manager: Background task manager to use for any asynchronous work.
+        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
+        :param parent: QT parent object.
+        :type parent: :class:`~PySide.QtGui.QObject`
         """
         super(SoftwareModel, self).__init__(
             parent,
@@ -160,7 +162,10 @@ class PipelineConfigModel(ShotgunModel):
     """
     def __init__(self, bg_task_manager, parent):
         """
-        :param parent: QT parent object
+        :param bg_task_manager: Background task manager to use for any asynchronous work.
+        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
+        :param parent: QT parent object.
+        :type parent: :class:`~PySide.QtGui.QObject`
         """
         super(PipelineConfigModel, self).__init__(
             parent,

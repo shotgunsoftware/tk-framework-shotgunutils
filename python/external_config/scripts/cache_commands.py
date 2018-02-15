@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Shotgun Software Inc.
+# Copyright (c) 2018 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -90,7 +90,7 @@ def main(
         )
 
     engine.log_debug("Engine commands processed.")
-    file_cache.write_cache(cache_path, commands)
+    file_cache.write_cache_file(cache_path, commands)
 
     logger.debug("Cache complete. Exiting with code 0")
 

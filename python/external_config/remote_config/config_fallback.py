@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Shotgun Software Inc.
+# Copyright (c) 2018 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -16,7 +16,7 @@ logger = sgtk.platform.get_logger(__name__)
 
 class FallbackRemoteConfiguration(RemoteConfiguration):
     """
-    Class representing a base fallback config which does not have
+    Class representing a config which does not have
     an associated pipeline configuration id.
     """
 
@@ -29,8 +29,13 @@ class FallbackRemoteConfiguration(RemoteConfiguration):
             pipeline_config_interpreter,
     ):
         """
-        :param parent: Qt parent object
-        :param bg_task_manager: Background task runner instance
+        .. note:: This class is constructed by :class:`RemoteConfigurationLoader`.
+            Do not construct objects by hand.
+
+        :param parent: QT parent object.
+        :type parent: :class:`~PySide.QtGui.QObject`
+        :param bg_task_manager: Background task manager to use for any asynchronous work.
+        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         :param str plugin_id: Associated bootstrap plugin id
         :param str pipeline_config_uri: Descriptor URI string for the config
         :param pipeline_config_interpreter: Path to the python interpreter
@@ -45,6 +50,9 @@ class FallbackRemoteConfiguration(RemoteConfiguration):
         self._pipeline_config_uri = pipeline_config_uri
 
     def __repr__(self):
+        """
+        String representation
+        """
         return "<FallbackRemoteConfiguration %s>" % self._pipeline_config_uri
 
     @property
@@ -57,7 +65,6 @@ class FallbackRemoteConfiguration(RemoteConfiguration):
     def _compute_config_hash(self, engine, entity_type, entity_id, link_entity_type):
         """
         Generates a hash to uniquely identify the configuration.
-        Implemented by subclasses.
 
         :param str engine: Engine to run
         :param str entity_type: Associated entity type

@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Shotgun Software Inc.
+# Copyright (c) 2018 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -10,13 +10,13 @@
 
 import sgtk
 from sgtk.platform.qt import QtCore, QtGui
-
-logger = sgtk.platform.get_logger(__name__)
-
 from .configuration_state import ConfigurationState
 from . import file_cache
 from .errors import RemoteConfigNotAccessibleError, RemoteConfigParseError
 from . import remote_config
+
+logger = sgtk.platform.get_logger(__name__)
+
 
 class RemoteConfigurationLoader(QtCore.QObject):
     """
@@ -35,7 +35,6 @@ class RemoteConfigurationLoader(QtCore.QObject):
         emitted at startup or typically after :meth:`refresh` has been called.
         Any implementation which caches :class:`RemoteConfiguration` instances
         can use this signal to invalidate their caches.
-
     """
 
     # signal emitted to indicate that an update has been detected
@@ -53,8 +52,10 @@ class RemoteConfigurationLoader(QtCore.QObject):
 
         :param plugin_id: Plugin id of the current environment
         :param base_config: base_config
-        :param bg_task_manager: Task manager to use for background work
-        :param parent: Qt parent
+        :param bg_task_manager: Background task manager to use for any asynchronous work.
+        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
+        :param parent: QT parent object.
+        :type parent: :class:`~PySide.QtGui.QObject`
         """
         super(RemoteConfigurationLoader, self).__init__(parent)
 
@@ -78,22 +79,26 @@ class RemoteConfigurationLoader(QtCore.QObject):
 
     def shut_down(self):
         """
-        Should be called prior to shutdown.
-        Deallocates any internal data and shuts down active workers.
+        Shut down and deallocate.
         """
         self._config_state.shut_down()
 
     def refresh(self):
         """
-        Requests a refresh. If things have changed, this may result in a
-        ``configuration_changed`` signal being emitted.
+        Requests a refresh. If the State of Shotgun has changed in a way which
+        may affect configurations, this will result in a ``configuration_changed``
+        signal being emitted.
+
+        Examples of state changes which may affect configurations are any changes
+        to related pipeline configuration, but also indirect changes such as a
+        change to the list of software entities, since these can implicitly affect
+        the list of commands associated with a project or entity.
         """
         self._config_state.refresh()
 
     def request_configurations(self, project_id, force=False):
         """
         Requests a list of configuration objects for the given project.
-        a configuration_changed signal will be emitted with the result.
 
         Emits a ``configurations_loaded`` signal when the configurations
         have been loaded.
@@ -117,22 +122,24 @@ class RemoteConfigurationLoader(QtCore.QObject):
         if config_data and not force:
             # got the data cached so emit is straight away
             try:
-                config_objects = [remote_config.deserialize(self, self._bg_task_manager, cfg) for cfg in config_data["configurations"]]
+                config_objects = []
+                for cfg in config_data["configurations"]:
+                    remote_config.deserialize(self, self._bg_task_manager, cfg)
+
             except RemoteConfigParseError:
                 # get rid of this configuration
                 file_cache.delete_cache(config_cache_key)
                 logger.debug("Detected and deleted out of date cache.")
+
             else:
-                self.configurations_loaded.emit(
-                    project_id,
-                    config_objects
-                )
+                self.configurations_loaded.emit(project_id, config_objects)
                 config_data_emitted = True
 
         if not config_data_emitted:
             # no cached version exists. Request a bg load
             self._bg_task_manager.add_task(
                 self._execute_get_configurations,
+                priority=1,
                 group=self.TASK_GROUP,
                 task_kwargs={
                     "project_id": project_id,
@@ -142,7 +149,10 @@ class RemoteConfigurationLoader(QtCore.QObject):
 
     def _execute_get_configurations(self, project_id, hash):
         """
-        Background task to load configs
+        Background task to load configs.
+
+        :param int project_id: Project id to load configs for.
+        :param str hash: Hash representing the relevant global state of Shotgun.
         """
         # get list of configurations
         mgr = sgtk.bootstrap.ToolkitManager()
@@ -152,7 +162,11 @@ class RemoteConfigurationLoader(QtCore.QObject):
 
     def _task_completed(self, unique_id, group, result):
         """
-        When a task completes
+        Called after pipeline configuration enumeration completes.
+
+        :param str unique_id: unique task id
+        :param str group: task group
+        :param str result: return data from worker
         """
         logger.debug("Got configuration info!")
         if group != self.TASK_GROUP:
@@ -195,7 +209,7 @@ class RemoteConfigurationLoader(QtCore.QObject):
         }
 
         # save cache
-        file_cache.write_cache_file(
+        file_cache.write_cache(
             {"project": project_id, "plugin": self._plugin_id, "hash": hash},
             data
         )
@@ -204,12 +218,12 @@ class RemoteConfigurationLoader(QtCore.QObject):
 
     def _task_failed(self, unique_id, group, message, traceback_str):
         """
-        When a task fails
-        @param unique_id:
-        @param group:
-        @param message:
-        @param traceback_str:
-        @return:
+        Called after pipeline configuration enumeration fails.
+
+        :param str unique_id: unique task id
+        :param str group: task group
+        :param message:
+        :param traceback_str:
         """
         if group != self.TASK_GROUP:
             # not for us

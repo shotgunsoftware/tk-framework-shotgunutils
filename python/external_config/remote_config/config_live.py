@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Shotgun Software Inc.
+# Copyright (c) 2018 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -34,8 +34,13 @@ class LiveRemoteConfiguration(RemoteConfiguration):
             pipeline_config_interpreter,
     ):
         """
-        :param parent: Qt parent object
-        :param bg_task_manager: Background task runner instance
+        .. note:: This class is constructed by :class:`RemoteConfigurationLoader`.
+            Do not construct objects by hand.
+
+        :param parent: QT parent object.
+        :type parent: :class:`~PySide.QtGui.QObject`
+        :param bg_task_manager: Background task manager to use for any asynchronous work.
+        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         :param str plugin_id: Associated bootstrap plugin id
         :param id pipeline_config_id: Pipeline Configuration id
         :param are pipeline_config_name: Pipeline Configuration name
@@ -57,6 +62,9 @@ class LiveRemoteConfiguration(RemoteConfiguration):
         self._pipeline_config_folder = pipeline_config_folder
 
     def __repr__(self):
+        """
+        String representation
+        """
         return "<LiveRemoteConfiguration id %d@%s>" % (
             self._pipeline_configuration_id,
             self._pipeline_config_uri
@@ -86,7 +94,6 @@ class LiveRemoteConfiguration(RemoteConfiguration):
     def _compute_config_hash(self, engine, entity_type, entity_id, link_entity_type):
         """
         Generates a hash to uniquely identify the configuration.
-        Implemented by subclasses.
 
         :param str engine: Engine to run
         :param str entity_type: Associated entity type

@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Shotgun Software Inc.
+# Copyright (c) 2018 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -19,6 +19,7 @@ from ..errors import RemoteConfigParseError, RemoteConfigNotAccessibleError
 
 logger = sgtk.platform.get_logger(__name__)
 
+# file format magic number
 CONFIGURATION_GENERATION = 4
 
 
@@ -27,8 +28,10 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, plugin_id, 
     Creates a :class`RemoteConfiguration` subclass given
     a set of input data, as returned by ToolkitManager.get_pipeline_configurations()
 
-    :param parent: Qt parent object
-    :param bg_task_manager: Background task runner instance
+    :param parent: QT parent object.
+    :type parent: :class:`~PySide.QtGui.QObject`
+    :param bg_task_manager: Background task manager to use for any asynchronous work.
+    :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
     :param str plugin_id: Associated bootstrap plugin id
     :param configuration_data: Dictionary entry on the form
         returned by ToolkitManager.get_pipeline_configurations()
@@ -71,8 +74,10 @@ def create_default(parent, bg_task_manager, plugin_id, config_uri):
     Creates a :class`RemoteConfiguration` subclass given a config
     URI with no particular pipeline configuration association.
 
-    :param parent: Qt parent object
-    :param bg_task_manager: Background task runner instance
+    :param parent: QT parent object.
+    :type parent: :class:`~PySide.QtGui.QObject`
+    :param bg_task_manager: Background task manager to use for any asynchronous work.
+    :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
     :param str plugin_id: Associated bootstrap plugin id
     :param str config_uri: Config URI to cache
     :returns: :class:`RemoteConfiguration`
@@ -89,7 +94,10 @@ def create_default(parent, bg_task_manager, plugin_id, config_uri):
 def serialize(config_object):
     """
     Create a chunk of data that can be included in json, yaml or pickle.
-    :return: simple data structure.
+
+    To be used in conjunction with :meth:`deserialize`.
+
+    :returns: Simple dictionary based data structure.
     """
     data = {
         "GENERATION": CONFIGURATION_GENERATION,
@@ -111,11 +119,13 @@ def deserialize(parent, bg_task_manager, data):
     """
     Creates a :class:`RemoteConfiguration` given serialized data.
 
-    :param bg_task_manager:
-    :param parent:
-    :param data:
+    :param parent: QT parent object.
+    :type parent: :class:`~PySide.QtGui.QObject`
+    :param bg_task_manager: Background task manager to use for any asynchronous work.
+    :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
+    :param data: Data created with :meth:`serialize`.
     :returns: :class:`RemoteConfiguration`
-    :raises: SerializationFormatError
+    :raises: :class:`RemoteConfigParseError` on error
     """
     if data.get("GENERATION") != CONFIGURATION_GENERATION:
         raise RemoteConfigParseError(
@@ -162,6 +172,10 @@ def _get_python_interpreter(descriptor):
     """
     Retrieves the python interpreter from the configuration. Returns the
     current python interpreter if no interpreter was specified.
+
+    :param descriptor: Configuration descriptor instance
+    :returns: path to a python interpreter to use in conjunction with the descriptor.
+    :rtype: str
     """
     try:
         if descriptor is None:

@@ -7,18 +7,21 @@
 # By accessing, using, copying or modifying this work you indicate your
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
+import cPickle as pickle
+import tempfile
 
 
-class RemoteConfigParseError(RuntimeError):
+def create_parameter_file(data):
     """
-    Indicates that the given serialized data is not usable
-    """
-    pass
+    Pickles and dumps out a temporary file containing the provided data structure.
 
-
-class RemoteConfigNotAccessibleError(RuntimeError):
+    :param data: The data to serialize to disk.
+    :returns: File path to a temporary file
+    :rtype: str
     """
-    Indicates that a configuration is not accessible
-    """
-    pass
+    param_file = tempfile.mkstemp()[1]
 
+    with open(param_file, "wb") as fh:
+        pickle.dump(data, fh, pickle.HIGHEST_PROTOCOL)
+
+    return param_file
