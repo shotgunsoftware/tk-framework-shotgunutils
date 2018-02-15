@@ -200,6 +200,7 @@ class RemoteCommand(object):
         """
         return self._display_name
 
+    @property
     def tooltip(self):
         """
         Associated help text tooltip.
