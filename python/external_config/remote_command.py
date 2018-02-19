@@ -7,13 +7,9 @@
 # By accessing, using, copying or modifying this work you indicate your
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
-
-
 import os
 import cPickle
 import sgtk
-
-from .util import create_parameter_file
 
 logger = sgtk.platform.get_logger(__name__)
 
@@ -210,8 +206,14 @@ class RemoteCommand(object):
     def execute(self):
         """
         Executes the remote command in a separate process.
+
+        .. note:: The process will be launched in an asynchronous way.
+            It is recommended that this command is executed in a worker thread.
         """
+        # local imports becuase this is executed from runner scripts
         from .process_execution import ProcessRunner
+        from .util import create_parameter_file
+
         logger.debug("%s: execute command" % self)
 
         script = os.path.abspath(

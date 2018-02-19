@@ -22,8 +22,7 @@ class RemoteConfigurationLoader(QtCore.QObject):
     """
     Class for loading configurations across contexts.
 
-    Signal Interface
-    ----------------
+    **Signal Interface**
 
     :signal configurations_loaded(project_id, configs): Gets emitted configurations
         have been loaded for the given project. The parameters passed is the

@@ -10,10 +10,8 @@
 
 import os
 import sgtk
-import tempfile
-import cPickle
 from sgtk.platform.qt import QtCore, QtGui
-from ..process_execution import ProcessRunner
+from sgtk.util.process import subprocess_check_output, SubprocessCalledProcessError
 from ..remote_command import RemoteCommand
 from ..util import create_parameter_file
 from .. import file_cache
@@ -25,8 +23,7 @@ class RemoteConfiguration(QtCore.QObject):
     """
     Object wrapping a remote pipeline configuration.
 
-    Signal Interface
-    ----------------
+    **Signals**
 
     :signal commands_loaded(commands): Gets emitted after :meth:`request_commands` has
         been called and once commands have been loaded for the configuration. The
@@ -47,6 +44,8 @@ class RemoteConfiguration(QtCore.QObject):
         """
         .. note:: This class is constructed by :class:`RemoteConfigurationLoader`.
             Do not construct objects by hand.
+
+        Constructor parameters:
 
         :param parent: QT parent object.
         :type parent: :class:`~PySide.QtGui.QObject`
@@ -202,19 +201,16 @@ class RemoteConfiguration(QtCore.QObject):
         )
 
         args = [self._pipeline_config_interpreter, script, args_file]
-        logger.debug("Command arguments: %s", args)
+        logger.warning("Command arguments: %s", args)
 
-        retcode, stdout, stderr = ProcessRunner.call_cmd(args)
-
-        if retcode == 0:
-            logger.error("Command stdout: %s", stdout)
-            logger.error("Command stderr: %s", stderr)
-        else:
-            logger.error("Command failed: %s", args)
-            logger.error("Failed command stdout: %s", stdout)
-            logger.error("Failed command stderr: %s", stderr)
-            logger.error("Failed command retcode: %s", retcode)
-            raise Exception("%s\n\n%s" % (stdout, stderr))
+        try:
+            output = subprocess_check_output(args)
+            logger.warning("OUTPUT: %s" % output)
+        except SubprocessCalledProcessError, e:
+            return_code = e.returncode
+            output = e.output
+            logger.error("OUTPUT: %s" % output)
+            raise Exception("Error caching commands")
 
         logger.debug("Caching complete.")
         return cache_path

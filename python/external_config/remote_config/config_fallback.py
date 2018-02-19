@@ -10,6 +10,7 @@
 
 import sgtk
 from .config_base import RemoteConfiguration
+from .. import file_cache
 
 logger = sgtk.platform.get_logger(__name__)
 
@@ -75,7 +76,7 @@ class FallbackRemoteConfiguration(RemoteConfiguration):
         :returns: dictionary of values to use for hash computation
         """
         cache_key = {
-            "prefix": "base",
+            file_cache.FOLDER_PREFIX_KEY: "base",
             "engine": engine,
             "uri": self.descriptor_uri,
             "type": entity_type,

@@ -28,8 +28,7 @@ class ConfigurationState(QtCore.QObject):
     As an example, changing a software entity may affect
     the list of registered commands.
 
-    Signal Interface
-    ----------------
+    **Signals**
 
     :signal state_changed(): Indicates that the state has changed since
         it was last checked.
@@ -39,6 +38,8 @@ class ConfigurationState(QtCore.QObject):
 
     def __init__(self, bg_task_manager, parent):
         """
+        Initialize the class with the following parameters:
+
         :param bg_task_manager: Background task manager to use for any asynchronous work.
         :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         :param parent: QT parent object.
@@ -104,6 +105,7 @@ class SoftwareModel(ShotgunModel):
     """
     All software entities
     """
+
     def __init__(self, bg_task_manager, parent):
         """
         :param bg_task_manager: Background task manager to use for any asynchronous work.

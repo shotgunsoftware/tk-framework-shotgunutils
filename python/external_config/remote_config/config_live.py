@@ -12,6 +12,7 @@ import os
 import sgtk
 import fnmatch
 from .config_base import RemoteConfiguration
+from .. import file_cache
 
 logger = sgtk.platform.get_logger(__name__)
 
@@ -104,7 +105,7 @@ class LiveRemoteConfiguration(RemoteConfiguration):
         :returns: dictionary of values to use for hash computation
         """
         cache_key = {
-            "prefix": "id_%s" % self.pipeline_configuration_id,
+            file_cache.FOLDER_PREFIX_KEY: "id_%s" % self.pipeline_configuration_id,
             "engine": engine,
             "uri": self.descriptor_uri,
             "type": entity_type,

@@ -31,20 +31,5 @@ Class RemoteCommand
     :inherited-members:
     :exclude-members: serialize_command, create,
 
-Exceptions
-============================================
-
-The following exception types are raised:
-
-.. autoclass:: RemoteConfigParseError
-    :show-inheritance:
-    :inherited-members:
-    :members:
-
-.. autoclass:: RemoteConfigNotAccessibleError
-    :show-inheritance:
-    :inherited-members:
-    :members:
-
 
 

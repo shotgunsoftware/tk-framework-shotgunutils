@@ -14,6 +14,10 @@ import sgtk
 
 logger = sgtk.platform.get_logger(__name__)
 
+# if this key is found in the cache, a folder
+# will this name will be generated as part of
+# the cache path
+FOLDER_PREFIX_KEY = "prefix"
 
 def load_cache(identifier_dict):
     """
@@ -115,6 +119,10 @@ def get_cache_path(identifier_dict):
     be computed based on the identifier and used to determine
     the path.
 
+    If the hash key 'prefix' is detected, this will be added
+    to the path as a parent folder to the cache file. This provides
+    a simple way to organize different caches into different folders.
+
     :param dict identifier_dict: Dictionary of identifying data.
     :retuns: path on disk, relative to the current bundle's cache location.
     """
@@ -125,11 +133,13 @@ def get_cache_path(identifier_dict):
 
     cache_location = sgtk.platform.current_bundle().cache_location
 
-    if "prefix" in identifier_dict:
+    if FOLDER_PREFIX_KEY in identifier_dict:
+        # if FOLDER_PREFIX_KEY is found in the hash,
+        # this will be added as a folder to the path
         data_cache_path = os.path.join(
             cache_location,
             "external_cfg",
-            identifier_dict["prefix"],
+            identifier_dict[FOLDER_PREFIX_KEY],
             "%s.pkl" % params_hash.hexdigest()
         )
     else:
