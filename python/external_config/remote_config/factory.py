@@ -39,33 +39,41 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, plugin_id, 
     :raises: :class:`RemoteConfigNotAccessibleError` if the configuration data could not
     """
 
-    if configuration_data["descriptor"] is None:
+    descriptor = configuration_data["descriptor"]
+
+    if descriptor is None:
         # the config is not accessible
         raise RemoteConfigNotAccessibleError(
-            "Configuration %s could not be accessed" % configuration_data["name"]
+            "Configuration %s could not be resolved" % configuration_data["name"]
         )
 
-    if configuration_data["descriptor"].is_immutable():
+    if descriptor.is_immutable():
         return ImmutableRemoteConfiguration(
             parent,
             bg_task_manager,
             plugin_id,
             configuration_data["id"],
             configuration_data["name"],
-            configuration_data["descriptor"].get_uri(),
-            _get_python_interpreter(configuration_data["descriptor"])
+            descriptor.get_uri(),
+            _get_python_interpreter(descriptor)
         )
 
     else:
+        # check that it exists on disk
+        if descriptor.get_path() is None:
+            raise RemoteConfigNotAccessibleError(
+                "Configuration %s does not have a path on disk." % configuration_data["name"]
+            )
+
         return LiveRemoteConfiguration(
             parent,
             bg_task_manager,
             plugin_id,
             configuration_data["id"],
             configuration_data["name"],
-            configuration_data["descriptor"].get_config_folder(),
-            configuration_data["descriptor"].get_uri(),
-            _get_python_interpreter(configuration_data["descriptor"])
+            descriptor.get_config_folder(),
+            descriptor.get_uri(),
+            _get_python_interpreter(descriptor)
         )
 
 

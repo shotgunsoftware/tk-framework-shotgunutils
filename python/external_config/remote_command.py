@@ -83,7 +83,7 @@ class RemoteCommand(object):
             engine_name=data["engine_name"],
             entity_type=data["entity"]["type"],
             entity_id=data["entity"]["id"],
-
+            pipeline_config_name=remote_configuration.pipeline_configuration_name,
         )
 
     def __init__(
@@ -98,6 +98,7 @@ class RemoteCommand(object):
             engine_name,
             entity_type,
             entity_id,
+            pipeline_config_name
     ):
         """
         .. note:: This class is constructed by :class:`RemoteConfigurationLoader`.
@@ -113,6 +114,7 @@ class RemoteCommand(object):
         :param str engine_name: Engine name to execute command in
         :param str entity_type: Associated entity type
         :param int entity_id: Associated entity id
+        :param str pipeline_config_name: Associated pipeline configuration name
         """
         super(RemoteCommand, self).__init__()
 
@@ -129,6 +131,7 @@ class RemoteCommand(object):
         self._engine_name = engine_name
         self._entity_type = entity_type
         self._entity_id = entity_id
+        self._pipeline_config_name = pipeline_config_name
 
     def __repr__(self):
         """
@@ -163,6 +166,7 @@ class RemoteCommand(object):
             engine_name=data["engine_name"],
             entity_type=data["entity_type"],
             entity_id=data["entity_id"],
+            pipeline_config_name=data["pipeline_config_name"]
         )
 
 
@@ -185,9 +189,18 @@ class RemoteCommand(object):
             "plugin_id": self._plugin_id,
             "engine_name": self._engine_name,
             "entity_type": self._entity_type,
-            "entity_id": self._entity_id
+            "entity_id": self._entity_id,
+            "pipeline_config_name": self._pipeline_config_name
         }
         return cPickle.dumps(data)
+
+    @property
+    def pipeline_configuration_name(self):
+        """
+        The name of the Shotgun pipeline configuration this command is associated with,
+        or ``None`` if no association exists.
+        """
+        return self._pipeline_config_name
 
     @property
     def display_name(self):

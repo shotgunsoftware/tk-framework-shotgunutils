@@ -29,12 +29,24 @@ def main(
 
 ):
     """
+    Bootstraps into an engine and caches commands to file.
+
+    :param str cache_path: Path to write cached data to
+    :param str configuration_uri: URI to bootstrap (for when pipeline config id is unknown).
+    :param int pipeline_config_id: Associated pipeline config id
+    :param str plugin_id: Plugin id to use for bootstrap
+    :param str engine_name: Engine name to launch
+    :param str entity_type: Entity type to launch
+    :param str entity_id: Entity id to launch
+    :param list bundle_cache_fallback_paths: List of bundle cache paths to include.
     """
     # import modules from shotgun-utils fw for serialization
     import file_cache
     import remote_command
+    import constants
 
     try:
+        # log to file.
         sgtk.LogManager().initialize_base_file_handler(engine_name)
         logger = sgtk.LogManager.get_logger(LOGGER_NAME)
         logger.debug("")
@@ -47,11 +59,11 @@ def main(
         manager.bundle_cache_fallback_paths = bundle_cache_fallback_paths
 
         if pipeline_config_id:
-            # we have a pipeline config id to launch
+            # we have a pipeline config id to launch.
             manager.do_shotgun_config_lookup = True
             manager.pipeline_configuration = pipeline_config_id
         else:
-            # launch a base uri. no need to look up in sg.
+            # launch a base uri. no need to look in sg for overrides.
             manager.do_shotgun_config_lookup = False
             manager.base_configuration = configuration_uri
 
@@ -66,9 +78,9 @@ def main(
         # We need to give the server a way to know that this failed due
         # to an engine initialization issue. That will allow it to skip
         # this config gracefully and log appropriately.
-        logger.exception("could not bootstrap configuration")
+        logger.exception("Could not bootstrap configuration")
         print traceback.format_exc()
-        sys.exit(ENGINE_INIT_ERROR_EXIT_CODE)
+        sys.exit(constants.EXTERNAL_PROCESS_ENGINE_INIT_EXIT_CODE)
 
     # Note that from here on out, we have to use the legacy log_* methods
     # that the engine provides. This is because we're now operating in the
@@ -91,27 +103,27 @@ def main(
 
     engine.log_debug("Engine commands processed.")
     file_cache.write_cache_file(cache_path, commands)
-
-    logger.debug("Cache complete. Exiting with code 0")
-
+    engine.log_debug("Cache complete.")
+    engine.destroy()
 
 if __name__ == "__main__":
-    arg_data_file = sys.argv[1]
+    """
+    Main script entry point
+    """
 
+    # unpack file with arguments payload
+    arg_data_file = sys.argv[1]
     with open(arg_data_file, "rb") as fh:
         arg_data = cPickle.load(fh)
 
-    # The RPC api has given us the path to its tk-core to prepend
-    # to our sys.path prior to importing sgtk. We'll prepent the
-    # the path, import sgtk, and then clean up after ourselves.
+    # prepend sgtk to sys.path to make sure
+    # know exactly what version of sgtk we are running.
     original_sys_path = copy.copy(sys.path)
-    try:
-        sys.path = [arg_data["core_path"]] + sys.path
-        import sgtk
-    finally:
-        sys.path = original_sys_path
+    sys.path = [arg_data["core_path"]] + sys.path
+    import sgtk
 
-    # now add shotgun utils
+    # now add the external config module
+    # so that we later can import serialization logic.
     utils_folder = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "..",)
     )

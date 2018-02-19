@@ -9,6 +9,8 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 import cPickle as pickle
 import tempfile
+import os
+import uuid
 
 
 def create_parameter_file(data):
@@ -19,7 +21,7 @@ def create_parameter_file(data):
     :returns: File path to a temporary file
     :rtype: str
     """
-    param_file = tempfile.mkstemp()[1]
+    param_file = os.path.join(tempfile.gettempdir(), "sgtk_%s.cmd" % uuid.uuid4().hex)
 
     with open(param_file, "wb") as fh:
         pickle.dump(data, fh, pickle.HIGHEST_PROTOCOL)

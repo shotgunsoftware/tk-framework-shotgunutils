@@ -58,6 +58,8 @@ class RemoteConfigurationLoader(QtCore.QObject):
         """
         super(RemoteConfigurationLoader, self).__init__(parent)
 
+        self._task_ids = {}
+
         self._plugin_id = plugin_id
         self._base_config = base_config
 
@@ -123,7 +125,9 @@ class RemoteConfigurationLoader(QtCore.QObject):
             try:
                 config_objects = []
                 for cfg in config_data["configurations"]:
-                    remote_config.deserialize(self, self._bg_task_manager, cfg)
+                    config_objects.append(
+                        remote_config.deserialize(self, self._bg_task_manager, cfg)
+                    )
 
             except RemoteConfigParseError:
                 # get rid of this configuration
@@ -136,7 +140,7 @@ class RemoteConfigurationLoader(QtCore.QObject):
 
         if not config_data_emitted:
             # no cached version exists. Request a bg load
-            self._bg_task_manager.add_task(
+            unqiue_id = self._bg_task_manager.add_task(
                 self._execute_get_configurations,
                 priority=1,
                 group=self.TASK_GROUP,
@@ -145,6 +149,7 @@ class RemoteConfigurationLoader(QtCore.QObject):
                     "hash": self._config_state.get_hash()
                 }
             )
+            self._task_ids[unqiue_id] = project_id
 
     def _execute_get_configurations(self, project_id, hash):
         """
@@ -167,11 +172,12 @@ class RemoteConfigurationLoader(QtCore.QObject):
         :param str group: task group
         :param str result: return data from worker
         """
-        logger.debug("Got configuration info!")
-        if group != self.TASK_GROUP:
-            # not for us
+        if unique_id not in self._task_ids:
             return
 
+        del self._task_ids[unique_id]
+
+        logger.debug("Got configuration info!")
         (project_id, hash, config_dicts) = result
 
         # check that the configs are complete. If not, issue warnings
@@ -213,6 +219,8 @@ class RemoteConfigurationLoader(QtCore.QObject):
             data
         )
 
+        logger.debug("Got configuration objects for project %d: %s" % (project_id, config_objects))
+
         self.configurations_loaded.emit(project_id, config_objects)
 
     def _task_failed(self, unique_id, group, message, traceback_str):
@@ -224,7 +232,13 @@ class RemoteConfigurationLoader(QtCore.QObject):
         :param message:
         :param traceback_str:
         """
-        if group != self.TASK_GROUP:
-            # not for us
+        if unique_id not in self._task_ids:
             return
 
+        project_id = self._task_ids[unique_id]
+        del self._task_ids[unique_id]
+
+        logger.error("Could not determine project configurations: %s" % message)
+
+        # emit an empty list of configurations
+        self.configurations_loaded.emit(project_id, [])

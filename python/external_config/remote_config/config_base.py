@@ -12,6 +12,7 @@ import os
 import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 from sgtk.util.process import subprocess_check_output, SubprocessCalledProcessError
+from .. import constants
 from ..remote_command import RemoteCommand
 from ..util import create_parameter_file
 from .. import file_cache
@@ -32,7 +33,7 @@ class RemoteConfiguration(QtCore.QObject):
     """
     TASK_GROUP = "tk-framework-shotgunutils.external_config.RemoteConfiguration"
 
-    commands_loaded = QtCore.Signal(list)  # list of RemoteCommand instances
+    commands_loaded = QtCore.Signal(list)  # list of :class:`RemoteCommand` instances
 
     def __init__(
             self,
@@ -60,6 +61,8 @@ class RemoteConfiguration(QtCore.QObject):
         self._parent = parent
         self._plugin_id = plugin_id
         self._pipeline_config_interpreter = pipeline_config_interpreter
+
+        self._task_ids = {}
 
         # keep a handle to the current app/engine/fw bundle for convenience
         self._bundle = sgtk.platform.current_bundle()
@@ -127,14 +130,16 @@ class RemoteConfiguration(QtCore.QObject):
 
         if cached_data:
             # got some cached data that we can emit
+            logger.debug("Returning cached commands.")
             self.commands_loaded.emit(
                 [RemoteCommand.create(self, d) for d in cached_data]
             )
 
         else:
             # no cached version exists. Request a bg load
+            logger.debug("No cached commands exists. Requesting background load.")
             cache_path = file_cache.get_cache_path(cache_hash)
-            self._bg_task_manager.add_task(
+            task_id = self._bg_task_manager.add_task(
                 self._cache_commands,
                 group=self.TASK_GROUP,
                 task_kwargs={
@@ -144,6 +149,7 @@ class RemoteConfiguration(QtCore.QObject):
                     "cache_path": cache_path,
                 }
             )
+            self._task_ids[task_id] = (entity_type, entity_id)
 
     def _compute_config_hash(self, engine, entity_type, entity_id, link_entity_type):
         """
@@ -171,12 +177,13 @@ class RemoteConfiguration(QtCore.QObject):
         :param int entity_id: Associated entity id
         :param str cache_path: Path where cache data should be written to
         """
-        logger.debug("Begin caching commands")
-
         if os.path.exists(cache_path):
             # no need to cache - another process got there first.
             return cache_path
 
+        logger.debug("Begin caching commands")
+
+        # launch external process to carry out caching.
         script = os.path.abspath(
             os.path.join(
                 os.path.dirname(__file__),
@@ -201,16 +208,22 @@ class RemoteConfiguration(QtCore.QObject):
         )
 
         args = [self._pipeline_config_interpreter, script, args_file]
-        logger.warning("Command arguments: %s", args)
+        logger.debug("Launching external script: %s", args)
 
         try:
-            output = subprocess_check_output(args)
-            logger.warning("OUTPUT: %s" % output)
+            subprocess_check_output(args)
         except SubprocessCalledProcessError, e:
-            return_code = e.returncode
-            output = e.output
-            logger.error("OUTPUT: %s" % output)
-            raise Exception("Error caching commands")
+            # caching failed!
+            logger.error("External process command caching failed: %s" % e.output)
+            if e.returncode == constants.EXTERNAL_PROCESS_ENGINE_INIT_EXIT_CODE:
+                # trigger a task failure
+                raise Exception("Could not launch Engine.")
+
+            else:
+                raise Exception("General error retrieving actions.")
+        finally:
+            # clean up temp file
+            sgtk.util.filesystem.safe_delete_file(args_file)
 
         logger.debug("Caching complete.")
         return cache_path
@@ -223,9 +236,11 @@ class RemoteConfiguration(QtCore.QObject):
         :param str group: task group
         :param str result: return data from worker
         """
-        if group != self.TASK_GROUP:
+        if unique_id not in self._task_ids:
             # this was not for us
             return
+
+        del self._task_ids[unique_id]
 
         # the return value from the process is the cache path
         cache_path = result
@@ -237,7 +252,12 @@ class RemoteConfiguration(QtCore.QObject):
                 [RemoteCommand.create(self, d) for d in cached_data]
             )
         else:
-            logger.error("TODO: handle this")
+            logger.error(
+                "Could not locate cached commands for remote configuration %s" % self
+            )
+            # emit an empty list of commands
+            self.commands_loaded.emit([])
+
 
     def _task_failed(self, unique_id, group, message, traceback_str):
         """
@@ -245,12 +265,17 @@ class RemoteConfiguration(QtCore.QObject):
 
         :param str unique_id: unique task id
         :param str group: task group
-        :param message:
-        :param traceback_str:
+        :param message: error message
+        :param traceback_str: callstack
         """
-        if group != self.TASK_GROUP:
-            # not for us
+        if unique_id not in self._task_ids:
+            # this was not for us
             return
 
-        logger.error("TASK FAILED %s %s " % (message, traceback_str))
+        del self._task_ids[unique_id]
+
+        # log exception message to error log
+        logger.error(message)
+        # emit an empty list of commands
+        self.commands_loaded.emit([])
 

@@ -52,7 +52,7 @@ class FallbackRemoteConfiguration(RemoteConfiguration):
 
     def __repr__(self):
         """
-        String representation
+        Low level string representation
         """
         return "<FallbackRemoteConfiguration %s>" % self._pipeline_config_uri
 
