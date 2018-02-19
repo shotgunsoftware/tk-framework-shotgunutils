@@ -26,14 +26,15 @@ class RemoteConfiguration(QtCore.QObject):
 
     **Signals**
 
-    :signal commands_loaded(commands): Gets emitted after :meth:`request_commands` has
+    :signal commands_loaded(config, commands): Gets emitted after :meth:`request_commands` has
         been called and once commands have been loaded for the configuration. The
         commands parameter contains a list of :class:`RemoteCommand` instances.
 
     """
     TASK_GROUP = "tk-framework-shotgunutils.external_config.RemoteConfiguration"
 
-    commands_loaded = QtCore.Signal(list)  # list of :class:`RemoteCommand` instances
+    # configuration object, list of :class:`RemoteCommand` instances
+    commands_loaded = QtCore.Signal(object, list)
 
     def __init__(
             self,
@@ -70,6 +71,17 @@ class RemoteConfiguration(QtCore.QObject):
         self._bg_task_manager = bg_task_manager
         self._bg_task_manager.task_completed.connect(self._task_completed)
         self._bg_task_manager.task_failed.connect(self._task_failed)
+
+    @property
+    def is_primary(self):
+        """
+        Returns ``True`` if this is the primary configuration, ``False`` if not.
+        """
+        if self.pipeline_configuration_name is None or self.pipeline_configuration_name == "Primary":
+            # all fallback configs are primary
+            return True
+        else:
+            return False
 
     @property
     def pipeline_configuration_id(self):
@@ -132,6 +144,7 @@ class RemoteConfiguration(QtCore.QObject):
             # got some cached data that we can emit
             logger.debug("Returning cached commands.")
             self.commands_loaded.emit(
+                self,
                 [RemoteCommand.create(self, d) for d in cached_data]
             )
 
@@ -249,6 +262,7 @@ class RemoteConfiguration(QtCore.QObject):
         if cached_data:
             # got some cached data.
             self.commands_loaded.emit(
+                self,
                 [RemoteCommand.create(self, d) for d in cached_data]
             )
         else:
@@ -256,7 +270,7 @@ class RemoteConfiguration(QtCore.QObject):
                 "Could not locate cached commands for remote configuration %s" % self
             )
             # emit an empty list of commands
-            self.commands_loaded.emit([])
+            self.commands_loaded.emit(self, [])
 
 
     def _task_failed(self, unique_id, group, message, traceback_str):
@@ -277,5 +291,5 @@ class RemoteConfiguration(QtCore.QObject):
         # log exception message to error log
         logger.error(message)
         # emit an empty list of commands
-        self.commands_loaded.emit([])
+        self.commands_loaded.emit(self, [])
 
