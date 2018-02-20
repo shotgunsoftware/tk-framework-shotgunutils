@@ -13,6 +13,7 @@ import imp
 import sys
 import cPickle
 import traceback
+import inspect
 
 # handle imports
 path_to_sgtk = sys.argv[1]
@@ -20,6 +21,8 @@ path_to_sgtk = sys.argv[1]
 # know exactly what version of sgtk we are running.
 sys.path.insert(0, path_to_sgtk)
 import sgtk
+
+
 
 LOGGER_NAME = "tk-framework-shotgunutils.multi_context.external_runner"
 
@@ -29,6 +32,16 @@ class EngineStartupFailure(RuntimeError):
     Raised when the engine fails to start.
     """
 
+def _get_core_python_path():
+    """
+    Computes the path to the current Toolkit core.
+
+    :returns: Path to the current core.
+    """
+    sgtk_file = inspect.getfile(sgtk)
+    tank_folder = os.path.dirname(sgtk_file)
+    python_folder = os.path.dirname(tank_folder)
+    return python_folder
 
 def _import_py_file(python_path, name):
     """
@@ -107,6 +120,11 @@ def start_engine(
         # print to our logger so it's picked up by the main process
         print traceback.format_exc()
         raise EngineStartupFailure(e)
+
+    # add the core path to the PYTHONPATH so that downstream processes
+    # can make use of it
+    sgtk_path = _get_core_python_path()
+    sgtk.util.prepend_path_to_env_var("PYTHONPATH", sgtk_path)
 
     return engine
 
