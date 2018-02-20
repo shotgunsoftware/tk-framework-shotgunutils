@@ -142,32 +142,17 @@ class RemoteConfiguration(QtCore.QObject):
         """
         logger.debug("Requested commands for %s: %s %s %s" % (self, entity_type, entity_id, link_entity_type))
 
-        # figure out if we have a suitable config for this on disk already
-        cache_hash = self._compute_config_hash(entity_type, entity_id, link_entity_type)
-        cached_data = file_cache.load_cache(cache_hash)
-
-        if cached_data:
-            # got some cached data that we can emit
-            logger.debug("Returning cached commands.")
-            self.commands_loaded.emit(
-                self,
-                [RemoteCommand.create(self, d, entity_id) for d in cached_data]
-            )
-
-        else:
-            # no cached version exists. Request a bg load
-            logger.debug("No cached commands exists. Requesting background load.")
-            cache_path = file_cache.get_cache_path(cache_hash)
-            task_id = self._bg_task_manager.add_task(
-                self._cache_commands,
-                group=self.TASK_GROUP,
-                task_kwargs={
-                    "entity_type": entity_type,
-                    "entity_id": entity_id,
-                    "cache_path": cache_path,
-                }
-            )
-            self._task_ids[task_id] = (entity_type, entity_id)
+        # run entire command check and generation in worker
+        task_id = self._bg_task_manager.add_task(
+            self._request_commands,
+            group=self.TASK_GROUP,
+            task_kwargs={
+                "entity_type": entity_type,
+                "entity_id": entity_id,
+                "link_entity_type": link_entity_type,
+            }
+        )
+        self._task_ids[task_id] = (entity_type, entity_id)
 
     def _compute_config_hash(self, entity_type, entity_id, link_entity_type):
         """
@@ -184,67 +169,85 @@ class RemoteConfiguration(QtCore.QObject):
         raise NotImplementedError("_compute_config_hash is not implemented.")
 
     @sgtk.LogManager.log_timing
-    def _cache_commands(self, entity_type, entity_id, cache_path):
+    def _request_commands(self, entity_type, entity_id, link_entity_type):
         """
         Execution, runs in a separate thread and launches an external
         process to cache commands.
 
         :param str entity_type: Associated entity type
         :param int entity_id: Associated entity id
-        :param str cache_path: Path where cache data should be written to
-
-        :returns: (cache_path, entity_id) to be passed on to ``_task_completed()``.
+        :param str link_entity_type: Entity type that the item is linked to.
+            This is typically provided for things such as task, versions or notes,
+            where caching it per linked type can be beneficial.
         """
-        if os.path.exists(cache_path):
-            # no need to cache - another process got there first.
-            return cache_path
+        # figure out if we have a suitable config for this on disk already
+        cache_hash = self._compute_config_hash(entity_type, entity_id, link_entity_type)
+        cache_path = file_cache.get_cache_path(cache_hash)
+        cached_data = file_cache.load_cache(cache_hash)
 
-        logger.debug("Begin caching commands")
+        if not cached_data:
+            logger.debug("Begin caching commands")
 
-        # launch external process to carry out caching.
-        script = os.path.abspath(
-            os.path.join(
-                os.path.dirname(__file__),
-                "..",
-                "scripts",
-                "external_runner.py"
+            # launch external process to carry out caching.
+            script = os.path.abspath(
+                os.path.join(
+                    os.path.dirname(__file__),
+                    "..",
+                    "scripts",
+                    "external_runner.py"
+                )
             )
-        )
 
-        args_file = create_parameter_file(
-            dict(
-                action="cache_actions",
-                cache_path=cache_path,
-                configuration_uri=self.descriptor_uri,
-                pipeline_config_id=self.pipeline_configuration_id,
-                plugin_id=self.plugin_id,
-                engine_name=self.engine,
-                entity_type=entity_type,
-                entity_id=entity_id,
-                bundle_cache_fallback_paths=self._bundle.engine.sgtk.bundle_cache_fallback_paths,
+            args_file = create_parameter_file(
+                dict(
+                    action="cache_actions",
+                    cache_path=cache_path,
+                    configuration_uri=self.descriptor_uri,
+                    pipeline_config_id=self.pipeline_configuration_id,
+                    plugin_id=self.plugin_id,
+                    engine_name=self.engine,
+                    entity_type=entity_type,
+                    entity_id=entity_id,
+                    bundle_cache_fallback_paths=self._bundle.engine.sgtk.bundle_cache_fallback_paths,
+                )
             )
-        )
 
-        args = [
-            self.interpreter,
-            script,
-            sgtk.bootstrap.ToolkitManager.get_core_python_path(),
-            args_file
-        ]
-        logger.debug("Launching external script: %s", args)
+            args = [
+                self.interpreter,
+                script,
+                sgtk.bootstrap.ToolkitManager.get_core_python_path(),
+                args_file
+            ]
+            logger.debug("Launching external script: %s", args)
 
-        try:
-            subprocess_check_output(args)
-        except SubprocessCalledProcessError, e:
-            # caching failed!
-            logger.error("External process command caching failed: %s" % e.output)
-            raise Exception("Error retrieving actions.")
-        finally:
-            # clean up temp file
-            sgtk.util.filesystem.safe_delete_file(args_file)
+            try:
+                subprocess_check_output(args)
+            except SubprocessCalledProcessError, e:
+                # caching failed!
+                logger.error("External process command caching failed: %s" % e.output)
+                raise Exception("Error retrieving actions.")
+            finally:
+                # clean up temp file
+                sgtk.util.filesystem.safe_delete_file(args_file)
 
-        logger.debug("Caching complete.")
-        return cache_path, entity_id
+            logger.debug("Caching complete.")
+
+            # now try again
+            cached_data = file_cache.load_cache(cache_hash)
+
+        # got some cached data that we can emit
+        if cached_data:
+            self.commands_loaded.emit(
+                self,
+                [RemoteCommand.create(self, d, entity_id) for d in cached_data]
+            )
+        else:
+            logger.error(
+                "Could not locate cached commands for remote configuration %s" % self
+            )
+            # emit an empty list of commands
+            self.commands_loaded.emit(self, [])
+
 
     def _task_completed(self, unique_id, group, result):
         """
@@ -259,24 +262,6 @@ class RemoteConfiguration(QtCore.QObject):
             return
 
         del self._task_ids[unique_id]
-
-        # the return value from the process is the cache path
-        cache_path, entity_id = result
-        cached_data = file_cache.load_cache_file(cache_path)
-
-        if cached_data:
-            # got some cached data.
-            self.commands_loaded.emit(
-                self,
-                [RemoteCommand.create(self, d, entity_id) for d in cached_data]
-            )
-        else:
-            logger.error(
-                "Could not locate cached commands for remote configuration %s" % self
-            )
-            # emit an empty list of commands
-            self.commands_loaded.emit(self, [])
-
 
     def _task_failed(self, unique_id, group, message, traceback_str):
         """

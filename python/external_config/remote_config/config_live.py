@@ -11,6 +11,7 @@
 import os
 import sgtk
 import fnmatch
+import hashlib
 from .config_base import RemoteConfiguration
 from .. import file_cache
 
@@ -111,10 +112,9 @@ class LiveRemoteConfiguration(RemoteConfiguration):
             "uri": self.descriptor_uri,
             "type": entity_type,
             "link_type": link_entity_type,
+            # because this cache is mutable, we need to look deeper to calculate its uniqueness.
+            "env_mtime_hash": self._get_yml_file_data()
         }
-
-        # because this cache is mutable, we need to look deeper to calculate its uniqueness.
-        cache_key.update(self._get_yml_file_data())
 
         return cache_key
 
@@ -138,18 +138,22 @@ class LiveRemoteConfiguration(RemoteConfiguration):
             at the time the data was cached.
         :rtype: dict
         """
+        env_hash = hashlib.md5()
         env_path = os.path.join(self._pipeline_config_folder, "env")
-        logger.debug("Looking for env files in %s" % env_path)
 
-        yml_files = {}
         # We do a deep scan of from the config's "env" root down to
         # its bottom.
+        logger.debug("Looking for env files in %s" % env_path)
+        num_files = 0
         for root, dir_names, file_names in os.walk(env_path):
             for file_name in fnmatch.filter(file_names, "*.yml"):
                 full_path = os.path.join(root, file_name)
-                yml_files[full_path] = os.path.getmtime(full_path)
+                # stash the filename and the mod date into the hash
+                num_files += 1
+                env_hash.update(full_path)
+                env_hash.update(str(os.path.getmtime(full_path)))
 
-        logger.debug("Checked %d files" % len(yml_files))
-        return yml_files
+        logger.debug("Checked %d files" % num_files)
+        return env_hash.hexdigest()
 
 
