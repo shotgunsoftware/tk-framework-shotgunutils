@@ -12,7 +12,6 @@ import os
 import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 from sgtk.util.process import subprocess_check_output, SubprocessCalledProcessError
-from .. import constants
 from ..remote_command import RemoteCommand
 from ..util import create_parameter_file
 from .. import file_cache
@@ -152,7 +151,7 @@ class RemoteConfiguration(QtCore.QObject):
             logger.debug("Returning cached commands.")
             self.commands_loaded.emit(
                 self,
-                [RemoteCommand.create(self, d) for d in cached_data]
+                [RemoteCommand.create(self, d, entity_id) for d in cached_data]
             )
 
         else:
@@ -193,6 +192,8 @@ class RemoteConfiguration(QtCore.QObject):
         :param str entity_type: Associated entity type
         :param int entity_id: Associated entity id
         :param str cache_path: Path where cache data should be written to
+
+        :returns: (cache_path, entity_id) to be passed on to ``_task_completed()``.
         """
         if os.path.exists(cache_path):
             # no need to cache - another process got there first.
@@ -206,12 +207,13 @@ class RemoteConfiguration(QtCore.QObject):
                 os.path.dirname(__file__),
                 "..",
                 "scripts",
-                "cache_commands.py"
+                "external_runner.py"
             )
         )
 
         args_file = create_parameter_file(
             dict(
+                action="cache_actions",
                 core_path=sgtk.bootstrap.ToolkitManager.get_core_python_path(),
                 cache_path=cache_path,
                 configuration_uri=self.descriptor_uri,
@@ -232,18 +234,13 @@ class RemoteConfiguration(QtCore.QObject):
         except SubprocessCalledProcessError, e:
             # caching failed!
             logger.error("External process command caching failed: %s" % e.output)
-            if e.returncode == constants.EXTERNAL_PROCESS_ENGINE_INIT_EXIT_CODE:
-                # trigger a task failure
-                raise Exception("Could not launch Engine.")
-
-            else:
-                raise Exception("General error retrieving actions.")
+            raise Exception("Error retrieving actions.")
         finally:
             # clean up temp file
             sgtk.util.filesystem.safe_delete_file(args_file)
 
         logger.debug("Caching complete.")
-        return cache_path
+        return cache_path, entity_id
 
     def _task_completed(self, unique_id, group, result):
         """
@@ -260,14 +257,14 @@ class RemoteConfiguration(QtCore.QObject):
         del self._task_ids[unique_id]
 
         # the return value from the process is the cache path
-        cache_path = result
+        cache_path, entity_id = result
         cached_data = file_cache.load_cache_file(cache_path)
 
         if cached_data:
             # got some cached data.
             self.commands_loaded.emit(
                 self,
-                [RemoteCommand.create(self, d) for d in cached_data]
+                [RemoteCommand.create(self, d, entity_id) for d in cached_data]
             )
         else:
             logger.error(
