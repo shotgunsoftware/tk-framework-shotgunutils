@@ -8,8 +8,6 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import os
-import sys
 import sgtk
 
 from .config_immutable import ImmutableRemoteConfiguration
@@ -20,10 +18,10 @@ from ..errors import RemoteConfigParseError, RemoteConfigNotAccessibleError
 logger = sgtk.platform.get_logger(__name__)
 
 # file format magic number
-CONFIGURATION_GENERATION = 5
+CONFIGURATION_GENERATION = 6
 
 
-def create_from_pipeline_configuration_data(parent, bg_task_manager, plugin_id, configuration_data):
+def create_from_pipeline_configuration_data(parent, bg_task_manager, config_loader, configuration_data):
     """
     Creates a :class`RemoteConfiguration` subclass given
     a set of input data, as returned by ToolkitManager.get_pipeline_configurations()
@@ -32,7 +30,8 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, plugin_id, 
     :type parent: :class:`~PySide.QtGui.QObject`
     :param bg_task_manager: Background task manager to use for any asynchronous work.
     :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
-    :param str plugin_id: Associated bootstrap plugin id
+    :param config_loader: Associated configuration Loader
+    :type config_loader: :class:`RemoteConfigurationLoader`
     :param configuration_data: Dictionary entry on the form
         returned by ToolkitManager.get_pipeline_configurations()
     :returns: :class:`RemoteConfiguration`
@@ -51,11 +50,12 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, plugin_id, 
         return ImmutableRemoteConfiguration(
             parent,
             bg_task_manager,
-            plugin_id,
+            config_loader.plugin_id,
+            config_loader.engine,
+            config_loader.interpreter,
             configuration_data["id"],
             configuration_data["name"],
             descriptor.get_uri(),
-            _get_python_interpreter(descriptor)
         )
 
     else:
@@ -68,16 +68,17 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, plugin_id, 
         return LiveRemoteConfiguration(
             parent,
             bg_task_manager,
-            plugin_id,
+            config_loader.plugin_id,
+            config_loader.engine,
+            config_loader.interpreter,
             configuration_data["id"],
             configuration_data["name"],
             descriptor.get_uri(),
             descriptor.get_config_folder(),
-            _get_python_interpreter(descriptor)
         )
 
 
-def create_default(parent, bg_task_manager, plugin_id, config_uri):
+def create_default(parent, bg_task_manager, config_loader):
     """
     Creates a :class`RemoteConfiguration` subclass given a config
     URI with no particular pipeline configuration association.
@@ -86,16 +87,17 @@ def create_default(parent, bg_task_manager, plugin_id, config_uri):
     :type parent: :class:`~PySide.QtGui.QObject`
     :param bg_task_manager: Background task manager to use for any asynchronous work.
     :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
-    :param str plugin_id: Associated bootstrap plugin id
-    :param str config_uri: Config URI to cache
+    :param config_loader: Associated configuration Loader
+    :type config_loader: :class:`RemoteConfigurationLoader`
     :returns: :class:`RemoteConfiguration`
     """
     return FallbackRemoteConfiguration(
         parent,
         bg_task_manager,
-        plugin_id,
-        config_uri,
-        _get_python_interpreter(None)
+        config_loader.plugin_id,
+        config_loader.engine,
+        config_loader.interpreter,
+        config_loader.base_config_uri,
     )
 
 
@@ -110,10 +112,11 @@ def serialize(config_object):
     data = {
         "GENERATION": CONFIGURATION_GENERATION,
         "plugin_id": config_object.plugin_id,
+        "engine": config_object.engine,
+        "interpreter": config_object.interpreter,
         "pipeline_config_id": config_object.pipeline_configuration_id,
         "pipeline_config_name": config_object.pipeline_configuration_name,
         "config_uri": config_object.descriptor_uri,
-        "python_interpreter": config_object.associated_python_interpreter,
         "class_name": config_object.__class__.__name__
     }
 
@@ -148,57 +151,34 @@ def deserialize(parent, bg_task_manager, data):
             parent,
             bg_task_manager,
             data["plugin_id"],
+            data["engine"],
+            data["interpreter"],
             data["pipeline_config_id"],
             data["pipeline_config_name"],
             data["config_uri"],
-            data["python_interpreter"]
         )
     elif data["class_name"] == "LiveRemoteConfiguration":
         return LiveRemoteConfiguration(
             parent,
             bg_task_manager,
             data["plugin_id"],
+            data["engine"],
+            data["interpreter"],
             data["pipeline_config_id"],
             data["pipeline_config_name"],
             data["config_uri"],
             data["config_path"],
-            data["python_interpreter"]
         )
     elif data["class_name"] == "FallbackRemoteConfiguration":
         return FallbackRemoteConfiguration(
             parent,
             bg_task_manager,
             data["plugin_id"],
+            data["engine"],
+            data["interpreter"],
             data["config_uri"],
-            data["python_interpreter"]
         )
     else:
         raise RemoteConfigParseError("Don't know how to deserialize class %s" % data["class_name"])
 
 
-def _get_python_interpreter(descriptor):
-    """
-    Retrieves the python interpreter from the configuration. Returns the
-    current python interpreter if no interpreter was specified.
-
-    :param descriptor: Configuration descriptor instance
-    :returns: path to a python interpreter to use in conjunction with the descriptor.
-    :rtype: str
-    """
-    try:
-        if descriptor is None:
-            # use default python
-            raise sgtk.TankFileDoesNotExistError()
-        else:
-            path_to_python = descriptor.python_interpreter
-    except sgtk.TankFileDoesNotExistError:
-        # note - for configurations not declaring this,
-        # a perfectly valid thing to do - we just use the
-        # default one
-        if sys.platform == "darwin":
-            path_to_python = os.path.join(sys.prefix, "bin", "python")
-        elif sys.platform == "win32":
-            path_to_python = os.path.join(sys.prefix, "python.exe")
-        else:
-            path_to_python = os.path.join(sys.prefix, "bin", "python")
-    return path_to_python

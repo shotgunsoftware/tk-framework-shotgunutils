@@ -6,8 +6,8 @@ External Configuration Management
 Introduction
 ======================================
 
-This module contains classes and methods for efficiently inspecting
-remote pipeline configurations and runtime environments.
+This module contains classes and methods for doing remote inspection
+of environments.
 
 
 Class RemoteConfigurationLoader

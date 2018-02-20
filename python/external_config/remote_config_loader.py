@@ -45,12 +45,18 @@ class RemoteConfigurationLoader(QtCore.QObject):
 
     TASK_GROUP = "tk-framework-shotgunutils.external_config.RemoteConfigurationLoader"
 
-    def __init__(self, plugin_id, base_config, bg_task_manager, parent):
+    def __init__(self, interpreter, engine, plugin_id, base_config, bg_task_manager, parent):
         """
         Initialize the class with the following parameters:
 
-        :param plugin_id: Plugin id of the current environment
-        :param base_config: base_config
+        .. note:: The interpreter needs to support the VFX Platform, e.g be
+            able to import ``PySide`` or ``Pyside2``.
+
+        :param str interpreter: Path to python interpreter to use.
+        :param str engine: Engine to run.
+        :param str plugin_id: Plugin id to use when executing remote requests.
+        :param str base_config: Default configuration URI to use if nothing else
+            is provided via Shotgun overrides.
         :param bg_task_manager: Background task manager to use for any asynchronous work.
         :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         :param parent: QT parent object.
@@ -61,7 +67,9 @@ class RemoteConfigurationLoader(QtCore.QObject):
         self._task_ids = {}
 
         self._plugin_id = plugin_id
-        self._base_config = base_config
+        self._base_config_uri = base_config
+        self._engine = engine
+        self._interpreter = interpreter
 
         self._config_state = ConfigurationState(bg_task_manager, parent)
         self._config_state.state_changed.connect(self.configurations_changed.emit)
@@ -76,7 +84,7 @@ class RemoteConfigurationLoader(QtCore.QObject):
         """
         String representation
         """
-        return "<CommandHandler@%s" % self._plugin_id
+        return "<CommandHandler %s@%s>" % (self._engine, self._plugin_id)
 
     def shut_down(self):
         """
@@ -96,6 +104,34 @@ class RemoteConfigurationLoader(QtCore.QObject):
         the list of commands associated with a project or entity.
         """
         self._config_state.refresh()
+
+    @property
+    def engine(self):
+        """
+        The name of the engine associated with this remote configuration loader.
+        """
+        return self._engine
+
+    @property
+    def interpreter(self):
+        """
+        The python interpreter to when bootstrapping and loading remote configurations.
+        """
+        return self._interpreter
+
+    @property
+    def plugin_id(self):
+        """
+        The plugin id which will be used when executing remote requests.
+        """
+        return self._plugin_id
+
+    @property
+    def base_config_uri(self):
+        """
+        Cnfiguration URI string to be used when nothing is provided via Shotgun overrides.
+        """
+        return self._base_config_uri
 
     def request_configurations(self, project_id, force=False):
         """
@@ -187,7 +223,7 @@ class RemoteConfigurationLoader(QtCore.QObject):
                 config_object = remote_config.create_from_pipeline_configuration_data(
                     self,
                     self._bg_task_manager,
-                    self._plugin_id,
+                    self,
                     config_dict
                 )
                 config_objects.append(config_object)
@@ -200,8 +236,7 @@ class RemoteConfigurationLoader(QtCore.QObject):
                 remote_config.create_default(
                     self,
                     self._bg_task_manager,
-                    self._plugin_id,
-                    self._base_config
+                    self
                 )
             )
 

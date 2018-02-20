@@ -41,7 +41,8 @@ class RemoteConfiguration(QtCore.QObject):
             parent,
             bg_task_manager,
             plugin_id,
-            pipeline_config_interpreter,
+            engine,
+            interpreter,
     ):
         """
         .. note:: This class is constructed by :class:`RemoteConfigurationLoader`.
@@ -54,14 +55,15 @@ class RemoteConfiguration(QtCore.QObject):
         :param bg_task_manager: Background task manager to use for any asynchronous work.
         :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         :param str plugin_id: Associated bootstrap plugin id
-        :param str pipeline_config_interpreter: Path to the python interpreter
-            associated with the config
+        :param str engine: Associated engine name
+        :param str interpreter: Associated python interpreter
         """
         super(RemoteConfiguration, self).__init__(parent)
 
         self._parent = parent
         self._plugin_id = plugin_id
-        self._pipeline_config_interpreter = pipeline_config_interpreter
+        self._engine = engine
+        self._interpreter = interpreter
 
         self._task_ids = {}
 
@@ -71,6 +73,27 @@ class RemoteConfiguration(QtCore.QObject):
         self._bg_task_manager = bg_task_manager
         self._bg_task_manager.task_completed.connect(self._task_completed)
         self._bg_task_manager.task_failed.connect(self._task_failed)
+
+    @property
+    def plugin_id(self):
+        """
+        The plugin id associated with the configuration.
+        """
+        return self._plugin_id
+
+    @property
+    def engine(self):
+        """
+        The engine name associated with the configuration.
+        """
+        return self._engine
+
+    @property
+    def interpreter(self):
+        """
+        The python interpreter to use when accessing this configuration
+        """
+        return self._interpreter
 
     @property
     def is_primary(self):
@@ -106,28 +129,12 @@ class RemoteConfiguration(QtCore.QObject):
         """
         return None
 
-    @property
-    def plugin_id(self):
-        """
-        The plugin id associated with the configuration.
-        """
-        return self._plugin_id
-
-    @property
-    def associated_python_interpreter(self):
-        """
-        The path to a python interpreter that should be used when
-        executing commands.
-        """
-        return self._pipeline_config_interpreter
-
-    def request_commands(self, engine, entity_type, entity_id, link_entity_type):
+    def request_commands(self, entity_type, entity_id, link_entity_type):
         """
         Request commands for the given object.
 
         A ``commands_loaded`` signal will be emitted once the commands are available.
 
-        :param str engine: Engine to run.
         :param str entity_type: Associated entity type
         :param int entity_id: Associated entity id
         :param str link_entity_type: Entity type that the item is linked to.
@@ -137,7 +144,7 @@ class RemoteConfiguration(QtCore.QObject):
         logger.debug("Requested commands for %s: %s %s %s" % (self, entity_type, entity_id, link_entity_type))
 
         # figure out if we have a suitable config for this on disk already
-        cache_hash = self._compute_config_hash(engine, entity_type, entity_id, link_entity_type)
+        cache_hash = self._compute_config_hash(entity_type, entity_id, link_entity_type)
         cached_data = file_cache.load_cache(cache_hash)
 
         if cached_data:
@@ -156,7 +163,6 @@ class RemoteConfiguration(QtCore.QObject):
                 self._cache_commands,
                 group=self.TASK_GROUP,
                 task_kwargs={
-                    "engine": engine,
                     "entity_type": entity_type,
                     "entity_id": entity_id,
                     "cache_path": cache_path,
@@ -164,11 +170,10 @@ class RemoteConfiguration(QtCore.QObject):
             )
             self._task_ids[task_id] = (entity_type, entity_id)
 
-    def _compute_config_hash(self, engine, entity_type, entity_id, link_entity_type):
+    def _compute_config_hash(self, entity_type, entity_id, link_entity_type):
         """
         Generates a hash to uniquely identify the configuration.
 
-        :param str engine: Engine to run
         :param str entity_type: Associated entity type
         :param int entity_id: Associated entity id
         :param str link_entity_type: Entity type that the item is linked to.
@@ -180,12 +185,11 @@ class RemoteConfiguration(QtCore.QObject):
         raise NotImplementedError("_compute_config_hash is not implemented.")
 
     @sgtk.LogManager.log_timing
-    def _cache_commands(self, engine, entity_type, entity_id, cache_path):
+    def _cache_commands(self, entity_type, entity_id, cache_path):
         """
         Execution, runs in a separate thread and launches an external
         process to cache commands.
 
-        :param str engine: Engine to run
         :param str entity_type: Associated entity type
         :param int entity_id: Associated entity id
         :param str cache_path: Path where cache data should be written to
@@ -213,14 +217,14 @@ class RemoteConfiguration(QtCore.QObject):
                 configuration_uri=self.descriptor_uri,
                 pipeline_config_id=self.pipeline_configuration_id,
                 plugin_id=self.plugin_id,
-                engine_name=engine,
+                engine_name=self.engine,
                 entity_type=entity_type,
                 entity_id=entity_id,
                 bundle_cache_fallback_paths=self._bundle.engine.sgtk.bundle_cache_fallback_paths,
             )
         )
 
-        args = [self._pipeline_config_interpreter, script, args_file]
+        args = [self.interpreter, script, args_file]
         logger.debug("Launching external script: %s", args)
 
         try:

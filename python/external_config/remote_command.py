@@ -13,6 +13,9 @@ import sgtk
 
 logger = sgtk.platform.get_logger(__name__)
 
+# file format magic number
+CONFIGURATION_GENERATION = 1
+
 
 class RemoteCommand(object):
     """
@@ -27,7 +30,7 @@ class RemoteCommand(object):
     """
 
     @classmethod
-    def serialize_command(cls, entity, engine_name, command_name, properties):
+    def serialize_command(cls, entity, command_name, properties):
         """
         Generates a data chunk given a set of standard
         toolkit command data, as obtained from engine.commands.
@@ -36,16 +39,14 @@ class RemoteCommand(object):
         :class:`RemoteCommand` instance.
 
         :param dict entity: Shotgun entity dictionary with keys type and id.
-        :param str engine_name: Name of associated engine.
         :param str command_name: Command name (the key
             name for an entry in engine.commands)
         :param dict properties: Properties dictionary
-            as returned by engine.commands.
+            as returned by the ``Engine.commands`` dictionary property.
         :returns: dictionary suitable to pass to :meth:`create`.
         """
         data = {
             "entity": entity,
-            "engine_name": engine_name,
             "callback_name": command_name,
             "display_name": properties.get("title") or command_name,
             "tooltip": properties.get("description") or "",
@@ -76,11 +77,11 @@ class RemoteCommand(object):
             callback_name=data["callback_name"],
             display_name=data["display_name"],
             tooltip=data["tooltip"],
-            python_interpreter=remote_configuration.associated_python_interpreter,
+            plugin_id=remote_configuration.plugin_id,
+            engine=remote_configuration.engine,
+            interpreter=remote_configuration.interpreter,
             descriptor_uri=remote_configuration.descriptor_uri,
             pipeline_config_id=remote_configuration.pipeline_configuration_id,
-            plugin_id=remote_configuration.plugin_id,
-            engine_name=data["engine_name"],
             entity_type=data["entity"]["type"],
             entity_id=data["entity"]["id"],
             pipeline_config_name=remote_configuration.pipeline_configuration_name,
@@ -91,11 +92,11 @@ class RemoteCommand(object):
             callback_name,
             display_name,
             tooltip,
-            python_interpreter,
+            plugin_id,
+            interpreter,
+            engine,
             descriptor_uri,
             pipeline_config_id,
-            plugin_id,
-            engine_name,
             entity_type,
             entity_id,
             pipeline_config_name
@@ -107,11 +108,11 @@ class RemoteCommand(object):
         :param str callback_name: Name of the associated toolkit command callback
         :param str display_name: Display name for command
         :param str tooltip: Tooltip
-        :param str python_interpreter: Associated python interpreter
+        :param str plugin_id: Plugin id
+        :param str interpreter: Associated python interpreter
+        :param str engine: Engine name to execute command in
         :param str descriptor_uri: Associated descriptor URI
         :param int pipeline_config_id: Associated pipeline configuration id
-        :param str plugin_id: Plugin id
-        :param str engine_name: Engine name to execute command in
         :param str entity_type: Associated entity type
         :param int entity_id: Associated entity id
         :param str pipeline_config_name: Associated pipeline configuration name
@@ -124,11 +125,11 @@ class RemoteCommand(object):
         self._callback_name = callback_name
         self._display_name = display_name
         self._tooltip = tooltip
-        self._python_interpreter = python_interpreter
+        self._interpreter = interpreter
         self._descriptor_uri = descriptor_uri
         self._pipeline_config_id = pipeline_config_id
         self._plugin_id = plugin_id
-        self._engine_name = engine_name
+        self._engine = engine
         self._entity_type = entity_type
         self._entity_id = entity_id
         self._pipeline_config_name = pipeline_config_name
@@ -139,7 +140,7 @@ class RemoteCommand(object):
         """
         return "<RemoteCommand %s @ %s %s %s>" % (
             self._display_name,
-            self._engine_name,
+            self._engine,
             self._entity_type,
             self._entity_id
         )
@@ -152,23 +153,27 @@ class RemoteCommand(object):
         :param str data: Data created by :meth:`to_string`
         :returns: Remote Command instance.
         :rtype: :class:`RemoteCommand`
+        :raises: :class:`RuntimeError` if data is not valid
         """
         data = data.encode("utf-8")
         data = cPickle.loads(data)
+
+        if data.get("GENERATION") != CONFIGURATION_GENERATION:
+            raise RuntimeError("Format is incompatible.")
+
         return RemoteCommand(
             callback_name=data["callback_name"],
             display_name=data["display_name"],
             tooltip=data["tooltip"],
-            python_interpreter=data["python_interpreter"],
+            plugin_id=data["plugin_id"],
+            engine=data["engine"],
+            interpreter=data["interpreter"],
             descriptor_uri=data["descriptor_uri"],
             pipeline_config_id=data["pipeline_config_id"],
-            plugin_id=data["plugin_id"],
-            engine_name=data["engine_name"],
             entity_type=data["entity_type"],
             entity_id=data["entity_id"],
             pipeline_config_name=data["pipeline_config_name"]
         )
-
 
     def to_string(self):
         """
@@ -180,17 +185,19 @@ class RemoteCommand(object):
         :rtype: str
         """
         data = {
+            "GENERATION": CONFIGURATION_GENERATION,
             "callback_name": self._callback_name,
             "display_name": self._display_name,
             "tooltip": self._tooltip,
-            "python_interpreter": self._python_interpreter,
+            "plugin_id": self._plugin_id,
+            "engine": self._engine,
+            "interpreter": self._interpreter,
             "descriptor_uri": self._descriptor_uri,
             "pipeline_config_id": self._pipeline_config_id,
-            "plugin_id": self._plugin_id,
-            "engine_name": self._engine_name,
             "entity_type": self._entity_type,
             "entity_id": self._entity_id,
             "pipeline_config_name": self._pipeline_config_name
+
         }
         return cPickle.dumps(data)
 
@@ -244,14 +251,14 @@ class RemoteCommand(object):
                 configuration_uri=self._descriptor_uri,
                 pipeline_config_id=self._pipeline_config_id,
                 plugin_id=self._plugin_id,
-                engine_name=self._engine_name,
+                engine_name=self._engine,
                 entity_type=self._entity_type,
                 entity_id=self._entity_id,
                 bundle_cache_fallback_paths=self._bundle.engine.sgtk.bundle_cache_fallback_paths,
             )
         )
 
-        args = [self._python_interpreter, script, args_file]
+        args = [self._interpreter, script, args_file]
         logger.debug("Command arguments: %s", args)
 
         retcode, stdout, stderr = ProcessRunner.call_cmd(args)

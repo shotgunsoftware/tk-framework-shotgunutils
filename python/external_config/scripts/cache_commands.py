@@ -95,7 +95,6 @@ def main(
         commands.append(
             remote_command.RemoteCommand.serialize_command(
                 {"type": entity_type, "id": entity_id},
-                engine_name,
                 cmd_name,
                 data["properties"]
             )

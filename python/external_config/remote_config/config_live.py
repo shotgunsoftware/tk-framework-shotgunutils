@@ -28,11 +28,12 @@ class LiveRemoteConfiguration(RemoteConfiguration):
             parent,
             bg_task_manager,
             plugin_id,
+            engine,
+            interpreter,
             pipeline_config_id,
             pipeline_config_name,
             pipeline_config_uri,
             pipeline_config_folder,
-            pipeline_config_interpreter,
     ):
         """
         .. note:: This class is constructed by :class:`RemoteConfigurationLoader`.
@@ -43,18 +44,19 @@ class LiveRemoteConfiguration(RemoteConfiguration):
         :param bg_task_manager: Background task manager to use for any asynchronous work.
         :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         :param str plugin_id: Associated bootstrap plugin id
+        :param str engine: Associated engine name
+        :param str interpreter: Associated python interpreter
         :param id pipeline_config_id: Pipeline Configuration id
         :param are pipeline_config_name: Pipeline Configuration name
         :param str pipeline_config_uri: Descriptor URI string for the config
         :param str pipeline_config_folder: Folder where the configuration is located
-        :param pipeline_config_interpreter: Path to the python interpreter
-            associated with the config
         """
         super(LiveRemoteConfiguration, self).__init__(
             parent,
             bg_task_manager,
             plugin_id,
-            pipeline_config_interpreter,
+            engine,
+            interpreter,
         )
 
         self._pipeline_configuration_id = pipeline_config_id
@@ -92,11 +94,10 @@ class LiveRemoteConfiguration(RemoteConfiguration):
         """
         return self._pipeline_config_folder
 
-    def _compute_config_hash(self, engine, entity_type, entity_id, link_entity_type):
+    def _compute_config_hash(self, entity_type, entity_id, link_entity_type):
         """
         Generates a hash to uniquely identify the configuration.
 
-        :param str engine: Engine to run
         :param str entity_type: Associated entity type
         :param int entity_id: Associated entity id
         :param str link_entity_type: Entity type that the item is linked to.
@@ -106,7 +107,7 @@ class LiveRemoteConfiguration(RemoteConfiguration):
         """
         cache_key = {
             file_cache.FOLDER_PREFIX_KEY: "id_%s" % self.pipeline_configuration_id,
-            "engine": engine,
+            "engine": self.engine,
             "uri": self.descriptor_uri,
             "type": entity_type,
             "link_type": link_entity_type,
