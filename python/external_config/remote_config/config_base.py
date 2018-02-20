@@ -214,7 +214,6 @@ class RemoteConfiguration(QtCore.QObject):
         args_file = create_parameter_file(
             dict(
                 action="cache_actions",
-                core_path=sgtk.bootstrap.ToolkitManager.get_core_python_path(),
                 cache_path=cache_path,
                 configuration_uri=self.descriptor_uri,
                 pipeline_config_id=self.pipeline_configuration_id,
@@ -226,7 +225,12 @@ class RemoteConfiguration(QtCore.QObject):
             )
         )
 
-        args = [self.interpreter, script, args_file]
+        args = [
+            self.interpreter,
+            script,
+            sgtk.bootstrap.ToolkitManager.get_core_python_path(),
+            args_file
+        ]
         logger.debug("Launching external script: %s", args)
 
         try:

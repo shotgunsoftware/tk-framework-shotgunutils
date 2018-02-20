@@ -254,7 +254,6 @@ class RemoteCommand(object):
             dict(
                 action="execute_command",
                 callback_name=self._callback_name,
-                core_path=sgtk.bootstrap.ToolkitManager.get_core_python_path(),
                 configuration_uri=self._descriptor_uri,
                 pipeline_config_id=self._pipeline_config_id,
                 plugin_id=self._plugin_id,
@@ -265,7 +264,12 @@ class RemoteCommand(object):
             )
         )
 
-        args = [self._interpreter, script, args_file]
+        args = [
+            self._interpreter,
+            script,
+            sgtk.bootstrap.ToolkitManager.get_core_python_path(),
+            args_file
+        ]
         logger.debug("Command arguments: %s", args)
 
         retcode, stdout, stderr = ProcessRunner.call_cmd(args)

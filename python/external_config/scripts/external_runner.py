@@ -9,17 +9,42 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
+import imp
 import sys
 import cPickle
 import traceback
-import copy
+
+# handle imports
+path_to_sgtk = sys.argv[1]
+# prepend sgtk to sys.path to make sure
+# know exactly what version of sgtk we are running.
+sys.path.insert(0, path_to_sgtk)
+import sgtk
 
 LOGGER_NAME = "tk-framework-shotgunutils.multi_context.external_runner"
+
 
 class EngineStartupFailure(RuntimeError):
     """
     Raised when the engine fails to start.
     """
+
+
+def _import_py_file(python_path, name):
+    """
+    Helper which imports a python file and returns it.
+
+    :param str python_path: path where module is located
+    :param str name: name of py file (without extension)
+    :returns: python object
+    """
+    mfile, pathname, description = imp.find_module(name, [python_path])
+    try:
+        module = imp.load_module(name, mfile, pathname, description)
+    finally:
+        if mfile:
+            mfile.close()
+    return module
 
 
 def start_engine(
@@ -96,8 +121,11 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
     :param str cache_path: Path to write cached data to
     """
     # import modules from shotgun-utils fw for serialization
-    import file_cache
-    import remote_command
+    utils_folder = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", )
+    )
+    file_cache = _import_py_file(utils_folder, "file_cache")
+    remote_command = _import_py_file(utils_folder, "remote_command")
 
     # Note that from here on out, we have to use the legacy log_* methods
     # that the engine provides. This is because we're now operating in the
@@ -129,22 +157,9 @@ if __name__ == "__main__":
     """
 
     # unpack file with arguments payload
-    arg_data_file = sys.argv[1]
+    arg_data_file = sys.argv[2]
     with open(arg_data_file, "rb") as fh:
         arg_data = cPickle.load(fh)
-
-    # prepend sgtk to sys.path to make sure
-    # know exactly what version of sgtk we are running.
-    original_sys_path = copy.copy(sys.path)
-    sys.path = [arg_data["core_path"]] + sys.path
-    import sgtk
-
-    # now add the external config module
-    # so that we later can import serialization logic.
-    utils_folder = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..",)
-    )
-    sys.path.insert(0, utils_folder)
 
     engine = None
     try:
