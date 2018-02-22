@@ -10,4 +10,4 @@
 
 from .external_config_loader import ExternalConfigurationLoader
 from .external_command import ExternalCommand
-from .external_config import ExternalConfiguration
+from .config import ExternalConfiguration
