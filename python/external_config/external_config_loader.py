@@ -135,7 +135,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
         """
         return self._base_config_uri
 
-    def request_configurations(self, project_id, force_reload=False):
+    def request_configurations(self, project_id):
         """
         Requests a list of configuration objects for the given project.
 
@@ -143,10 +143,6 @@ class ExternalConfigurationLoader(QtCore.QObject):
         have been loaded.
 
         :param project_id: Project to request configurations for.
-        :param force_reload: If ``True``, force reload the configuration data.
-            If ``False`` (default), use a cached representation. This
-            cache is refreshed at startup and whenever
-            :meth:`refresh_shotgun_global_state` is called.
         """
         # load existing cache file if it exists
         config_cache_key = {
@@ -158,7 +154,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
         config_data = file_cache.load_cache(config_cache_key)
         # attempt to load configurations
         config_data_emitted = False
-        if config_data and not force_reload:
+        if config_data:
             # got the data cached so emit it straight away
             try:
                 config_objects = []
@@ -178,7 +174,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
 
         if not config_data_emitted:
             # Request a bg load
-            unqiue_id = self._bg_task_manager.add_task(
+            unique_id = self._bg_task_manager.add_task(
                 self._execute_get_configurations,
                 priority=1,
                 group=self.TASK_GROUP,
@@ -187,7 +183,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
                     "state_hash": self._config_state.get_hash()
                 }
             )
-            self._task_ids[unqiue_id] = project_id
+            self._task_ids[unique_id] = project_id
 
     def _execute_get_configurations(self, project_id, state_hash):
         """

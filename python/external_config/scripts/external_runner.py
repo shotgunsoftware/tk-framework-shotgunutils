@@ -13,7 +13,6 @@ import imp
 import sys
 import cPickle
 import traceback
-import inspect
 
 # handle imports
 path_to_sgtk = sys.argv[1]
@@ -38,7 +37,7 @@ def _get_core_python_path():
 
     :returns: Path to the current core.
     """
-    sgtk_file = inspect.getfile(sgtk)
+    sgtk_file = sgtk.__file__
     tank_folder = os.path.dirname(sgtk_file)
     python_folder = os.path.dirname(tank_folder)
     return python_folder
