@@ -17,26 +17,9 @@ import time
 
 # toolkit imports
 import sgtk
-from sgtk.platform.qt import QtCore, QtGui
 
 from .errors import ShotgunModelDataError
 from .data_handler_cache import ShotgunDataHandlerCache
-
-def log_timing(func):
-    """
-    Decorator that times and logs the execution of a method.
-    Borrowed from 0.18.
-    """
-    def wrapper(self, *args, **kwargs):
-        time_before = time.time()
-        try:
-            response = func(self, *args, **kwargs)
-        finally:
-            time_spent = time.time() - time_before
-            # log to special timing logger
-            self._bundle.log_debug("ShotgunDataHandler.%s took %fs" % (func.__name__, time_spent))
-        return response
-    return wrapper
 
 
 class ShotgunDataHandler(object):
@@ -116,7 +99,7 @@ class ShotgunDataHandler(object):
         """
         return self._cache is not None
 
-    @log_timing
+    @sgtk.LogManager.log_timing
     def remove_cache(self):
         """
         Removes the associated cache file from disk
@@ -141,7 +124,7 @@ class ShotgunDataHandler(object):
 
         return True
 
-    @log_timing
+    @sgtk.LogManager.log_timing
     def load_cache(self):
         """
         Loads a cache from disk into memory
@@ -181,7 +164,7 @@ class ShotgunDataHandler(object):
         self._log_debug("Unloading in-memory cache for %s" % self)
         self._cache = None
 
-    @log_timing
+    @sgtk.LogManager.log_timing
     def save_cache(self):
         """
         Saves the current cache to disk.
@@ -253,7 +236,7 @@ class ShotgunDataHandler(object):
 
         return self._cache.get_entry_by_uid(unique_id)
 
-    @log_timing
+    @sgtk.LogManager.log_timing
     def generate_child_nodes(self, unique_id, parent_object, factory_fn):
         """
         Generate nodes recursively from the data set
@@ -392,4 +375,3 @@ class ShotgunDataHandler(object):
             sg_data = time.mktime(sg_data.timetuple())
 
         return sg_data
-

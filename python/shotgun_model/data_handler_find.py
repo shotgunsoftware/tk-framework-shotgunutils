@@ -9,10 +9,11 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 import gc
 
-from .data_handler import ShotgunDataHandler, log_timing
+from .data_handler import ShotgunDataHandler
 from .errors import ShotgunModelDataError
 from .data_handler_cache import ShotgunDataHandlerCache
 from .util import compare_shotgun_data
+import sgtk
 
 
 class ShotgunFindDataHandler(ShotgunDataHandler):
@@ -24,7 +25,10 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
     shotgun find query is stored in the cache file.
     """
 
-    def __init__(self, entity_type, filters, order, hierarchy, fields, download_thumbs, limit, additional_filter_presets, cache_path):
+    def __init__(
+        self, entity_type, filters, order, hierarchy, fields, download_thumbs,
+        limit, additional_filter_presets, cache_path
+    ):
         """
         :param entity_type:               Shotgun entity type to download
         :param filters:                   List of Shotgun filters. Standard Shotgun syntax.
@@ -40,10 +44,11 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                                           the ones specified in the hierarchy parameter).
         :param download_thumbs:           Boolean to indicate if this model should attempt
                                           to download and process thumbnails for the downloaded data.
-        :param limit:                     Limit the number of results returned from Shotgun. In conjunction with the order
+        :param limit:                     Limit the number of results returned from Shotgun. In conjunction with the
+                                          order
                                           parameter, this can be used to effectively cap the data set that the model
-                                          is handling, allowing a user to for example show the twenty most recent notes or
-                                          similar.
+                                          is handling, allowing a user to for example show the twenty most recent note
+                                          or similar.
         :param additional_filter_presets: List of Shotgun filter presets to apply, e.g.
                                           ``[{"preset_name":"LATEST","latest_by":"BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT"}]``
         :param cache_path:                Path to cache file location
@@ -138,7 +143,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
 
         return request_id
 
-    @log_timing
+    @sgtk.LogManager.log_timing
     def update_data(self, sg_data):
         """
         The counterpart to :meth:`generate_data_request`. When the data
@@ -353,5 +358,3 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
             return "/%s" % unique_key
         else:
             return "%s/%s" % (parent_unique_key, unique_key)
-
-
