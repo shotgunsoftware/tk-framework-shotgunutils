@@ -10,10 +10,10 @@
 
 import sgtk
 
-from .config_immutable import ImmutableRemoteConfiguration
-from .config_live import LiveRemoteConfiguration
-from .config_fallback import FallbackRemoteConfiguration
-from ..errors import RemoteConfigParseError, RemoteConfigNotAccessibleError
+from .config_immutable import ImmutableExternalConfiguration
+from .config_live import LiveExternalConfiguration
+from .config_fallback import FallbackExternalConfiguration
+from ..errors import ExternalConfigParseError, ExternalConfigNotAccessibleError
 
 logger = sgtk.platform.get_logger(__name__)
 
@@ -23,7 +23,7 @@ CONFIGURATION_GENERATION = 6
 
 def create_from_pipeline_configuration_data(parent, bg_task_manager, config_loader, configuration_data):
     """
-    Creates a :class`RemoteConfiguration` subclass given
+    Creates a :class`ExternalConfiguration` subclass given
     a set of input data, as returned by ToolkitManager.get_pipeline_configurations()
 
     :param parent: QT parent object.
@@ -31,27 +31,28 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
     :param bg_task_manager: Background task manager to use for any asynchronous work.
     :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
     :param config_loader: Associated configuration Loader
-    :type config_loader: :class:`RemoteConfigurationLoader`
+    :type config_loader: :class:`ExternalConfigurationLoader`
     :param configuration_data: Dictionary entry on the form
         returned by ToolkitManager.get_pipeline_configurations()
-    :returns: :class:`RemoteConfiguration`
-    :raises: :class:`RemoteConfigNotAccessibleError` if the configuration data could not
+    :returns: :class:`ExternalConfiguration`
+    :raises: :class:`ExternalConfigNotAccessibleError` if the configuration
+        data could not be accessed.
     """
 
     descriptor = configuration_data["descriptor"]
 
     if descriptor is None:
         # the config is not accessible
-        raise RemoteConfigNotAccessibleError(
+        raise ExternalConfigNotAccessibleError(
             "Configuration %s could not be resolved" % configuration_data["name"]
         )
 
     if descriptor.is_immutable():
-        return ImmutableRemoteConfiguration(
+        return ImmutableExternalConfiguration(
             parent,
             bg_task_manager,
             config_loader.plugin_id,
-            config_loader.engine,
+            config_loader.engine_name,
             config_loader.interpreter,
             configuration_data["id"],
             configuration_data["name"],
@@ -61,15 +62,15 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
     else:
         # check that it exists on disk
         if descriptor.get_path() is None:
-            raise RemoteConfigNotAccessibleError(
+            raise ExternalConfigNotAccessibleError(
                 "Configuration %s does not have a path on disk." % configuration_data["name"]
             )
 
-        return LiveRemoteConfiguration(
+        return LiveExternalConfiguration(
             parent,
             bg_task_manager,
             config_loader.plugin_id,
-            config_loader.engine,
+            config_loader.engine_name,
             config_loader.interpreter,
             configuration_data["id"],
             configuration_data["name"],
@@ -78,9 +79,9 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
         )
 
 
-def create_default(parent, bg_task_manager, config_loader):
+def create_fallback_configuration(parent, bg_task_manager, config_loader):
     """
-    Creates a :class`RemoteConfiguration` subclass given a config
+    Creates a :class`ExternalConfiguration` subclass given a config
     URI with no particular pipeline configuration association.
 
     :param parent: QT parent object.
@@ -88,14 +89,14 @@ def create_default(parent, bg_task_manager, config_loader):
     :param bg_task_manager: Background task manager to use for any asynchronous work.
     :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
     :param config_loader: Associated configuration Loader
-    :type config_loader: :class:`RemoteConfigurationLoader`
-    :returns: :class:`RemoteConfiguration`
+    :type config_loader: :class:`ExternalConfigurationLoader`
+    :returns: :class:`ExternalConfiguration`
     """
-    return FallbackRemoteConfiguration(
+    return FallbackExternalConfiguration(
         parent,
         bg_task_manager,
         config_loader.plugin_id,
-        config_loader.engine,
+        config_loader.engine_name,
         config_loader.interpreter,
         config_loader.base_config_uri,
     )
@@ -112,7 +113,7 @@ def serialize(config_object):
     data = {
         "GENERATION": CONFIGURATION_GENERATION,
         "plugin_id": config_object.plugin_id,
-        "engine": config_object.engine,
+        "engine_name": config_object.engine_name,
         "interpreter": config_object.interpreter,
         "pipeline_config_id": config_object.pipeline_configuration_id,
         "pipeline_config_name": config_object.pipeline_configuration_name,
@@ -120,7 +121,7 @@ def serialize(config_object):
         "class_name": config_object.__class__.__name__
     }
 
-    if isinstance(config_object, LiveRemoteConfiguration):
+    if isinstance(config_object, LiveExternalConfiguration):
         data["config_path"] = config_object.path
 
     return data
@@ -128,57 +129,57 @@ def serialize(config_object):
 
 def deserialize(parent, bg_task_manager, data):
     """
-    Creates a :class:`RemoteConfiguration` given serialized data.
+    Creates a :class:`ExternalConfiguration` given serialized data.
 
     :param parent: QT parent object.
     :type parent: :class:`~PySide.QtGui.QObject`
     :param bg_task_manager: Background task manager to use for any asynchronous work.
     :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
     :param data: Data created with :meth:`serialize`.
-    :returns: :class:`RemoteConfiguration`
-    :raises: :class:`RemoteConfigParseError` on error
+    :returns: :class:`ExternalConfiguration`
+    :raises: :class:`ExternalConfigParseError` on error
     """
     if data.get("GENERATION") != CONFIGURATION_GENERATION:
-        raise RemoteConfigParseError(
+        raise ExternalConfigParseError(
             "Serialized format is version %s. Required version is %s" % (
                 data.get("GENERATION"),
                 CONFIGURATION_GENERATION
             )
         )
 
-    if data["class_name"] == "ImmutableRemoteConfiguration":
-        return ImmutableRemoteConfiguration(
+    if data["class_name"] == "ImmutableExternalConfiguration":
+        return ImmutableExternalConfiguration(
             parent,
             bg_task_manager,
             data["plugin_id"],
-            data["engine"],
+            data["engine_name"],
             data["interpreter"],
             data["pipeline_config_id"],
             data["pipeline_config_name"],
             data["config_uri"],
         )
-    elif data["class_name"] == "LiveRemoteConfiguration":
-        return LiveRemoteConfiguration(
+    elif data["class_name"] == "LiveExternalConfiguration":
+        return LiveExternalConfiguration(
             parent,
             bg_task_manager,
             data["plugin_id"],
-            data["engine"],
+            data["engine_name"],
             data["interpreter"],
             data["pipeline_config_id"],
             data["pipeline_config_name"],
             data["config_uri"],
             data["config_path"],
         )
-    elif data["class_name"] == "FallbackRemoteConfiguration":
-        return FallbackRemoteConfiguration(
+    elif data["class_name"] == "FallbackExternalConfiguration":
+        return FallbackExternalConfiguration(
             parent,
             bg_task_manager,
             data["plugin_id"],
-            data["engine"],
+            data["engine_name"],
             data["interpreter"],
             data["config_uri"],
         )
     else:
-        raise RemoteConfigParseError("Don't know how to deserialize class %s" % data["class_name"])
+        raise ExternalConfigParseError("Don't know how to deserialize class %s" % data["class_name"])
 
 

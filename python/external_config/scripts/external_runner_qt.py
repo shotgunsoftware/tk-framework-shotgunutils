@@ -9,55 +9,62 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
-import imp
 import sys
 import cPickle
 import traceback
-import inspect
-
-# handle imports
-path_to_sgtk = sys.argv[1]
-# prepend sgtk to sys.path to make sure
-# know exactly what version of sgtk we are running.
-sys.path.insert(0, path_to_sgtk)
-import sgtk
-
-
 
 LOGGER_NAME = "tk-framework-shotgunutils.multi_context.external_runner"
 
+# first ensure that we have the right path to sgtk loaded
+# this is explicitly passed down from the caller
+sgtk_path = sys.argv[1]
+
+# prepend sgtk to sys.path to make sure
+# know exactly what version of sgtk we are running.
+sys.path.insert(0, sgtk_path)
+
+import sgtk
+
+# we should now be able to import QT - this is a
+# requirement for the external config module
+qt_importer = sgtk.util.qt_importer.QtImporter()
+
+
+
+# now add the external config module
+# so that we later can import serialization logic.
+utils_folder = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", )
+)
+sys.path.insert(0, utils_folder)
+
+
+class QtTaskRunner(qt_importer.QtCore.QObject):
+    """
+    Wrapper class which allowing us to run a single operation
+    """
+    completed = qt_importer.QtCore.Signal()
+
+    def __init__(self, callback):
+        qt_importer.QtCore.QObject.__init__(self)
+        self._callback = callback
+
+    def execute_command(self):
+        # execute the callback
+
+        # note that because pyside has its own exception wrapper around
+        # exec we need to catch and log any exceptions here.
+        try:
+            self._callback()
+
+        finally:
+            # broadcast that we have finished this command
+            self.completed.emit()
 
 class EngineStartupFailure(RuntimeError):
     """
     Raised when the engine fails to start.
     """
-
-def _get_core_python_path():
-    """
-    Computes the path to the current Toolkit core.
-
-    :returns: Path to the current core.
-    """
-    sgtk_file = inspect.getfile(sgtk)
-    tank_folder = os.path.dirname(sgtk_file)
-    python_folder = os.path.dirname(tank_folder)
-    return python_folder
-
-def _import_py_file(python_path, name):
-    """
-    Helper which imports a Python file and returns it.
-
-    :param str python_path: path where module is located
-    :param str name: name of py file (without extension)
-    :returns: Python object
-    """
-    mfile, pathname, description = imp.find_module(name, [python_path])
-    try:
-        module = imp.load_module(name, mfile, pathname, description)
-    finally:
-        if mfile:
-            mfile.close()
-    return module
 
 
 def start_engine(
@@ -121,11 +128,6 @@ def start_engine(
         print traceback.format_exc()
         raise EngineStartupFailure(e)
 
-    # add the core path to the PYTHONPATH so that downstream processes
-    # can make use of it
-    sgtk_path = _get_core_python_path()
-    sgtk.util.prepend_path_to_env_var("PYTHONPATH", sgtk_path)
-
     return engine
 
 
@@ -139,11 +141,8 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
     :param str cache_path: Path to write cached data to
     """
     # import modules from shotgun-utils fw for serialization
-    utils_folder = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", )
-    )
-    file_cache = _import_py_file(utils_folder, "file_cache")
-    external_command = _import_py_file(utils_folder, "external_command")
+    import file_cache
+    import external_command
 
     # Note that from here on out, we have to use the legacy log_* methods
     # that the engine provides. This is because we're now operating in the
@@ -168,18 +167,8 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
     engine.log_debug("Cache complete.")
 
 
+def main(arg_data):
 
-if __name__ == "__main__":
-    """
-    Main script entry point
-    """
-
-    # unpack file with arguments payload
-    arg_data_file = sys.argv[2]
-    with open(arg_data_file, "rb") as fh:
-        arg_data = cPickle.load(fh)
-
-    engine = None
     try:
         engine = start_engine(
             arg_data["configuration_uri"],
@@ -208,14 +197,39 @@ if __name__ == "__main__":
         else:
             raise RuntimeError("Unknown action '%s'" % action)
 
-    except EngineStartupFailure:
-        sys.exit(2)
-    except Exception as e:
-        sys.exit(1)
-
     finally:
         # make sure we have a clean shutdown
         if engine:
             engine.destroy()
+
+
+
+if __name__ == "__main__":
+    """
+    Main script entry point
+    """
+    # unpack file with arguments payload
+    arg_data_file = sys.argv[2]
+    with open(arg_data_file, "rb") as fh:
+        arg_data = cPickle.load(fh)
+
+    task_runner = QtTaskRunner(main)
+
+    # start up our QApp now
+    qt_application = qt_importer.QtGui.QApplication([])
+
+    # TODO - add icon
+    #qt_application.setWindowIcon(qt_importer.QtGui.QIcon(self.icon_256))
+
+    # when the QApp starts, initialize our task code
+    qt_importer.QtCore.QTimer.singleShot(0, task_runner.execute_command)
+
+    # and ask the main app to exit when the task emits its finished signal
+    task_runner.completed.connect(qt_application.quit)
+
+    # start the application loop. This will block the process until the task
+    # has completed - this is either triggered by a main window closing or
+    # byt the finished signal being called from the task class above.
+    qt_application.exec_()
 
     sys.exit(0)

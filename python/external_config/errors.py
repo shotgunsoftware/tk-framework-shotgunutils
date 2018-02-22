@@ -9,14 +9,14 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 
-class RemoteConfigParseError(RuntimeError):
+class ExternalConfigParseError(RuntimeError):
     """
     Indicates that the given serialized data is not usable
     """
     pass
 
 
-class RemoteConfigNotAccessibleError(RuntimeError):
+class ExternalConfigNotAccessibleError(RuntimeError):
     """
     Indicates that a configuration is not accessible
     """

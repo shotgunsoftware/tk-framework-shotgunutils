@@ -108,7 +108,7 @@ class ProcessRunner(object):
 
         :returns: A tuple containing (exit code, stdout, stderr).
         """
-        # Note: Tie stdin to a PIPE as well to avoid this python bug on windows
+        # Note: Tie stdin to a PIPE as well to avoid this Python bug on windows
         # http://bugs.python.org/issue3905
         # Queue code taken from: http://stackoverflow.com/questions/375427/non-blocking-read-on-a-subprocess-pipe-in-python
         stdout_lines = []

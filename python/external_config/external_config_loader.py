@@ -12,13 +12,13 @@ import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 from .configuration_state import ConfigurationState
 from . import file_cache
-from .errors import RemoteConfigNotAccessibleError, RemoteConfigParseError
-from . import remote_config
+from .errors import ExternalConfigNotAccessibleError, ExternalConfigParseError
+from . import external_config
 
 logger = sgtk.platform.get_logger(__name__)
 
 
-class RemoteConfigurationLoader(QtCore.QObject):
+class ExternalConfigurationLoader(QtCore.QObject):
     """
     Class for loading configurations across contexts.
 
@@ -26,14 +26,15 @@ class RemoteConfigurationLoader(QtCore.QObject):
 
     :signal configurations_loaded(project_id, configs): Gets emitted configurations
         have been loaded for the given project. The parameters passed is the
-        project id and a list of :class:`RemoteConfiguration` instances.
+        project id and a list of :class:`ExternalConfiguration` instances.
 
     :signal configurations_changed(): Gets emitted whenever the class
         has detected a change to the state of shotgun which could invalidate
-        any existing :class:`RemoteConfiguration` instances. This can be
-        emitted at startup or typically after :meth:`refresh` has been called.
-        Any implementation which caches :class:`RemoteConfiguration` instances
-        can use this signal to invalidate their caches.
+        any existing :class:`ExternalConfiguration` instances. This can be
+        emitted at startup or typically after :meth:`refresh_shotgun_global_state`
+        has been called. Any implementation which caches
+        :class:`ExternalConfiguration` instances can use this signal to invalidate
+        their caches.
     """
 
     # signal emitted to indicate that an update has been detected
@@ -43,18 +44,19 @@ class RemoteConfigurationLoader(QtCore.QObject):
     # signal to indicate that change to the configurations have been detected.
     configurations_changed = QtCore.Signal()
 
-    TASK_GROUP = "tk-framework-shotgunutils.external_config.RemoteConfigurationLoader"
+    # grouping used by the background task manager
+    TASK_GROUP = "tk-framework-shotgunutils.external_config.ExternalConfigurationLoader"
 
-    def __init__(self, interpreter, engine, plugin_id, base_config, bg_task_manager, parent):
+    def __init__(self, interpreter, engine_name, plugin_id, base_config, bg_task_manager, parent):
         """
         Initialize the class with the following parameters:
 
         .. note:: The interpreter needs to support the VFX Platform, e.g be
             able to import ``PySide`` or ``Pyside2``.
 
-        :param str interpreter: Path to python interpreter to use.
-        :param str engine: Engine to run.
-        :param str plugin_id: Plugin id to use when executing remote requests.
+        :param str interpreter: Path to Python interpreter to use.
+        :param str engine_name: Engine to run.
+        :param str plugin_id: Plugin id to use when executing external requests.
         :param str base_config: Default configuration URI to use if nothing else
             is provided via Shotgun overrides.
         :param bg_task_manager: Background task manager to use for any asynchronous work.
@@ -62,19 +64,19 @@ class RemoteConfigurationLoader(QtCore.QObject):
         :param parent: QT parent object.
         :type parent: :class:`~PySide.QtGui.QObject`
         """
-        super(RemoteConfigurationLoader, self).__init__(parent)
+        super(ExternalConfigurationLoader, self).__init__(parent)
 
         self._task_ids = {}
 
         self._plugin_id = plugin_id
         self._base_config_uri = base_config
-        self._engine = engine
+        self._engine_name = engine_name
         self._interpreter = interpreter
 
         self._config_state = ConfigurationState(bg_task_manager, parent)
         self._config_state.state_changed.connect(self.configurations_changed.emit)
         # always trigger a check at startup
-        self.refresh()
+        self.refresh_shotgun_global_state()
 
         self._bg_task_manager = bg_task_manager
         self._bg_task_manager.task_completed.connect(self._task_completed)
@@ -84,7 +86,7 @@ class RemoteConfigurationLoader(QtCore.QObject):
         """
         String representation
         """
-        return "<CommandHandler %s@%s>" % (self._engine, self._plugin_id)
+        return "<CommandHandler %s@%s>" % (self._engine_name, self._plugin_id)
 
     def shut_down(self):
         """
@@ -92,11 +94,11 @@ class RemoteConfigurationLoader(QtCore.QObject):
         """
         self._config_state.shut_down()
 
-    def refresh(self):
+    def refresh_shotgun_global_state(self):
         """
-        Requests a refresh. If the State of Shotgun has changed in a way which
-        may affect configurations, this will result in a ``configuration_changed``
-        signal being emitted.
+        Requests an async refresh. If the State of Shotgun has
+        changed in a way which may affect configurations, this will
+        result in a ``configurations_changed`` signal being emitted.
 
         Examples of state changes which may affect configurations are any changes
         to related pipeline configuration, but also indirect changes such as a
@@ -106,23 +108,23 @@ class RemoteConfigurationLoader(QtCore.QObject):
         self._config_state.refresh()
 
     @property
-    def engine(self):
+    def engine_name(self):
         """
-        The name of the engine associated with this remote configuration loader.
+        The name of the engine associated with this external configuration loader.
         """
-        return self._engine
+        return self._engine_name
 
     @property
     def interpreter(self):
         """
-        The python interpreter to when bootstrapping and loading remote configurations.
+        The Python interpreter to when bootstrapping and loading external configurations.
         """
         return self._interpreter
 
     @property
     def plugin_id(self):
         """
-        The plugin id which will be used when executing remote requests.
+        The plugin id which will be used when executing external requests.
         """
         return self._plugin_id
 
@@ -133,7 +135,7 @@ class RemoteConfigurationLoader(QtCore.QObject):
         """
         return self._base_config_uri
 
-    def request_configurations(self, project_id, force=False):
+    def request_configurations(self, project_id, force_reload=False):
         """
         Requests a list of configuration objects for the given project.
 
@@ -141,31 +143,31 @@ class RemoteConfigurationLoader(QtCore.QObject):
         have been loaded.
 
         :param project_id: Project to request configurations for.
-        :param force: If ``True``, force reload the configuration data.
+        :param force_reload: If ``True``, force reload the configuration data.
             If ``False`` (default), use a cached representation. This
-            cache is refreshed at startup and whenever :meth:`refresh`
-            is called.
+            cache is refreshed at startup and whenever
+            :meth:`refresh_shotgun_global_state` is called.
         """
         # load existing cache file if it exists
         config_cache_key = {
             "project": project_id,
             "plugin": self._plugin_id,
-            "hash": self._config_state.get_hash()
+            "state_hash": self._config_state.get_hash()
         }
 
         config_data = file_cache.load_cache(config_cache_key)
         # attempt to load configurations
         config_data_emitted = False
-        if config_data and not force:
-            # got the data cached so emit is straight away
+        if config_data and not force_reload:
+            # got the data cached so emit it straight away
             try:
                 config_objects = []
                 for cfg in config_data["configurations"]:
                     config_objects.append(
-                        remote_config.deserialize(self, self._bg_task_manager, cfg)
+                        external_config.deserialize(self, self._bg_task_manager, cfg)
                     )
 
-            except RemoteConfigParseError:
+            except ExternalConfigParseError:
                 # get rid of this configuration
                 file_cache.delete_cache(config_cache_key)
                 logger.debug("Detected and deleted out of date cache.")
@@ -175,30 +177,30 @@ class RemoteConfigurationLoader(QtCore.QObject):
                 config_data_emitted = True
 
         if not config_data_emitted:
-            # no cached version exists. Request a bg load
+            # Request a bg load
             unqiue_id = self._bg_task_manager.add_task(
                 self._execute_get_configurations,
                 priority=1,
                 group=self.TASK_GROUP,
                 task_kwargs={
                     "project_id": project_id,
-                    "hash": self._config_state.get_hash()
+                    "state_hash": self._config_state.get_hash()
                 }
             )
             self._task_ids[unqiue_id] = project_id
 
-    def _execute_get_configurations(self, project_id, hash):
+    def _execute_get_configurations(self, project_id, state_hash):
         """
         Background task to load configs.
 
         :param int project_id: Project id to load configs for.
-        :param str hash: Hash representing the relevant global state of Shotgun.
+        :param str state_hash: Hash representing the relevant global state of Shotgun.
         """
         # get list of configurations
         mgr = sgtk.bootstrap.ToolkitManager()
         mgr.plugin_id = self._plugin_id
         configs = mgr.get_pipeline_configurations({"type": "Project", "id": project_id})
-        return (project_id, hash, configs)
+        return (project_id, state_hash, configs)
 
     def _task_completed(self, unique_id, group, result):
         """
@@ -214,26 +216,26 @@ class RemoteConfigurationLoader(QtCore.QObject):
         del self._task_ids[unique_id]
 
         logger.debug("Got configuration info!")
-        (project_id, hash, config_dicts) = result
+        (project_id, state_hash, config_dicts) = result
 
         # check that the configs are complete. If not, issue warnings
         config_objects = []
         for config_dict in config_dicts:
             try:
-                config_object = remote_config.create_from_pipeline_configuration_data(
-                    self,
-                    self._bg_task_manager,
-                    self,
-                    config_dict
+                config_object = external_config.create_from_pipeline_configuration_data(
+                    parent=self,
+                    bg_task_manager=self._bg_task_manager,
+                    config_loader=self,
+                    configuration_data=config_dict
                 )
                 config_objects.append(config_object)
-            except RemoteConfigNotAccessibleError, e:
+            except ExternalConfigNotAccessibleError as e:
                 logger.warning(str(e))
 
         # if no custom pipeline configs were found, we use the default one
         if len(config_objects) == 0:
             config_objects.append(
-                remote_config.create_default(
+                external_config.create_fallback_configuration(
                     self,
                     self._bg_task_manager,
                     self
@@ -244,13 +246,15 @@ class RemoteConfigurationLoader(QtCore.QObject):
         data = {
             "project_id": project_id,
             "plugin_id": self._plugin_id,
-            "global_state_hash": hash,
-            "configurations": [remote_config.serialize(cfg_obj) for cfg_obj in config_objects]
+            "global_state_hash": state_hash,
+            "configurations": [
+                external_config.serialize(cfg_obj) for cfg_obj in config_objects
+                ]
         }
 
         # save cache
         file_cache.write_cache(
-            {"project": project_id, "plugin": self._plugin_id, "hash": hash},
+            {"project": project_id, "plugin": self._plugin_id, "state_hash": state_hash},
             data
         )
 

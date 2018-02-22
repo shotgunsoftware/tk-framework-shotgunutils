@@ -12,39 +12,44 @@ import os
 import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 from sgtk.util.process import subprocess_check_output, SubprocessCalledProcessError
-from ..remote_command import RemoteCommand
+from ..external_command import ExternalCommand
 from ..util import create_parameter_file
 from .. import file_cache
 
 logger = sgtk.platform.get_logger(__name__)
 
 
-class RemoteConfiguration(QtCore.QObject):
+class ExternalConfiguration(QtCore.QObject):
     """
-    Object wrapping a remote pipeline configuration.
+    Object wrapping an external pipeline configuration.
 
     **Signals**
 
-    :signal commands_loaded(config, commands): Gets emitted after :meth:`request_commands` has
+    :signal commands_loaded(project_id, config, commands): Gets emitted after :meth:`request_commands` has
         been called and once commands have been loaded for the configuration. The
-        commands parameter contains a list of :class:`RemoteCommand` instances.
+        commands parameter contains a list of :class:`ExternalCommand` instances.
 
     """
-    TASK_GROUP = "tk-framework-shotgunutils.external_config.RemoteConfiguration"
 
-    # configuration object, list of :class:`RemoteCommand` instances
-    commands_loaded = QtCore.Signal(object, list)
+    # grouping used by the background task manager
+    TASK_GROUP = "tk-framework-shotgunutils.external_config.ExternalConfiguration"
+
+    commands_loaded = QtCore.Signal(int, object, list)
+    # signal parameters:
+    # 1. project_id
+    # 2. configuration instance
+    # 3. configuration object, list of :class:`ExternalCommand` instances
 
     def __init__(
             self,
             parent,
             bg_task_manager,
             plugin_id,
-            engine,
+            engine_name,
             interpreter,
     ):
         """
-        .. note:: This class is constructed by :class:`RemoteConfigurationLoader`.
+        .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
             Do not construct objects by hand.
 
         Constructor parameters:
@@ -54,14 +59,13 @@ class RemoteConfiguration(QtCore.QObject):
         :param bg_task_manager: Background task manager to use for any asynchronous work.
         :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         :param str plugin_id: Associated bootstrap plugin id
-        :param str engine: Associated engine name
-        :param str interpreter: Associated python interpreter
+        :param str engine_name: Associated engine name
+        :param str interpreter: Associated Python interpreter
         """
-        super(RemoteConfiguration, self).__init__(parent)
+        super(ExternalConfiguration, self).__init__(parent)
 
-        self._parent = parent
         self._plugin_id = plugin_id
-        self._engine = engine
+        self._engine_name = engine_name
         self._interpreter = interpreter
 
         self._task_ids = {}
@@ -81,16 +85,16 @@ class RemoteConfiguration(QtCore.QObject):
         return self._plugin_id
 
     @property
-    def engine(self):
+    def engine_name(self):
         """
         The engine name associated with the configuration.
         """
-        return self._engine
+        return self._engine_name
 
     @property
     def interpreter(self):
         """
-        The python interpreter to use when accessing this configuration
+        The Python interpreter to use when accessing this configuration
         """
         return self._interpreter
 
@@ -110,6 +114,7 @@ class RemoteConfiguration(QtCore.QObject):
         """
         The associated pipeline configuration id or ``None`` if not defined.
         """
+        # note: subclassed implementations will override this return value
         return None
 
     @property
@@ -117,6 +122,7 @@ class RemoteConfiguration(QtCore.QObject):
         """
         The name of the associated pipeline configuration or ``None`` if not defined.
         """
+        # note: subclassed implementations will override this return value
         return None
 
     @property
@@ -126,14 +132,16 @@ class RemoteConfiguration(QtCore.QObject):
         configurations that have an associated :meth:`pipeline_configuration_id`,
         this returns ``None``.
         """
+        # note: subclassed implementations will override this return value
         return None
 
-    def request_commands(self, entity_type, entity_id, link_entity_type):
+    def request_commands(self, project_id, entity_type, entity_id, link_entity_type):
         """
-        Request commands for the given object.
+        Request commands for the given shotgun entity.
 
         A ``commands_loaded`` signal will be emitted once the commands are available.
 
+        :param int project_id: Associated project id
         :param str entity_type: Associated entity type
         :param int entity_id: Associated entity id
         :param str link_entity_type: Entity type that the item is linked to.
@@ -147,14 +155,15 @@ class RemoteConfiguration(QtCore.QObject):
             self._request_commands,
             group=self.TASK_GROUP,
             task_kwargs={
+                "project_id": project_id,
                 "entity_type": entity_type,
                 "entity_id": entity_id,
                 "link_entity_type": link_entity_type,
             }
         )
-        self._task_ids[task_id] = (entity_type, entity_id)
+        self._task_ids[task_id] = (project_id, entity_type, entity_id)
 
-    def _compute_config_hash(self, entity_type, entity_id, link_entity_type):
+    def _compute_config_hash_keys(self, entity_type, entity_id, link_entity_type):
         """
         Generates a hash to uniquely identify the configuration.
 
@@ -165,15 +174,16 @@ class RemoteConfiguration(QtCore.QObject):
             where caching it per linked type can be beneficial.
         :returns: dictionary of values to use for hash computation
         """
-        # Implemented by subclasses.
-        raise NotImplementedError("_compute_config_hash is not implemented.")
+        # This needs to be implemented by subclasses.
+        raise NotImplementedError("_compute_config_hash_keys is not implemented.")
 
     @sgtk.LogManager.log_timing
-    def _request_commands(self, entity_type, entity_id, link_entity_type):
+    def _request_commands(self, project_id, entity_type, entity_id, link_entity_type):
         """
         Execution, runs in a separate thread and launches an external
         process to cache commands.
 
+        :param int project_id: Associated project id
         :param str entity_type: Associated entity type
         :param int entity_id: Associated entity id
         :param str link_entity_type: Entity type that the item is linked to.
@@ -181,7 +191,11 @@ class RemoteConfiguration(QtCore.QObject):
             where caching it per linked type can be beneficial.
         """
         # figure out if we have a suitable config for this on disk already
-        cache_hash = self._compute_config_hash(entity_type, entity_id, link_entity_type)
+        cache_hash = self._compute_config_hash_keys(
+            entity_type,
+            entity_id,
+            link_entity_type
+        )
         cache_path = file_cache.get_cache_path(cache_hash)
         cached_data = file_cache.load_cache(cache_hash)
 
@@ -205,7 +219,7 @@ class RemoteConfiguration(QtCore.QObject):
                     configuration_uri=self.descriptor_uri,
                     pipeline_config_id=self.pipeline_configuration_id,
                     plugin_id=self.plugin_id,
-                    engine_name=self.engine,
+                    engine_name=self.engine_name,
                     entity_type=entity_type,
                     entity_id=entity_id,
                     bundle_cache_fallback_paths=self._bundle.engine.sgtk.bundle_cache_fallback_paths,
@@ -222,10 +236,9 @@ class RemoteConfiguration(QtCore.QObject):
 
             try:
                 subprocess_check_output(args)
-            except SubprocessCalledProcessError, e:
+            except SubprocessCalledProcessError as e:
                 # caching failed!
-                logger.error("External process command caching failed: %s" % e.output)
-                raise Exception("Error retrieving actions.")
+                raise RuntimeError("Error retrieving actions: %s" % e.output)
             finally:
                 # clean up temp file
                 sgtk.util.filesystem.safe_delete_file(args_file)
@@ -235,18 +248,10 @@ class RemoteConfiguration(QtCore.QObject):
             # now try again
             cached_data = file_cache.load_cache(cache_hash)
 
-        # got some cached data that we can emit
-        if cached_data:
-            self.commands_loaded.emit(
-                self,
-                [RemoteCommand.create(self, d, entity_id) for d in cached_data]
-            )
-        else:
-            logger.error(
-                "Could not locate cached commands for remote configuration %s" % self
-            )
-            # emit an empty list of commands
-            self.commands_loaded.emit(self, [])
+            if cached_data is None:
+                raise RuntimeError("Could not locate cached commands for %s" % self)
+
+        return cached_data
 
 
     def _task_completed(self, unique_id, group, result):
@@ -261,7 +266,20 @@ class RemoteConfiguration(QtCore.QObject):
             # this was not for us
             return
 
+        (project_id, entity_type, entity_id) = self._task_ids[unique_id]
+
         del self._task_ids[unique_id]
+
+        # result contains our cached data
+        cached_data = result
+
+        # got some cached data that we can emit
+        self.commands_loaded.emit(
+            project_id,
+            self,
+            [ExternalCommand.create(self, d, entity_id) for d in cached_data]
+        )
+
 
     def _task_failed(self, unique_id, group, message, traceback_str):
         """
@@ -276,10 +294,13 @@ class RemoteConfiguration(QtCore.QObject):
             # this was not for us
             return
 
+        (project_id, _, _) = self._task_ids[unique_id]
+
         del self._task_ids[unique_id]
 
         # log exception message to error log
         logger.error(message)
+
         # emit an empty list of commands
-        self.commands_loaded.emit(self, [])
+        self.commands_loaded.emit(project_id, self, [])
 

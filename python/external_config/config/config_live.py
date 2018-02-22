@@ -12,16 +12,20 @@ import os
 import sgtk
 import fnmatch
 import hashlib
-from .config_base import RemoteConfiguration
+from .config_base import ExternalConfiguration
 from .. import file_cache
 
 logger = sgtk.platform.get_logger(__name__)
 
 
-class LiveRemoteConfiguration(RemoteConfiguration):
+class LiveExternalConfiguration(ExternalConfiguration):
     """
-    Represents a remote configuration which is which is linked to
-    a mutable descriptor and a locaation on disk.
+    Represents an external configuration which is linked to
+    a mutable descriptor and a location on disk.
+
+    This class of configurations are 'classic' shotgun
+    configurations which have been set up with the
+    Shotgun project setup wizard.
     """
 
     def __init__(
@@ -29,7 +33,7 @@ class LiveRemoteConfiguration(RemoteConfiguration):
             parent,
             bg_task_manager,
             plugin_id,
-            engine,
+            engine_name,
             interpreter,
             pipeline_config_id,
             pipeline_config_name,
@@ -37,7 +41,7 @@ class LiveRemoteConfiguration(RemoteConfiguration):
             pipeline_config_folder,
     ):
         """
-        .. note:: This class is constructed by :class:`RemoteConfigurationLoader`.
+        .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
             Do not construct objects by hand.
 
         :param parent: QT parent object.
@@ -45,18 +49,18 @@ class LiveRemoteConfiguration(RemoteConfiguration):
         :param bg_task_manager: Background task manager to use for any asynchronous work.
         :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         :param str plugin_id: Associated bootstrap plugin id
-        :param str engine: Associated engine name
-        :param str interpreter: Associated python interpreter
+        :param str engine_name: Associated engine name
+        :param str interpreter: Associated Python interpreter
         :param id pipeline_config_id: Pipeline Configuration id
         :param are pipeline_config_name: Pipeline Configuration name
         :param str pipeline_config_uri: Descriptor URI string for the config
         :param str pipeline_config_folder: Folder where the configuration is located
         """
-        super(LiveRemoteConfiguration, self).__init__(
+        super(LiveExternalConfiguration, self).__init__(
             parent,
             bg_task_manager,
             plugin_id,
-            engine,
+            engine_name,
             interpreter,
         )
 
@@ -69,7 +73,7 @@ class LiveRemoteConfiguration(RemoteConfiguration):
         """
         String representation
         """
-        return "<LiveRemoteConfiguration id %d@%s>" % (
+        return "<LiveExternalConfiguration id %d@%s>" % (
             self._pipeline_configuration_id,
             self._pipeline_config_uri
         )
@@ -95,7 +99,7 @@ class LiveRemoteConfiguration(RemoteConfiguration):
         """
         return self._pipeline_config_folder
 
-    def _compute_config_hash(self, entity_type, entity_id, link_entity_type):
+    def _compute_config_hash_keys(self, entity_type, entity_id, link_entity_type):
         """
         Generates a hash to uniquely identify the configuration.
 
@@ -108,18 +112,18 @@ class LiveRemoteConfiguration(RemoteConfiguration):
         """
         cache_key = {
             file_cache.FOLDER_PREFIX_KEY: "id_%s" % self.pipeline_configuration_id,
-            "engine": self.engine,
+            "engine_name": self.engine_name,
             "uri": self.descriptor_uri,
             "type": entity_type,
             "link_type": link_entity_type,
             # because this cache is mutable, we need to look deeper to calculate its uniqueness.
-            "env_mtime_hash": self._get_yml_file_data()
+            "env_mtime_hash": self._get_environment_hash()
         }
 
         return cache_key
 
     @sgtk.LogManager.log_timing
-    def _get_yml_file_data(self):
+    def _get_environment_hash(self):
         """
         Gets environment yml file paths and their associated mtimes for the
         given pipeline configuration descriptor object. The data will be looked
@@ -134,9 +138,8 @@ class LiveRemoteConfiguration(RemoteConfiguration):
                 ...
             }
 
-        :returns: A dictionary keyed by yml file path, set to the file's mtime
-            at the time the data was cached.
-        :rtype: dict
+        :returns: checksum string representing the state of the environment files.
+        :rtype: str
         """
         env_hash = hashlib.md5()
         env_path = os.path.join(self._pipeline_config_folder, "env")

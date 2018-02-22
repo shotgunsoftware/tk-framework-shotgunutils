@@ -9,16 +9,20 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
-from .config_base import RemoteConfiguration
+from .config_base import ExternalConfiguration
 from .. import file_cache
 
 logger = sgtk.platform.get_logger(__name__)
 
 
-class ImmutableRemoteConfiguration(RemoteConfiguration):
+class FallbackExternalConfiguration(ExternalConfiguration):
     """
-    Represents a Shotgun pipeline configuration
-    linked to an immutable descriptor.
+    Class representing a config which does not have
+    an associated pipeline configuration id.
+
+    This is used to represent the standard zero config setup
+    where a user does not have any custom pipeline configurations
+    defined in Shotgun.
     """
 
     def __init__(
@@ -26,14 +30,12 @@ class ImmutableRemoteConfiguration(RemoteConfiguration):
             parent,
             bg_task_manager,
             plugin_id,
-            engine,
+            engine_name,
             interpreter,
-            pipeline_config_id,
-            pipeline_config_name,
             pipeline_config_uri,
     ):
         """
-        .. note:: This class is constructed by :class:`RemoteConfigurationLoader`.
+        .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
             Do not construct objects by hand.
 
         :param parent: QT parent object.
@@ -41,48 +43,33 @@ class ImmutableRemoteConfiguration(RemoteConfiguration):
         :param bg_task_manager: Background task manager to use for any asynchronous work.
         :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         :param str plugin_id: Associated bootstrap plugin id
-        :param str engine: Associated engine name
-        :param str interpreter: Associated python interpreter
-        :param id pipeline_config_id: Pipeline Configuration id
-        :param are pipeline_config_name: Pipeline Configuration name
+        :param str engine_name: Associated engine name
+        :param str interpreter: Associated Python interpreter
         :param str pipeline_config_uri: Descriptor URI string for the config
         """
-        super(ImmutableRemoteConfiguration, self).__init__(
+        super(FallbackExternalConfiguration, self).__init__(
             parent,
             bg_task_manager,
             plugin_id,
-            engine,
+            engine_name,
             interpreter,
         )
-
-        self._pipeline_configuration_id = pipeline_config_id
-        self._pipeline_config_name = pipeline_config_name
         self._pipeline_config_uri = pipeline_config_uri
 
     def __repr__(self):
         """
-        String representation
+        Low level string representation
         """
-        return "<ImmutableRemoteConfiguration id %d@%s>" % (
-            self._pipeline_configuration_id,
-            self._pipeline_config_uri
-        )
+        return "<FallbackExternalConfiguration %s>" % self._pipeline_config_uri
 
     @property
-    def pipeline_configuration_id(self):
+    def descriptor_uri(self):
         """
-        The associated pipeline configuration id or ``None`` if not defined.
+        The descriptor uri associated with this pipeline configuration.
         """
-        return self._pipeline_configuration_id
+        return self._pipeline_config_uri
 
-    @property
-    def pipeline_configuration_name(self):
-        """
-        The name of the associated pipeline configuration or ``None`` if not defined.
-        """
-        return self._pipeline_config_name
-
-    def _compute_config_hash(self, entity_type, entity_id, link_entity_type):
+    def _compute_config_hash_keys(self, entity_type, entity_id, link_entity_type):
         """
         Generates a hash to uniquely identify the configuration.
 
@@ -93,12 +80,13 @@ class ImmutableRemoteConfiguration(RemoteConfiguration):
             where caching it per linked type can be beneficial.
         :returns: dictionary of values to use for hash computation
         """
-        return {
-            file_cache.FOLDER_PREFIX_KEY: "id_%s" % self.pipeline_configuration_id,
-            "engine": self.engine,
+        cache_key = {
+            file_cache.FOLDER_PREFIX_KEY: "base",
+            "engine_name": self.engine_name,
             "uri": self.descriptor_uri,
             "type": entity_type,
             "link_type": link_entity_type,
         }
 
+        return cache_key
 

@@ -8,5 +8,8 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-from .factory import create_default, create_from_pipeline_configuration_data, serialize, deserialize
-from .config_base import RemoteConfiguration
+from .factory import create_fallback_configuration, \
+    create_from_pipeline_configuration_data, \
+    serialize, \
+    deserialize
+from .config_base import ExternalConfiguration

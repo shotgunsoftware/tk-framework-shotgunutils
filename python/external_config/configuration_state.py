@@ -46,10 +46,21 @@ class ConfigurationState(QtCore.QObject):
         :type parent: :class:`~PySide.QtGui.QObject`
         """
         super(ConfigurationState, self).__init__(parent)
-        self._software_model = SoftwareModel(bg_task_manager, parent)
-        self._software_model.data_refreshed.connect(self._on_software_refreshed)
 
-        self._pipeline_config_model = PipelineConfigModel(bg_task_manager, parent)
+        self._software_model = ConfigStateModel(
+            "Software",
+            [],
+            bg_task_manager,
+            parent
+        )
+        self._pipeline_config_model = ConfigStateModel(
+            "PipelineConfiguration",
+            [["project.Project.archived", "is", False]],
+            bg_task_manager,
+            parent
+        )
+
+        self._software_model.data_refreshed.connect(self._on_software_refreshed)
         self._pipeline_config_model.data_refreshed.connect(self._on_pipeline_configs_refreshed)
 
     def refresh(self):
@@ -58,8 +69,8 @@ class ConfigurationState(QtCore.QObject):
         configuration state. If a change is detected, indicating that
         configurations should be recomputed, a ``state_changed`` signal is emitted.
         """
-        self._pipeline_config_model.load()
-        self._software_model.load()
+        self._pipeline_config_model.load_and_refresh()
+        self._software_model.load_and_refresh()
 
     def shut_down(self):
         """
@@ -75,10 +86,12 @@ class ConfigurationState(QtCore.QObject):
         :returns: Hash string or ``None`` if not yet defined.
         """
         sw_hash = self._software_model.get_hash()
-        pc_hash = self._pipeline_config_model.get_hash()
-        if sw_hash is None or pc_hash is None:
+        if sw_hash is None:
             return None
-        return str(sw_hash) + str(pc_hash)
+        pc_hash = self._pipeline_config_model.get_hash()
+        if pc_hash is None:
+            return None
+        return "%s%s" % (sw_hash, pc_hash)
 
     def _on_software_refreshed(self, has_changed):
         """
@@ -101,91 +114,47 @@ class ConfigurationState(QtCore.QObject):
             self.state_changed.emit()
 
 
-class SoftwareModel(ShotgunModel):
+class ConfigStateModel(ShotgunModel):
     """
-    All software entities
+    A ShotgunModel use to retrieve the state of a given entity.
+
+    Maintains the most recent updated_at timestamp for a given query
+    and allows this to be used as a way to detect if a change has
+    happened to the given state.
+
+    .. note:: This state model does not currently track deletion.
+              If an object gets deleted, the model will not be able
+              to indicate this.
     """
 
-    def __init__(self, bg_task_manager, parent):
+    def __init__(self, entity_type, filters, bg_task_manager, parent):
         """
         :param bg_task_manager: Background task manager to use for any asynchronous work.
         :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         :param parent: QT parent object.
         :type parent: :class:`~PySide.QtGui.QObject`
         """
-        super(SoftwareModel, self).__init__(
+        super(ConfigStateModel, self).__init__(
             parent,
             download_thumbs=False,
             bg_task_manager=bg_task_manager
         )
+        self._entity_type = entity_type
+        self._filters = filters
 
-    def load(self):
+    def load_and_refresh(self):
         """
-        Load all data into model.
+        Load cached data into the model and request a refresh.
         """
         hierarchy = ["id"]
-        fields = ["code", "updated_at"]
-        self._load_data("Software", [], hierarchy, fields)
-        self._refresh_data()
-
-    def get_hash(self):
-        """
-        Computes a hash representing the state of all entities.
-
-        :returns: Hash int or None if nothing is loaded.
-        """
-        sg_data = self._get_sg_data()
-        if sg_data is None:
-            return None
-        else:
-            return hash(str(sg_data))
-
-    def _get_sg_data(self):
-        """
-        Currently loaded Shotgun data.
-
-        :returns: The sg data dictionary for the associated item,
-                  None if not available.
-        """
-        if self.rowCount() == 0:
-            data = None
-        else:
-            data = []
-            for idx in range(self.rowCount()):
-                item = self.item(idx)
-                data.append(item.get_sg_data())
-
-        return data
-
-
-class PipelineConfigModel(ShotgunModel):
-    """
-    Pipeline configurations for all active projects.
-    """
-    def __init__(self, bg_task_manager, parent):
-        """
-        :param bg_task_manager: Background task manager to use for any asynchronous work.
-        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
-        :param parent: QT parent object.
-        :type parent: :class:`~PySide.QtGui.QObject`
-        """
-        super(PipelineConfigModel, self).__init__(
-            parent,
-            download_thumbs=False,
-            bg_task_manager=bg_task_manager
-        )
-
-    def load(self):
-        """
-        Load all data into model.
-        """
-        hierarchy = ["id"]
-        fields = ["code", "updated_at"]
+        fields = ["updated_at"]
         self._load_data(
-            "PipelineConfiguration",
-            [["project.Project.archived", "is", False]],
+            self._entity_type,
+            self._filters,
             hierarchy,
-            fields
+            fields,
+            [{"field_name": "updated_at", "direction": "desc"}],
+            limit=1
         )
         self._refresh_data()
 
@@ -205,8 +174,8 @@ class PipelineConfigModel(ShotgunModel):
         """
         Currently loaded Shotgun data.
 
-        :returns: The sg data dictionary for the associated item,
-                  None if not available.
+        :returns: List of sg data dictionaries
+            or ``None`` if not data is loaded.
         """
         if self.rowCount() == 0:
             data = None
@@ -217,3 +186,5 @@ class PipelineConfigModel(ShotgunModel):
                 data.append(item.get_sg_data())
 
         return data
+
+

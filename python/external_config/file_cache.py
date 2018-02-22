@@ -49,8 +49,8 @@ def load_cache_file(cache_path):
         try:
             with open(cache_path, "rb") as fh:
                 content = pickle.load(fh)
-        except Exception, e:
-            logger.debug("Cache '%s' not valid - ignoring. Details: %s" % (cache_path, e))
+        except Exception as e:
+            logger.debug("Cache '%s' not valid - ignoring. Details: %s" % (cache_path, e), exec_info=True)
     else:
         logger.debug("No cache found on disk.")
 
@@ -106,10 +106,10 @@ def write_cache_file(path, data):
         # and ensure the cache file has got open permissions
         os.chmod(path, 0666)
 
-    except Exception, e:
-        logger.debug("Could not write '%s'. Details: %s" % (path, e))
-
-    logger.debug("Completed save of %s. Size %s bytes" % (path, os.path.getsize(path)))
+    except Exception as e:
+        logger.debug("Could not write '%s'. Details: %s" % (path, e), exec_info=True)
+    else:
+        logger.debug("Completed save of %s. Size %s bytes" % (path, os.path.getsize(path)))
 
 
 def get_cache_path(identifier_dict):

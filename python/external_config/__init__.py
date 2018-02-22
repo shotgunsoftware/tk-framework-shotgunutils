@@ -8,6 +8,6 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-from .remote_config_loader import RemoteConfigurationLoader
-from .remote_command import RemoteCommand
-from .remote_config import RemoteConfiguration
+from .external_config_loader import ExternalConfigurationLoader
+from .external_command import ExternalCommand
+from .external_config import ExternalConfiguration
