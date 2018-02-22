@@ -13,7 +13,7 @@ from sgtk.platform.qt import QtCore, QtGui
 from .configuration_state import ConfigurationState
 from . import file_cache
 from .errors import ExternalConfigNotAccessibleError, ExternalConfigParseError
-from . import external_config
+from . import config
 
 logger = sgtk.platform.get_logger(__name__)
 
@@ -164,7 +164,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
                 config_objects = []
                 for cfg in config_data["configurations"]:
                     config_objects.append(
-                        external_config.deserialize(self, self._bg_task_manager, cfg)
+                        config.deserialize(self, self._bg_task_manager, cfg)
                     )
 
             except ExternalConfigParseError:
@@ -222,7 +222,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
         config_objects = []
         for config_dict in config_dicts:
             try:
-                config_object = external_config.create_from_pipeline_configuration_data(
+                config_object = config.create_from_pipeline_configuration_data(
                     parent=self,
                     bg_task_manager=self._bg_task_manager,
                     config_loader=self,
@@ -235,7 +235,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
         # if no custom pipeline configs were found, we use the default one
         if len(config_objects) == 0:
             config_objects.append(
-                external_config.create_fallback_configuration(
+                config.create_fallback_configuration(
                     self,
                     self._bg_task_manager,
                     self
@@ -248,7 +248,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
             "plugin_id": self._plugin_id,
             "global_state_hash": state_hash,
             "configurations": [
-                external_config.serialize(cfg_obj) for cfg_obj in config_objects
+                config.serialize(cfg_obj) for cfg_obj in config_objects
                 ]
         }
 
