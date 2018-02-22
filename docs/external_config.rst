@@ -6,8 +6,8 @@ External Configuration Management
 Introduction
 ======================================
 
-This module contains classes and methods for doing remote inspection
-of environments. The typical scenario when this is helpful is if you
+This module contains classes and methods for doing inspection
+of external environments. The typical scenario when this is helpful is if you
 are creating an environment with mixed contexts - for example a
 Shotgun 'My Tasks' tool which lists different items from different
 projects and presents a list of available commands, apps or similar
@@ -25,26 +25,26 @@ ensuring complete stability of the runtime environment - no context
 switching or core changes take place.
 
 
-Class RemoteConfigurationLoader
+Class ExternalConfigurationLoader
 ============================================
-.. autoclass:: RemoteConfigurationLoader
+.. autoclass:: ExternalConfigurationLoader
     :members:
     :inherited-members:
 
-Class RemoteConfiguration
+Class ExternalConfiguration
 ============================================
 
-.. autoclass:: RemoteConfiguration
+.. autoclass:: ExternalConfiguration
     :members:
     :inherited-members:
 
-Class RemoteCommand
+Class ExternalCommand
 ============================================
 
-.. autoclass:: RemoteCommand
+.. autoclass:: ExternalCommand
     :members:
     :inherited-members:
-    :exclude-members: serialize_command, create,
+    :exclude-members: serialize_command, create
 
 
 
