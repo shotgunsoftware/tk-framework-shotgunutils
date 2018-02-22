@@ -9,12 +9,10 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import copy
-import gc
 
-from .data_handler import ShotgunDataHandler, log_timing
+from .data_handler import ShotgunDataHandler
 from .errors import ShotgunModelDataError
-from .data_item import ShotgunItemData
-from .data_handler_cache import ShotgunDataHandlerCache
+import sgtk
 
 
 class ShotgunNavDataHandler(ShotgunDataHandler):
@@ -91,7 +89,7 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
 
         return worker_id
 
-    @log_timing
+    @sgtk.LogManager.log_timing
     def update_data(self, sg_data):
         """
         The counterpart to :meth:`generate_data_request`. When the data
@@ -243,6 +241,3 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
         self._log_debug("    Number of modified records: %d" % num_modifications)
 
         return diff_list
-
-
-
