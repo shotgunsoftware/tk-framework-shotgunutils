@@ -117,7 +117,8 @@ def get_cache_path(identifier_dict):
     Create a file name given a dictionary of identifiers,
     e.g. ``{shot: 123, project: 345}`` etc. A hash value will
     be computed based on the identifier and used to determine
-    the path.
+    the path. The current user will be added to the hash in
+    order to make it user-centric.
 
     If the hash key 'prefix' is detected, this will be added
     to the path as a parent folder to the cache file. This provides
@@ -130,6 +131,11 @@ def get_cache_path(identifier_dict):
     for (k, v) in identifier_dict.iteritems():
         params_hash.update(str(k))
         params_hash.update(str(v))
+
+    # add current user to hash
+    user = sgtk.get_authenticated_user()
+    if user and user.login:
+        params_hash.update(user.login)
 
     cache_location = sgtk.platform.current_bundle().cache_location
 
