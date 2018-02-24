@@ -21,15 +21,101 @@ path_to_sgtk = sys.argv[1]
 sys.path.insert(0, path_to_sgtk)
 import sgtk
 
-
+# we should now be able to import QT - this is a
+# requirement for the external config module
+qt_importer = sgtk.util.qt_importer.QtImporter()
 
 LOGGER_NAME = "tk-framework-shotgunutils.multi_context.external_runner"
+logger = sgtk.LogManager.get_logger(LOGGER_NAME)
 
 
-class EngineStartupFailure(RuntimeError):
+class QtTaskRunner(qt_importer.QtCore.QObject):
     """
-    Raised when the engine fails to start.
+    Wrapper class for a callback payload.
+
+    This is used in conjunction with a QT event loop, allowing a
+    given callback to be run inside an event loop. By the end of
+    the execution, if the callback payload has not created any
+    windows, a ``completed`` signal is emitted. This allows for
+    a pattern where the QT event loop can be explicitly torn down
+    for callback payloads which don't start up new dialogs.
+
+    In the case of dialogs, QT defaults to a "terminate event loop
+    when the last window closes", ensuring a graceful termination
+    when the dialog is closed.
+
+    Typically used like this::
+
+        task_runner = QtTaskRunner(callback_payload)
+
+        # start up our QApplication
+        qt_application = qt_importer.QtGui.QApplication([])
+
+        # Set up automatic execution of our task runner as soon
+        # as the event loop starts up.
+        qt_importer.QtCore.QTimer.singleShot(0, task_runner.execute_command)
+
+        # and ask the main app to exit when the task emits its finished signal
+        task_runner.completed.connect(qt_application.quit)
+
+        # start the application loop. This will block the process until the task
+        # has completed - this is either triggered by a main window closing or
+        # byt the finished signal being called from the task class above.
+        qt_application.exec_()
+
+        # check if any errors were raised.
+        if task_runner.failure_detected:
+            # exit with error
+            sys.exit(1)
+        else:
+            sys.exit(0)
     """
+
+    # emitted when the taskrunner has completed non-ui work
+    completed = qt_importer.QtCore.Signal()
+
+    def __init__(self, callback):
+        """
+        :param callback: Callback to execute
+        """
+        qt_importer.QtCore.QObject.__init__(self)
+        self._callback = callback
+        self._failure_detected = False
+
+    @property
+    def failure_detected(self):
+        """
+        True if an execution error has been detected
+        """
+        return self._failure_detected
+
+    def execute_command(self):
+        """
+        Execute the callback given by the constructor.
+        For details and example, see the class introduction.
+        """
+        # note that because pyside has its own exception wrapper around
+        # exec we need to catch and log any exceptions here.
+        try:
+            self._callback()
+        except Exception as e:
+            self._failure_detected = True
+
+            # We need to give the server a way to know that this failed due
+            # to an engine initialization issue. That will allow it to skip
+            # this config gracefully and log appropriately.
+            logger.exception("Could not bootstrap configuration")
+
+            # push it to stdout so that the parent process will get it
+            print traceback.format_exc()
+
+        finally:
+            # broadcast that we have finished this command
+            qt_app = qt_importer.QtCore.QCoreApplication.instance()
+            if len(qt_app.topLevelWidgets()) == 0:
+                # no windows opened. we are done!
+                self.completed.emit()
+
 
 def _get_core_python_path():
     """
@@ -41,6 +127,7 @@ def _get_core_python_path():
     tank_folder = os.path.dirname(sgtk_file)
     python_folder = os.path.dirname(tank_folder)
     return python_folder
+
 
 def _import_py_file(python_path, name):
     """
@@ -79,46 +166,33 @@ def start_engine(
     :param str entity_type: Entity type to launch
     :param str entity_id: Entity id to launch
     :param list bundle_cache_fallback_paths: List of bundle cache paths to include.
-    :raises: EngineStartupFailure on failure
     """
-    try:
-        # log to file.
-        sgtk.LogManager().initialize_base_file_handler(engine_name)
-        logger = sgtk.LogManager.get_logger(LOGGER_NAME)
-        logger.debug("")
-        logger.debug("-=" * 60)
-        logger.debug("Preparing ToolkitManager for command cache bootstrap.")
+    # log to file.
+    sgtk.LogManager().initialize_base_file_handler(engine_name)
+    logger.debug("")
+    logger.debug("-=" * 60)
+    logger.debug("Preparing ToolkitManager for command cache bootstrap.")
 
-        # Setup the bootstrap manager.
-        manager = sgtk.bootstrap.ToolkitManager()
-        manager.plugin_id = plugin_id
-        manager.bundle_cache_fallback_paths = bundle_cache_fallback_paths
+    # Setup the bootstrap manager.
+    manager = sgtk.bootstrap.ToolkitManager()
+    manager.plugin_id = plugin_id
+    manager.bundle_cache_fallback_paths = bundle_cache_fallback_paths
 
-        if pipeline_config_id:
-            # we have a pipeline config id to launch.
-            manager.do_shotgun_config_lookup = True
-            manager.pipeline_configuration = pipeline_config_id
-        else:
-            # launch a base uri. no need to look in sg for overrides.
-            manager.do_shotgun_config_lookup = False
-            manager.base_configuration = configuration_uri
+    if pipeline_config_id:
+        # we have a pipeline config id to launch.
+        manager.do_shotgun_config_lookup = True
+        manager.pipeline_configuration = pipeline_config_id
+    else:
+        # launch a base uri. no need to look in sg for overrides.
+        manager.do_shotgun_config_lookup = False
+        manager.base_configuration = configuration_uri
 
-        logger.debug("Starting %s using entity %s %s", engine_name, entity_type, entity_id)
-        engine = manager.bootstrap_engine(
-            engine_name,
-            entity={"type": entity_type, "id": entity_id}
-        )
-        logger.debug("Engine %s started using entity %s %s", engine, entity_type, entity_id)
-
-    except Exception as e:
-        # We need to give the server a way to know that this failed due
-        # to an engine initialization issue. That will allow it to skip
-        # this config gracefully and log appropriately.
-        logger.exception("Could not bootstrap configuration")
-
-        # print to our logger so it's picked up by the main process
-        print traceback.format_exc()
-        raise EngineStartupFailure(e)
+    logger.debug("Starting %s using entity %s %s", engine_name, entity_type, entity_id)
+    engine = manager.bootstrap_engine(
+        engine_name,
+        entity={"type": entity_type, "id": entity_id}
+    )
+    logger.debug("Engine %s started using entity %s %s", engine, entity_type, entity_id)
 
     # add the core path to the PYTHONPATH so that downstream processes
     # can make use of it
@@ -144,15 +218,11 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
     file_cache = _import_py_file(utils_folder, "file_cache")
     external_command = _import_py_file(utils_folder, "external_command")
 
-    # Note that from here on out, we have to use the legacy log_* methods
-    # that the engine provides. This is because we're now operating in the
-    # tk-core that is configured for the project, which means we can't
-    # guarantee that it is v0.18+.
-    engine.log_debug("Processing engine commands...")
+    logger.debug("Processing engine commands...")
     commands = []
 
     for cmd_name, data in engine.commands.iteritems():
-        engine.log_debug("Processing command: %s" % cmd_name)
+        logger.debug("Processing command: %s" % cmd_name)
 
         commands.append(
             external_command.ExternalCommand.serialize_command(
@@ -162,23 +232,27 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
             )
         )
 
-    engine.log_debug("Engine commands processed.")
+    logger.debug("Engine commands processed.")
     file_cache.write_cache_file(cache_path, commands)
-    engine.log_debug("Cache complete.")
+    logger.debug("Cache complete.")
 
 
-
-if __name__ == "__main__":
+def main():
     """
-    Main script entry point
+    Main method, executed from inside a QT event loop.
     """
-
     # unpack file with arguments payload
     arg_data_file = sys.argv[2]
     with open(arg_data_file, "rb") as fh:
         arg_data = cPickle.load(fh)
 
+    # Add application icon
+    qt_application.setWindowIcon(
+        qt_importer.QtGui.QIcon(arg_data["icon_path"])
+    )
+
     engine = None
+
     try:
         engine = start_engine(
             arg_data["configuration_uri"],
@@ -201,20 +275,51 @@ if __name__ == "__main__":
             )
 
         elif action == "execute_command":
+
             callback_name = arg_data["callback_name"]
+
+            # try to set the process icon to be the tk app icon
+            if engine.commands[callback_name]["properties"]["app"]:
+                # not every command has an associated app
+                qt_application.setWindowIcon(
+                    qt_importer.QtGui.QIcon(
+                        engine.commands[callback_name]["properties"]["app"].icon_256
+                    )
+                )
+            # execute the payload
             engine.commands[callback_name]["callback"]()
 
         else:
             raise RuntimeError("Unknown action '%s'" % action)
-
-    except EngineStartupFailure:
-        sys.exit(2)
-    except Exception as e:
-        sys.exit(1)
 
     finally:
         # make sure we have a clean shutdown
         if engine:
             engine.destroy()
 
-    sys.exit(0)
+
+if __name__ == "__main__":
+    """
+    Main script entry point
+    """
+    task_runner = QtTaskRunner(main)
+
+    # start up our QApp now
+    qt_application = qt_importer.QtGui.QApplication([])
+
+    # when the QApp starts, initialize our task code
+    qt_importer.QtCore.QTimer.singleShot(0, task_runner.execute_command)
+
+    # and ask the main app to exit when the task emits its finished signal
+    task_runner.completed.connect(qt_application.quit)
+
+    # start the application loop. This will block the process until the task
+    # has completed - this is either triggered by a main window closing or
+    # byt the finished signal being called from the task class above.
+    qt_application.exec_()
+
+    if task_runner.failure_detected:
+        # exit with error
+        sys.exit(1)
+    else:
+        sys.exit(0)
