@@ -38,13 +38,16 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
     :raises: :class:`ExternalConfigNotAccessibleError` if the configuration
         data could not be accessed.
     """
-
     descriptor = configuration_data["descriptor"]
 
     if descriptor is None:
         # the config is not accessible
         raise ExternalConfigNotAccessibleError(
-            "Configuration %s could not be resolved" % configuration_data["name"]
+            "The descriptor for Pipeline Configuration '%s' (id %s) "
+            "could not be resolved" % (
+                configuration_data["name"],
+                configuration_data["id"]
+            )
         )
 
     if descriptor.is_immutable():
@@ -63,7 +66,11 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
         # check that it exists on disk
         if descriptor.get_path() is None:
             raise ExternalConfigNotAccessibleError(
-                "Configuration %s does not have a path on disk." % configuration_data["name"]
+                "Pipeline Configuration '%s' (id %s) "
+                "does not have a path on disk." % (
+                    configuration_data["name"],
+                    configuration_data["id"]
+                )
             )
 
         return LiveExternalConfiguration(

@@ -267,6 +267,8 @@ class ExternalCommand(object):
                 entity_type=self._entity_type,
                 entity_id=self._entity_id,
                 bundle_cache_fallback_paths=self._bundle.engine.sgtk.bundle_cache_fallback_paths,
+                # the engine icon becomes the process icon
+                icon_path=self._bundle.engine.icon_256,
             )
         )
         # compose the command we want to run

@@ -226,7 +226,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
                 )
                 config_objects.append(config_object)
             except ExternalConfigNotAccessibleError as e:
-                logger.warning(str(e))
+                logger.warning("%s Configuration will not be loaded." % e)
 
         # if no custom pipeline configs were found, we use the default one
         if len(config_objects) == 0:
