@@ -246,15 +246,14 @@ class ExternalConfiguration(QtCore.QObject):
             logger.debug("Launching external script: %s", args)
 
             try:
-                subprocess_check_output(args)
+                output = subprocess_check_output(args)
+                logger.debug("External caching complete. Output: %s" % output)
             except SubprocessCalledProcessError as e:
                 # caching failed!
                 raise RuntimeError("Error retrieving actions: %s" % e.output)
             finally:
                 # clean up temp file
                 sgtk.util.filesystem.safe_delete_file(args_file)
-
-            logger.debug("Caching complete.")
 
             # now try again
             cached_data = file_cache.load_cache(cache_hash)

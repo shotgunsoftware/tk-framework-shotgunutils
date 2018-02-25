@@ -10,6 +10,8 @@
 import os
 import cPickle
 import sgtk
+from sgtk.util.process import subprocess_check_output, \
+    SubprocessCalledProcessError
 
 logger = sgtk.platform.get_logger(__name__)
 
@@ -237,14 +239,24 @@ class ExternalCommand(object):
         """
         Executes the external command in a separate process.
 
-        .. note:: The process will be launched in an asynchronous way.
-            It is recommended that this command is executed in a worker thread.
+        .. note:: The process will be launched in an synchronous way.
+            It is recommended that this command is executed in a worker thread::
+
+                # execute external command in a thread to not block
+                # main thread execution
+                worker = threading.Thread(target=action.execute)
+                # if the python environment shuts down, no need
+                # to wait for this thread
+                worker.daemon = True
+                # launch external process
+                worker.start()
+
+        :raises: :class:`RuntimeError` on execution failure.
         """
         # local imports because this is executed from runner scripts
-        from .process_execution import ProcessRunner
         from .util import create_parameter_file
 
-        logger.debug("%s: execute command" % self)
+        logger.debug("%s: Execute command" % self)
 
         # prepare execution of the command in an external process
         # this will bootstrap Toolkit and execute the command.
@@ -280,17 +292,15 @@ class ExternalCommand(object):
         ]
         logger.debug("Command arguments: %s", args)
 
-        retcode, stdout, stderr = ProcessRunner.call_cmd(args)
+        try:
+            output = subprocess_check_output(args)
+            logger.debug("External execution complete. Output: %s" % output)
+        except SubprocessCalledProcessError as e:
+            # caching failed!
+            raise RuntimeError("Error executing remote command %s: %s" % (self, e.output))
+        finally:
+            # clean up temp file
+            sgtk.util.filesystem.safe_delete_file(args_file)
 
-        if retcode == 0:
-            logger.debug("Command stdout: %s", stdout)
-            logger.debug("Command stderr: %s", stderr)
-        else:
-            logger.error("Command failed: %s", args)
-            logger.error("Failed command stdout: %s", stdout)
-            logger.error("Failed command stderr: %s", stderr)
-            logger.error("Failed command retcode: %s", retcode)
-            raise RuntimeError("%s\n\n%s" % (stdout, stderr))
 
-        logger.debug("Execution complete.")
 
