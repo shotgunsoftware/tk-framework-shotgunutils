@@ -810,8 +810,12 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         parent_model_item = item.parent()
 
         if parent_model_item:
-            # remove entire row that item belongs to
-            parent_model_item.removeRow(item.row())
+            # remove entire row that item belongs to.
+            # we are the owner of the data so we just do a `takeRow` and not a
+            # `removeRow` to prevent the model to delete the data. Because we
+            # don't keep any reference to the item, it will be garbage collected
+            # if not already done.
+            parent_model_item.takeRow(item.row())
 
     def _log_debug(self, msg):
         """
