@@ -148,6 +148,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
         config_cache_key = {
             "project": project_id,
             "plugin": self._plugin_id,
+            "base_config": self._base_config_uri,
             "state_hash": self._config_state.get_hash()
         }
 
@@ -187,10 +188,15 @@ class ExternalConfigurationLoader(QtCore.QObject):
 
     def _execute_get_configurations(self, project_id, state_hash):
         """
-        Background task to load configs.
+        Background task to load configs using the ToolkitManager.
 
         :param int project_id: Project id to load configs for.
-        :param str state_hash: Hash representing the relevant global state of Shotgun.
+        :param str state_hash: Hash representing the relevant
+            global state of Shotgun.
+        :returns: Tuple with (project id, state hash, list of configs), where
+            the two first items are the input parameters to this method
+            and the last item is the return data from
+            ToolkitManager.get_pipeline_configurations()
         """
         # get list of configurations
         mgr = sgtk.bootstrap.ToolkitManager()
@@ -228,7 +234,9 @@ class ExternalConfigurationLoader(QtCore.QObject):
             except ExternalConfigNotAccessibleError as e:
                 logger.warning("%s Configuration will not be loaded." % e)
 
-        # if no custom pipeline configs were found, we use the default one
+        # if no custom pipeline configs were found, we use the base config
+        # note: because the base config can change over time, we make sure
+        # to include it as an ingredient in the hash key below.
         if len(config_objects) == 0:
             config_objects.append(
                 config.create_fallback_configuration(
@@ -250,7 +258,12 @@ class ExternalConfigurationLoader(QtCore.QObject):
 
         # save cache
         file_cache.write_cache(
-            {"project": project_id, "plugin": self._plugin_id, "state_hash": state_hash},
+            {
+                "project": project_id,
+                "plugin": self._plugin_id,
+                "base_config": self._base_config_uri,
+                "state_hash": state_hash
+            },
             data
         )
 
@@ -264,8 +277,8 @@ class ExternalConfigurationLoader(QtCore.QObject):
 
         :param str unique_id: unique task id
         :param str group: task group
-        :param message:
-        :param traceback_str:
+        :param str message: Error message
+        :param str traceback_str: Full traceback
         """
         if unique_id not in self._task_ids:
             return
