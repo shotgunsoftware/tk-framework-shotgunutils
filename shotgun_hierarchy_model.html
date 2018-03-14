@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Hierarchy Model &mdash; tk-framework-shotgunutils v5.3.4 documentation</title>
+  <title>Shotgun Hierarchy Model &mdash; tk-framework-shotgunutils v5.3.5 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.3.4 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.3.5 documentation" href="index.html"/>
         <link rel="next" title="Shotgun Asynchronous Data Retriever" href="shotgun_data.html"/>
         <link rel="prev" title="Shotgun Model" href="shotgun_model.html"/> 
 
@@ -129,7 +129,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.3.4.<br>
+    <b>tk-framework-shotgunutils</b> v5.3.5.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -337,7 +337,7 @@ against the cached data.</li>
 <li><strong>bg_task_manager</strong> (<a class="reference internal" href="task_manager.html#task_manager.BackgroundTaskManager" title="task_manager.BackgroundTaskManager"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a>) &#8211; Background task manager to use for any
 asynchronous work. If this is None then a task manager will be
 created as needed.</li>
-<li><strong>include_root</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Defines the name of an additional, top-level
+<li><strong>include_root</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) &#8211; Defines the name of an additional, top-level
 model item that represents the root. In views, this item will appear
 as a sibling to top-level children of the root. This allows for
 UX whereby a user can select an item representing the root without
@@ -360,18 +360,18 @@ If <code class="docutils literal"><span class="pre">include_root</span></code> i
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>seed_entity_field</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; <p>This is a string that corresponds to the
+<li><strong>seed_entity_field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) &#8211; <p>This is a string that corresponds to the
 field on an entity used to seed the hierarchy. For example, a value
 of <code class="docutils literal"><span class="pre">Version.entity</span></code> would cause the model to display a hierarchy
 where the leaves match the entity value of Version entities.</p>
 <p>NOTE: This value is currently limited to either <code class="docutils literal"><span class="pre">Version.entity</span></code>
 or <code class="docutils literal"><span class="pre">PublishedFile.entity</span></code></p>
 </li>
-<li><strong>root</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; This is the entity that will be at the root
+<li><strong>root</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) &#8211; This is the entity that will be at the root
 of the hierarchy view. By default, this value is <code class="docutils literal"><span class="pre">None</span></code>, which
 means the root of the hierarchy will be at the site level. Only
 projects can be set as the root of a hierarchy model.</li>
-<li><strong>entity_fields</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; A dictionary that identifies what fields to
+<li><strong>entity_fields</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) &#8211; A dictionary that identifies what fields to
 include on returned entities. Since the hierarchy can include any
 entity structure, this argument allows for specification of
 additional fields to include as these entities are returned. The
@@ -445,7 +445,7 @@ against the cached data.</li>
 <li><strong>bg_task_manager</strong> (<a class="reference internal" href="task_manager.html#task_manager.BackgroundTaskManager" title="task_manager.BackgroundTaskManager"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a>) &#8211; Background task manager to use for any
 asynchronous work. If this is None then a task manager will be
 created as needed.</li>
-<li><strong>include_root</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Defines the name of an additional, top-level
+<li><strong>include_root</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) &#8211; Defines the name of an additional, top-level
 model item that represents the root. In views, this item will appear
 as a sibling to top-level children of the root. This allows for
 UX whereby a user can select an item representing the root without
@@ -479,18 +479,18 @@ typically want to), call the <code class="xref py py-meth docutils literal"><spa
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>seed_entity_field</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; <p>This is a string that corresponds to the
+<li><strong>seed_entity_field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) &#8211; <p>This is a string that corresponds to the
 field on an entity used to seed the hierarchy. For example, a value
 of <code class="docutils literal"><span class="pre">Version.entity</span></code> would cause the model to display a hierarchy
 where the leaves match the entity value of Version entities.</p>
 <p>NOTE: This value is currently limited to either <code class="docutils literal"><span class="pre">Version.entity</span></code>
 or <code class="docutils literal"><span class="pre">PublishedFile.entity</span></code></p>
 </li>
-<li><strong>root</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; This is the entity that will be at the root
+<li><strong>root</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) &#8211; This is the entity that will be at the root
 of the hierarchy view. By default, this value is <code class="docutils literal"><span class="pre">None</span></code>, which
 means the root of the hierarchy will be at the site level. Only
 projects can be set as the root of a hierarchy model.</li>
-<li><strong>entity_fields</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; A dictionary that identifies what fields to
+<li><strong>entity_fields</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) &#8211; A dictionary that identifies what fields to
 include on returned entities. Since the hierarchy can include any
 entity structure, this argument allows for specification of
 additional fields to include as these entities are returned. The
@@ -719,7 +719,7 @@ icon for.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The path to search the tree for. The paths match those
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) &#8211; The path to search the tree for. The paths match those
 used by and returned from the python-api&#8217;s
 <code class="xref py py-meth docutils literal"><span class="pre">shotgun_api3.Shotgun.nav_expand</span></code> method.</td>
 </tr>
@@ -738,7 +738,7 @@ associated <code class="xref py py-class docutils literal"><span class="pre">Sho
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; Entity dictionary with keys <code class="docutils literal"><span class="pre">type</span></code> and <code class="docutils literal"><span class="pre">id</span></code>.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) &#8211; Entity dictionary with keys <code class="docutils literal"><span class="pre">type</span></code> and <code class="docutils literal"><span class="pre">id</span></code>.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Signals:</th><td class="field-body"><code class="docutils literal"><span class="pre">async_item_retrieval_completed</span></code></td>
 </tr>
@@ -809,7 +809,7 @@ and further into the tree.</td>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v5.3.4',
+            VERSION:'v5.3.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

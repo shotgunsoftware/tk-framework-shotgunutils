@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_query_model &mdash; tk-framework-shotgunutils v5.3.4 documentation</title>
+  <title>shotgun_model.shotgun_query_model &mdash; tk-framework-shotgunutils v5.3.5 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.3.4 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.3.5 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -118,7 +118,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.3.4.<br>
+    <b>tk-framework-shotgunutils</b> v5.3.5.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -984,8 +984,12 @@
         <span class="n">parent_model_item</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">parent_model_item</span><span class="p">:</span>
-            <span class="c1"># remove entire row that item belongs to</span>
-            <span class="n">parent_model_item</span><span class="o">.</span><span class="n">removeRow</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">row</span><span class="p">())</span>
+            <span class="c1"># remove entire row that item belongs to.</span>
+            <span class="c1"># we are the owner of the data so we just do a `takeRow` and not a</span>
+            <span class="c1"># `removeRow` to prevent the model to delete the data. Because we</span>
+            <span class="c1"># don&#39;t keep any reference to the item, it will be garbage collected</span>
+            <span class="c1"># if not already done.</span>
+            <span class="n">parent_model_item</span><span class="o">.</span><span class="n">takeRow</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">row</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">_log_debug</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1238,7 +1242,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.3.4',
+            VERSION:'v5.3.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

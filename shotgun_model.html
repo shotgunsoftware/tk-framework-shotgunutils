@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Model &mdash; tk-framework-shotgunutils v5.3.4 documentation</title>
+  <title>Shotgun Model &mdash; tk-framework-shotgunutils v5.3.5 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.3.4 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.3.5 documentation" href="index.html"/>
         <link rel="next" title="Shotgun Hierarchy Model" href="shotgun_hierarchy_model.html"/>
         <link rel="prev" title="The Shotgun Utilities Framework" href="index.html"/> 
 
@@ -132,7 +132,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.3.4.<br>
+    <b>tk-framework-shotgunutils</b> v5.3.5.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -370,10 +370,10 @@ subclassed implementation.</li>
 parameter, this can be used to effectively cap the data set that the model
 is handling, allowing a user to for example show the twenty most recent notes or
 similar.</li>
-<li><strong>columns</strong> (<em>list</em>) &#8211; List of Shotgun fields names to use to populate the model columns</li>
+<li><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a>) &#8211; List of Shotgun fields names to use to populate the model columns</li>
 <li><strong>additional_filter_presets</strong> &#8211; List of Shotgun filter presets to apply, e.g.
 <code class="docutils literal"><span class="pre">[{&quot;preset_name&quot;:&quot;LATEST&quot;,&quot;latest_by&quot;:&quot;BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT&quot;}]</span></code></li>
-<li><strong>editable_columns</strong> (<em>list</em>) &#8211; A subset of <code class="docutils literal"><span class="pre">columns</span></code> that will be editable in views that use this model.</li>
+<li><strong>editable_columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a>) &#8211; A subset of <code class="docutils literal"><span class="pre">columns</span></code> that will be editable in views that use this model.</li>
 </ul>
 </td>
 </tr>
@@ -607,13 +607,13 @@ an external string via this parameter which will be added to the seed.</li>
 parameter, this can be used to effectively cap the data set that the model
 is handling, allowing a user to for example show the twenty most recent notes or
 similar.</li>
-<li><strong>columns</strong> (<em>list</em>) &#8211; If columns is specified, then any leaf row in the model will have columns created where
+<li><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a>) &#8211; If columns is specified, then any leaf row in the model will have columns created where
 each column in the row contains the value for the corresponding field from columns. This means
 that the data from the loaded entity will be available field by field. Subclasses can modify
 this behavior by overriding _get_additional_columns.</li>
 <li><strong>additional_filter_presets</strong> &#8211; List of Shotgun filter presets to apply, e.g.
 <code class="docutils literal"><span class="pre">[{&quot;preset_name&quot;:&quot;LATEST&quot;,&quot;latest_by&quot;:&quot;BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT&quot;}]</span></code></li>
-<li><strong>editable_columns</strong> (<em>list</em>) &#8211; A subset of <code class="docutils literal"><span class="pre">columns</span></code> that will be editable in views that use this model.</li>
+<li><strong>editable_columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a>) &#8211; A subset of <code class="docutils literal"><span class="pre">columns</span></code> that will be editable in views that use this model.</li>
 </ul>
 </td>
 </tr>
@@ -1233,7 +1233,7 @@ level tree node, it may return:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v5.3.4',
+            VERSION:'v5.3.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
