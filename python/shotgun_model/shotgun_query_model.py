@@ -1035,4 +1035,4 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             self._log_debug("...diffs applied!")
 
         # and emit completion signal
-        self.data_refreshed.emit(modified_items > 0)
+        self.data_refreshed.emit(len(modified_items) > 0)
