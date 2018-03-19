@@ -118,13 +118,14 @@ class ConfigStateModel(ShotgunModel):
     """
     A ShotgunModel use to retrieve the state of a given entity.
 
-    Maintains the most recent updated_at timestamp for a given query
-    and allows this to be used as a way to detect if a change has
-    happened to the given state.
+    Holds *all* records for the given entity type (unless external
+    filters have been provided) and exposes a hash representing
+    the full state of the entity via the `get_hash()`
+    method. Any change to the given entity type within the filter
+    subset will be detected and will affect the hash.
 
-    .. note:: This state model does not currently track deletion.
-              If an object gets deleted, the model will not be able
-              to indicate this.
+    Internally, the hash is build based on the aggregate of updated_at
+    values found for all records that the model tracks.
     """
 
     def __init__(self, entity_type, filters, bg_task_manager, parent):
@@ -153,8 +154,6 @@ class ConfigStateModel(ShotgunModel):
             self._filters,
             hierarchy,
             fields,
-            [{"field_name": "updated_at", "direction": "desc"}],
-            limit=1
         )
         self._refresh_data()
 
