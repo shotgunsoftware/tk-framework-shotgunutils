@@ -153,8 +153,6 @@ class ConfigStateModel(ShotgunModel):
             self._filters,
             hierarchy,
             fields,
-            [{"field_name": "updated_at", "direction": "desc"}],
-            limit=1
         )
         self._refresh_data()
 
