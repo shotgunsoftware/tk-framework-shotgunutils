@@ -208,7 +208,7 @@ class ExternalConfiguration(QtCore.QObject):
         cache_path = file_cache.get_cache_path(cache_hash)
         cached_data = file_cache.load_cache(cache_hash)
 
-        if not cached_data:
+        if cached_data is None or not ExternalCommand.is_compatible(cached_data):
             logger.debug("Begin caching commands")
 
             # launch external process to carry out caching.
@@ -281,15 +281,21 @@ class ExternalConfiguration(QtCore.QObject):
         del self._task_ids[unique_id]
 
         # result contains our cached data
+        #
+        # this is a dictionary with the following structure:
+        # cache_data = {
+        #   "version": external_command.ExternalCommand.FORMAT_GENERATION,
+        #   "commands": [<serialized1>, <serialized2>]
+        # }
+        #
         cached_data = result
 
         # got some cached data that we can emit
         self.commands_loaded.emit(
             project_id,
             self,
-            [ExternalCommand.create(self, d, entity_id) for d in cached_data]
+            [ExternalCommand.create(self, d, entity_id) for d in cached_data["commands"]]
         )
-
 
     def _task_failed(self, unique_id, group, message, traceback_str):
         """

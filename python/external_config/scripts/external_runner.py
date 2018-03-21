@@ -219,21 +219,25 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
     external_command = _import_py_file(utils_folder, "external_command")
 
     logger.debug("Processing engine commands...")
-    commands = []
+    cache_data = {
+        "version": external_command.ExternalCommand.FORMAT_GENERATION,
+        "commands": []
+    }
 
     for cmd_name, data in engine.commands.iteritems():
         logger.debug("Processing command: %s" % cmd_name)
 
-        commands.append(
-            external_command.ExternalCommand.serialize_command(
-                entity_type,
-                cmd_name,
-                data["properties"]
+        if external_command.ExternalCommand.enabled_on_current_os(data["properties"]):
+            cache_data["commands"].append(
+                external_command.ExternalCommand.serialize_command(
+                    entity_type,
+                    cmd_name,
+                    data["properties"]
+                )
             )
-        )
 
     logger.debug("Engine commands processed.")
-    file_cache.write_cache_file(cache_path, commands)
+    file_cache.write_cache_file(cache_path, cache_data)
     logger.debug("Cache complete.")
 
 
