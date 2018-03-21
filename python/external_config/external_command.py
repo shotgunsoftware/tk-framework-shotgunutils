@@ -293,6 +293,27 @@ class ExternalCommand(object):
         return self._is_group_default
 
     @property
+    def excluded_permission_groups_hint(self):
+        """
+        Legacy option used by some older Shotgun toolkit apps.
+        Apps may hint a list of permission groups for which
+        the app command should not be displayed.
+
+        Returns a list of Shotgun permission groups (as strings)
+        where this command is not appropriate.
+        """
+        return self._sg_deny_permissions or []
+
+    @property
+    def support_shotgun_multiple_selection(self):
+        """
+        Legacy flag indicated by some older Toolkit apps,
+        indicating that the app can accept a list of
+        entity ids to operate on rather than a single item.
+        """
+        return self._sg_supports_multiple_selection
+
+    @property
     def tooltip(self):
         """
         Associated help text tooltip.
