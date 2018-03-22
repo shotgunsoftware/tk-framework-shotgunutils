@@ -308,6 +308,16 @@ if __name__ == "__main__":
     """
     task_runner = QtTaskRunner(main)
 
+    # For qt5, we may get this error:
+    #
+    # RuntimeError: Qt WebEngine seems to be initialized from a plugin.
+    # Please set Qt::AA_ShareOpenGLContexts using QCoreApplication::setAttribute
+    # before constructing QGuiApplication.
+    if hasattr(qt_importer.QtCore.Qt, "AA_ShareOpenGLContexts"):
+        qt_importer.QtGui.QApplication.setAttribute(
+            qt_importer.QtCore.Qt.AA_ShareOpenGLContexts
+        )
+
     # start up our QApp now
     qt_application = qt_importer.QtGui.QApplication([])
 
