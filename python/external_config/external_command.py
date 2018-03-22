@@ -344,6 +344,7 @@ class ExternalCommand(object):
                 worker.start()
 
         :raises: :class:`RuntimeError` on execution failure.
+        :returns: Output from execution session.
         """
         # local imports because this is executed from runner scripts
         from .util import create_parameter_file
@@ -394,5 +395,5 @@ class ExternalCommand(object):
             # clean up temp file
             sgtk.util.filesystem.safe_delete_file(args_file)
 
-
+        return output
 
