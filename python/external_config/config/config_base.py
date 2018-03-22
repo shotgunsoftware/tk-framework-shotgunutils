@@ -38,7 +38,7 @@ class ExternalConfiguration(QtCore.QObject):
     TASK_GROUP = "tk-framework-shotgunutils.external_config.ExternalConfiguration"
 
     commands_loaded = QtCore.Signal(int, object, list)
-    # signal parameters:
+    # Signal parameters:
     # 1. project_id
     # 2. configuration instance
     # 3. configuration object, list of :class:`ExternalCommand` instances
@@ -152,7 +152,8 @@ class ExternalConfiguration(QtCore.QObject):
 
         :param int project_id: Associated project id
         :param str entity_type: Associated entity type
-        :param int entity_id: Associated entity id
+        :param int entity_id: Associated entity id. If this is set to None,
+            a best guess for a generic listing will be carried out.
         :param str link_entity_type: Entity type that the item is linked to.
             This is typically provided for things such as task, versions or notes,
             where having different values it per linked type can be beneficial.
@@ -207,6 +208,25 @@ class ExternalConfiguration(QtCore.QObject):
         )
         cache_path = file_cache.get_cache_path(cache_hash)
         cached_data = file_cache.load_cache(cache_hash)
+
+        # if entity_id is None, we need to figure out an actual entity id
+        # go get items for. This is done by choosing the most recently
+        # updated item for the project
+        if entity_id is None:
+            logger.debug(
+                "No entity id specified. Resolving most most recent %s "
+                "id for project." % entity_type
+            )
+
+            most_recent_id = self._bundle.shotgun.find_one(
+                entity_type,
+                [["project", "is", {"type": "Project", "id": project_id}]],
+                ["id"],
+                order=[{"field_name": "id", "direction": "desc"}]
+            )
+
+            entity_id = most_recent_id["id"]
+            logger.debug("Will cache using %s %s" % (entity_type, entity_id))
 
         if cached_data is None or not ExternalCommand.is_compatible(cached_data):
             logger.debug("Begin caching commands")
