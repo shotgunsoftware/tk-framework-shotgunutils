@@ -272,6 +272,13 @@ class ExternalCommand(object):
         return self._pipeline_config_name
 
     @property
+    def system_name(self):
+        """
+        The system name for the command
+        """
+        return self._callback_name
+
+    @property
     def display_name(self):
         """
         Display name, suitable for display in a menu.
