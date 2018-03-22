@@ -220,7 +220,7 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
 
     logger.debug("Processing engine commands...")
     cache_data = {
-        "version": external_command.ExternalCommand.FORMAT_GENERATION,
+        "generation": external_command.ExternalCommand.FORMAT_GENERATION,
         "commands": []
     }
 
