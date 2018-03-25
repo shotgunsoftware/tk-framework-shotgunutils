@@ -265,6 +265,12 @@ class ExternalConfiguration(QtCore.QObject):
             ]
             logger.debug("Launching external script: %s", args)
 
+            # Ensure the credentials are still valid before launching the command in
+            # a separate process. We need do to this in advance because the process
+            # that will be launched might not have PySide and as such won't be able
+            # to prompt the user to re-authenticate.
+            sgtk.get_authenticated_user().refresh_credentials()
+
             try:
                 output = subprocess_check_output(args)
                 logger.debug("External caching complete. Output: %s" % output)
