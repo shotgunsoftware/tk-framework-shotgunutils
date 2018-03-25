@@ -283,7 +283,7 @@ def main():
             callback_name = arg_data["callback_name"]
 
             # try to set the process icon to be the tk app icon
-            if engine.commands[callback_name]["properties"]["app"]:
+            if engine.commands[callback_name]["properties"].get("app"):
                 # not every command has an associated app
                 qt_application.setWindowIcon(
                     qt_importer.QtGui.QIcon(
