@@ -237,7 +237,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
         # if no custom pipeline configs were found, we use the base config
         # note: because the base config can change over time, we make sure
         # to include it as an ingredient in the hash key below.
-        if len(config_objects) == 0:
+        if len(config_dicts) == 0:
             config_objects.append(
                 config.create_fallback_configuration(
                     self,
