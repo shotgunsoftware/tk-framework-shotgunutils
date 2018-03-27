@@ -142,8 +142,24 @@ class ExternalConfigurationLoader(QtCore.QObject):
         Emits a ``configurations_loaded`` signal when the configurations
         have been loaded.
 
+        .. note:: If this method is called multiple times in quick succession, only
+                  a single ``configurations_loaded`` signal will be emitted, belonging
+                  to the last request.
+
         :param project_id: Project to request configurations for.
         """
+        # First of all, remove any existing requests for this project from
+        # our internal task tracker. This will ensure that only one signal
+        # is emitted even if this method is called multiple times
+        # in rapid succession.
+        #
+        for (task_id, task_project_id) in self._task_ids.iteritems():
+            if task_project_id == project_id:
+                logger.debug(
+                    "Discarding existing request_configurations request for project %s" % project_id
+                )
+                del self._task_ids[task_id]
+
         # load existing cache file if it exists
         config_cache_key = {
             "project": project_id,
@@ -184,6 +200,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
                     "state_hash": self._config_state.get_hash()
                 }
             )
+
             self._task_ids[unique_id] = project_id
 
     def _execute_get_configurations(self, project_id, state_hash):
