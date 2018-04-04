@@ -82,6 +82,13 @@ class ImmutableExternalConfiguration(ExternalConfiguration):
         """
         return self._pipeline_config_name
 
+    @property
+    def descriptor_uri(self):
+        """
+        The descriptor URI associated with this pipeline configuration.
+        """
+        return self._pipeline_config_uri
+
     def _compute_config_hash_keys(self, entity_type, entity_id, link_entity_type):
         """
         Generates a hash to uniquely identify the configuration.
@@ -96,7 +103,7 @@ class ImmutableExternalConfiguration(ExternalConfiguration):
         return {
             file_cache.FOLDER_PREFIX_KEY: "id_%s" % self.pipeline_configuration_id,
             "engine_name": self.engine_name,
-            "uri": self._pipeline_config_uri,
+            "uri": self.descriptor_uri,
             "type": entity_type,
             "link_type": link_entity_type,
         }

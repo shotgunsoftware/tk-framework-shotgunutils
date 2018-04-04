@@ -19,7 +19,7 @@ from ..errors import ExternalConfigParseError, ExternalConfigNotAccessibleError
 logger = sgtk.platform.get_logger(__name__)
 
 # file format magic number
-CONFIGURATION_GENERATION = 8
+CONFIGURATION_GENERATION = 9
 
 
 def create_from_pipeline_configuration_data(parent, bg_task_manager, config_loader, configuration_data):
@@ -44,7 +44,6 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
     # for configurations which were resolved directly from a
     # descriptor, we also have a descriptor_uri set
     descriptor_uri = configuration_data["descriptor_uri"]
-    print "descriptor uri: %s" % descriptor_uri
 
     if descriptor is None:
         # the config is not accessible

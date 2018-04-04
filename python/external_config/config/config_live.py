@@ -93,6 +93,13 @@ class LiveExternalConfiguration(ExternalConfiguration):
         return self._pipeline_config_name
 
     @property
+    def descriptor_uri(self):
+        """
+        The descriptor URI associated with this pipeline configuration.
+        """
+        return self._pipeline_config_uri
+
+    @property
     def path(self):
         """
         The path on disk to where this configuration is located.
@@ -113,7 +120,7 @@ class LiveExternalConfiguration(ExternalConfiguration):
         cache_key = {
             file_cache.FOLDER_PREFIX_KEY: "id_%s" % self.pipeline_configuration_id,
             "engine_name": self.engine_name,
-            "uri": self._pipeline_config_uri,
+            "uri": self.descriptor_uri,
             "type": entity_type,
             "link_type": link_entity_type,
             # because this cache is mutable, we need to look deeper to calculate its uniqueness.

@@ -87,6 +87,13 @@ class UnversionedDescriptorExternalConfiguration(ExternalConfiguration):
         return self._pipeline_config_name
 
     @property
+    def descriptor_uri(self):
+        """
+        The descriptor URI associated with this pipeline configuration.
+        """
+        return self._pipeline_config_uri
+
+    @property
     def tracking_latest(self):
         """
         Returns True if this configuration is tracking an external 'latest version'.
@@ -112,7 +119,7 @@ class UnversionedDescriptorExternalConfiguration(ExternalConfiguration):
         return {
             file_cache.FOLDER_PREFIX_KEY: "id_%s" % self.pipeline_configuration_id,
             "engine_name": self.engine_name,
-            "uri": self._pipeline_config_uri,
+            "uri": self.descriptor_uri,
             "type": entity_type,
             "link_type": link_entity_type,
         }

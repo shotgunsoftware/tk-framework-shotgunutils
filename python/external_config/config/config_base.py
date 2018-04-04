@@ -137,9 +137,7 @@ class ExternalConfiguration(QtCore.QObject):
     @property
     def descriptor_uri(self):
         """
-        The descriptor URI associated with this pipeline configuration. For
-        configurations that have an associated :meth:`pipeline_configuration_id`,
-        this returns ``None``.
+        The descriptor URI associated with this pipeline configuration.
         """
         # note: subclassed implementations will override this return value
         return None
@@ -154,6 +152,7 @@ class ExternalConfiguration(QtCore.QObject):
         is up to date or not. The only way to determine this is by actually fully resolve
         the configuration
         """
+        # note: subclassed implementations will override this return value
         return False
 
     def request_commands(self, project_id, entity_type, entity_id, link_entity_type):
