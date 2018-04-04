@@ -144,6 +144,18 @@ class ExternalConfiguration(QtCore.QObject):
         # note: subclassed implementations will override this return value
         return None
 
+    @property
+    def tracking_latest(self):
+        """
+        Returns True if this configuration is tracking an external 'latest version'.
+        This means that we cannot rely on any caches - because an remote process
+        may release a new "latest" version, we cannot know simply by computing a
+        cache key or looking at a local state on disk whether a cached configuration
+        is up to date or not. The only way to determine this is by actually fully resolve
+        the configuration
+        """
+        return False
+
     def request_commands(self, project_id, entity_type, entity_id, link_entity_type):
         """
         Request commands for the given shotgun entity.
@@ -206,7 +218,12 @@ class ExternalConfiguration(QtCore.QObject):
             link_entity_type
         )
         cache_path = file_cache.get_cache_path(cache_hash)
-        cached_data = file_cache.load_cache(cache_hash)
+
+        if self.tracking_latest:
+            # this configuration is never up to date
+            cached_data = None
+        else:
+            cached_data = file_cache.load_cache(cache_hash)
 
         if not cached_data:
             logger.debug("Begin caching commands")
@@ -263,7 +280,6 @@ class ExternalConfiguration(QtCore.QObject):
 
         return cached_data
 
-
     def _task_completed(self, unique_id, group, result):
         """
         Called after command caching completes.
@@ -289,7 +305,6 @@ class ExternalConfiguration(QtCore.QObject):
             self,
             [ExternalCommand.create(self, d, entity_id) for d in cached_data]
         )
-
 
     def _task_failed(self, unique_id, group, message, traceback_str):
         """

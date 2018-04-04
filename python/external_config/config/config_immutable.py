@@ -96,7 +96,7 @@ class ImmutableExternalConfiguration(ExternalConfiguration):
         return {
             file_cache.FOLDER_PREFIX_KEY: "id_%s" % self.pipeline_configuration_id,
             "engine_name": self.engine_name,
-            "uri": self.descriptor_uri,
+            "uri": self._pipeline_config_uri,
             "type": entity_type,
             "link_type": link_entity_type,
         }

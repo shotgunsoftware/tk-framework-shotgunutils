@@ -13,12 +13,13 @@ import sgtk
 from .config_immutable import ImmutableExternalConfiguration
 from .config_live import LiveExternalConfiguration
 from .config_fallback import FallbackExternalConfiguration
+from .config_unversioned_descriptor import UnversionedDescriptorExternalConfiguration
 from ..errors import ExternalConfigParseError, ExternalConfigNotAccessibleError
 
 logger = sgtk.platform.get_logger(__name__)
 
 # file format magic number
-CONFIGURATION_GENERATION = 6
+CONFIGURATION_GENERATION = 8
 
 
 def create_from_pipeline_configuration_data(parent, bg_task_manager, config_loader, configuration_data):
@@ -40,6 +41,11 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
     """
     descriptor = configuration_data["descriptor"]
 
+    # for configurations which were resolved directly from a
+    # descriptor, we also have a descriptor_uri set
+    descriptor_uri = configuration_data["descriptor_uri"]
+    print "descriptor uri: %s" % descriptor_uri
+
     if descriptor is None:
         # the config is not accessible
         raise ExternalConfigNotAccessibleError(
@@ -50,7 +56,26 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
             )
         )
 
-    if descriptor.is_immutable():
+    elif descriptor_uri and sgtk.descriptor.is_descriptor_version_missing(descriptor_uri):
+        # this is a pipeline configuration defined via the descriptor field in
+        # Shotgun which doesn't have a version number, e.g. something like
+        # sgtk:descriptor:app_store?name=tk-config-basic
+
+        return UnversionedDescriptorExternalConfiguration(
+            parent,
+            bg_task_manager,
+            config_loader.plugin_id,
+            config_loader.engine_name,
+            config_loader.interpreter,
+            configuration_data["id"],
+            configuration_data["name"],
+            descriptor_uri,
+        )
+
+    elif descriptor.is_immutable():
+        # this is a pipeline configuration defined in Shotgun pointing
+        # at an immutable descriptor, e.g. a uploaded zip, app store,
+        # git etc.
         return ImmutableExternalConfiguration(
             parent,
             bg_task_manager,
@@ -63,6 +88,11 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
         )
 
     else:
+        # this is a pipeline configuration pointing at a location on
+        # disk where the configuration can change at any point. This
+        # includes path and dev descriptors as well as classic
+        # toolkit setups.
+
         # check that it exists on disk
         if descriptor.get_path() is None:
             raise ExternalConfigNotAccessibleError(
@@ -156,6 +186,17 @@ def deserialize(parent, bg_task_manager, data):
 
     if data["class_name"] == "ImmutableExternalConfiguration":
         return ImmutableExternalConfiguration(
+            parent,
+            bg_task_manager,
+            data["plugin_id"],
+            data["engine_name"],
+            data["interpreter"],
+            data["pipeline_config_id"],
+            data["pipeline_config_name"],
+            data["config_uri"],
+        )
+    elif data["class_name"] == "UnversionedDescriptorExternalConfiguration":
+        return UnversionedDescriptorExternalConfiguration(
             parent,
             bg_task_manager,
             data["plugin_id"],

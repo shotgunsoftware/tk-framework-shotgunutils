@@ -201,7 +201,9 @@ class ExternalConfigurationLoader(QtCore.QObject):
         # get list of configurations
         mgr = sgtk.bootstrap.ToolkitManager()
         mgr.plugin_id = self._plugin_id
-        configs = mgr.get_pipeline_configurations({"type": "Project", "id": project_id})
+        configs = mgr.get_pipeline_configurations(
+            {"type": "Project", "id": project_id}
+        )
         return (project_id, state_hash, configs)
 
     def _task_completed(self, unique_id, group, result):

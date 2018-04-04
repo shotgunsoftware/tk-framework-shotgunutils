@@ -56,6 +56,11 @@ class FallbackExternalConfiguration(ExternalConfiguration):
         )
         self._pipeline_config_uri = pipeline_config_uri
 
+        # is our config uri tracking the latest version?
+        self._tracking_latest = sgtk.descriptor.is_descriptor_version_missing(
+            self._pipeline_config_uri
+        )
+
     def __repr__(self):
         """
         Low level string representation
@@ -68,6 +73,18 @@ class FallbackExternalConfiguration(ExternalConfiguration):
         The descriptor uri associated with this pipeline configuration.
         """
         return self._pipeline_config_uri
+
+    @property
+    def tracking_latest(self):
+        """
+        Returns True if this configuration is tracking an external 'latest version'.
+        This means that we cannot rely on any caches - because an remote process
+        may release a new "latest" version, we cannot know simply by computing a
+        cache key or looking at a local state on disk whether a cached configuration
+        is up to date or not. The only way to determine this is by actually fully resolve
+        the configuration
+        """
+        return self._tracking_latest
 
     def _compute_config_hash_keys(self, entity_type, entity_id, link_entity_type):
         """
