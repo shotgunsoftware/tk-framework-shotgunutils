@@ -78,11 +78,6 @@ class FallbackExternalConfiguration(ExternalConfiguration):
     def tracking_latest(self):
         """
         Returns True if this configuration is tracking an external 'latest version'.
-        This means that we cannot rely on any caches - because an remote process
-        may release a new "latest" version, we cannot know simply by computing a
-        cache key or looking at a local state on disk whether a cached configuration
-        is up to date or not. The only way to determine this is by actually fully resolve
-        the configuration
         """
         return self._tracking_latest
 
