@@ -77,6 +77,11 @@ class ExternalConfiguration(QtCore.QObject):
         self._engine_name = engine_name
         self._interpreter = interpreter
 
+        # boolean to track if commands have been requested for this instance
+        # this is related to how configs tracking remote latest versions
+        # have their list of commands memoized for performance reasons.
+        self._commands_evaluated_once = False
+
         self._task_ids = {}
 
         # keep a handle to the current app/engine/fw bundle for convenience
@@ -150,7 +155,14 @@ class ExternalConfiguration(QtCore.QObject):
         may release a new "latest" version, we cannot know simply by computing a
         cache key or looking at a local state on disk whether a cached configuration
         is up to date or not. The only way to determine this is by actually fully resolve
-        the configuration
+        the configuration.
+
+        .. note:: External configurations with this property returning True will have their
+                  commands memoized; The first call to :meth:`request_commands` will resolve
+                  the associated commands and subsequent requests will simply return that
+                  result. In order do perform a new evaluation of the list of associated
+                  commands, instantiate a new External Configuration instance.
+
         """
         # note: subclassed implementations will override this return value
         return False
@@ -218,11 +230,17 @@ class ExternalConfiguration(QtCore.QObject):
         )
         cache_path = file_cache.get_cache_path(cache_hash)
 
-        if self.tracking_latest:
-            # this configuration is never up to date
+        if self.tracking_latest and not self._commands_evaluated_once:
+            # this configuration is tracking an external latest version
+            # so it's by definition never up to date. For performance
+            # reasons, we memoize it, and only evaluate the list of
+            # commands once per external config instance, tracked
+            # via the _commands_evaluated_once boolean.
             cached_data = None
         else:
             cached_data = file_cache.load_cache(cache_hash)
+
+        self._commands_evaluated_once = True
 
         if not cached_data:
             logger.debug("Begin caching commands")
