@@ -56,6 +56,7 @@ class ExternalConfiguration(QtCore.QObject):
             plugin_id,
             engine_name,
             interpreter,
+            pipeline_config_uri
     ):
         """
         .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
@@ -70,12 +71,19 @@ class ExternalConfiguration(QtCore.QObject):
         :param str plugin_id: Associated bootstrap plugin id
         :param str engine_name: Associated engine name
         :param str interpreter: Associated Python interpreter
+        :param str pipeline_config_uri: Descriptor URI string for the config
         """
         super(ExternalConfiguration, self).__init__(parent)
 
+        self._pipeline_config_uri = pipeline_config_uri
         self._plugin_id = plugin_id
         self._engine_name = engine_name
         self._interpreter = interpreter
+
+        # boolean to track if commands have been requested for this instance
+        # this is related to how configs tracking remote latest versions
+        # have their list of commands memoized for performance reasons.
+        self._commands_evaluated_once = False
 
         self._task_ids = {}
 
@@ -137,12 +145,29 @@ class ExternalConfiguration(QtCore.QObject):
     @property
     def descriptor_uri(self):
         """
-        The descriptor URI associated with this pipeline configuration. For
-        configurations that have an associated :meth:`pipeline_configuration_id`,
-        this returns ``None``.
+        The descriptor URI associated with this pipeline configuration.
+        """
+        return self._pipeline_config_uri
+
+    @property
+    def tracking_latest(self):
+        """
+        Returns True if this configuration is tracking an external 'latest version'.
+        This means that we cannot rely on any caches - because a remote process
+        may release a new "latest" version, we cannot know simply by computing a
+        cache key or looking at a local state on disk whether a cached configuration
+        is up to date or not. The only way to determine this is by actually fully resolve
+        the configuration.
+
+        .. note:: External configurations with this property returning True will have their
+                  commands memoized; The first call to :meth:`request_commands` will resolve
+                  the associated commands and subsequent requests will simply return that
+                  result. In order do perform a new evaluation of the list of associated
+                  commands, instantiate a new External Configuration instance.
+
         """
         # note: subclassed implementations will override this return value
-        return None
+        return False
 
     def request_commands(self, project_id, entity_type, entity_id, link_entity_type):
         """
@@ -207,7 +232,18 @@ class ExternalConfiguration(QtCore.QObject):
             link_entity_type
         )
         cache_path = file_cache.get_cache_path(cache_hash)
-        cached_data = file_cache.load_cache(cache_hash)
+
+        if self.tracking_latest and not self._commands_evaluated_once:
+            # this configuration is tracking an external latest version
+            # so it's by definition never up to date. For performance
+            # reasons, we memoize it, and only evaluate the list of
+            # commands once per external config instance, tracked
+            # via the _commands_evaluated_once boolean.
+            cached_data = None
+        else:
+            cached_data = file_cache.load_cache(cache_hash)
+
+        self._commands_evaluated_once = True
 
         # if entity_id is None, we need to figure out an actual entity id
         # go get items for. This is done by choosing the most recently
@@ -288,7 +324,6 @@ class ExternalConfiguration(QtCore.QObject):
                 raise RuntimeError("Could not locate cached commands for %s" % self)
 
         return cached_data
-
 
     def _task_completed(self, unique_id, group, result):
         """
