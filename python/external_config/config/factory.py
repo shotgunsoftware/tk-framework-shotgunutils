@@ -58,6 +58,13 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
         # this is a pipeline configuration defined in Shotgun pointing
         # at an immutable descriptor, e.g. a uploaded zip, app store,
         # git etc.
+        #
+        # note: In the case where we have access to the raw descriptor
+        #       uri defined in the pipeline configuration, we use this
+        #       rather than the descriptor object's uri - this is because
+        #       this the uri can define a 'tracks latest' versionless uri
+        #       such as sgtk:descriptor:app_store?name=tk-config-basic
+        #
         return RemoteExternalConfiguration(
             parent,
             bg_task_manager,
