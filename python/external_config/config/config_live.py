@@ -62,11 +62,11 @@ class LiveExternalConfiguration(ExternalConfiguration):
             plugin_id,
             engine_name,
             interpreter,
+            pipeline_config_uri
         )
 
         self._pipeline_configuration_id = pipeline_config_id
         self._pipeline_config_name = pipeline_config_name
-        self._pipeline_config_uri = pipeline_config_uri
         self._pipeline_config_folder = pipeline_config_folder
 
     def __repr__(self):
@@ -75,7 +75,7 @@ class LiveExternalConfiguration(ExternalConfiguration):
         """
         return "<LiveExternalConfiguration id %d@%s>" % (
             self._pipeline_configuration_id,
-            self._pipeline_config_uri
+            self.descriptor_uri
         )
 
     @property
@@ -91,13 +91,6 @@ class LiveExternalConfiguration(ExternalConfiguration):
         The name of the associated pipeline configuration or None if not defined.
         """
         return self._pipeline_config_name
-
-    @property
-    def descriptor_uri(self):
-        """
-        The descriptor URI associated with this pipeline configuration.
-        """
-        return self._pipeline_config_uri
 
     @property
     def path(self):

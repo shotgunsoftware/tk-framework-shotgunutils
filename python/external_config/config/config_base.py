@@ -56,6 +56,7 @@ class ExternalConfiguration(QtCore.QObject):
             plugin_id,
             engine_name,
             interpreter,
+            pipeline_config_uri
     ):
         """
         .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
@@ -70,9 +71,11 @@ class ExternalConfiguration(QtCore.QObject):
         :param str plugin_id: Associated bootstrap plugin id
         :param str engine_name: Associated engine name
         :param str interpreter: Associated Python interpreter
+        :param str pipeline_config_uri: Descriptor URI string for the config
         """
         super(ExternalConfiguration, self).__init__(parent)
 
+        self._pipeline_config_uri = pipeline_config_uri
         self._plugin_id = plugin_id
         self._engine_name = engine_name
         self._interpreter = interpreter
@@ -144,8 +147,7 @@ class ExternalConfiguration(QtCore.QObject):
         """
         The descriptor URI associated with this pipeline configuration.
         """
-        # note: subclassed implementations will override this return value
-        return None
+        return self._pipeline_config_uri
 
     @property
     def tracking_latest(self):

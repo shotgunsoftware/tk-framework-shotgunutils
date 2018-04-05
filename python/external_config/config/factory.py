@@ -10,16 +10,15 @@
 
 import sgtk
 
-from .config_immutable import ImmutableExternalConfiguration
+from .config_remote import RemoteExternalConfiguration
 from .config_live import LiveExternalConfiguration
 from .config_fallback import FallbackExternalConfiguration
-from .config_unversioned_descriptor import UnversionedDescriptorExternalConfiguration
 from ..errors import ExternalConfigParseError, ExternalConfigNotAccessibleError
 
 logger = sgtk.platform.get_logger(__name__)
 
 # file format magic number
-CONFIGURATION_GENERATION = 9
+CONFIGURATION_GENERATION = 10
 
 
 def create_from_pipeline_configuration_data(parent, bg_task_manager, config_loader, configuration_data):
@@ -55,27 +54,11 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
             )
         )
 
-    elif descriptor_uri and sgtk.descriptor.is_descriptor_version_missing(descriptor_uri):
-        # this is a pipeline configuration defined via the descriptor field in
-        # Shotgun which doesn't have a version number, e.g. something like
-        # sgtk:descriptor:app_store?name=tk-config-basic
-
-        return UnversionedDescriptorExternalConfiguration(
-            parent,
-            bg_task_manager,
-            config_loader.plugin_id,
-            config_loader.engine_name,
-            config_loader.interpreter,
-            configuration_data["id"],
-            configuration_data["name"],
-            descriptor_uri,
-        )
-
-    elif descriptor.is_immutable():
+    if descriptor.is_immutable():
         # this is a pipeline configuration defined in Shotgun pointing
         # at an immutable descriptor, e.g. a uploaded zip, app store,
         # git etc.
-        return ImmutableExternalConfiguration(
+        return RemoteExternalConfiguration(
             parent,
             bg_task_manager,
             config_loader.plugin_id,
@@ -83,7 +66,7 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
             config_loader.interpreter,
             configuration_data["id"],
             configuration_data["name"],
-            descriptor.get_uri(),
+            descriptor_uri or descriptor.get_uri(),
         )
 
     else:
@@ -184,18 +167,7 @@ def deserialize(parent, bg_task_manager, data):
         )
 
     if data["class_name"] == "ImmutableExternalConfiguration":
-        return ImmutableExternalConfiguration(
-            parent,
-            bg_task_manager,
-            data["plugin_id"],
-            data["engine_name"],
-            data["interpreter"],
-            data["pipeline_config_id"],
-            data["pipeline_config_name"],
-            data["config_uri"],
-        )
-    elif data["class_name"] == "UnversionedDescriptorExternalConfiguration":
-        return UnversionedDescriptorExternalConfiguration(
+        return RemoteExternalConfiguration(
             parent,
             bg_task_manager,
             data["plugin_id"],

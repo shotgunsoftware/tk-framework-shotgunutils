@@ -15,10 +15,11 @@ from .. import file_cache
 logger = sgtk.platform.get_logger(__name__)
 
 
-class ImmutableExternalConfiguration(ExternalConfiguration):
+class RemoteExternalConfiguration(ExternalConfiguration):
     """
     Represents a Shotgun pipeline configuration
-    linked to an immutable descriptor.
+    linked to an remote descriptor such as app_store,
+    git or shotgun.
     """
 
     def __init__(
@@ -47,25 +48,31 @@ class ImmutableExternalConfiguration(ExternalConfiguration):
         :param are pipeline_config_name: Pipeline Configuration name
         :param str pipeline_config_uri: Descriptor URI string for the config
         """
-        super(ImmutableExternalConfiguration, self).__init__(
+        super(RemoteExternalConfiguration, self).__init__(
             parent,
             bg_task_manager,
             plugin_id,
             engine_name,
             interpreter,
+            pipeline_config_uri
         )
 
         self._pipeline_configuration_id = pipeline_config_id
         self._pipeline_config_name = pipeline_config_name
-        self._pipeline_config_uri = pipeline_config_uri
+
+        # is our config uri tracking the latest version?
+        self._tracking_latest = sgtk.descriptor.is_descriptor_version_missing(
+            pipeline_config_uri
+        )
+
 
     def __repr__(self):
         """
         String representation
         """
-        return "<ImmutableExternalConfiguration id %d@%s>" % (
+        return "<RemoteExternalConfiguration id %d@%s>" % (
             self._pipeline_configuration_id,
-            self._pipeline_config_uri
+            self.descriptor_uri
         )
 
     @property
@@ -83,11 +90,11 @@ class ImmutableExternalConfiguration(ExternalConfiguration):
         return self._pipeline_config_name
 
     @property
-    def descriptor_uri(self):
+    def tracking_latest(self):
         """
-        The descriptor URI associated with this pipeline configuration.
+        Returns True if this configuration is tracking an external 'latest version'.
         """
-        return self._pipeline_config_uri
+        return self._tracking_latest
 
     def _compute_config_hash_keys(self, entity_type, entity_id, link_entity_type):
         """

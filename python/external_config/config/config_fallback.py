@@ -53,26 +53,19 @@ class FallbackExternalConfiguration(ExternalConfiguration):
             plugin_id,
             engine_name,
             interpreter,
+            pipeline_config_uri
         )
-        self._pipeline_config_uri = pipeline_config_uri
 
         # is our config uri tracking the latest version?
         self._tracking_latest = sgtk.descriptor.is_descriptor_version_missing(
-            self._pipeline_config_uri
+            pipeline_config_uri
         )
 
     def __repr__(self):
         """
         Low level string representation
         """
-        return "<FallbackExternalConfiguration %s>" % self._pipeline_config_uri
-
-    @property
-    def descriptor_uri(self):
-        """
-        The descriptor uri associated with this pipeline configuration.
-        """
-        return self._pipeline_config_uri
+        return "<FallbackExternalConfiguration %s>" % self.descriptor_uri
 
     @property
     def tracking_latest(self):
