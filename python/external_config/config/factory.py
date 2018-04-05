@@ -41,8 +41,10 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
     descriptor = configuration_data["descriptor"]
 
     # for configurations which were resolved directly from a
-    # descriptor, we also have a descriptor_uri set
-    descriptor_uri = configuration_data.get("descriptor_uri")
+    # descriptor, we also have a descriptor_uri set.
+    # Note that not all cores return this key as part of the
+    # return dictionary.
+    descriptor_source_uri = configuration_data.get("descriptor_source_uri")
 
     if descriptor is None:
         # the config is not accessible
@@ -73,7 +75,7 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
             config_loader.interpreter,
             configuration_data["id"],
             configuration_data["name"],
-            descriptor_uri or descriptor.get_uri(),
+            descriptor_source_uri or descriptor.get_uri(),
         )
 
     else:
