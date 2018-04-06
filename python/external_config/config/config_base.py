@@ -29,7 +29,7 @@ class ExternalConfiguration(QtCore.QObject):
         been called and once commands have been loaded for the configuration. The
         commands parameter contains a list of :class:`ExternalCommand` instances.
 
-    :signal commands_load_fail(project_id, config, reason): Gets emitted after
+    :signal commands_load_failed(project_id, config, reason): Gets emitted after
         :meth:`request_commands` has been called if command loading fails for some reason.
         The reason string parameter contains a message signfiying why the load failed.
     """
@@ -43,7 +43,7 @@ class ExternalConfiguration(QtCore.QObject):
     # 2. configuration instance
     # 3. configuration object, list of :class:`ExternalCommand` instances
 
-    commands_load_fail = QtCore.Signal(int, object, str)
+    commands_load_failed = QtCore.Signal(int, object, str)
     # signal parameters:
     # 1. project_id
     # 2. configuration instance
@@ -381,5 +381,5 @@ class ExternalConfiguration(QtCore.QObject):
         del self._task_ids[unique_id]
 
         # emit an empty list of commands
-        self.commands_load_fail.emit(project_id, self, message)
+        self.commands_load_failed.emit(project_id, self, message)
 
