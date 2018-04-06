@@ -10,7 +10,7 @@
 
 import sgtk
 
-from .config_immutable import ImmutableExternalConfiguration
+from .config_remote import RemoteExternalConfiguration
 from .config_live import LiveExternalConfiguration
 from .config_fallback import FallbackExternalConfiguration
 from ..errors import ExternalConfigParseError, ExternalConfigNotAccessibleError
@@ -18,7 +18,7 @@ from ..errors import ExternalConfigParseError, ExternalConfigNotAccessibleError
 logger = sgtk.platform.get_logger(__name__)
 
 # file format magic number
-CONFIGURATION_GENERATION = 6
+CONFIGURATION_GENERATION = 10
 
 
 def create_from_pipeline_configuration_data(parent, bg_task_manager, config_loader, configuration_data):
@@ -40,6 +40,12 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
     """
     descriptor = configuration_data["descriptor"]
 
+    # for configurations which were resolved directly from a
+    # descriptor, we also have a descriptor_uri set.
+    # Note that not all cores return this key as part of the
+    # return dictionary.
+    descriptor_source_uri = configuration_data.get("descriptor_source_uri")
+
     if descriptor is None:
         # the config is not accessible
         raise ExternalConfigNotAccessibleError(
@@ -51,7 +57,17 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
         )
 
     if descriptor.is_immutable():
-        return ImmutableExternalConfiguration(
+        # this is a pipeline configuration defined in Shotgun pointing
+        # at an immutable descriptor, e.g. a uploaded zip, app store,
+        # git etc.
+        #
+        # note: In the case where we have access to the raw descriptor
+        #       uri defined in the pipeline configuration, we use this
+        #       rather than the descriptor object's uri - this is because
+        #       this the uri can define a 'tracks latest' versionless uri
+        #       such as sgtk:descriptor:app_store?name=tk-config-basic
+        #
+        return RemoteExternalConfiguration(
             parent,
             bg_task_manager,
             config_loader.plugin_id,
@@ -59,10 +75,15 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
             config_loader.interpreter,
             configuration_data["id"],
             configuration_data["name"],
-            descriptor.get_uri(),
+            descriptor_source_uri or descriptor.get_uri(),
         )
 
     else:
+        # this is a pipeline configuration pointing at a location on
+        # disk where the configuration can change at any point. This
+        # includes path and dev descriptors as well as classic
+        # toolkit setups.
+
         # check that it exists on disk
         if descriptor.get_path() is None:
             raise ExternalConfigNotAccessibleError(
@@ -155,7 +176,7 @@ def deserialize(parent, bg_task_manager, data):
         )
 
     if data["class_name"] == "ImmutableExternalConfiguration":
-        return ImmutableExternalConfiguration(
+        return RemoteExternalConfiguration(
             parent,
             bg_task_manager,
             data["plugin_id"],

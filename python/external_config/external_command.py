@@ -8,6 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 import os
+import sys
 import cPickle
 import sgtk
 from sgtk.util.process import subprocess_check_output, \
@@ -15,8 +16,6 @@ from sgtk.util.process import subprocess_check_output, \
 
 logger = sgtk.platform.get_logger(__name__)
 
-# file format magic number
-CONFIGURATION_GENERATION = 2
 
 
 class ExternalCommand(object):
@@ -30,6 +29,9 @@ class ExternalCommand(object):
     A command is executed via its :meth:`execute` method, which
     will launch it in the given engine.
     """
+
+    # file format magic number
+    FORMAT_GENERATION = 3
 
     @classmethod
     def serialize_command(cls, entity_type, command_name, properties):
@@ -59,12 +61,43 @@ class ExternalCommand(object):
             "group_default": properties.get("group_default") or False,
 
             # special for shotgun
-            "deny_permissions": properties.get("deny_permissions"),
-            "deny_platforms": properties.get("deny_platforms"),
-            "supports_multiple_selection": properties.get("supports_multiple_selection"),
+            "sg_deny_permissions": properties.get("deny_permissions"),
+            "sg_supports_multiple_selection": properties.get("supports_multiple_selection"),
         }
 
         return data
+
+    @classmethod
+    def enabled_on_current_os(cls, properties):
+        """
+        Checks toolkit command properties to determine
+        if a command is enabled on the current OS or not.
+
+        :param dict properties: Properties dictionary
+            as returned by the ``Engine.commands`` dictionary property.
+        :returns: True if enabled, False if not.
+        """
+        if "deny_platforms" in properties:
+            # setting can be Linux, Windows or Mac
+            curr_os = {"linux2": "Linux", "darwin": "Mac", "win32": "Windows"}[sys.platform]
+            if curr_os in properties["deny_platforms"]:
+                # not enabled on this platform
+                return False
+
+        return True
+
+    @classmethod
+    def is_compatible(cls, data):
+        """
+        Determines if the given data is compatible.
+
+        :param dict data: Serialized data
+        :returns: True if the given data can be loaded, False if not.
+        """
+        try:
+            return data.get("generation") == cls.FORMAT_GENERATION
+        except AttributeError:
+            return False
 
     @classmethod
     def create(cls, external_configuration, data, entity_id):
@@ -86,6 +119,8 @@ class ExternalCommand(object):
             callback_name=data["callback_name"],
             display_name=data["display_name"],
             tooltip=data["tooltip"],
+            group=data["group"],
+            is_group_default=data["group_default"],
             plugin_id=external_configuration.plugin_id,
             engine_name=external_configuration.engine_name,
             interpreter=external_configuration.interpreter,
@@ -94,6 +129,8 @@ class ExternalCommand(object):
             entity_type=data["entity_type"],
             entity_id=entity_id,
             pipeline_config_name=external_configuration.pipeline_configuration_name,
+            sg_deny_permissions=data["sg_deny_permissions"],
+            sg_supports_multiple_selection=data["sg_supports_multiple_selection"],
         )
 
     def __init__(
@@ -101,6 +138,8 @@ class ExternalCommand(object):
             callback_name,
             display_name,
             tooltip,
+            group,
+            is_group_default,
             plugin_id,
             interpreter,
             engine_name,
@@ -108,7 +147,9 @@ class ExternalCommand(object):
             pipeline_config_id,
             entity_type,
             entity_id,
-            pipeline_config_name
+            pipeline_config_name,
+            sg_deny_permissions,
+            sg_supports_multiple_selection,
     ):
         """
         .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
@@ -117,6 +158,8 @@ class ExternalCommand(object):
         :param str callback_name: Name of the associated Toolkit command callback
         :param str display_name: Display name for command
         :param str tooltip: Tooltip
+        :param str group: Group that this command belongs to
+        :param bool is_group_default: Indicates that this is a group default
         :param str plugin_id: Plugin id
         :param str interpreter: Associated Python interpreter
         :param str engine_name: Engine name to execute command in
@@ -125,6 +168,10 @@ class ExternalCommand(object):
         :param str entity_type: Associated entity type
         :param int entity_id: Associated entity id
         :param str pipeline_config_name: Associated pipeline configuration name
+        :param list sg_deny_permissions: (Shotgun specific) List of permission
+            groups to exclude this action from.
+        :param bool sg_supports_multiple_selection: (Shotgun specific) Action
+            supports multiple selection.
         """
         super(ExternalCommand, self).__init__()
 
@@ -134,14 +181,18 @@ class ExternalCommand(object):
         self._callback_name = callback_name
         self._display_name = display_name
         self._tooltip = tooltip
+        self._group = group
+        self._is_group_default = is_group_default
+        self._plugin_id = plugin_id
         self._interpreter = interpreter
         self._descriptor_uri = descriptor_uri
         self._pipeline_config_id = pipeline_config_id
-        self._plugin_id = plugin_id
         self._engine_name = engine_name
         self._entity_type = entity_type
         self._entity_id = entity_id
         self._pipeline_config_name = pipeline_config_name
+        self._sg_deny_permissions = sg_deny_permissions
+        self._sg_supports_multiple_selection = sg_supports_multiple_selection
 
     def __repr__(self):
         """
@@ -166,17 +217,12 @@ class ExternalCommand(object):
         """
         data = cPickle.loads(data)
 
-        if data.get("GENERATION") != CONFIGURATION_GENERATION:
-            raise RuntimeError(
-                "Format is incompatible. Serialized data "
-                "is of generation %s, code expects "
-                "generation %s" % (data.get("GENERATION"), CONFIGURATION_GENERATION)
-            )
-
         return ExternalCommand(
             callback_name=data["callback_name"],
             display_name=data["display_name"],
             tooltip=data["tooltip"],
+            group=data["group"],
+            is_group_default=data["is_group_default"],
             plugin_id=data["plugin_id"],
             engine_name=data["engine_name"],
             interpreter=data["interpreter"],
@@ -184,7 +230,9 @@ class ExternalCommand(object):
             pipeline_config_id=data["pipeline_config_id"],
             entity_type=data["entity_type"],
             entity_id=data["entity_id"],
-            pipeline_config_name=data["pipeline_config_name"]
+            pipeline_config_name=data["pipeline_config_name"],
+            sg_deny_permissions=data["sg_deny_permissions"],
+            sg_supports_multiple_selection=data["sg_supports_multiple_selection"],
         )
 
     def serialize(self):
@@ -197,9 +245,10 @@ class ExternalCommand(object):
         :rtype: str
         """
         data = {
-            "GENERATION": CONFIGURATION_GENERATION,
             "callback_name": self._callback_name,
             "display_name": self._display_name,
+            "group": self._group,
+            "is_group_default": self._is_group_default,
             "tooltip": self._tooltip,
             "plugin_id": self._plugin_id,
             "engine_name": self._engine_name,
@@ -208,8 +257,9 @@ class ExternalCommand(object):
             "pipeline_config_id": self._pipeline_config_id,
             "entity_type": self._entity_type,
             "entity_id": self._entity_id,
-            "pipeline_config_name": self._pipeline_config_name
-
+            "pipeline_config_name": self._pipeline_config_name,
+            "sg_deny_permissions": self._sg_deny_permissions,
+            "sg_supports_multiple_selection": self._sg_supports_multiple_selection
         }
         return cPickle.dumps(data)
 
@@ -222,11 +272,71 @@ class ExternalCommand(object):
         return self._pipeline_config_name
 
     @property
+    def system_name(self):
+        """
+        The system name for the command
+        """
+        return self._callback_name
+
+    @property
     def display_name(self):
         """
         Display name, suitable for display in a menu.
         """
         return self._display_name
+
+    @property
+    def group(self):
+        """
+        Group command belongs to or None if not defined.
+
+        This is used in conjunction with the :meth:`group` property
+        and is a hint to engines how commands should be grouped together.
+
+        Engines which implement support for grouping will group commands which
+        share the same :meth:`group` name into a group of associated items
+        (typically as a submenu). The :meth:`group_default` boolean property
+        is used to indicate which item in the group should be considered the
+        default one to represent the group as a whole.
+        """
+        return self._group
+
+    @property
+    def is_group_default(self):
+        """
+        True if this command is a default action for a group.
+
+        This is used in conjunction with the :meth:`group` property
+        and is a hint to engines how commands should be grouped together.
+
+        Engines which implement support for grouping will group commands which
+        share the same :meth:`group` name into a group of associated items
+        (typically as a submenu). The :meth:`group_default` boolean property
+        is used to indicate which item in the group should be considered the
+        default one to represent the group as a whole.
+        """
+        return self._is_group_default
+
+    @property
+    def excluded_permission_groups_hint(self):
+        """
+        Legacy option used by some older Shotgun toolkit apps.
+        Apps may hint a list of permission groups for which
+        the app command should not be displayed.
+
+        Returns a list of Shotgun permission groups (as strings)
+        where this command is not appropriate.
+        """
+        return self._sg_deny_permissions or []
+
+    @property
+    def support_shotgun_multiple_selection(self):
+        """
+        Legacy flag indicated by some older Toolkit apps,
+        indicating that the app can accept a list of
+        entity ids to operate on rather than a single item.
+        """
+        return self._sg_supports_multiple_selection
 
     @property
     def tooltip(self):
@@ -252,6 +362,7 @@ class ExternalCommand(object):
                 worker.start()
 
         :raises: :class:`RuntimeError` on execution failure.
+        :returns: Output from execution session.
         """
         # local imports because this is executed from runner scripts
         from .util import create_parameter_file
@@ -302,5 +413,5 @@ class ExternalCommand(object):
             # clean up temp file
             sgtk.util.filesystem.safe_delete_file(args_file)
 
-
+        return output
 

@@ -219,21 +219,27 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
     external_command = _import_py_file(utils_folder, "external_command")
 
     logger.debug("Processing engine commands...")
-    commands = []
+    cache_data = {
+        "generation": external_command.ExternalCommand.FORMAT_GENERATION,
+        "commands": []
+    }
 
     for cmd_name, data in engine.commands.iteritems():
         logger.debug("Processing command: %s" % cmd_name)
 
-        commands.append(
-            external_command.ExternalCommand.serialize_command(
-                entity_type,
-                cmd_name,
-                data["properties"]
+        # note: we are baking the current operating system into the cache,
+        #       meaning that caches cannot be shared freely across OS platforms.
+        if external_command.ExternalCommand.enabled_on_current_os(data["properties"]):
+            cache_data["commands"].append(
+                external_command.ExternalCommand.serialize_command(
+                    entity_type,
+                    cmd_name,
+                    data["properties"]
+                )
             )
-        )
 
     logger.debug("Engine commands processed.")
-    file_cache.write_cache_file(cache_path, commands)
+    file_cache.write_cache_file(cache_path, cache_data)
     logger.debug("Cache complete.")
 
 
@@ -279,7 +285,7 @@ def main():
             callback_name = arg_data["callback_name"]
 
             # try to set the process icon to be the tk app icon
-            if engine.commands[callback_name]["properties"]["app"]:
+            if engine.commands[callback_name]["properties"].get("app"):
                 # not every command has an associated app
                 qt_application.setWindowIcon(
                     qt_importer.QtGui.QIcon(
@@ -303,6 +309,16 @@ if __name__ == "__main__":
     Main script entry point
     """
     task_runner = QtTaskRunner(main)
+
+    # For qt5, we may get this error:
+    #
+    # RuntimeError: Qt WebEngine seems to be initialized from a plugin.
+    # Please set Qt::AA_ShareOpenGLContexts using QCoreApplication::setAttribute
+    # before constructing QGuiApplication.
+    if hasattr(qt_importer.QtCore.Qt, "AA_ShareOpenGLContexts"):
+        qt_importer.QtGui.QApplication.setAttribute(
+            qt_importer.QtCore.Qt.AA_ShareOpenGLContexts
+        )
 
     # start up our QApp now
     qt_application = qt_importer.QtGui.QApplication([])

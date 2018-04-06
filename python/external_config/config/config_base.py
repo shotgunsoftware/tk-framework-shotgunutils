@@ -38,7 +38,7 @@ class ExternalConfiguration(QtCore.QObject):
     TASK_GROUP = "tk-framework-shotgunutils.external_config.ExternalConfiguration"
 
     commands_loaded = QtCore.Signal(int, object, list)
-    # signal parameters:
+    # Signal parameters:
     # 1. project_id
     # 2. configuration instance
     # 3. configuration object, list of :class:`ExternalCommand` instances
@@ -56,6 +56,7 @@ class ExternalConfiguration(QtCore.QObject):
             plugin_id,
             engine_name,
             interpreter,
+            pipeline_config_uri
     ):
         """
         .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
@@ -70,12 +71,19 @@ class ExternalConfiguration(QtCore.QObject):
         :param str plugin_id: Associated bootstrap plugin id
         :param str engine_name: Associated engine name
         :param str interpreter: Associated Python interpreter
+        :param str pipeline_config_uri: Descriptor URI string for the config
         """
         super(ExternalConfiguration, self).__init__(parent)
 
+        self._pipeline_config_uri = pipeline_config_uri
         self._plugin_id = plugin_id
         self._engine_name = engine_name
         self._interpreter = interpreter
+
+        # boolean to track if commands have been requested for this instance
+        # this is related to how configs tracking remote latest versions
+        # have their list of commands memoized for performance reasons.
+        self._commands_evaluated_once = False
 
         self._task_ids = {}
 
@@ -137,12 +145,29 @@ class ExternalConfiguration(QtCore.QObject):
     @property
     def descriptor_uri(self):
         """
-        The descriptor URI associated with this pipeline configuration. For
-        configurations that have an associated :meth:`pipeline_configuration_id`,
-        this returns ``None``.
+        The descriptor URI associated with this pipeline configuration.
+        """
+        return self._pipeline_config_uri
+
+    @property
+    def tracking_latest(self):
+        """
+        Returns True if this configuration is tracking an external 'latest version'.
+        This means that we cannot rely on any caches - because a remote process
+        may release a new "latest" version, we cannot know simply by computing a
+        cache key or looking at a local state on disk whether a cached configuration
+        is up to date or not. The only way to determine this is by actually fully resolve
+        the configuration.
+
+        .. note:: External configurations with this property returning True will have their
+                  commands memoized; The first call to :meth:`request_commands` will resolve
+                  the associated commands and subsequent requests will simply return that
+                  result. In order do perform a new evaluation of the list of associated
+                  commands, instantiate a new External Configuration instance.
+
         """
         # note: subclassed implementations will override this return value
-        return None
+        return False
 
     def request_commands(self, project_id, entity_type, entity_id, link_entity_type):
         """
@@ -152,7 +177,8 @@ class ExternalConfiguration(QtCore.QObject):
 
         :param int project_id: Associated project id
         :param str entity_type: Associated entity type
-        :param int entity_id: Associated entity id
+        :param int entity_id: Associated entity id. If this is set to None,
+            a best guess for a generic listing will be carried out.
         :param str link_entity_type: Entity type that the item is linked to.
             This is typically provided for things such as task, versions or notes,
             where having different values it per linked type can be beneficial.
@@ -199,6 +225,8 @@ class ExternalConfiguration(QtCore.QObject):
             This is typically provided for things such as task, versions or notes,
             where caching it per linked type can be beneficial.
         """
+        self._commands_evaluated_once = True
+
         # figure out if we have a suitable config for this on disk already
         cache_hash = self._compute_config_hash_keys(
             entity_type,
@@ -206,10 +234,43 @@ class ExternalConfiguration(QtCore.QObject):
             link_entity_type
         )
         cache_path = file_cache.get_cache_path(cache_hash)
-        cached_data = file_cache.load_cache(cache_hash)
 
-        if not cached_data:
+        if self.tracking_latest and not self._commands_evaluated_once:
+            # this configuration is tracking an external latest version
+            # so it's by definition never up to date. For performance
+            # reasons, we memoize it, and only evaluate the list of
+            # commands once per external config instance, tracked
+            # via the _commands_evaluated_once boolean.
+            cached_data = None
+        else:
+            cached_data = file_cache.load_cache(cache_hash)
+
+        if cached_data is None or not ExternalCommand.is_compatible(cached_data):
             logger.debug("Begin caching commands")
+
+            # if entity_id is None, we need to figure out an actual entity id
+            # go get items for. This is done by choosing the most recently
+            # updated item for the project
+            if entity_id is None:
+                logger.debug(
+                    "No entity id specified. Resolving most most recent %s "
+                    "id for project." % entity_type
+                )
+
+                most_recent_id = self._bundle.shotgun.find_one(
+                    entity_type,
+                    [["project", "is", {"type": "Project", "id": project_id}]],
+                    ["id"],
+                    order=[{"field_name": "id", "direction": "desc"}]
+                )
+
+                if most_recent_id is None:
+                    raise RuntimeError(
+                        "There are no %s objects for project %s." % (entity_type, project_id)
+                    )
+
+                entity_id = most_recent_id["id"]
+                logger.debug("Will cache using %s %s" % (entity_type, entity_id))
 
             # launch external process to carry out caching.
             script = os.path.abspath(
@@ -245,6 +306,12 @@ class ExternalConfiguration(QtCore.QObject):
             ]
             logger.debug("Launching external script: %s", args)
 
+            # Ensure the credentials are still valid before launching the command in
+            # a separate process. We need do to this in advance because the process
+            # that will be launched might not have PySide and as such won't be able
+            # to prompt the user to re-authenticate.
+            sgtk.get_authenticated_user().refresh_credentials()
+
             try:
                 output = subprocess_check_output(args)
                 logger.debug("External caching complete. Output: %s" % output)
@@ -263,7 +330,6 @@ class ExternalConfiguration(QtCore.QObject):
 
         return cached_data
 
-
     def _task_completed(self, unique_id, group, result):
         """
         Called after command caching completes.
@@ -281,15 +347,21 @@ class ExternalConfiguration(QtCore.QObject):
         del self._task_ids[unique_id]
 
         # result contains our cached data
+        #
+        # this is a dictionary with the following structure:
+        # cache_data = {
+        #   "version": external_command.ExternalCommand.FORMAT_GENERATION,
+        #   "commands": [<serialized1>, <serialized2>]
+        # }
+        #
         cached_data = result
 
         # got some cached data that we can emit
         self.commands_loaded.emit(
             project_id,
             self,
-            [ExternalCommand.create(self, d, entity_id) for d in cached_data]
+            [ExternalCommand.create(self, d, entity_id) for d in cached_data["commands"]]
         )
-
 
     def _task_failed(self, unique_id, group, message, traceback_str):
         """
