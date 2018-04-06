@@ -71,11 +71,11 @@ class ExternalCommand(object):
     def enabled_on_current_os(cls, properties):
         """
         Checks toolkit command properties to determine
-        if a command is enabled on the current os or Not.
+        if a command is enabled on the current OS or not.
 
         :param dict properties: Properties dictionary
             as returned by the ``Engine.commands`` dictionary property.
-        :return: True if enabled, False if not.
+        :returns: True if enabled, False if not.
         """
         if "deny_platforms" in properties:
             # setting can be Linux, Windows or Mac
@@ -96,7 +96,7 @@ class ExternalCommand(object):
         """
         try:
             return data.get("generation") == cls.FORMAT_GENERATION
-        except Exception as e:
+        except AttributeError:
             return False
 
     @classmethod
@@ -168,9 +168,9 @@ class ExternalCommand(object):
         :param str entity_type: Associated entity type
         :param int entity_id: Associated entity id
         :param str pipeline_config_name: Associated pipeline configuration name
-        :param list sg_deny_permissions: (Shotgun specific, legacy) List of permission
-            groups to eclude this action from.
-        :param bool sg_supports_multiple_selection: (Shotgun specific, legacy) Action
+        :param list sg_deny_permissions: (Shotgun specific) List of permission
+            groups to exclude this action from.
+        :param bool sg_supports_multiple_selection: (Shotgun specific) Action
             supports multiple selection.
         """
         super(ExternalCommand, self).__init__()
@@ -289,6 +289,15 @@ class ExternalCommand(object):
     def group(self):
         """
         Group command belongs to or None if not defined.
+
+        This is used in conjunction with the :meth:`group` property
+        and is a hint to engines how commands should be grouped together.
+
+        Engines which implement support for grouping will group commands which
+        share the same :meth:`group` name into a group of associated items
+        (typically as a submenu). The :meth:`group_default` boolean property
+        is used to indicate which item in the group should be considered the
+        default one to represent the group as a whole.
         """
         return self._group
 
@@ -296,6 +305,15 @@ class ExternalCommand(object):
     def is_group_default(self):
         """
         True if this command is a default action for a group.
+
+        This is used in conjunction with the :meth:`group` property
+        and is a hint to engines how commands should be grouped together.
+
+        Engines which implement support for grouping will group commands which
+        share the same :meth:`group` name into a group of associated items
+        (typically as a submenu). The :meth:`group_default` boolean property
+        is used to indicate which item in the group should be considered the
+        default one to represent the group as a whole.
         """
         return self._is_group_default
 

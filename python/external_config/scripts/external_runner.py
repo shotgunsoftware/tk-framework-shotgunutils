@@ -227,6 +227,8 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
     for cmd_name, data in engine.commands.iteritems():
         logger.debug("Processing command: %s" % cmd_name)
 
+        # note: we are baking the current operating system into the cache,
+        #       meaning that caches cannot be shared freely across OS platforms.
         if external_command.ExternalCommand.enabled_on_current_os(data["properties"]):
             cache_data["commands"].append(
                 external_command.ExternalCommand.serialize_command(

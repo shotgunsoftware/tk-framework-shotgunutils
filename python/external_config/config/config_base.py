@@ -225,6 +225,8 @@ class ExternalConfiguration(QtCore.QObject):
             This is typically provided for things such as task, versions or notes,
             where caching it per linked type can be beneficial.
         """
+        self._commands_evaluated_once = True
+
         # figure out if we have a suitable config for this on disk already
         cache_hash = self._compute_config_hash_keys(
             entity_type,
@@ -243,29 +245,32 @@ class ExternalConfiguration(QtCore.QObject):
         else:
             cached_data = file_cache.load_cache(cache_hash)
 
-        self._commands_evaluated_once = True
-
-        # if entity_id is None, we need to figure out an actual entity id
-        # go get items for. This is done by choosing the most recently
-        # updated item for the project
-        if entity_id is None:
-            logger.debug(
-                "No entity id specified. Resolving most most recent %s "
-                "id for project." % entity_type
-            )
-
-            most_recent_id = self._bundle.shotgun.find_one(
-                entity_type,
-                [["project", "is", {"type": "Project", "id": project_id}]],
-                ["id"],
-                order=[{"field_name": "id", "direction": "desc"}]
-            )
-
-            entity_id = most_recent_id["id"]
-            logger.debug("Will cache using %s %s" % (entity_type, entity_id))
-
         if cached_data is None or not ExternalCommand.is_compatible(cached_data):
             logger.debug("Begin caching commands")
+
+            # if entity_id is None, we need to figure out an actual entity id
+            # go get items for. This is done by choosing the most recently
+            # updated item for the project
+            if entity_id is None:
+                logger.debug(
+                    "No entity id specified. Resolving most most recent %s "
+                    "id for project." % entity_type
+                )
+
+                most_recent_id = self._bundle.shotgun.find_one(
+                    entity_type,
+                    [["project", "is", {"type": "Project", "id": project_id}]],
+                    ["id"],
+                    order=[{"field_name": "id", "direction": "desc"}]
+                )
+
+                if most_recent_id is None:
+                    raise RuntimeError(
+                        "There are no %s objects for project %s." % (entity_type, project_id)
+                    )
+
+                entity_id = most_recent_id["id"]
+                logger.debug("Will cache using %s %s" % (entity_type, entity_id))
 
             # launch external process to carry out caching.
             script = os.path.abspath(
