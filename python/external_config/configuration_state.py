@@ -8,7 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-
+import os
 import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 
@@ -23,7 +23,11 @@ class ConfigurationState(QtCore.QObject):
     Represents the state in Shotgun which may affect
     configurations and ultimately registered commands.
 
-    Looks at software entities and Pipeline Configurations.
+    Looks at the following items:
+
+    - The list of software entities
+    - The list of Pipeline Configurations
+    - The state of TK_BOOTSTRAP_CONFIG_OVERRIDE
 
     As an example, changing a software entity may affect
     the list of registered commands.
@@ -91,7 +95,14 @@ class ConfigurationState(QtCore.QObject):
         pc_hash = self._pipeline_config_model.get_hash()
         if pc_hash is None:
             return None
-        return "%s%s" % (sw_hash, pc_hash)
+        # note: include the value of TK_BOOTSTRAP_CONFIG_OVERRIDE
+        #       as this is a global 'switch' which overrides
+        #       the pipeline configuration settings
+        return "%s%s%s" % (
+            sw_hash,
+            pc_hash,
+            os.environ.get("TK_BOOTSTRAP_CONFIG_OVERRIDE")
+        )
 
     def _on_software_refreshed(self, has_changed):
         """
