@@ -11,6 +11,10 @@ import cPickle as pickle
 import tempfile
 import os
 import uuid
+import sgtk
+import pprint
+
+logger = sgtk.platform.get_logger(__name__)
 
 
 def create_parameter_file(data):
@@ -25,5 +29,12 @@ def create_parameter_file(data):
 
     with open(param_file, "wb") as fh:
         pickle.dump(data, fh, pickle.HIGHEST_PROTOCOL)
+
+    logger.debug(
+        "Created parameter file '%s' with the following data: %s" % (
+            param_file,
+            pprint.pformat(data)
+        )
+    )
 
     return param_file

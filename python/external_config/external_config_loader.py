@@ -165,6 +165,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
         config_cache_key = {
             "project": project_id,
             "plugin": self._plugin_id,
+            "engine": self._engine_name,
             "base_config": self._base_config_uri,
             "state_hash": self._config_state.get_hash()
         }
@@ -281,6 +282,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
             {
                 "project": project_id,
                 "plugin": self._plugin_id,
+                "engine": self._engine_name,
                 "base_config": self._base_config_uri,
                 "state_hash": state_hash
             },
