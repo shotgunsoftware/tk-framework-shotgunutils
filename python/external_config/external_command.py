@@ -281,6 +281,13 @@ class ExternalCommand(object):
         return self._callback_name
 
     @property
+    def engine_name(self):
+        """
+        The name of the engine associated with the command
+        """
+        return self._engine_name
+
+    @property
     def display_name(self):
         """
         Display name, suitable for display in a menu.
