@@ -169,7 +169,7 @@ class ExternalConfiguration(QtCore.QObject):
         # note: subclassed implementations will override this return value
         return False
 
-    def request_commands(self, project_id, entity_type, entity_id, link_entity_type):
+    def request_commands(self, project_id, entity_type, entity_id, link_entity_type, engine_fallback=None):
         """
         Request commands for the given shotgun entity.
 
@@ -182,6 +182,9 @@ class ExternalConfiguration(QtCore.QObject):
         :param str link_entity_type: Entity type that the item is linked to.
             This is typically provided for things such as task, versions or notes,
             where having different values it per linked type can be beneficial.
+        :param str engine_fallback: If the main engine isn't available for the given
+            entity id and project, request generate commands for the fallback engine
+            specified. This can be useful in backwards compatibility scenarios.
         """
         logger.debug("Requested commands for %s: %s %s %s" % (self, entity_type, entity_id, link_entity_type))
 
@@ -194,6 +197,7 @@ class ExternalConfiguration(QtCore.QObject):
                 "entity_type": entity_type,
                 "entity_id": entity_id,
                 "link_entity_type": link_entity_type,
+                "engine_fallback": engine_fallback
             }
         )
         self._task_ids[task_id] = (project_id, entity_type, entity_id)
@@ -213,7 +217,7 @@ class ExternalConfiguration(QtCore.QObject):
         raise NotImplementedError("_compute_config_hash_keys is not implemented.")
 
     @sgtk.LogManager.log_timing
-    def _request_commands(self, project_id, entity_type, entity_id, link_entity_type):
+    def _request_commands(self, project_id, entity_type, entity_id, link_entity_type, engine_fallback):
         """
         Execution, runs in a separate thread and launches an external
         process to cache commands.
@@ -224,6 +228,9 @@ class ExternalConfiguration(QtCore.QObject):
         :param str link_entity_type: Entity type that the item is linked to.
             This is typically provided for things such as task, versions or notes,
             where caching it per linked type can be beneficial.
+        :param str engine_fallback: If the main engine isn't available for the given
+            entity id and project, request generate commands for the fallback engine
+            specified. This can be useful in backwards compatibility scenarios.
         """
         self._commands_evaluated_once = True
 
@@ -290,6 +297,7 @@ class ExternalConfiguration(QtCore.QObject):
                     pipeline_config_id=self.pipeline_configuration_id,
                     plugin_id=self.plugin_id,
                     engine_name=self.engine_name,
+                    fallback_engine_name=engine_fallback,
                     entity_type=entity_type,
                     entity_id=entity_id,
                     bundle_cache_fallback_paths=self._bundle.engine.sgtk.bundle_cache_fallback_paths,

@@ -31,10 +31,10 @@ class ExternalCommand(object):
     """
 
     # file format magic number
-    FORMAT_GENERATION = 3
+    FORMAT_GENERATION = 4
 
     @classmethod
-    def serialize_command(cls, entity_type, command_name, properties):
+    def serialize_command(cls, engine_name, entity_type, command_name, properties):
         """
         Generates a data chunk given a set of standard
         Toolkit command data, as obtained from engine.commands.
@@ -42,6 +42,7 @@ class ExternalCommand(object):
         This can be passed to :meth:`create` in order to construct a
         :class:`ExternalCommand` instance.
 
+        :param str engine_name: Name of engine command is associated with.
         :param str entity_type: Shotgun entity type that the
             command is associated with.
         :param str command_name: Command name (the key
@@ -51,6 +52,7 @@ class ExternalCommand(object):
         :returns: dictionary suitable to pass to :meth:`create`.
         """
         data = {
+            "engine_name": engine_name,
             "entity_type": entity_type,
             "callback_name": command_name,
             "display_name": properties.get("title") or command_name,
@@ -122,7 +124,7 @@ class ExternalCommand(object):
             group=data["group"],
             is_group_default=data["group_default"],
             plugin_id=external_configuration.plugin_id,
-            engine_name=external_configuration.engine_name,
+            engine_name=data["engine_name"],
             interpreter=external_configuration.interpreter,
             descriptor_uri=external_configuration.descriptor_uri,
             pipeline_config_id=external_configuration.pipeline_configuration_id,

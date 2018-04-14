@@ -151,10 +151,10 @@ def start_engine(
     pipeline_config_id,
     plugin_id,
     engine_name,
+    engine_fallback_name,
     entity_type,
     entity_id,
     bundle_cache_fallback_paths
-
 ):
     """
     Bootstraps into an engine.
@@ -163,6 +163,7 @@ def start_engine(
     :param int pipeline_config_id: Associated pipeline config id
     :param str plugin_id: Plugin id to use for bootstrap
     :param str engine_name: Engine name to launch
+    :param str engine_fallback_name: Engine name to launch if engine_name does launch.
     :param str entity_type: Entity type to launch
     :param str entity_id: Entity id to launch
     :param list bundle_cache_fallback_paths: List of bundle cache paths to include.
@@ -188,10 +189,27 @@ def start_engine(
         manager.base_configuration = configuration_uri
 
     logger.debug("Starting %s using entity %s %s", engine_name, entity_type, entity_id)
-    engine = manager.bootstrap_engine(
-        engine_name,
-        entity={"type": entity_type, "id": entity_id}
-    )
+    logger.debug("Engine fallback in case primary engine does not exist: %s" % engine_fallback_name)
+    try:
+        engine = manager.bootstrap_engine(
+            engine_name,
+            entity={"type": entity_type, "id": entity_id}
+        )
+
+    except Exception as e:
+        logger.debug("Engine %s was not found in the environment.", engine_name)
+
+        if engine_fallback_name:
+            # we have a fallback engine we can try as a plan B
+            logger.debug("Attempting to launch fallback engine '%s'." % engine_fallback_name)
+            engine = manager.bootstrap_engine(
+                engine_fallback_name,
+                entity={"type": entity_type, "id": entity_id}
+            )
+        else:
+            # no fallback engine. let the TankMissingEngineError bubble up
+            raise
+
     logger.debug("Engine %s started using entity %s %s", engine, entity_type, entity_id)
 
     # add the core path to the PYTHONPATH so that downstream processes
@@ -232,6 +250,7 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
         if external_command.ExternalCommand.enabled_on_current_os(data["properties"]):
             cache_data["commands"].append(
                 external_command.ExternalCommand.serialize_command(
+                    engine.name,
                     entity_type,
                     cmd_name,
                     data["properties"]
@@ -265,9 +284,10 @@ def main():
             arg_data["pipeline_config_id"],
             arg_data["plugin_id"],
             arg_data["engine_name"],
+            arg_data.get("fallback_engine_name"),
             arg_data["entity_type"],
             arg_data["entity_id"],
-            arg_data["bundle_cache_fallback_paths"]
+            arg_data["bundle_cache_fallback_paths"],
         )
 
         action = arg_data["action"]
