@@ -197,11 +197,14 @@ def start_engine(
         )
 
     except Exception as e:
-        logger.debug("Engine %s was not found in the environment.", engine_name)
 
-        if engine_fallback_name:
-            # we have a fallback engine we can try as a plan B
-            logger.debug("Attempting to launch fallback engine '%s'." % engine_fallback_name)
+        # note - due to core swapping, we cannot simply catch a TankMissingEngineError
+        # but we have to compare via string
+        if e.__class__.__name__ == "TankMissingEngineError" and engine_fallback_name:
+            # engine wasn't available, and we have a
+            # fallback engine we can try as a plan B
+            logger.debug("Engine %s was not found in the environment.", engine_name)
+            logger.debug("Attempting to launch fallback engine '%s'.", engine_fallback_name)
             engine = manager.bootstrap_engine(
                 engine_fallback_name,
                 entity={"type": entity_type, "id": entity_id}
