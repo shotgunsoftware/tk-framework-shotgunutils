@@ -31,7 +31,7 @@ class ExternalCommand(object):
     """
 
     # file format magic number
-    FORMAT_GENERATION = 4
+    FORMAT_GENERATION = 5
 
     @classmethod
     def serialize_command(cls, engine_name, entity_type, command_name, properties):
@@ -401,6 +401,7 @@ class ExternalCommand(object):
                 bundle_cache_fallback_paths=self._bundle.engine.sgtk.bundle_cache_fallback_paths,
                 # the engine icon becomes the process icon
                 icon_path=self._bundle.engine.icon_256,
+                supports_multiple_selection=self._sg_supports_multiple_selection,
             )
         )
         # compose the command we want to run

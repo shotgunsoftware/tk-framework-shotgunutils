@@ -306,6 +306,7 @@ def main():
         elif action == "execute_command":
 
             callback_name = arg_data["callback_name"]
+            supports_multi_select = arg_data["supports_multiple_selection"]
 
             # try to set the process icon to be the tk app icon
             if engine.commands[callback_name]["properties"].get("app"):
@@ -315,8 +316,24 @@ def main():
                         engine.commands[callback_name]["properties"]["app"].icon_256
                     )
                 )
-            # execute the payload
-            engine.commands[callback_name]["callback"]()
+
+            # Now execute the payload command payload
+            #
+            # multi-select actions use an old execution methodology
+            # and are only used by the tk-shotgun engine, where they
+            # will continue to be supported but not added in other places.
+            if supports_multi_select:
+                # multi select commands are expected to be routed via
+                # a special method using the following interface:
+                # execute_old_style_command(cmd_name, entity_type, entity_ids)
+                engine.execute_old_style_command(
+                    callback_name,
+                    arg_data["entity_type"],
+                    [arg_data["entity_id"]]
+                )
+            else:
+                # standard route - just run the callback
+                engine.commands[callback_name]["callback"]()
 
         else:
             raise RuntimeError("Unknown action '%s'" % action)
