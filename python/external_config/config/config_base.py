@@ -388,6 +388,6 @@ class ExternalConfiguration(QtCore.QObject):
 
         del self._task_ids[unique_id]
 
-        # emit an empty list of commands
+        # emit error signal
         self.commands_load_failed.emit(project_id, self, message)
 

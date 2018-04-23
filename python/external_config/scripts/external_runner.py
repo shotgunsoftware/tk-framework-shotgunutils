@@ -9,6 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
+import re
 import imp
 import sys
 import cPickle
@@ -226,10 +227,11 @@ def start_engine(
 def cache_commands(engine, entity_type, entity_id, cache_path):
     """
     Caches registered commands for the given engine.
+    If the engine is None, an empty list of actions is cached.
 
     :param str entity_type: Entity type
     :param str entity_id: Entity id
-    :param engine: Engine instance.
+    :param engine: Engine instance or None
     :param str cache_path: Path to write cached data to
     """
     # import modules from shotgun-utils fw for serialization
@@ -239,28 +241,32 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
     file_cache = _import_py_file(utils_folder, "file_cache")
     external_command = _import_py_file(utils_folder, "external_command")
 
-    logger.debug("Processing engine commands...")
+
     cache_data = {
         "generation": external_command.ExternalCommand.FORMAT_GENERATION,
         "commands": []
     }
+    if engine is None:
+        logger.debug("No engine running - caching empty list of commands.")
 
-    for cmd_name, data in engine.commands.iteritems():
-        logger.debug("Processing command: %s" % cmd_name)
+    else:
+        logger.debug("Processing engine commands...")
+        for cmd_name, data in engine.commands.iteritems():
+            logger.debug("Processing command: %s" % cmd_name)
 
-        # note: we are baking the current operating system into the cache,
-        #       meaning that caches cannot be shared freely across OS platforms.
-        if external_command.ExternalCommand.enabled_on_current_os(data["properties"]):
-            cache_data["commands"].append(
-                external_command.ExternalCommand.serialize_command(
-                    engine.name,
-                    entity_type,
-                    cmd_name,
-                    data["properties"]
+            # note: we are baking the current operating system into the cache,
+            #       meaning that caches cannot be shared freely across OS platforms.
+            if external_command.ExternalCommand.enabled_on_current_os(data["properties"]):
+                cache_data["commands"].append(
+                    external_command.ExternalCommand.serialize_command(
+                        engine.name,
+                        entity_type,
+                        cmd_name,
+                        data["properties"]
+                    )
                 )
-            )
+        logger.debug("Engine commands processed.")
 
-    logger.debug("Engine commands processed.")
     file_cache.write_cache_file(cache_path, cache_data)
     logger.debug("Cache complete.")
 
@@ -280,22 +286,44 @@ def main():
     )
 
     engine = None
-
     try:
-        engine = start_engine(
-            arg_data["configuration_uri"],
-            arg_data["pipeline_config_id"],
-            arg_data["plugin_id"],
-            arg_data["engine_name"],
-            arg_data.get("fallback_engine_name"),
-            arg_data["entity_type"],
-            arg_data["entity_id"],
-            arg_data["bundle_cache_fallback_paths"],
-        )
-
         action = arg_data["action"]
 
         if action == "cache_actions":
+            try:
+                engine = start_engine(
+                    arg_data["configuration_uri"],
+                    arg_data["pipeline_config_id"],
+                    arg_data["plugin_id"],
+                    arg_data["engine_name"],
+                    arg_data.get("fallback_engine_name"),
+                    arg_data["entity_type"],
+                    arg_data["entity_id"],
+                    arg_data["bundle_cache_fallback_paths"],
+                )
+            except Exception as e:
+                # catch the special case where a shotgun engine has falled back
+                # to its legacy mode, looking for a shotgun_entitytype.yml file
+                # and cannot find it. In this case, we shouldn't handle that as
+                # an error but as an indication that the given entity type and
+                # entity id doesn't have any actions defined, and thus produce
+                # an empty list.
+                #
+                # Because this operation needs to be backwards compatible, we
+                # have to parse the exception message in order to extract the
+                # relevant state. The error to look for is on the following form:
+                # TankMissingEnvironmentFile: Missing environment file: /path/to/env/shotgun_camera.yml
+                #
+                if re.match("^Missing environment file:.*shotgun_[a-zA-Z0-9]+\.yml$", str(e)):
+                    logger.debug(
+                        "Bootstrap returned legacy fallback exception '%s'. "
+                        "An empty list of actions will be cached for the "
+                        "given entity type.", str(e)
+                    )
+                else:
+                    # bubble the error
+                    raise
+
             cache_commands(
                 engine,
                 arg_data["entity_type"],
@@ -304,6 +332,16 @@ def main():
             )
 
         elif action == "execute_command":
+            engine = start_engine(
+                arg_data["configuration_uri"],
+                arg_data["pipeline_config_id"],
+                arg_data["plugin_id"],
+                arg_data["engine_name"],
+                arg_data.get("fallback_engine_name"),
+                arg_data["entity_type"],
+                arg_data["entity_id"],
+                arg_data["bundle_cache_fallback_paths"],
+            )
 
             callback_name = arg_data["callback_name"]
             supports_multi_select = arg_data["supports_multiple_selection"]
