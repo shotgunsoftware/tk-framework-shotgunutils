@@ -279,56 +279,35 @@ class ExternalConfiguration(QtCore.QObject):
                 entity_id = most_recent_id["id"]
                 logger.debug("Will cache using %s %s" % (entity_type, entity_id))
 
-            # launch external process to carry out caching.
-            script = os.path.abspath(
-                os.path.join(
-                    os.path.dirname(__file__),
-                    "..",
-                    "scripts",
-                    "external_runner.py"
-                )
-            )
-
-            args_file = create_parameter_file(
-                dict(
-                    action="cache_actions",
-                    cache_path=cache_path,
-                    configuration_uri=self.descriptor_uri,
-                    pipeline_config_id=self.pipeline_configuration_id,
-                    plugin_id=self.plugin_id,
-                    engine_name=self.engine_name,
-                    fallback_engine_name=engine_fallback,
-                    entity_type=entity_type,
-                    entity_id=entity_id,
-                    bundle_cache_fallback_paths=self._bundle.engine.sgtk.bundle_cache_fallback_paths,
-                    # the engine icon becomes the process icon
-                    icon_path=self._bundle.engine.icon_256,
-                )
-            )
-
-            args = [
-                self.interpreter,
-                script,
-                sgtk.bootstrap.ToolkitManager.get_core_python_path(),
-                args_file
-            ]
-            logger.debug("Launching external script: %s", args)
-
-            # Ensure the credentials are still valid before launching the command in
-            # a separate process. We need do to this in advance because the process
-            # that will be launched might not have PySide and as such won't be able
-            # to prompt the user to re-authenticate.
-            sgtk.get_authenticated_user().refresh_credentials()
-
             try:
-                output = subprocess_check_output(args)
-                logger.debug("External caching complete. Output: %s" % output)
+                # run the external process. It will write a cache file to disk or fail.
+                self._run_external_process(
+                    cache_path,
+                    entity_type,
+                    entity_id,
+                    self.engine_name
+                )
+
             except SubprocessCalledProcessError as e:
                 # caching failed!
-                raise RuntimeError("Error retrieving actions: %s" % e.output)
-            finally:
-                # clean up temp file
-                sgtk.util.filesystem.safe_delete_file(args_file)
+                if e.returncode == 2 and engine_fallback:
+                    # An indication that the engine could not be started.
+                    # If a fallback engine is defined, try to launch this
+                    # Note: the reason we are doing this as two separate
+                    # process invocation is because older cores don't
+                    # have the ability to bootstrap and then bootstrap again.
+                    try:
+                        self._run_external_process(
+                            cache_path,
+                            entity_type,
+                            entity_id,
+                            engine_fallback
+                        )
+                    except SubprocessCalledProcessError as e:
+                        raise RuntimeError("Error retrieving actions: %s" % e.output)
+
+                else:
+                    raise RuntimeError("Error retrieving actions: %s" % e.output)
 
             # now try again
             cached_data = file_cache.load_cache(cache_hash)
@@ -337,6 +316,65 @@ class ExternalConfiguration(QtCore.QObject):
                 raise RuntimeError("Could not locate cached commands for %s" % self)
 
         return cached_data
+
+    @sgtk.LogManager.log_timing
+    def _run_external_process(self, cache_path, entity_type, entity_id, engine_name):
+        """
+        Helper method. Executes the external caching process.
+
+        :param int cache_path: Path to cache file to write
+        :param str entity_type: Associated entity type
+        :param int entity_id: Associated entity id
+        :param str engine_name: Engine to start
+
+        :raises: SubprocessCalledProcessError
+        """
+        # launch external process to carry out caching.
+        script = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__),
+                "..",
+                "scripts",
+                "external_runner.py"
+            )
+        )
+
+        args_file = create_parameter_file(
+            dict(
+                action="cache_actions",
+                cache_path=cache_path,
+                configuration_uri=self.descriptor_uri,
+                pipeline_config_id=self.pipeline_configuration_id,
+                plugin_id=self.plugin_id,
+                engine_name=engine_name,
+                entity_type=entity_type,
+                entity_id=entity_id,
+                bundle_cache_fallback_paths=self._bundle.engine.sgtk.bundle_cache_fallback_paths,
+                # the engine icon becomes the process icon
+                icon_path=self._bundle.engine.icon_256,
+            )
+        )
+
+        args = [
+            self.interpreter,
+            script,
+            sgtk.bootstrap.ToolkitManager.get_core_python_path(),
+            args_file
+        ]
+        logger.debug("Launching external script: %s", args)
+
+        # Ensure the credentials are still valid before launching the command in
+        # a separate process. We need do to this in advance because the process
+        # that will be launched might not have PySide and as such won't be able
+        # to prompt the user to re-authenticate.
+        sgtk.get_authenticated_user().refresh_credentials()
+
+        try:
+            output = subprocess_check_output(args)
+            logger.debug("External caching complete. Output: %s" % output)
+        finally:
+            # clean up temp file
+            sgtk.util.filesystem.safe_delete_file(args_file)
 
     def _task_completed(self, unique_id, group, result):
         """

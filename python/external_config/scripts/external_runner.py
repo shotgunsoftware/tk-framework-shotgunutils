@@ -29,6 +29,10 @@ qt_importer = sgtk.util.qt_importer.QtImporter()
 LOGGER_NAME = "tk-framework-shotgunutils.multi_context.external_runner"
 logger = sgtk.LogManager.get_logger(LOGGER_NAME)
 
+class EngineStartupError(Exception):
+    """
+    Indicates that bootstrapping into the engine failed.
+    """
 
 class QtTaskRunner(qt_importer.QtCore.QObject):
     """
@@ -75,20 +79,23 @@ class QtTaskRunner(qt_importer.QtCore.QObject):
     # emitted when the taskrunner has completed non-ui work
     completed = qt_importer.QtCore.Signal()
 
+    # statuses
+    (SUCCESS, GENERAL_ERROR, ERROR_ENGINE_NOT_STARTED) = range(3)
+
     def __init__(self, callback):
         """
         :param callback: Callback to execute
         """
         qt_importer.QtCore.QObject.__init__(self)
         self._callback = callback
-        self._failure_detected = False
+        self._status = self.SUCCESS
 
     @property
-    def failure_detected(self):
+    def status(self):
         """
-        True if an execution error has been detected
+        Status of execution
         """
-        return self._failure_detected
+        return self._status
 
     def execute_command(self):
         """
@@ -99,15 +106,24 @@ class QtTaskRunner(qt_importer.QtCore.QObject):
         # exec we need to catch and log any exceptions here.
         try:
             self._callback()
-        except Exception as e:
-            self._failure_detected = True
 
-            # We need to give the server a way to know that this failed due
-            # to an engine initialization issue. That will allow it to skip
-            # this config gracefully and log appropriately.
-            logger.exception("Could not bootstrap configuration")
+        except EngineStartupError as e:
+            self._status = self.ERROR_ENGINE_NOT_STARTED
+
+            # log details to log file
+            logger.exception("Could not start engine.")
+
+            # push message to stdout
+            print "Engine could not be started: %s. For details, see log files." % e
+
+        except Exception as e:
+            self._status = self.GENERAL_ERROR
+
+            # log details to log file
+            logger.exception("Could not bootstrap configuration.")
 
             # push it to stdout so that the parent process will get it
+            print "A general error was raised:"
             print traceback.format_exc()
 
         finally:
@@ -152,7 +168,6 @@ def start_engine(
     pipeline_config_id,
     plugin_id,
     engine_name,
-    engine_fallback_name,
     entity_type,
     entity_id,
     bundle_cache_fallback_paths
@@ -164,7 +179,6 @@ def start_engine(
     :param int pipeline_config_id: Associated pipeline config id
     :param str plugin_id: Plugin id to use for bootstrap
     :param str engine_name: Engine name to launch
-    :param str engine_fallback_name: Engine name to launch if engine_name does launch.
     :param str entity_type: Entity type to launch
     :param str entity_id: Entity id to launch
     :param list bundle_cache_fallback_paths: List of bundle cache paths to include.
@@ -190,7 +204,6 @@ def start_engine(
         manager.base_configuration = configuration_uri
 
     logger.debug("Starting %s using entity %s %s", engine_name, entity_type, entity_id)
-    logger.debug("Engine fallback in case primary engine does not exist: %s" % engine_fallback_name)
     try:
         engine = manager.bootstrap_engine(
             engine_name,
@@ -198,21 +211,11 @@ def start_engine(
         )
 
     except Exception as e:
-
-        # note - due to core swapping, we cannot simply catch a TankMissingEngineError
-        # but we have to compare via string
-        if e.__class__.__name__ == "TankMissingEngineError" and engine_fallback_name:
-            # engine wasn't available, and we have a
-            # fallback engine we can try as a plan B
-            logger.debug("Engine %s was not found in the environment.", engine_name)
-            logger.debug("Attempting to launch fallback engine '%s'.", engine_fallback_name)
-            engine = manager.bootstrap_engine(
-                engine_fallback_name,
-                entity={"type": entity_type, "id": entity_id}
-            )
-        else:
-            # no fallback engine. let the TankMissingEngineError bubble up
-            raise
+        # qualify this exception and re-raise
+        # note: we cannot probe for TankMissingEngineError here,
+        # because older cores may not raise that exception type.
+        logger.debug("Could not launch engine.", exc_info=True)
+        raise EngineStartupError(e)
 
     logger.debug("Engine %s started using entity %s %s", engine, entity_type, entity_id)
 
@@ -296,7 +299,6 @@ def main():
                     arg_data["pipeline_config_id"],
                     arg_data["plugin_id"],
                     arg_data["engine_name"],
-                    arg_data.get("fallback_engine_name"),
                     arg_data["entity_type"],
                     arg_data["entity_id"],
                     arg_data["bundle_cache_fallback_paths"],
@@ -337,7 +339,6 @@ def main():
                 arg_data["pipeline_config_id"],
                 arg_data["plugin_id"],
                 arg_data["engine_name"],
-                arg_data.get("fallback_engine_name"),
                 arg_data["entity_type"],
                 arg_data["entity_id"],
                 arg_data["bundle_cache_fallback_paths"],
@@ -398,6 +399,11 @@ if __name__ == "__main__":
             qt_importer.QtCore.Qt.AA_ShareOpenGLContexts
         )
 
+    # we don't want this process to have any traces of
+    # any previous environment
+    if "TANK_CURRENT_PC" in os.environ:
+        del os.environ["TANK_CURRENT_PC"]
+
     # start up our QApp now
     qt_application = qt_importer.QtGui.QApplication([])
 
@@ -412,8 +418,10 @@ if __name__ == "__main__":
     # byt the finished signal being called from the task class above.
     qt_application.exec_()
 
-    if task_runner.failure_detected:
-        # exit with error
-        sys.exit(1)
-    else:
+    if task_runner.status == task_runner.SUCCESS:
         sys.exit(0)
+    elif task_runner.status == task_runner.ERROR_ENGINE_NOT_STARTED:
+        sys.exit(2)
+
+    # for all general errors
+    sys.exit(1)
