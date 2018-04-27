@@ -396,7 +396,7 @@ class ExternalConfiguration(QtCore.QObject):
         #
         # this is a dictionary with the following structure:
         # cache_data = {
-        #   "version": external_command.ExternalCommand.FORMAT_GENERATION,
+        #   "version": external_command_utils.FORMAT_GENERATION,
         #   "commands": [<serialized1>, <serialized2>]
         # }
         #

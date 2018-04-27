@@ -44,7 +44,7 @@ Class ExternalCommand
 .. autoclass:: ExternalCommand
     :members:
     :inherited-members:
-    :exclude-members: serialize_command, create
+    :exclude-members: create
 
 
 

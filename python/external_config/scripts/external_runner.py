@@ -12,6 +12,7 @@ import os
 import re
 import imp
 import sys
+import errno
 import cPickle
 import traceback
 
@@ -146,6 +147,43 @@ def _get_core_python_path():
     return python_folder
 
 
+def _write_cache_file(path, data):
+    """
+    Writes a cache to disk given a path and some data.
+
+    :param str path: Path to a cache file on disk.
+    :param data: Data to save.
+    """
+    logger.debug("Saving cache to disk: %s" % path)
+
+    old_umask = os.umask(0)
+    try:
+        # try to create the cache folder with as open permissions as possible
+        cache_dir = os.path.dirname(path)
+        if not os.path.exists(cache_dir):
+            try:
+                os.makedirs(cache_dir, 0o775)
+            except OSError as e:
+                # Race conditions are perfectly possible on some network storage setups
+                # so make sure that we ignore any file already exists errors, as they
+                # are not really errors!
+                if e.errno != errno.EEXIST:
+                    # re-raise
+                    raise
+        # now write the file to disk
+        try:
+            with open(path, "wb") as fh:
+                cPickle.dump(data, fh)
+            # and ensure the cache file has got open permissions
+            os.chmod(path, 0666)
+        except Exception as e:
+            logger.debug("Could not write '%s'. Details: %s" % (path, e), exec_info=True)
+        else:
+            logger.debug("Completed save of %s. Size %s bytes" % (path, os.path.getsize(path)))
+    finally:
+        os.umask(old_umask)
+
+
 def _import_py_file(python_path, name):
     """
     Helper which imports a Python file and returns it.
@@ -170,7 +208,8 @@ def start_engine(
     engine_name,
     entity_type,
     entity_id,
-    bundle_cache_fallback_paths
+    bundle_cache_fallback_paths,
+    pre_cache
 ):
     """
     Bootstraps into an engine.
@@ -182,6 +221,9 @@ def start_engine(
     :param str entity_type: Entity type to launch
     :param str entity_id: Entity id to launch
     :param list bundle_cache_fallback_paths: List of bundle cache paths to include.
+    :param bool pre_cache: If set to True, starting up the command
+        will also include a full caching of all necessary
+        dependencies for all contexts and engines.
     """
     # log to file.
     sgtk.LogManager().initialize_base_file_handler(engine_name)
@@ -193,6 +235,10 @@ def start_engine(
     manager = sgtk.bootstrap.ToolkitManager()
     manager.plugin_id = plugin_id
     manager.bundle_cache_fallback_paths = bundle_cache_fallback_paths
+
+    if pre_cache:
+        logger.debug("Will request a full environment caching before startup.")
+        manager.caching_policy = manager.CACHE_FULL
 
     if pipeline_config_id:
         # we have a pipeline config id to launch.
@@ -209,6 +255,12 @@ def start_engine(
             engine_name,
             entity={"type": entity_type, "id": entity_id}
         )
+
+    #
+    # NOTE: At this point, the core has been swapped, and can be as old
+    #       as v0.15.x. Beyond this point, all sgtk operatinos need to
+    #       be backwards compatible with v0.15.
+    #
 
     except Exception as e:
         # qualify this exception and re-raise
@@ -241,12 +293,10 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
     utils_folder = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "..", )
     )
-    file_cache = _import_py_file(utils_folder, "file_cache")
-    external_command = _import_py_file(utils_folder, "external_command")
-
+    external_command_utils = _import_py_file(utils_folder, "external_command_utils")
 
     cache_data = {
-        "generation": external_command.ExternalCommand.FORMAT_GENERATION,
+        "generation": external_command_utils.FORMAT_GENERATION,
         "commands": []
     }
     if engine is None:
@@ -259,9 +309,9 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
 
             # note: we are baking the current operating system into the cache,
             #       meaning that caches cannot be shared freely across OS platforms.
-            if external_command.ExternalCommand.enabled_on_current_os(data["properties"]):
+            if external_command_utils.enabled_on_current_os(data["properties"]):
                 cache_data["commands"].append(
-                    external_command.ExternalCommand.serialize_command(
+                    external_command_utils.serialize_command(
                         engine.name,
                         entity_type,
                         cmd_name,
@@ -270,7 +320,7 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
                 )
         logger.debug("Engine commands processed.")
 
-    file_cache.write_cache_file(cache_path, cache_data)
+    _write_cache_file(cache_path, cache_data)
     logger.debug("Cache complete.")
 
 
@@ -302,6 +352,7 @@ def main():
                     arg_data["entity_type"],
                     arg_data["entity_id"],
                     arg_data["bundle_cache_fallback_paths"],
+                    arg_data.get("pre_cache") or False,
                 )
             except Exception as e:
                 # catch the special case where a shotgun engine has falled back
@@ -342,6 +393,7 @@ def main():
                 arg_data["entity_type"],
                 arg_data["entity_id"],
                 arg_data["bundle_cache_fallback_paths"],
+                False,
             )
 
             callback_name = arg_data["callback_name"]

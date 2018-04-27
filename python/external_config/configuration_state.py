@@ -159,7 +159,7 @@ class ConfigStateModel(ShotgunModel):
         Load cached data into the model and request a refresh.
         """
         hierarchy = ["id"]
-        fields = ["updated_at"]
+        fields = ["updated_at", "id"]
         self._load_data(
             self._entity_type,
             self._filters,
@@ -178,7 +178,10 @@ class ConfigStateModel(ShotgunModel):
         if sg_data is None:
             return None
         else:
-            return hash(str(sg_data))
+            # note: there *may* be a bug when deleting items out of a shotgun
+            #       model in certain cases, so in order to ensure we
+            #       get a correct representation, include entity_ids in the hash.
+            return hash(str(sg_data+self.entity_ids))
 
     def _get_sg_data(self):
         """
