@@ -73,8 +73,8 @@ class ExternalConfigurationLoader(QtCore.QObject):
         self._engine_name = engine_name
         self._interpreter = interpreter
 
-        self._config_state = ConfigurationState(bg_task_manager, parent)
-        self._config_state.state_changed.connect(self.configurations_changed.emit)
+        self._shotgun_state = ConfigurationState(bg_task_manager, parent)
+        self._shotgun_state.state_changed.connect(self.configurations_changed.emit)
         # always trigger a check at startup
         self.refresh_shotgun_global_state()
 
@@ -92,7 +92,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
         """
         Shut down and deallocate.
         """
-        self._config_state.shut_down()
+        self._shotgun_state.shut_down()
 
     def refresh_shotgun_global_state(self):
         """
@@ -105,7 +105,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
         change to the list of software entities, since these can implicitly affect
         the list of commands associated with a project or entity.
         """
-        self._config_state.refresh()
+        self._shotgun_state.refresh()
 
     @property
     def engine_name(self):
@@ -131,9 +131,17 @@ class ExternalConfigurationLoader(QtCore.QObject):
     @property
     def base_config_uri(self):
         """
-        Cnfiguration URI string to be used when nothing is provided via Shotgun overrides.
+        Configuration URI string to be used when nothing is provided via Shotgun overrides.
         """
         return self._base_config_uri
+
+    @property
+    def software_hash(self):
+        """
+        Hash string representing the state of the software
+        entity in Shotgun or None if not yet determined.
+        """
+        return self._shotgun_state.get_software_hash()
 
     def request_configurations(self, project_id):
         """
@@ -167,7 +175,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
             "plugin": self._plugin_id,
             "engine": self._engine_name,
             "base_config": self._base_config_uri,
-            "state_hash": self._config_state.get_hash()
+            "state_hash": self._shotgun_state.get_configuration_hash()
         }
 
         config_data = file_cache.load_cache(config_cache_key)
@@ -199,7 +207,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
                 group=self.TASK_GROUP,
                 task_kwargs={
                     "project_id": project_id,
-                    "state_hash": self._config_state.get_hash()
+                    "state_hash": self._shotgun_state.get_configuration_hash()
                 }
             )
 

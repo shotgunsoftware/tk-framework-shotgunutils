@@ -56,6 +56,7 @@ class ExternalConfiguration(QtCore.QObject):
             plugin_id,
             engine_name,
             interpreter,
+            software_hash,
             pipeline_config_uri
     ):
         """
@@ -71,6 +72,7 @@ class ExternalConfiguration(QtCore.QObject):
         :param str plugin_id: Associated bootstrap plugin id
         :param str engine_name: Associated engine name
         :param str interpreter: Associated Python interpreter
+        :param str software_hash: Hash representing the state of the Shotgun software entity
         :param str pipeline_config_uri: Descriptor URI string for the config
         """
         super(ExternalConfiguration, self).__init__(parent)
@@ -79,6 +81,7 @@ class ExternalConfiguration(QtCore.QObject):
         self._plugin_id = plugin_id
         self._engine_name = engine_name
         self._interpreter = interpreter
+        self._software_hash = software_hash
 
         # boolean to track if commands have been requested for this instance
         # this is related to how configs tracking remote latest versions
@@ -114,6 +117,13 @@ class ExternalConfiguration(QtCore.QObject):
         The Python interpreter to use when accessing this configuration
         """
         return self._interpreter
+
+    @property
+    def software_hash(self):
+        """
+        A hash of the state of the software entity associated with this configuration.
+        """
+        return self._software_hash
 
     @property
     def is_primary(self):

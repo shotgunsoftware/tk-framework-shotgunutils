@@ -29,6 +29,7 @@ class RemoteExternalConfiguration(ExternalConfiguration):
             plugin_id,
             engine_name,
             interpreter,
+            software_hash,
             pipeline_config_id,
             pipeline_config_name,
             pipeline_config_uri,
@@ -44,6 +45,7 @@ class RemoteExternalConfiguration(ExternalConfiguration):
         :param str plugin_id: Associated bootstrap plugin id
         :param str engine_name: Associated engine name
         :param str interpreter: Associated Python interpreter
+        :param str software_hash: Hash representing the state of the Shotgun software entity
         :param id pipeline_config_id: Pipeline Configuration id
         :param are pipeline_config_name: Pipeline Configuration name
         :param str pipeline_config_uri: Descriptor URI string for the config
@@ -54,6 +56,7 @@ class RemoteExternalConfiguration(ExternalConfiguration):
             plugin_id,
             engine_name,
             interpreter,
+            software_hash,
             pipeline_config_uri
         )
 
@@ -111,6 +114,7 @@ class RemoteExternalConfiguration(ExternalConfiguration):
             file_cache.FOLDER_PREFIX_KEY: "id_%s" % self.pipeline_configuration_id,
             "engine_name": self.engine_name,
             "uri": self.descriptor_uri,
+            "software_hash": self.software_hash,
             "type": entity_type,
             "link_type": link_entity_type,
         }

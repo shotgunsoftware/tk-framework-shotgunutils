@@ -32,6 +32,7 @@ class FallbackExternalConfiguration(ExternalConfiguration):
             plugin_id,
             engine_name,
             interpreter,
+            software_hash,
             pipeline_config_uri,
     ):
         """
@@ -45,6 +46,7 @@ class FallbackExternalConfiguration(ExternalConfiguration):
         :param str plugin_id: Associated bootstrap plugin id
         :param str engine_name: Associated engine name
         :param str interpreter: Associated Python interpreter
+        :param str software_hash: Hash representing the state of the Shotgun software entity
         :param str pipeline_config_uri: Descriptor URI string for the config
         """
         super(FallbackExternalConfiguration, self).__init__(
@@ -53,6 +55,7 @@ class FallbackExternalConfiguration(ExternalConfiguration):
             plugin_id,
             engine_name,
             interpreter,
+            software_hash,
             pipeline_config_uri
         )
 
@@ -88,10 +91,10 @@ class FallbackExternalConfiguration(ExternalConfiguration):
         cache_key = {
             file_cache.FOLDER_PREFIX_KEY: "base",
             "engine_name": self.engine_name,
+            "software_hash": self.software_hash,
             "uri": self.descriptor_uri,
             "type": entity_type,
             "link_type": link_entity_type,
         }
-
         return cache_key
 

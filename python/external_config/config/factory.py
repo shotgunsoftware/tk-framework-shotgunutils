@@ -18,7 +18,7 @@ from ..errors import ExternalConfigParseError, ExternalConfigNotAccessibleError
 logger = sgtk.platform.get_logger(__name__)
 
 # file format magic number
-CONFIGURATION_GENERATION = 10
+CONFIGURATION_GENERATION = 11
 
 
 def create_from_pipeline_configuration_data(parent, bg_task_manager, config_loader, configuration_data):
@@ -73,6 +73,7 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
             config_loader.plugin_id,
             config_loader.engine_name,
             config_loader.interpreter,
+            config_loader.software_hash,
             configuration_data["id"],
             configuration_data["name"],
             descriptor_source_uri or descriptor.get_uri(),
@@ -100,6 +101,7 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
             config_loader.plugin_id,
             config_loader.engine_name,
             config_loader.interpreter,
+            config_loader.software_hash,
             configuration_data["id"],
             configuration_data["name"],
             descriptor.get_uri(),
@@ -126,6 +128,7 @@ def create_fallback_configuration(parent, bg_task_manager, config_loader):
         config_loader.plugin_id,
         config_loader.engine_name,
         config_loader.interpreter,
+        config_loader.software_hash,
         config_loader.base_config_uri,
     )
 
@@ -143,6 +146,7 @@ def serialize(config_object):
         "plugin_id": config_object.plugin_id,
         "engine_name": config_object.engine_name,
         "interpreter": config_object.interpreter,
+        "software_hash": config_object.software_hash,
         "pipeline_config_id": config_object.pipeline_configuration_id,
         "pipeline_config_name": config_object.pipeline_configuration_name,
         "config_uri": config_object.descriptor_uri,
@@ -182,6 +186,7 @@ def deserialize(parent, bg_task_manager, data):
             data["plugin_id"],
             data["engine_name"],
             data["interpreter"],
+            data["software_hash"],
             data["pipeline_config_id"],
             data["pipeline_config_name"],
             data["config_uri"],
@@ -193,6 +198,7 @@ def deserialize(parent, bg_task_manager, data):
             data["plugin_id"],
             data["engine_name"],
             data["interpreter"],
+            data["software_hash"],
             data["pipeline_config_id"],
             data["pipeline_config_name"],
             data["config_uri"],
@@ -205,6 +211,7 @@ def deserialize(parent, bg_task_manager, data):
             data["plugin_id"],
             data["engine_name"],
             data["interpreter"],
+            data["software_hash"],
             data["config_uri"],
         )
     else:

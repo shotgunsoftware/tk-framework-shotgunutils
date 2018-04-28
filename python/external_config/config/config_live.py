@@ -35,6 +35,7 @@ class LiveExternalConfiguration(ExternalConfiguration):
             plugin_id,
             engine_name,
             interpreter,
+            software_hash,
             pipeline_config_id,
             pipeline_config_name,
             pipeline_config_uri,
@@ -51,6 +52,7 @@ class LiveExternalConfiguration(ExternalConfiguration):
         :param str plugin_id: Associated bootstrap plugin id
         :param str engine_name: Associated engine name
         :param str interpreter: Associated Python interpreter
+        :param str software_hash: Hash representing the state of the Shotgun software entity
         :param id pipeline_config_id: Pipeline Configuration id
         :param are pipeline_config_name: Pipeline Configuration name
         :param str pipeline_config_uri: Descriptor URI string for the config
@@ -62,6 +64,7 @@ class LiveExternalConfiguration(ExternalConfiguration):
             plugin_id,
             engine_name,
             interpreter,
+            software_hash,
             pipeline_config_uri
         )
 
@@ -113,6 +116,7 @@ class LiveExternalConfiguration(ExternalConfiguration):
         cache_key = {
             file_cache.FOLDER_PREFIX_KEY: "id_%s" % self.pipeline_configuration_id,
             "engine_name": self.engine_name,
+            "software_hash": self.software_hash,
             "uri": self.descriptor_uri,
             "type": entity_type,
             "link_type": link_entity_type,

@@ -83,15 +83,21 @@ class ConfigurationState(QtCore.QObject):
         self._software_model.destroy()
         self._pipeline_config_model.destroy()
 
-    def get_hash(self):
+    def get_software_hash(self):
+        """
+        Returns a hash representing the state of the
+        software entity in Shotgun.
+
+        :returns: Hash string or ``None`` if not yet defined.
+        """
+        return self._software_model.get_hash()
+
+    def get_configuration_hash(self):
         """
         Returns a hash representing the global state of Shotgun.
 
         :returns: Hash string or ``None`` if not yet defined.
         """
-        sw_hash = self._software_model.get_hash()
-        if sw_hash is None:
-            return None
         pc_hash = self._pipeline_config_model.get_hash()
         if pc_hash is None:
             return None
@@ -99,7 +105,7 @@ class ConfigurationState(QtCore.QObject):
         #       as this is a global 'switch' which overrides
         #       the pipeline configuration settings
         return "%s%s%s" % (
-            sw_hash,
+            self.get_software_hash(),
             pc_hash,
             os.environ.get("TK_BOOTSTRAP_CONFIG_OVERRIDE")
         )
