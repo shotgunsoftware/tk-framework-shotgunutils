@@ -14,6 +14,7 @@ import imp
 import sys
 import errno
 import cPickle
+import inspect
 import traceback
 
 # handle imports
@@ -135,13 +136,14 @@ class QtTaskRunner(qt_importer.QtCore.QObject):
                 self.completed.emit()
 
 
-def _get_core_python_path():
+def _get_core_python_path(engine):
     """
-    Computes the path to the current Toolkit core.
+    Computes the path to the core for a given engine.
 
+    :param engine: Toolkit Engine to inspect
     :returns: Path to the current core.
     """
-    sgtk_file = sgtk.__file__
+    sgtk_file = inspect.getfile(engine.sgtk.__class__)
     tank_folder = os.path.dirname(sgtk_file)
     python_folder = os.path.dirname(tank_folder)
     return python_folder
@@ -273,7 +275,7 @@ def start_engine(
 
     # add the core path to the PYTHONPATH so that downstream processes
     # can make use of it
-    sgtk_path = _get_core_python_path()
+    sgtk_path = _get_core_python_path(engine)
     sgtk.util.prepend_path_to_env_var("PYTHONPATH", sgtk_path)
 
     return engine
