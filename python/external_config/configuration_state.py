@@ -57,9 +57,21 @@ class ConfigurationState(QtCore.QObject):
             bg_task_manager,
             parent
         )
+
+        # Determine the overall state of pipeline configurations
+        # based on configs linked to active projects plus any
+        # site configurations.
         self._pipeline_config_model = ConfigStateModel(
             "PipelineConfiguration",
-            [["project.Project.archived", "is", False]],
+            [
+                {
+                    "filter_operator": "any",
+                    "filters": [
+                        ["project.Project.archived", "is", False],
+                        ["project", "is", None],
+                    ]
+                }
+            ],
             bg_task_manager,
             parent
         )
