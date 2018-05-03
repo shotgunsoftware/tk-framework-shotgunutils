@@ -37,17 +37,23 @@ class ExternalConfiguration(QtCore.QObject):
     # grouping used by the background task manager
     TASK_GROUP = "tk-framework-shotgunutils.external_config.ExternalConfiguration"
 
-    commands_loaded = QtCore.Signal(int, object, list)
+    commands_loaded = QtCore.Signal(int, str, int, str, object, list)
     # Signal parameters:
     # 1. project_id
-    # 2. configuration instance
-    # 3. configuration object, list of :class:`ExternalCommand` instances
+    # 2. entity_type
+    # 3. entity_id
+    # 4. link_entity_type
+    # 5. configuration instance
+    # 6. configuration object, list of :class:`ExternalCommand` instances
 
-    commands_load_failed = QtCore.Signal(int, object, str)
+    commands_load_failed = QtCore.Signal(int, str, int, str, object, str)
     # signal parameters:
     # 1. project_id
-    # 2. configuration instance
-    # 3. reason for the failure
+    # 2. entity_type
+    # 3. entity_id
+    # 4. link_entity_type
+    # 5. configuration instance
+    # 6. reason for the failure
 
     def __init__(
             self,
@@ -210,7 +216,7 @@ class ExternalConfiguration(QtCore.QObject):
                 "engine_fallback": engine_fallback
             }
         )
-        self._task_ids[task_id] = (project_id, entity_type, entity_id)
+        self._task_ids[task_id] = (project_id, entity_type, entity_id, link_entity_type)
 
     def _compute_config_hash_keys(self, entity_type, entity_id, link_entity_type):
         """
@@ -398,7 +404,7 @@ class ExternalConfiguration(QtCore.QObject):
             # this was not for us
             return
 
-        (project_id, entity_type, entity_id) = self._task_ids[unique_id]
+        (project_id, entity_type, entity_id, link_entity_type) = self._task_ids[unique_id]
 
         del self._task_ids[unique_id]
 
@@ -415,6 +421,9 @@ class ExternalConfiguration(QtCore.QObject):
         # got some cached data that we can emit
         self.commands_loaded.emit(
             project_id,
+            entity_type,
+            entity_id,
+            link_entity_type,
             self,
             [ExternalCommand.create(self, d, entity_id) for d in cached_data["commands"]]
         )
@@ -432,10 +441,17 @@ class ExternalConfiguration(QtCore.QObject):
             # this was not for us
             return
 
-        (project_id, _, _) = self._task_ids[unique_id]
+        (project_id, entity_type, entity_id, link_entity_type) = self._task_ids[unique_id]
 
         del self._task_ids[unique_id]
 
         # emit error signal
-        self.commands_load_failed.emit(project_id, self, message)
+        self.commands_load_failed.emit(
+            project_id,
+            entity_type,
+            entity_id,
+            link_entity_type,
+            self,
+            message
+        )
 
