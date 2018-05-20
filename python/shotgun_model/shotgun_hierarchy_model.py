@@ -94,7 +94,11 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             supplied arg would look like: ``include_root="Project Publishes"``.
             If ``include_root`` is `None`, no root item will be added.
         """
-        super(ShotgunHierarchyModel, self).__init__(parent, bg_task_manager)
+        super(ShotgunHierarchyModel, self).__init__(
+            parent,
+            bg_load_thumbs=True,
+            bg_task_manager=bg_task_manager
+        )
 
         # check for hierarchy support
         (self._hierarchy_is_supported, self._hierarchy_not_supported_reason) = \
