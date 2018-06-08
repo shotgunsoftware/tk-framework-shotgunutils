@@ -174,8 +174,12 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         self._log_debug("Updating %s with %s shotgun records." % (self, len(sg_data)))
         self._log_debug("Hierarchy: %s" % self.__hierarchy)
 
+        new_cache = ShotgunDataHandlerCache()
+
+        # If there's no cache at all, we can just go ahead and start using our
+        # fresh, empty cache and continue on with the update.
         if self._cache is None:
-            raise ShotgunModelDataError("No data currently loaded in memory!")
+            self._cache = new_cache
 
         if self._cache.size == 0:
             self._log_debug("In-memory cache is empty.")
@@ -193,8 +197,6 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         num_adds = 0
         num_deletes = 0
         num_modifications = 0
-
-        new_cache = ShotgunDataHandlerCache()
 
         # analyze the incoming shotgun data
         for sg_item in sg_data:
@@ -294,15 +296,16 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
             })
             num_deletes += 1
 
-        # lastly swap the new for the old
-        self._cache = None
+        # Lastly, swap the new cache in if it's not already there.
+        if self._cache is not new_cache:
+            self._cache = None
 
-        # at this point, kick the gc to make sure the memory is freed up
-        # despite its cycles.
-        gc.collect()
+            # at this point, kick the gc to make sure the memory is freed up
+            # despite its cycles.
+            gc.collect()
 
-        # and set the new cache
-        self._cache = new_cache
+            # and set the new cache
+            self._cache = new_cache
 
         self._log_debug("Shotgun data (%d records) received and processed. " % len(sg_data))
         self._log_debug("    The new tree is %d records." % self._cache.size)
