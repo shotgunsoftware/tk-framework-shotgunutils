@@ -176,8 +176,9 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
 
         new_cache = ShotgunDataHandlerCache()
 
+        # If we don't already have a cache, we can continue on here by just populating
+        # our new cache with the necessary data.
         if self._cache is None:
-            # raise ShotgunModelDataError("No data currently loaded in memory!")
             self._cache = new_cache
 
         if self._cache.size == 0:
@@ -295,7 +296,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
             })
             num_deletes += 1
 
-        # lastly swap the new for the old
+        # Lastly, swap in the new cache if it's not already been done.
         if self._cache is not new_cache:
             self._cache = None
 
