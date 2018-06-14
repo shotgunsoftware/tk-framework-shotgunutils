@@ -179,7 +179,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         # If we don't already have a cache, we can continue on here by just populating
         # our new cache with the necessary data.
         if self._cache is None:
-            self._cache = new_cache
+            self.load_cache()
 
         if self._cache.size == 0:
             self._log_debug("In-memory cache is empty.")
@@ -296,16 +296,15 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
             })
             num_deletes += 1
 
-        # Lastly, swap in the new cache if it's not already been done.
-        if self._cache is not new_cache:
-            self._cache = None
+        # Lastly, swap in the new cache
+        self._cache = None
 
-            # at this point, kick the gc to make sure the memory is freed up
-            # despite its cycles.
-            gc.collect()
+        # at this point, kick the gc to make sure the memory is freed up
+        # despite its cycles.
+        gc.collect()
 
-            # and set the new cache
-            self._cache = new_cache
+        # and set the new cache
+        self._cache = new_cache
 
         self._log_debug("Shotgun data (%d records) received and processed. " % len(sg_data))
         self._log_debug("    The new tree is %d records." % self._cache.size)
