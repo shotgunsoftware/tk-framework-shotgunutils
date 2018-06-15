@@ -268,10 +268,18 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         # Clear ourselves, preserving the data handler so that we can then
         # refresh. Clearing the model here ensures we don't end up with
         # duplicate items once the cache is cleared and repopulated.
-        self.clear(remove_data_handler=False)
-
-        # request a reload
-        self._refresh_data()
+        #
+        # Block all signals before we clear the model otherwise downstream
+        # proxy objects could cause crashes.
+        signals_blocked = self.blockSignals(True)
+        try:
+            # Clear all internal memory storage.
+            self.clear(remove_data_handler=False)
+            self._refresh_data()
+        finally:
+            # Reset the state of signal blocking.
+            self.blockSignals(signals_blocked)
+            self.modelReset.emit()
 
     def is_data_cached(self):
         """
