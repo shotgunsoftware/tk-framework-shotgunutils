@@ -170,10 +170,14 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     ############################################################################
     # public methods
 
-    def clear(self):
+    def clear(self, remove_data_handler=True):
         """
         Removes all items (including header items) from the model and
         sets the number of rows and columns to zero.
+
+        :param bool remove_data_handler: Whether to remove the reference to the
+            current data handler object. If False, the data handler will be
+            retained, which will allow the model to be repopulated.
         """
         # clear thumbnail download lookup so we don't process any more results:
         self.__thumb_map = {}
@@ -218,7 +222,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             self.__do_depth_first_tree_deletion(self.invisibleRootItem())
 
             # unload the data backend
-            if self._data_handler:
+            if self._data_handler and remove_data_handler:
                 self._data_handler.unload_cache()
                 self._data_handler = None
 
@@ -260,8 +264,22 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         # delete cache file
         self._data_handler.remove_cache()
-        # request a reload
-        self._refresh_data()
+
+        # Clear ourselves, preserving the data handler so that we can then
+        # refresh. Clearing the model here ensures we don't end up with
+        # duplicate items once the cache is cleared and repopulated.
+        #
+        # Block all signals before we clear the model otherwise downstream
+        # proxy objects could cause crashes.
+        signals_blocked = self.blockSignals(True)
+        try:
+            # Clear all internal memory storage.
+            self.clear(remove_data_handler=False)
+            self._refresh_data()
+        finally:
+            # Reset the state of signal blocking.
+            self.blockSignals(signals_blocked)
+            self.modelReset.emit()
 
     def is_data_cached(self):
         """

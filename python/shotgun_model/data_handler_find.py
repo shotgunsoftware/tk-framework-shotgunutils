@@ -174,8 +174,12 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         self._log_debug("Updating %s with %s shotgun records." % (self, len(sg_data)))
         self._log_debug("Hierarchy: %s" % self.__hierarchy)
 
+        new_cache = ShotgunDataHandlerCache()
+
+        # If we don't already have a cache, we can continue on here by just populating
+        # our new cache with the necessary data.
         if self._cache is None:
-            raise ShotgunModelDataError("No data currently loaded in memory!")
+            self.load_cache()
 
         if self._cache.size == 0:
             self._log_debug("In-memory cache is empty.")
@@ -193,8 +197,6 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         num_adds = 0
         num_deletes = 0
         num_modifications = 0
-
-        new_cache = ShotgunDataHandlerCache()
 
         # analyze the incoming shotgun data
         for sg_item in sg_data:
@@ -294,7 +296,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
             })
             num_deletes += 1
 
-        # lastly swap the new for the old
+        # Lastly, swap in the new cache
         self._cache = None
 
         # at this point, kick the gc to make sure the memory is freed up
