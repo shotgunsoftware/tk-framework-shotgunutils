@@ -170,14 +170,10 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     ############################################################################
     # public methods
 
-    def clear(self, remove_data_handler=True):
+    def clear(self):
         """
         Removes all items (including header items) from the model and
         sets the number of rows and columns to zero.
-
-        :param bool remove_data_handler: Whether to remove the reference to the
-            current data handler object. If False, the data handler will be
-            retained, which will allow the model to be repopulated.
         """
         # clear thumbnail download lookup so we don't process any more results:
         self.__thumb_map = {}
@@ -222,7 +218,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             self.__do_depth_first_tree_deletion(self.invisibleRootItem())
 
             # unload the data backend
-            if self._data_handler and remove_data_handler:
+            if self._data_handler:
                 self._data_handler.unload_cache()
                 self._data_handler = None
 
@@ -273,8 +269,22 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         # proxy objects could cause crashes.
         signals_blocked = self.blockSignals(True)
         try:
-            # Clear all internal memory storage.
-            self.clear(remove_data_handler=False)
+            # First, we need to clear out some internal data from the model. This
+            # logic represents part of what happens in a call to the model's
+            # clear() method, but we need to omit part of that process, so we're
+            # not calling it directly. The below represents the minimum amount of
+            # work we need to do to properly refresh the model's data.
+            #
+            # Clearing the below combats some PySide crashing problems, as outlined
+            # in the clear() method, and ensures that when we refresh the model's
+            # data below that we don't end up with duplicated items in the model.
+            self.__items_by_uid = {}
+            self.__all_tree_items = []
+            self.__do_depth_first_tree_deletion(self.invisibleRootItem())
+
+            # Repopulate the model with fresh data. Since we've already cleared
+            # the data handler's cache, refreshing the data here will pull
+            # everything down from Shotgun.
             self._refresh_data()
         finally:
             # Reset the state of signal blocking.
