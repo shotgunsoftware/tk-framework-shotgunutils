@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Background Task Processing &mdash; tk-framework-shotgunutils v5.4.3 documentation</title>
+  <title>Background Task Processing &mdash; tk-framework-shotgunutils v5.4.5 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.4.3 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.4.5 documentation" href="index.html"/>
         <link rel="next" title="Shotgun Toolkit Qt Settings Wrapper" href="settings.html"/>
         <link rel="prev" title="Shotgun Asynchronous Data Retriever" href="shotgun_data.html"/> 
 
@@ -127,7 +127,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.4.3.<br>
+    <b>tk-framework-shotgunutils</b> v5.4.5.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -185,9 +185,9 @@
 <p>In order to build responsive Toolkit apps, work needs to be scheduled to run
 in background threads. The <code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code> handles generic
 background processing and is used by many of the Toolkit frameworks.</p>
-<p>When using a <a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-shotgunutils/shotgun_model.html#shotgun_model.ShotgunModel" title="(in tk-framework-shotgunutils vv5.4.2)"><code class="xref py py-class docutils literal"><span class="pre">ShotgunModel</span></code></a>, for example, the model
-will internally create a <a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-shotgunutils/shotgun_data.html#shotgun_data.ShotgunDataRetriever" title="(in tk-framework-shotgunutils vv5.4.2)"><code class="xref py py-class docutils literal"><span class="pre">ShotgunDataRetriever</span></code></a> to handle
-background communication with Shotgun. The <a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-shotgunutils/shotgun_data.html#shotgun_data.ShotgunDataRetriever" title="(in tk-framework-shotgunutils vv5.4.2)"><code class="xref py py-class docutils literal"><span class="pre">ShotgunDataRetriever</span></code></a>
+<p>When using a <code class="xref py py-class docutils literal"><span class="pre">ShotgunModel</span></code>, for example, the model
+will internally create a <code class="xref py py-class docutils literal"><span class="pre">ShotgunDataRetriever</span></code> to handle
+background communication with Shotgun. The <code class="xref py py-class docutils literal"><span class="pre">ShotgunDataRetriever</span></code>
 in turn uses threads to handle its
 background processing and uses this <code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code> in order
 to schedule the background processing.</p>
@@ -205,8 +205,8 @@ use a single  <code class="xref py py-class docutils literal"><span class="pre">
 background processing.</p>
 </div>
 <p>In these situations, you can maintain a single <code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code>
-for your app and supply it to your <a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-shotgunutils/shotgun_model.html#shotgun_model.ShotgunModel" title="(in tk-framework-shotgunutils vv5.4.2)"><code class="xref py py-class docutils literal"><span class="pre">ShotgunModel</span></code></a> and
-<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-shotgunutils/shotgun_data.html#shotgun_data.ShotgunDataRetriever" title="(in tk-framework-shotgunutils vv5.4.2)"><code class="xref py py-class docutils literal"><span class="pre">ShotgunDataRetriever</span></code></a> instances when creating them.
+for your app and supply it to your <code class="xref py py-class docutils literal"><span class="pre">ShotgunModel</span></code> and
+<code class="xref py py-class docutils literal"><span class="pre">ShotgunDataRetriever</span></code> instances when creating them.
 This allows for a setup where all threaded work
 is handled by a single thread pool and allows for efficient control and
 prioritization of the work that needs to be carried out.</p>
@@ -304,7 +304,7 @@ can easily be prioritized, grouped and organized in a hierarchical fashion.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v5.4.3',
+            VERSION:'v5.4.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
