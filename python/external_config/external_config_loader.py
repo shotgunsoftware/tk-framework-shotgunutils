@@ -263,10 +263,25 @@ class ExternalConfigurationLoader(QtCore.QObject):
             except ExternalConfigNotAccessibleError as e:
                 logger.warning("%s Configuration will not be loaded." % e)
 
+        # If none of the configs in SG are accessible on disk, we're going to
+        # end up using the fallback configuration below. We're going to warn
+        # here about that, though, because it's a situation where we might
+        # need to know that when debugging why someone's config isn't being
+        # used.
+        if config_dicts and not config_objects:
+            logger.warning(
+                "PipelineConfiguration entities were found in Shotgun, but "
+                "none of the configs they represent are accessible from this "
+                "host."
+            )
+
         # if no custom pipeline configs were found, we use the base config
         # note: because the base config can change over time, we make sure
         # to include it as an ingredient in the hash key below.
-        if len(config_dicts) == 0:
+        if not config_objects:
+            logger.debug(
+                "No usable configurations were found. Using the fallback configuration."
+            )
             config_objects.append(
                 config.create_fallback_configuration(
                     self,
@@ -282,7 +297,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
             "global_state_hash": state_hash,
             "configurations": [
                 config.serialize(cfg_obj) for cfg_obj in config_objects
-                ]
+            ]
         }
 
         # save cache
