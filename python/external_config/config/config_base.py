@@ -297,11 +297,19 @@ class ExternalConfiguration(QtCore.QObject):
 
             try:
                 # run the external process. It will write a cache file to disk or fail.
+                #
+                # We're pre-caching here, which triggers a CACHE_FULL caching policy
+                # for the ToolkitManager used for bootstrapping when getting commands.
+                # This is required because tk-multi-launchapp requires access to all
+                # of the engines in the config when operating via Software entities. If
+                # we don't have all of the engines cached on disk yet, this will cause
+                # them to be cached prior to us getting a list of commands.
                 self._run_external_process(
                     cache_path,
                     entity_type,
                     entity_id,
-                    self.engine_name
+                    self.engine_name,
+                    pre_cache=True,
                 )
 
             except SubprocessCalledProcessError as e:
@@ -317,7 +325,8 @@ class ExternalConfiguration(QtCore.QObject):
                             cache_path,
                             entity_type,
                             entity_id,
-                            engine_fallback
+                            engine_fallback,
+                            pre_cache=True,
                         )
                     except SubprocessCalledProcessError as e:
                         raise RuntimeError("Error retrieving actions: %s" % e.output)
@@ -334,7 +343,7 @@ class ExternalConfiguration(QtCore.QObject):
         return cached_data
 
     @sgtk.LogManager.log_timing
-    def _run_external_process(self, cache_path, entity_type, entity_id, engine_name):
+    def _run_external_process(self, cache_path, entity_type, entity_id, engine_name, pre_cache=False):
         """
         Helper method. Executes the external caching process.
 
@@ -342,6 +351,7 @@ class ExternalConfiguration(QtCore.QObject):
         :param str entity_type: Associated entity type
         :param int entity_id: Associated entity id
         :param str engine_name: Engine to start
+        :param bool pre_cache: Whether to pre-cache all bundles during bootstrap
 
         :raises: SubprocessCalledProcessError
         """
@@ -368,6 +378,7 @@ class ExternalConfiguration(QtCore.QObject):
                 bundle_cache_fallback_paths=self._bundle.engine.sgtk.bundle_cache_fallback_paths,
                 # the engine icon becomes the process icon
                 icon_path=self._bundle.engine.icon_256,
+                pre_cache=pre_cache,
             )
         )
 
