@@ -340,53 +340,10 @@ def main():
         qt_importer.QtGui.QIcon(arg_data["icon_path"])
     )
 
-    engine = None
-    try:
-        action = arg_data["action"]
+    action = arg_data["action"]
 
-        if action == "cache_actions":
-            try:
-                engine = start_engine(
-                    arg_data["configuration_uri"],
-                    arg_data["pipeline_config_id"],
-                    arg_data["plugin_id"],
-                    arg_data["engine_name"],
-                    arg_data["entity_type"],
-                    arg_data["entity_id"],
-                    arg_data["bundle_cache_fallback_paths"],
-                    arg_data.get("pre_cache") or False,
-                )
-            except Exception as e:
-                # catch the special case where a shotgun engine has falled back
-                # to its legacy mode, looking for a shotgun_entitytype.yml file
-                # and cannot find it. In this case, we shouldn't handle that as
-                # an error but as an indication that the given entity type and
-                # entity id doesn't have any actions defined, and thus produce
-                # an empty list.
-                #
-                # Because this operation needs to be backwards compatible, we
-                # have to parse the exception message in order to extract the
-                # relevant state. The error to look for is on the following form:
-                # TankMissingEnvironmentFile: Missing environment file: /path/to/env/shotgun_camera.yml
-                #
-                if re.match("^Missing environment file:.*shotgun_[a-zA-Z0-9]+\.yml$", str(e)):
-                    logger.debug(
-                        "Bootstrap returned legacy fallback exception '%s'. "
-                        "An empty list of actions will be cached for the "
-                        "given entity type.", str(e)
-                    )
-                else:
-                    # bubble the error
-                    raise
-
-            cache_commands(
-                engine,
-                arg_data["entity_type"],
-                arg_data["entity_id"],
-                arg_data["cache_path"]
-            )
-
-        elif action == "execute_command":
+    if action == "cache_actions":
+        try:
             engine = start_engine(
                 arg_data["configuration_uri"],
                 arg_data["pipeline_config_id"],
@@ -395,46 +352,82 @@ def main():
                 arg_data["entity_type"],
                 arg_data["entity_id"],
                 arg_data["bundle_cache_fallback_paths"],
-                False,
+                arg_data.get("pre_cache") or False,
             )
-
-            callback_name = arg_data["callback_name"]
-            supports_multi_select = arg_data["supports_multiple_selection"]
-
-            # try to set the process icon to be the tk app icon
-            if engine.commands[callback_name]["properties"].get("app"):
-                # not every command has an associated app
-                qt_application.setWindowIcon(
-                    qt_importer.QtGui.QIcon(
-                        engine.commands[callback_name]["properties"]["app"].icon_256
-                    )
-                )
-
-            # Now execute the payload command payload
+        except Exception as e:
+            # catch the special case where a shotgun engine has falled back
+            # to its legacy mode, looking for a shotgun_entitytype.yml file
+            # and cannot find it. In this case, we shouldn't handle that as
+            # an error but as an indication that the given entity type and
+            # entity id doesn't have any actions defined, and thus produce
+            # an empty list.
             #
-            # multi-select actions use an old execution methodology
-            # and are only used by the tk-shotgun engine, where they
-            # will continue to be supported but not added in other places.
-            if supports_multi_select:
-                # multi select commands are expected to be routed via
-                # a special method using the following interface:
-                # execute_old_style_command(cmd_name, entity_type, entity_ids)
-                engine.execute_old_style_command(
-                    callback_name,
-                    arg_data["entity_type"],
-                    [arg_data["entity_id"]]
+            # Because this operation needs to be backwards compatible, we
+            # have to parse the exception message in order to extract the
+            # relevant state. The error to look for is on the following form:
+            # TankMissingEnvironmentFile: Missing environment file: /path/to/env/shotgun_camera.yml
+            #
+            if re.match("^Missing environment file:.*shotgun_[a-zA-Z0-9]+\.yml$", str(e)):
+                logger.debug(
+                    "Bootstrap returned legacy fallback exception '%s'. "
+                    "An empty list of actions will be cached for the "
+                    "given entity type.", str(e)
                 )
             else:
-                # standard route - just run the callback
-                engine.commands[callback_name]["callback"]()
+                # bubble the error
+                raise
 
+        cache_commands(
+            engine,
+            arg_data["entity_type"],
+            arg_data["entity_id"],
+            arg_data["cache_path"]
+        )
+
+    elif action == "execute_command":
+        engine = start_engine(
+            arg_data["configuration_uri"],
+            arg_data["pipeline_config_id"],
+            arg_data["plugin_id"],
+            arg_data["engine_name"],
+            arg_data["entity_type"],
+            arg_data["entity_id"],
+            arg_data["bundle_cache_fallback_paths"],
+            False,
+        )
+
+        callback_name = arg_data["callback_name"]
+        supports_multi_select = arg_data["supports_multiple_selection"]
+
+        # try to set the process icon to be the tk app icon
+        if engine.commands[callback_name]["properties"].get("app"):
+            # not every command has an associated app
+            qt_application.setWindowIcon(
+                qt_importer.QtGui.QIcon(
+                    engine.commands[callback_name]["properties"]["app"].icon_256
+                )
+            )
+
+        # Now execute the payload command payload
+        #
+        # multi-select actions use an old execution methodology
+        # and are only used by the tk-shotgun engine, where they
+        # will continue to be supported but not added in other places.
+        if supports_multi_select:
+            # multi select commands are expected to be routed via
+            # a special method using the following interface:
+            # execute_old_style_command(cmd_name, entity_type, entity_ids)
+            engine.execute_old_style_command(
+                callback_name,
+                arg_data["entity_type"],
+                [arg_data["entity_id"]]
+            )
         else:
-            raise RuntimeError("Unknown action '%s'" % action)
+            # standard route - just run the callback
+            engine.commands[callback_name]["callback"]()
 
-    finally:
-        # make sure we have a clean shutdown
-        if engine:
-            engine.destroy()
+    else:
+        raise RuntimeError("Unknown action '%s'" % action)
 
 
 if __name__ == "__main__":
@@ -471,6 +464,10 @@ if __name__ == "__main__":
     # has completed - this is either triggered by a main window closing or
     # byt the finished signal being called from the task class above.
     qt_application.exec_()
+
+    # Make sure we have a clean shutdown.
+    if sgtk.platform.current_engine():
+        sgtk.platform.current_engine().destroy()
 
     if task_runner.status == task_runner.SUCCESS:
         sys.exit(0)
