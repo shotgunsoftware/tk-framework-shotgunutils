@@ -420,7 +420,7 @@ def main():
             engine.execute_old_style_command(
                 callback_name,
                 arg_data["entity_type"],
-                [arg_data["entity_id"]]
+                arg_data["entity_ids"],
             )
         else:
             # standard route - just run the callback

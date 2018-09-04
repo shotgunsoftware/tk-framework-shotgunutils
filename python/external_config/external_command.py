@@ -297,7 +297,7 @@ class ExternalCommand(object):
         """
         return self._tooltip
 
-    def execute(self, pre_cache=False):
+    def execute(self, pre_cache=False, entity_ids=None):
         """
         Executes the external command in a separate process.
 
@@ -323,6 +323,11 @@ class ExternalCommand(object):
             assumes that all necessary app dependencies already exists in
             the bundle cache search path and without a pre-cache, apps
             may not initialize correctly.
+        :param list entity_ids: A list of entity ids to use when executing
+            the command. This is only required when running legacy commands
+            that support being run on multiple entities at the same time. If
+            not given, a list will be built on the fly containing only the
+            entity id associated with this command.
         :raises: :class:`RuntimeError` on execution failure.
         :returns: Output from execution session.
         """
@@ -351,6 +356,7 @@ class ExternalCommand(object):
                 engine_name=self._engine_name,
                 entity_type=self._entity_type,
                 entity_id=self._entity_id,
+                entity_ids=entity_ids or [self._entity_id], # Legacy support for multi-entity commands
                 bundle_cache_fallback_paths=self._bundle.engine.sgtk.bundle_cache_fallback_paths,
                 # the engine icon becomes the process icon
                 icon_path=self._bundle.engine.icon_256,
