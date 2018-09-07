@@ -334,18 +334,6 @@ class ExternalCommand(object):
         provides support for executing commands that support being run on
         multiple entities as part of a single execution.
 
-        .. note:: The process will be launched in an synchronous way.
-            It is recommended that this command is executed in a worker thread::
-
-                # execute external command in a thread to not block
-                # main thread execution
-                worker = threading.Thread(target=action.execute)
-                # if the python environment shuts down, no need
-                # to wait for this thread
-                worker.daemon = True
-                # launch external process
-                worker.start()
-
         :param bool pre_cache: If set to True, starting up the command
             will also include a full caching of all necessary
             dependencies for all contexts and engines. If set to False,
@@ -369,18 +357,6 @@ class ExternalCommand(object):
     def _execute(self, pre_cache=False, entity_ids=None):
         """
         Executes the external command in a separate process.
-
-        .. note:: The process will be launched in an synchronous way.
-            It is recommended that this command is executed in a worker thread::
-
-                # execute external command in a thread to not block
-                # main thread execution
-                worker = threading.Thread(target=action.execute)
-                # if the python environment shuts down, no need
-                # to wait for this thread
-                worker.daemon = True
-                # launch external process
-                worker.start()
 
         :param bool pre_cache: If set to True, starting up the command
             will also include a full caching of all necessary
