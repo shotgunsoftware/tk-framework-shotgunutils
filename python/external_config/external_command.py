@@ -297,7 +297,76 @@ class ExternalCommand(object):
         """
         return self._tooltip
 
-    def execute(self, pre_cache=False, entity_ids=None):
+    def execute(self, pre_cache=False):
+        """
+        Executes the external command in a separate process.
+
+        .. note:: The process will be launched in an synchronous way.
+            It is recommended that this command is executed in a worker thread::
+
+                # execute external command in a thread to not block
+                # main thread execution
+                worker = threading.Thread(target=action.execute)
+                # if the python environment shuts down, no need
+                # to wait for this thread
+                worker.daemon = True
+                # launch external process
+                worker.start()
+
+        :param bool pre_cache: If set to True, starting up the command
+            will also include a full caching of all necessary
+            dependencies for all contexts and engines. If set to False,
+            caching will only be carried as needed in order to run
+            the given command. This is an advanced setting that can be
+            useful to set to true when launching older engines which don't
+            launch via a bootstrap process. In that case, the engine simply
+            assumes that all necessary app dependencies already exists in
+            the bundle cache search path and without a pre-cache, apps
+            may not initialize correctly.
+        :raises: :class:`RuntimeError` on execution failure.
+        :returns: Output from execution session.
+        """
+        return self._execute(pre_cache)
+
+    def execute_on_multiple_entities(self, pre_cache=False, entity_ids=None):
+        """
+        Executes the external command in a separate process. This method
+        provides support for executing commands that support being run on
+        multiple entities as part of a single execution.
+
+        .. note:: The process will be launched in an synchronous way.
+            It is recommended that this command is executed in a worker thread::
+
+                # execute external command in a thread to not block
+                # main thread execution
+                worker = threading.Thread(target=action.execute)
+                # if the python environment shuts down, no need
+                # to wait for this thread
+                worker.daemon = True
+                # launch external process
+                worker.start()
+
+        :param bool pre_cache: If set to True, starting up the command
+            will also include a full caching of all necessary
+            dependencies for all contexts and engines. If set to False,
+            caching will only be carried as needed in order to run
+            the given command. This is an advanced setting that can be
+            useful to set to true when launching older engines which don't
+            launch via a bootstrap process. In that case, the engine simply
+            assumes that all necessary app dependencies already exists in
+            the bundle cache search path and without a pre-cache, apps
+            may not initialize correctly.
+        :param list entity_ids: A list of entity ids to use when executing
+            the command. This is only required when running legacy commands
+            that support being run on multiple entities at the same time. If
+            not given, a list will be built on the fly containing only the
+            entity id associated with this command.
+        :raises: :class:`RuntimeError` on execution failure.
+        :returns: Output from execution session.
+        """
+        return self._execute(pre_cache, entity_ids)
+
+    def _execute(self, pre_cache=False, entity_ids=None):
         """
         Executes the external command in a separate process.
 
@@ -355,8 +424,7 @@ class ExternalCommand(object):
                 plugin_id=self._plugin_id,
                 engine_name=self._engine_name,
                 entity_type=self._entity_type,
-                entity_id=self._entity_id,
-                entity_ids=entity_ids or [self._entity_id], # Legacy support for multi-entity commands
+                entity_ids=entity_ids or [self._entity_id],
                 bundle_cache_fallback_paths=self._bundle.engine.sgtk.bundle_cache_fallback_paths,
                 # the engine icon becomes the process icon
                 icon_path=self._bundle.engine.icon_256,

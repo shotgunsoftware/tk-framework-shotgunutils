@@ -350,7 +350,7 @@ def main():
                 arg_data["plugin_id"],
                 arg_data["engine_name"],
                 arg_data["entity_type"],
-                arg_data["entity_id"],
+                arg_data["entity_ids"][0],
                 arg_data["bundle_cache_fallback_paths"],
                 arg_data.get("pre_cache") or False,
             )
@@ -380,7 +380,7 @@ def main():
         cache_commands(
             engine,
             arg_data["entity_type"],
-            arg_data["entity_id"],
+            arg_data["entity_ids"][0],
             arg_data["cache_path"]
         )
 
@@ -391,7 +391,7 @@ def main():
             arg_data["plugin_id"],
             arg_data["engine_name"],
             arg_data["entity_type"],
-            arg_data["entity_id"],
+            arg_data["entity_ids"][0],
             arg_data["bundle_cache_fallback_paths"],
             False,
         )
