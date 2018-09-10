@@ -24,9 +24,11 @@ class ExternalConfigurationLoader(QtCore.QObject):
 
     **Signal Interface**
 
-    :signal configurations_loaded(project_id, configs): Gets emitted configurations
+    :signal configurations_loaded(project_id, configs, error): Gets emitted configurations
         have been loaded for the given project. The parameters passed is the
-        project id and a list of :class:`ExternalConfiguration` instances.
+        project id and a list of :class:`ExternalConfiguration` instances. If errors
+        occurred while loading configurations, the error property will be set to a tuple
+        containing the error message and the traceback, in that order.
 
     :signal configurations_changed(): Gets emitted whenever the class
         has detected a change to the state of shotgun which could invalidate
@@ -39,7 +41,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
 
     # signal emitted to indicate that an update has been detected
     # to the pipeline configurations for a project
-    configurations_loaded = QtCore.Signal(int, list)  # project_id, list of configs
+    configurations_loaded = QtCore.Signal(int, list, tuple)  # project_id, list of configs, error
 
     # signal to indicate that change to the configurations have been detected.
     configurations_changed = QtCore.Signal()
@@ -196,7 +198,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
                 logger.debug("Detected and deleted out of date cache.")
 
             else:
-                self.configurations_loaded.emit(project_id, config_objects)
+                self.configurations_loaded.emit(project_id, config_objects, ())
                 config_data_emitted = True
 
         if not config_data_emitted:
@@ -261,19 +263,8 @@ class ExternalConfigurationLoader(QtCore.QObject):
                 )
                 config_objects.append(config_object)
             except ExternalConfigNotAccessibleError as e:
-                logger.warning("%s Configuration will not be loaded." % e)
-
-        # If none of the configs in SG are accessible on disk, we're going to
-        # end up using the fallback configuration below. We're going to warn
-        # here about that, though, because it's a situation where we might
-        # need to know that when debugging why someone's config isn't being
-        # used.
-        if config_dicts and not config_objects:
-            logger.warning(
-                "PipelineConfiguration entities were found in Shotgun, but "
-                "none of the configs they represent are accessible from this "
-                "host."
-            )
+                logger.error("%s Configuration will not be loaded." % e)
+                raise
 
         # if no custom pipeline configs were found, we use the base config
         # note: because the base config can change over time, we make sure
@@ -316,7 +307,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
             "Got configuration objects for project %s: %s" % (project_id, config_objects)
         )
 
-        self.configurations_loaded.emit(project_id, config_objects)
+        self.configurations_loaded.emit(project_id, config_objects, ())
 
     def _task_failed(self, unique_id, group, message, traceback_str):
         """
@@ -336,4 +327,4 @@ class ExternalConfigurationLoader(QtCore.QObject):
         logger.error("Could not determine project configurations: %s" % message)
 
         # emit an empty list of configurations
-        self.configurations_loaded.emit(project_id, [])
+        self.configurations_loaded.emit(project_id, [], (message, traceback_str))
