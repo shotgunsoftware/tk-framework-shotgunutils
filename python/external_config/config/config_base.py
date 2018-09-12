@@ -230,17 +230,6 @@ class ExternalConfiguration(QtCore.QObject):
         :raises: RuntimeError if this configuration's status does not allow for
             commands requests.
         """
-        # Make sure that we're a valid configuration. If we aren't, then we
-        # won't be able to successfully request commands. That being the case,
-        # we can raise here.
-        if not self.is_valid:
-            logger.debug("Commands were requested from an invalid config: %r", self)
-            raise RuntimeError(
-                "Configuration (%s) has a status that marks it as invalid, "
-                "and therefore inaccessible. It is not possible to request "
-                "commands from this configuration as a result." % self
-            )
-
         logger.debug("Requested commands for %s: %s %s %s" % (self, entity_type, entity_id, link_entity_type))
 
         # run entire command check and generation in worker
