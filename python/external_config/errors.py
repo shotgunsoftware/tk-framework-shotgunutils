@@ -14,11 +14,3 @@ class ExternalConfigParseError(RuntimeError):
     Indicates that the given serialized data is not usable
     """
     pass
-
-
-class ExternalConfigNotAccessibleError(RuntimeError):
-    """
-    Indicates that a configuration is not accessible
-    """
-    pass
-

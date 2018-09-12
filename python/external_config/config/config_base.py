@@ -37,6 +37,10 @@ class ExternalConfiguration(QtCore.QObject):
     # grouping used by the background task manager
     TASK_GROUP = "tk-framework-shotgunutils.external_config.ExternalConfiguration"
 
+    # Status enums:
+    CONFIGURATION_READY = 1
+    CONFIGURATION_INACCESSIBLE = 2
+
     commands_loaded = QtCore.Signal(int, str, int, str, object, list)
     # Signal parameters:
     # 1. project_id
@@ -63,7 +67,8 @@ class ExternalConfiguration(QtCore.QObject):
             engine_name,
             interpreter,
             software_hash,
-            pipeline_config_uri
+            pipeline_config_uri,
+            status=CONFIGURATION_READY
     ):
         """
         .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
@@ -80,6 +85,8 @@ class ExternalConfiguration(QtCore.QObject):
         :param str interpreter: Associated Python interpreter
         :param str software_hash: Hash representing the state of the Shotgun software entity
         :param str pipeline_config_uri: Descriptor URI string for the config
+        :param int status: The status of the configuration. This is defined as a enum value
+            provided by :class:`ExternalConfiguration`.
         """
         super(ExternalConfiguration, self).__init__(parent)
 
@@ -88,6 +95,7 @@ class ExternalConfiguration(QtCore.QObject):
         self._engine_name = engine_name
         self._interpreter = interpreter
         self._software_hash = software_hash
+        self._status = status
 
         # boolean to track if commands have been requested for this instance
         # this is related to how configs tracking remote latest versions
@@ -141,6 +149,23 @@ class ExternalConfiguration(QtCore.QObject):
             return True
         else:
             return False
+
+    @property
+    def is_valid(self):
+        """
+        Returns ``True`` if this configuration contains valid data that can be
+        used in the current environment, and ``False`` if the configuration is
+        inaccessible for some reason.
+        """
+        return True
+
+    @property
+    def status(self):
+        """
+        The current status of the configuration. This will be returned as an
+        enum value provided by :class:`ExternalConfiguration`.
+        """
+        return self._status
 
     @property
     def pipeline_configuration_id(self):
@@ -201,7 +226,21 @@ class ExternalConfiguration(QtCore.QObject):
         :param str engine_fallback: If the main engine isn't available for the given
             entity id and project, request generate commands for the fallback engine
             specified. This can be useful in backwards compatibility scenarios.
+
+        :raises: RuntimeError if this configuration's status does not allow for
+            commands requests.
         """
+        # Make sure that we're a valid configuration. If we aren't, then we
+        # won't be able to successfully request commands. That being the case,
+        # we can raise here.
+        if not self.is_valid:
+            logger.debug("Commands were requested from an invalid config: %r", self)
+            raise RuntimeError(
+                "Configuration (%s) has a status that marks it as invalid, "
+                "and therefore inaccessible. It is not possible to request "
+                "commands from this configuration as a result." % self
+            )
+
         logger.debug("Requested commands for %s: %s %s %s" % (self, entity_type, entity_id, link_entity_type))
 
         # run entire command check and generation in worker

@@ -40,6 +40,7 @@ class LiveExternalConfiguration(ExternalConfiguration):
             pipeline_config_name,
             pipeline_config_uri,
             pipeline_config_folder,
+            status=ExternalConfiguration.CONFIGURATION_READY
     ):
         """
         .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
@@ -65,7 +66,8 @@ class LiveExternalConfiguration(ExternalConfiguration):
             engine_name,
             interpreter,
             software_hash,
-            pipeline_config_uri
+            pipeline_config_uri,
+            status
         )
 
         self._pipeline_configuration_id = pipeline_config_id
