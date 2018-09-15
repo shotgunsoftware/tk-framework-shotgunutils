@@ -198,8 +198,15 @@ class ExternalConfigurationLoader(QtCore.QObject):
                 logger.debug("Detected and deleted out of date cache.")
 
             else:
-                self.configurations_loaded.emit(project_id, config_objects)
-                config_data_emitted = True
+                # Check to see if any of the configs are invalid in the cache. If there
+                # are, then we're going to recache in case the problematic configs in
+                # Shotgun have been fixed in the interim since the cache was built.
+                if [c for c in config_objects if not c.is_valid]:
+                    file_cache.delete_cache(config_cache_key)
+                    logger.debug("Detected an invalid config in the cache. Recaching from scratch...")
+                else:
+                    self.configurations_loaded.emit(project_id, config_objects)
+                    config_data_emitted = True
 
         if not config_data_emitted:
             # Request a bg load
