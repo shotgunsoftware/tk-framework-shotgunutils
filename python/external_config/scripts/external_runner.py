@@ -341,6 +341,7 @@ def main():
     )
 
     action = arg_data["action"]
+    engine = None
 
     if action == "cache_actions":
         try:

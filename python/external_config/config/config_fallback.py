@@ -34,6 +34,7 @@ class FallbackExternalConfiguration(ExternalConfiguration):
             interpreter,
             software_hash,
             pipeline_config_uri,
+            status=ExternalConfiguration.CONFIGURATION_READY
     ):
         """
         .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
@@ -56,7 +57,8 @@ class FallbackExternalConfiguration(ExternalConfiguration):
             engine_name,
             interpreter,
             software_hash,
-            pipeline_config_uri
+            pipeline_config_uri,
+            status
         )
 
         # is our config uri tracking the latest version?

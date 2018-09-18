@@ -10,10 +10,12 @@
 
 import sgtk
 
+from .config_base import ExternalConfiguration
+from .config_invalid import InvalidExternalConfiguration
 from .config_remote import RemoteExternalConfiguration
 from .config_live import LiveExternalConfiguration
 from .config_fallback import FallbackExternalConfiguration
-from ..errors import ExternalConfigParseError, ExternalConfigNotAccessibleError
+from ..errors import ExternalConfigParseError
 
 logger = sgtk.platform.get_logger(__name__)
 
@@ -35,8 +37,6 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
     :param configuration_data: Dictionary entry on the form
         returned by ToolkitManager.get_pipeline_configurations()
     :returns: :class:`ExternalConfiguration`
-    :raises: :class:`ExternalConfigNotAccessibleError` if the configuration
-        data could not be accessed.
     """
     descriptor = configuration_data["descriptor"]
 
@@ -48,12 +48,15 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
 
     if descriptor is None:
         # the config is not accessible
-        raise ExternalConfigNotAccessibleError(
-            "The descriptor for Pipeline Configuration '%s' (id %s) "
-            "could not be resolved" % (
-                configuration_data["name"],
-                configuration_data["id"]
-            )
+        return InvalidExternalConfiguration(
+            parent,
+            bg_task_manager,
+            config_loader.plugin_id,
+            config_loader.engine_name,
+            config_loader.interpreter,
+            config_loader.software_hash,
+            configuration_data["id"],
+            ExternalConfiguration.CONFIGURATION_INACCESSIBLE,
         )
 
     if descriptor.is_immutable():
@@ -87,12 +90,15 @@ def create_from_pipeline_configuration_data(parent, bg_task_manager, config_load
 
         # check that it exists on disk
         if descriptor.get_path() is None:
-            raise ExternalConfigNotAccessibleError(
-                "Pipeline Configuration '%s' (id %s) "
-                "does not have a path on disk." % (
-                    configuration_data["name"],
-                    configuration_data["id"]
-                )
+            return InvalidExternalConfiguration(
+                parent,
+                bg_task_manager,
+                config_loader.plugin_id,
+                config_loader.engine_name,
+                config_loader.interpreter,
+                config_loader.software_hash,
+                configuration_data["id"],
+                ExternalConfiguration.CONFIGURATION_INACCESSIBLE,
             )
 
         return LiveExternalConfiguration(
@@ -150,6 +156,7 @@ def serialize(config_object):
         "pipeline_config_id": config_object.pipeline_configuration_id,
         "pipeline_config_name": config_object.pipeline_configuration_name,
         "config_uri": config_object.descriptor_uri,
+        "status": config_object.status,
         "class_name": config_object.__class__.__name__
     }
 
@@ -190,6 +197,7 @@ def deserialize(parent, bg_task_manager, data):
             data["pipeline_config_id"],
             data["pipeline_config_name"],
             data["config_uri"],
+            data["status"],
         )
     elif data["class_name"] == "LiveExternalConfiguration":
         return LiveExternalConfiguration(
@@ -203,6 +211,7 @@ def deserialize(parent, bg_task_manager, data):
             data["pipeline_config_name"],
             data["config_uri"],
             data["config_path"],
+            data["status"],
         )
     elif data["class_name"] == "FallbackExternalConfiguration":
         return FallbackExternalConfiguration(
@@ -213,6 +222,18 @@ def deserialize(parent, bg_task_manager, data):
             data["interpreter"],
             data["software_hash"],
             data["config_uri"],
+            data["status"],
+        )
+    elif data["class_name"] == "InvalidExternalConfiguration":
+        return InvalidExternalConfiguration(
+            parent,
+            bg_task_manager,
+            data["plugin_id"],
+            data["engine_name"],
+            data["interpreter"],
+            data["software_hash"],
+            data["pipeline_config_id"],
+            data["status"],
         )
     else:
         raise ExternalConfigParseError("Don't know how to deserialize class %s" % data["class_name"])
