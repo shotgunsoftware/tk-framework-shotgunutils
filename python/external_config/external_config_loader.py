@@ -12,7 +12,7 @@ import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 from .configuration_state import ConfigurationState
 from . import file_cache
-from .errors import ExternalConfigNotAccessibleError, ExternalConfigParseError
+from .errors import ExternalConfigParseError
 from . import config
 
 logger = sgtk.platform.get_logger(__name__)
@@ -26,7 +26,9 @@ class ExternalConfigurationLoader(QtCore.QObject):
 
     :signal configurations_loaded(project_id, configs): Gets emitted configurations
         have been loaded for the given project. The parameters passed is the
-        project id and a list of :class:`ExternalConfiguration` instances.
+        project id and a list of :class:`ExternalConfiguration` instances. If errors
+        occurred while loading configurations, the error property will be set to a tuple
+        containing the error message and the traceback, in that order.
 
     :signal configurations_changed(): Gets emitted whenever the class
         has detected a change to the state of shotgun which could invalidate
@@ -196,8 +198,15 @@ class ExternalConfigurationLoader(QtCore.QObject):
                 logger.debug("Detected and deleted out of date cache.")
 
             else:
-                self.configurations_loaded.emit(project_id, config_objects)
-                config_data_emitted = True
+                # Check to see if any of the configs are invalid in the cache. If there
+                # are, then we're going to recache in case the problematic configs in
+                # Shotgun have been fixed in the interim since the cache was built.
+                if [c for c in config_objects if not c.is_valid]:
+                    file_cache.delete_cache(config_cache_key)
+                    logger.debug("Detected an invalid config in the cache. Recaching from scratch...")
+                else:
+                    self.configurations_loaded.emit(project_id, config_objects)
+                    config_data_emitted = True
 
         if not config_data_emitted:
             # Request a bg load
@@ -252,21 +261,24 @@ class ExternalConfigurationLoader(QtCore.QObject):
         # check that the configs are complete. If not, issue warnings
         config_objects = []
         for config_dict in config_dicts:
-            try:
-                config_object = config.create_from_pipeline_configuration_data(
-                    parent=self,
-                    bg_task_manager=self._bg_task_manager,
-                    config_loader=self,
-                    configuration_data=config_dict
-                )
-                config_objects.append(config_object)
-            except ExternalConfigNotAccessibleError as e:
-                logger.warning("%s Configuration will not be loaded." % e)
+            config_object = config.create_from_pipeline_configuration_data(
+                parent=self,
+                bg_task_manager=self._bg_task_manager,
+                config_loader=self,
+                configuration_data=config_dict
+            )
+            config_objects.append(config_object)
+
+            if not config_object.is_valid:
+                logger.debug("Configuration (%r) was found, but is invalid.", config_object)
 
         # if no custom pipeline configs were found, we use the base config
         # note: because the base config can change over time, we make sure
         # to include it as an ingredient in the hash key below.
-        if len(config_dicts) == 0:
+        if not config_dicts:
+            logger.debug(
+                "No configurations were found. Using the fallback configuration."
+            )
             config_objects.append(
                 config.create_fallback_configuration(
                     self,
@@ -282,7 +294,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
             "global_state_hash": state_hash,
             "configurations": [
                 config.serialize(cfg_obj) for cfg_obj in config_objects
-                ]
+            ]
         }
 
         # save cache

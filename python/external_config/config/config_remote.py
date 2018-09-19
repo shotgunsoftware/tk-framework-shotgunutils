@@ -33,6 +33,7 @@ class RemoteExternalConfiguration(ExternalConfiguration):
             pipeline_config_id,
             pipeline_config_name,
             pipeline_config_uri,
+            status=ExternalConfiguration.CONFIGURATION_READY
     ):
         """
         .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
@@ -57,7 +58,8 @@ class RemoteExternalConfiguration(ExternalConfiguration):
             engine_name,
             interpreter,
             software_hash,
-            pipeline_config_uri
+            pipeline_config_uri,
+            status
         )
 
         self._pipeline_configuration_id = pipeline_config_id
