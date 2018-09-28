@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_query_model &mdash; tk-framework-shotgunutils v5.4.2 documentation</title>
+  <title>shotgun_model.shotgun_query_model &mdash; tk-framework-shotgunutils v5.4.5 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.4.2 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.4.5 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -118,7 +118,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.4.2.<br>
+    <b>tk-framework-shotgunutils</b> v5.4.5.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -434,8 +434,36 @@
 
         <span class="c1"># delete cache file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">remove_cache</span><span class="p">()</span>
-        <span class="c1"># request a reload</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_data</span><span class="p">()</span>
+
+        <span class="c1"># Clear ourselves, preserving the data handler so that we can then</span>
+        <span class="c1"># refresh. Clearing the model here ensures we don&#39;t end up with</span>
+        <span class="c1"># duplicate items once the cache is cleared and repopulated.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Block all signals before we clear the model otherwise downstream</span>
+        <span class="c1"># proxy objects could cause crashes.</span>
+        <span class="n">signals_blocked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># First, we need to clear out some internal data from the model. This</span>
+            <span class="c1"># logic represents part of what happens in a call to the model&#39;s</span>
+            <span class="c1"># clear() method, but we need to omit part of that process, so we&#39;re</span>
+            <span class="c1"># not calling it directly. The below represents the minimum amount of</span>
+            <span class="c1"># work we need to do to properly refresh the model&#39;s data.</span>
+            <span class="c1">#</span>
+            <span class="c1"># Clearing the below combats some PySide crashing problems, as outlined</span>
+            <span class="c1"># in the clear() method, and ensures that when we refresh the model&#39;s</span>
+            <span class="c1"># data below that we don&#39;t end up with duplicated items in the model.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__items_by_uid</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__all_tree_items</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__do_depth_first_tree_deletion</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">())</span>
+
+            <span class="c1"># Repopulate the model with fresh data. Since we&#39;ve already cleared</span>
+            <span class="c1"># the data handler&#39;s cache, refreshing the data here will pull</span>
+            <span class="c1"># everything down from Shotgun.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_data</span><span class="p">()</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c1"># Reset the state of signal blocking.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="n">signals_blocked</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">modelReset</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">is_data_cached</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1242,7 +1270,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.4.2',
+            VERSION:'v5.4.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
