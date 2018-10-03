@@ -131,8 +131,13 @@ class QtTaskRunner(qt_importer.QtCore.QObject):
         finally:
             # broadcast that we have finished this command
             qt_app = qt_importer.QtCore.QCoreApplication.instance()
+
             if len(qt_app.topLevelWidgets()) == 0:
                 # no windows opened. we are done!
+                self.completed.emit()
+            elif not [w for w in qt_app.topLevelWidgets() if w.isVisible()]:
+                # There are windows, but they're all hidden, which means we should
+                # be safe to shut down.
                 self.completed.emit()
 
 
