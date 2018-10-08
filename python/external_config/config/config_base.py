@@ -9,6 +9,8 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
+import sys
+
 import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 from sgtk.util.process import subprocess_check_output, SubprocessCalledProcessError
@@ -424,10 +426,21 @@ class ExternalConfiguration(QtCore.QObject):
         # to prompt the user to re-authenticate.
         sgtk.get_authenticated_user().refresh_credentials()
 
+        # We might have paths in sys.path that aren't in PYTHONPATH. We'll make
+        # sure that we prepend our current pathing to that prior to spawning any
+        # subprocesses.
+        current_pypath = os.environ.get("PYTHONPATH")
+
+        for path in sys.path:
+            sgtk.util.prepend_path_to_env_var("PYTHONPATH", path)
+
         try:
             output = subprocess_check_output(args)
             logger.debug("External caching complete. Output: %s" % output)
         finally:
+            # Leave PYTHONPATH the way we found it.
+            os.environ["PYTHONPATH"] = current_pypath
+
             # clean up temp file
             sgtk.util.filesystem.safe_delete_file(args_file)
 
