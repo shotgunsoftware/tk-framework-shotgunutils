@@ -439,7 +439,10 @@ class ExternalConfiguration(QtCore.QObject):
             logger.debug("External caching complete. Output: %s" % output)
         finally:
             # Leave PYTHONPATH the way we found it.
-            os.environ["PYTHONPATH"] = current_pypath
+            if current_pypath is None:
+                del os.environ["PYTHONPATH"]
+            else:
+                os.environ["PYTHONPATH"] = current_pypath
 
             # clean up temp file
             sgtk.util.filesystem.safe_delete_file(args_file)
