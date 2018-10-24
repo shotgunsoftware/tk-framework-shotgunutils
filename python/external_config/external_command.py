@@ -417,6 +417,14 @@ class ExternalCommand(object):
         ]
         logger.debug("Command arguments: %s", args)
 
+        # We might have paths in sys.path that aren't in PYTHONPATH. We'll make
+        # sure that we prepend our current pathing to that prior to spawning any
+        # subprocesses.
+        current_pypath = os.environ.get("PYTHONPATH")
+
+        for path in sys.path:
+            sgtk.util.prepend_path_to_env_var("PYTHONPATH", path)
+
         try:
             output = subprocess_check_output(args)
             logger.debug("External execution complete. Output: %s" % output)
@@ -424,6 +432,12 @@ class ExternalCommand(object):
             # caching failed!
             raise RuntimeError("Error executing remote command %s: %s" % (self, e.output))
         finally:
+            # Leave PYTHONPATH the way we found it.
+            if current_pypath is None:
+                del os.environ["PYTHONPATH"]
+            else:
+                os.environ["PYTHONPATH"] = current_pypath
+
             # clean up temp file
             sgtk.util.filesystem.safe_delete_file(args_file)
 
