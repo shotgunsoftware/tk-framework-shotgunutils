@@ -422,8 +422,10 @@ class ExternalCommand(object):
         # subprocesses.
         current_pypath = os.environ.get("PYTHONPATH")
 
-        for path in sys.path:
-            sgtk.util.prepend_path_to_env_var("PYTHONPATH", path)
+        # for path in sys.path:
+        sgtk.util.prepend_path_to_env_var("PYTHONPATH", sys.path[0])
+            # logger.warning("******************************************")
+            # logger.warning(os.environ["PYTHONPATH"])
 
         try:
             output = subprocess_check_output(args)

@@ -431,8 +431,9 @@ class ExternalConfiguration(QtCore.QObject):
         # subprocesses.
         current_pypath = os.environ.get("PYTHONPATH")
 
-        for path in sys.path:
-            sgtk.util.prepend_path_to_env_var("PYTHONPATH", path)
+        sgtk.util.prepend_path_to_env_var("PYTHONPATH", sys.path[0])
+        # for path in sys.path:
+            # sgtk.util.prepend_path_to_env_var("PYTHONPATH", path)
 
         try:
             output = subprocess_check_output(args)
