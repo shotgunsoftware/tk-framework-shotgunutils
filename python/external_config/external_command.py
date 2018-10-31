@@ -430,6 +430,7 @@ class ExternalCommand(object):
             logger.debug("External execution complete. Output: %s" % output)
         except SubprocessCalledProcessError as e:
             # caching failed!
+            logger.exception(e)
             raise RuntimeError("Error executing remote command %s: %s" % (self, e.output))
         finally:
             # Leave PYTHONPATH the way we found it.
