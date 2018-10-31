@@ -394,6 +394,12 @@ class ExternalCommand(object):
         # We might have paths in sys.path that aren't in PYTHONPATH. We'll make
         # sure that we prepend our current pathing to that prior to spawning any
         # subprocesses.
+        #
+        # One additional step that we'll take is to send the original PYTHONPATH
+        # to the external_runner we spawn, and ask it to set PYTHONPATH to that
+        # value before it does its work. That means we have everything required
+        # for external_runner when we run it, but we'll keep the environment
+        # clean for any process that it might spawn, like when launching a DCC.
         current_pypath = os.environ.get("PYTHONPATH")
 
         # pass arguments via a pickled temp file.
