@@ -390,6 +390,12 @@ class ExternalCommand(object):
                 "external_runner.py"
             )
         )
+
+        # We might have paths in sys.path that aren't in PYTHONPATH. We'll make
+        # sure that we prepend our current pathing to that prior to spawning any
+        # subprocesses.
+        current_pypath = os.environ.get("PYTHONPATH")
+
         # pass arguments via a pickled temp file.
         args_file = create_parameter_file(
             dict(
@@ -406,6 +412,7 @@ class ExternalCommand(object):
                 icon_path=self._bundle.engine.icon_256,
                 supports_multiple_selection=self._sg_supports_multiple_selection,
                 pre_cache=pre_cache,
+                pythonpath=current_pypath,
             )
         )
         # compose the command we want to run
@@ -417,22 +424,14 @@ class ExternalCommand(object):
         ]
         logger.debug("Command arguments: %s", args)
 
-        # We might have paths in sys.path that aren't in PYTHONPATH. We'll make
-        # sure that we prepend our current pathing to that prior to spawning any
-        # subprocesses.
-        current_pypath = os.environ.get("PYTHONPATH")
-
-        # for path in sys.path:
-        sgtk.util.prepend_path_to_env_var("PYTHONPATH", sys.path[0])
-            # logger.warning("******************************************")
-            # logger.warning(os.environ["PYTHONPATH"])
+        for path in sys.path:
+            sgtk.util.prepend_path_to_env_var("PYTHONPATH", path)
 
         try:
             output = subprocess_check_output(args)
             logger.debug("External execution complete. Output: %s" % output)
         except SubprocessCalledProcessError as e:
             # caching failed!
-            logger.exception(e)
             raise RuntimeError("Error executing remote command %s: %s" % (self, e.output))
         finally:
             # Leave PYTHONPATH the way we found it.

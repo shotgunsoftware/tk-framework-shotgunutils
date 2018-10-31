@@ -395,6 +395,11 @@ class ExternalConfiguration(QtCore.QObject):
             )
         )
 
+        # We might have paths in sys.path that aren't in PYTHONPATH. We'll make
+        # sure that we prepend our current pathing to that prior to spawning any
+        # subprocesses.
+        current_pypath = os.environ.get("PYTHONPATH")
+
         args_file = create_parameter_file(
             dict(
                 action="cache_actions",
@@ -409,6 +414,7 @@ class ExternalConfiguration(QtCore.QObject):
                 # the engine icon becomes the process icon
                 icon_path=self._bundle.engine.icon_256,
                 pre_cache=pre_cache,
+                pythonpath=current_pypath,
             )
         )
 
@@ -426,14 +432,8 @@ class ExternalConfiguration(QtCore.QObject):
         # to prompt the user to re-authenticate.
         sgtk.get_authenticated_user().refresh_credentials()
 
-        # We might have paths in sys.path that aren't in PYTHONPATH. We'll make
-        # sure that we prepend our current pathing to that prior to spawning any
-        # subprocesses.
-        current_pypath = os.environ.get("PYTHONPATH")
-
-        sgtk.util.prepend_path_to_env_var("PYTHONPATH", sys.path[0])
-        # for path in sys.path:
-            # sgtk.util.prepend_path_to_env_var("PYTHONPATH", path)
+        for path in sys.path:
+            sgtk.util.prepend_path_to_env_var("PYTHONPATH", path)
 
         try:
             output = subprocess_check_output(args)

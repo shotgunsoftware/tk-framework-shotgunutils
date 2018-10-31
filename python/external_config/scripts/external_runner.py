@@ -340,6 +340,12 @@ def main():
     with open(arg_data_file, "rb") as fh:
         arg_data = cPickle.load(fh)
 
+    # Set the PYTHONPATH requested.
+    if arg_data["pythonpath"] is None:
+        del os.environ["PYTHONPATH"]
+    else:
+        os.environ["PYTHONPATH"] = arg_data["pythonpath"]
+
     # Add application icon
     qt_application.setWindowIcon(
         qt_importer.QtGui.QIcon(arg_data["icon_path"])
