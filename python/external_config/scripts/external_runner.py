@@ -345,7 +345,7 @@ def main():
     # external_runner script to run properly, but that would cause problems
     # when a process is spawned from this script, like when launching a DCC.
     if "pythonpath" in arg_data:
-        if arg_data["pythonpath"] is None:
+        if arg_data["pythonpath"] is None and "PYTHONPATH" in os.environ:
             del os.environ["PYTHONPATH"]
         else:
             os.environ["PYTHONPATH"] = arg_data["pythonpath"]

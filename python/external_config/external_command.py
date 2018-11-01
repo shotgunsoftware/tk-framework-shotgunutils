@@ -434,7 +434,12 @@ class ExternalCommand(object):
             sgtk.util.prepend_path_to_env_var("PYTHONPATH", path)
 
         try:
-            output = subprocess_check_output(args)
+            # Note: passing a copy of the environment in resolves some odd behavior with
+            # the environment of processes spawned from the external_runner. This caused
+            # some very bad behavior where it looked like PYTHONPATH was inherited from
+            # this top-level environment rather than what is being set in external_runner
+            # prior to launch.
+            output = subprocess_check_output(args, env=os.environ.copy())
             logger.debug("External execution complete. Output: %s" % output)
         except SubprocessCalledProcessError as e:
             # caching failed!
