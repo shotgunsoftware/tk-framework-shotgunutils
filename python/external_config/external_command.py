@@ -390,6 +390,18 @@ class ExternalCommand(object):
                 "external_runner.py"
             )
         )
+
+        # We might have paths in sys.path that aren't in PYTHONPATH. We'll make
+        # sure that we prepend our current pathing to that prior to spawning any
+        # subprocesses.
+        #
+        # One additional step that we'll take is to send the original PYTHONPATH
+        # to the external_runner we spawn, and ask it to set PYTHONPATH to that
+        # value before it does its work. That means we have everything required
+        # for external_runner when we run it, but we'll keep the environment
+        # clean for any process that it might spawn, like when launching a DCC.
+        current_pypath = os.environ.get("PYTHONPATH")
+
         # pass arguments via a pickled temp file.
         args_file = create_parameter_file(
             dict(
@@ -406,6 +418,7 @@ class ExternalCommand(object):
                 icon_path=self._bundle.engine.icon_256,
                 supports_multiple_selection=self._sg_supports_multiple_selection,
                 pre_cache=pre_cache,
+                pythonpath=current_pypath,
             )
         )
         # compose the command we want to run
@@ -417,20 +430,19 @@ class ExternalCommand(object):
         ]
         logger.debug("Command arguments: %s", args)
 
-        # We might have paths in sys.path that aren't in PYTHONPATH. We'll make
-        # sure that we prepend our current pathing to that prior to spawning any
-        # subprocesses.
-        current_pypath = os.environ.get("PYTHONPATH")
-
         for path in sys.path:
             sgtk.util.prepend_path_to_env_var("PYTHONPATH", path)
 
         try:
-            output = subprocess_check_output(args)
+            # Note: passing a copy of the environment in resolves some odd behavior with
+            # the environment of processes spawned from the external_runner. This caused
+            # some very bad behavior where it looked like PYTHONPATH was inherited from
+            # this top-level environment rather than what is being set in external_runner
+            # prior to launch.
+            output = subprocess_check_output(args, env=os.environ.copy())
             logger.debug("External execution complete. Output: %s" % output)
         except SubprocessCalledProcessError as e:
             # caching failed!
-            logger.exception(e)
             raise RuntimeError("Error executing remote command %s: %s" % (self, e.output))
         finally:
             # Leave PYTHONPATH the way we found it.
