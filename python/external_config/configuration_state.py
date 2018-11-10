@@ -176,6 +176,10 @@ class ConfigStateModel(ShotgunModel):
         """
         Load cached data into the model and request a refresh.
         """
+        # Clear the cache first. It's important that we not let the disk cache
+        # get in the way of having an accurate state to test against.
+        self.hard_refresh()
+
         hierarchy = ["id"]
         fields = ["updated_at", "id"]
         self._load_data(
