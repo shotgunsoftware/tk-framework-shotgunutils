@@ -24,6 +24,7 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
         "sg",
         "sg_nav",
         "thumbs",
+        "multi_context"
     ]
     # Number of days a file without modification should be kept around
     # before being considered for clean up.
