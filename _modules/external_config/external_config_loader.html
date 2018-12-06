@@ -1,0 +1,583 @@
+
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>external_config.external_config_loader &mdash; tk-framework-shotgunutils v5.5.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="tk-framework-shotgunutils v5.5.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+    <a href='http://developer.shotgunsoftware.com'>
+    
+        <img style='width: 191px;
+                height: 60px; 
+                margin: 2px;
+                border-radius: 0px; 
+                padding: 0px;' 
+            src='../../_static/logo@2x.png'/>
+    
+    </a>
+    
+
+          
+            <a href="../../index.html" class="icon icon-home"> tk-framework-shotgunutils
+          
+
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+    
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_model.html">Shotgun Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_hierarchy_model.html">Shotgun Hierarchy Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../task_manager.html">Background Task Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../settings.html">Shotgun Toolkit Qt Settings Wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_globals.html">Shotgun Globals Access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_config.html">External Configuration Management</a></li>
+</ul>
+
+            
+          
+
+    <a href='genindex.html'>Alphabetic Index</a>
+
+    <div style='margin-top: 50px;
+                margin-left: 10px;
+                margin-right: 10px;
+                padding: 10px; 
+                color: #b3b3b3; 
+                font-size: 70%;
+                border-radius: 3px;
+                background-color: #444;
+                line-height: 18px;
+                '>    
+    <style>
+        a.custom_post_menu { display: inline; 
+                             padding: 0px; 
+                             text-decoration: underline; }
+    </style>
+
+    <b>tk-framework-shotgunutils</b> v5.5.0.<br>
+    
+        This documentation is part of the Shotgun Pipeline Toolkit.
+    
+    For more information, please visit
+    <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
+    The code associated with this documentation can be found 
+    <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
+
+    </div>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">tk-framework-shotgunutils</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>external_config.external_config_loader</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for external_config.external_config_loader</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2018 Shotgun Software Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># CONFIDENTIAL AND PROPRIETARY</span>
+<span class="c1">#</span>
+<span class="c1"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit</span>
+<span class="c1"># Source Code License included in this distribution package. See LICENSE.</span>
+<span class="c1"># By accessing, using, copying or modifying this work you indicate your</span>
+<span class="c1"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights</span>
+<span class="c1"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
+
+<span class="kn">import</span> <span class="nn">sgtk</span>
+<span class="kn">from</span> <span class="nn">sgtk.platform.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">.configuration_state</span> <span class="kn">import</span> <span class="n">ConfigurationState</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">file_cache</span>
+<span class="kn">from</span> <span class="nn">.errors</span> <span class="kn">import</span> <span class="n">ExternalConfigParseError</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">config</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ExternalConfigurationLoader"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalConfigurationLoader">[docs]</a><span class="k">class</span> <span class="nc">ExternalConfigurationLoader</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for loading configurations across contexts.</span>
+
+<span class="sd">    **Signal Interface**</span>
+
+<span class="sd">    :signal configurations_loaded(project_id, configs): Gets emitted configurations</span>
+<span class="sd">        have been loaded for the given project. The parameters passed is the</span>
+<span class="sd">        project id and a list of :class:`ExternalConfiguration` instances. If errors</span>
+<span class="sd">        occurred while loading configurations, the error property will be set to a tuple</span>
+<span class="sd">        containing the error message and the traceback, in that order.</span>
+
+<span class="sd">    :signal configurations_changed(): Gets emitted whenever the class</span>
+<span class="sd">        has detected a change to the state of shotgun which could invalidate</span>
+<span class="sd">        any existing :class:`ExternalConfiguration` instances. This can be</span>
+<span class="sd">        emitted at startup or typically after :meth:`refresh_shotgun_global_state`</span>
+<span class="sd">        has been called. Any implementation which caches</span>
+<span class="sd">        :class:`ExternalConfiguration` instances can use this signal to invalidate</span>
+<span class="sd">        their caches.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># signal emitted to indicate that an update has been detected</span>
+    <span class="c1"># to the pipeline configurations for a project</span>
+    <span class="n">configurations_loaded</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>  <span class="c1"># project_id, list of configs</span>
+
+    <span class="c1"># signal to indicate that change to the configurations have been detected.</span>
+    <span class="n">configurations_changed</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">()</span>
+
+    <span class="c1"># grouping used by the background task manager</span>
+    <span class="n">TASK_GROUP</span> <span class="o">=</span> <span class="s2">&quot;tk-framework-shotgunutils.external_config.ExternalConfigurationLoader&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">,</span> <span class="n">engine_name</span><span class="p">,</span> <span class="n">plugin_id</span><span class="p">,</span> <span class="n">base_config</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the class with the following parameters:</span>
+
+<span class="sd">        .. note:: The interpreter needs to support the VFX Platform, e.g be</span>
+<span class="sd">            able to import ``PySide`` or ``Pyside2``.</span>
+
+<span class="sd">        :param str interpreter: Path to Python interpreter to use.</span>
+<span class="sd">        :param str engine_name: Engine to run.</span>
+<span class="sd">        :param str plugin_id: Plugin id to use when executing external requests.</span>
+<span class="sd">        :param str base_config: Default configuration URI to use if nothing else</span>
+<span class="sd">            is provided via Shotgun overrides.</span>
+<span class="sd">        :param bg_task_manager: Background task manager to use for any asynchronous work.</span>
+<span class="sd">        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`</span>
+<span class="sd">        :param parent: QT parent object.</span>
+<span class="sd">        :type parent: :class:`~PySide.QtGui.QObject`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ExternalConfigurationLoader</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span> <span class="o">=</span> <span class="n">plugin_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_base_config_uri</span> <span class="o">=</span> <span class="n">base_config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span> <span class="o">=</span> <span class="n">engine_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span> <span class="o">=</span> <span class="n">interpreter</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_state</span> <span class="o">=</span> <span class="n">ConfigurationState</span><span class="p">(</span><span class="n">bg_task_manager</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_state</span><span class="o">.</span><span class="n">state_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configurations_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">)</span>
+        <span class="c1"># always trigger a check at startup</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refresh_shotgun_global_state</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bg_task_manager</span> <span class="o">=</span> <span class="n">bg_task_manager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bg_task_manager</span><span class="o">.</span><span class="n">task_completed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_completed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bg_task_manager</span><span class="o">.</span><span class="n">task_failed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_failed</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        String representation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;CommandHandler </span><span class="si">%s</span><span class="s2">@</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ExternalConfigurationLoader.shut_down"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalConfigurationLoader.shut_down">[docs]</a>    <span class="k">def</span> <span class="nf">shut_down</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shut down and deallocate.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_state</span><span class="o">.</span><span class="n">shut_down</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ExternalConfigurationLoader.refresh_shotgun_global_state"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalConfigurationLoader.refresh_shotgun_global_state">[docs]</a>    <span class="k">def</span> <span class="nf">refresh_shotgun_global_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Requests an async refresh. If the State of Shotgun has</span>
+<span class="sd">        changed in a way which may affect configurations, this will</span>
+<span class="sd">        result in a ``configurations_changed`` signal being emitted.</span>
+
+<span class="sd">        Examples of state changes which may affect configurations are any changes</span>
+<span class="sd">        to related pipeline configuration, but also indirect changes such as a</span>
+<span class="sd">        change to the list of software entities, since these can implicitly affect</span>
+<span class="sd">        the list of commands associated with a project or entity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_state</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">engine_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The name of the engine associated with this external configuration loader.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The Python interpreter to when bootstrapping and loading external configurations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">plugin_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The plugin id which will be used when executing external requests.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">base_config_uri</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Configuration URI string to be used when nothing is provided via Shotgun overrides.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_config_uri</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">software_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Hash string representing the state of the software</span>
+<span class="sd">        entity in Shotgun or None if not yet determined.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_state</span><span class="o">.</span><span class="n">get_software_hash</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ExternalConfigurationLoader.request_configurations"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalConfigurationLoader.request_configurations">[docs]</a>    <span class="k">def</span> <span class="nf">request_configurations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Requests a list of configuration objects for the given project.</span>
+
+<span class="sd">        Emits a ``configurations_loaded`` signal when the configurations</span>
+<span class="sd">        have been loaded.</span>
+
+<span class="sd">        .. note:: If this method is called multiple times in quick succession, only</span>
+<span class="sd">                  a single ``configurations_loaded`` signal will be emitted, belonging</span>
+<span class="sd">                  to the last request.</span>
+
+<span class="sd">        :param project_id: Project to request configurations for.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># First of all, remove any existing requests for this project from</span>
+        <span class="c1"># our internal task tracker. This will ensure that only one signal</span>
+        <span class="c1"># is emitted even if this method is called multiple times</span>
+        <span class="c1"># in rapid succession.</span>
+        <span class="c1">#</span>
+        <span class="c1"># note: not using a generator since we are deleting in the loop</span>
+        <span class="k">for</span> <span class="n">task_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span> <span class="o">==</span> <span class="n">project_id</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="s2">&quot;Discarding existing request_configurations request for project </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">project_id</span>
+                <span class="p">)</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span>
+
+        <span class="c1"># load existing cache file if it exists</span>
+        <span class="n">config_cache_key</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;project&quot;</span><span class="p">:</span> <span class="n">project_id</span><span class="p">,</span>
+            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span><span class="p">,</span>
+            <span class="s2">&quot;engine&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span><span class="p">,</span>
+            <span class="s2">&quot;base_config&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_config_uri</span><span class="p">,</span>
+            <span class="s2">&quot;state_hash&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_state</span><span class="o">.</span><span class="n">get_configuration_hash</span><span class="p">()</span>
+        <span class="p">}</span>
+
+        <span class="n">config_data</span> <span class="o">=</span> <span class="n">file_cache</span><span class="o">.</span><span class="n">load_cache</span><span class="p">(</span><span class="n">config_cache_key</span><span class="p">)</span>
+        <span class="c1"># attempt to load configurations</span>
+        <span class="n">config_data_emitted</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">config_data</span><span class="p">:</span>
+            <span class="c1"># got the data cached so emit it straight away</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">config_objects</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">cfg</span> <span class="ow">in</span> <span class="n">config_data</span><span class="p">[</span><span class="s2">&quot;configurations&quot;</span><span class="p">]:</span>
+                    <span class="n">config_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">config</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bg_task_manager</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+                    <span class="p">)</span>
+
+            <span class="k">except</span> <span class="n">ExternalConfigParseError</span><span class="p">:</span>
+                <span class="c1"># get rid of this configuration</span>
+                <span class="n">file_cache</span><span class="o">.</span><span class="n">delete_cache</span><span class="p">(</span><span class="n">config_cache_key</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Detected and deleted out of date cache.&quot;</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Check to see if any of the configs are invalid in the cache. If there</span>
+                <span class="c1"># are, then we&#39;re going to recache in case the problematic configs in</span>
+                <span class="c1"># Shotgun have been fixed in the interim since the cache was built.</span>
+                <span class="k">if</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">config_objects</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">c</span><span class="o">.</span><span class="n">is_valid</span><span class="p">]:</span>
+                    <span class="n">file_cache</span><span class="o">.</span><span class="n">delete_cache</span><span class="p">(</span><span class="n">config_cache_key</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Detected an invalid config in the cache. Recaching from scratch...&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">configurations_loaded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">config_objects</span><span class="p">)</span>
+                    <span class="n">config_data_emitted</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">config_data_emitted</span><span class="p">:</span>
+            <span class="c1"># Request a bg load</span>
+            <span class="n">unique_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bg_task_manager</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_execute_get_configurations</span><span class="p">,</span>
+                <span class="n">priority</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">TASK_GROUP</span><span class="p">,</span>
+                <span class="n">task_kwargs</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s2">&quot;project_id&quot;</span><span class="p">:</span> <span class="n">project_id</span><span class="p">,</span>
+                    <span class="s2">&quot;state_hash&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_state</span><span class="o">.</span><span class="n">get_configuration_hash</span><span class="p">()</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">[</span><span class="n">unique_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">project_id</span></div>
+
+    <span class="k">def</span> <span class="nf">_execute_get_configurations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="p">,</span> <span class="n">state_hash</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Background task to load configs using the ToolkitManager.</span>
+
+<span class="sd">        :param int project_id: Project id to load configs for.</span>
+<span class="sd">        :param str state_hash: Hash representing the relevant</span>
+<span class="sd">            global state of Shotgun.</span>
+<span class="sd">        :returns: Tuple with (project id, state hash, list of configs), where</span>
+<span class="sd">            the two first items are the input parameters to this method</span>
+<span class="sd">            and the last item is the return data from</span>
+<span class="sd">            ToolkitManager.get_pipeline_configurations()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get list of configurations</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">bootstrap</span><span class="o">.</span><span class="n">ToolkitManager</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">plugin_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span>
+        <span class="n">configs</span> <span class="o">=</span> <span class="n">mgr</span><span class="o">.</span><span class="n">get_pipeline_configurations</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Project&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">project_id</span><span class="p">}</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">state_hash</span><span class="p">,</span> <span class="n">configs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_task_completed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique_id</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called after pipeline configuration enumeration completes.</span>
+
+<span class="sd">        :param str unique_id: unique task id</span>
+<span class="sd">        :param str group: task group</span>
+<span class="sd">        :param str result: return data from worker</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">unique_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">[</span><span class="n">unique_id</span><span class="p">]</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Received configuration info from external process.&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">state_hash</span><span class="p">,</span> <span class="n">config_dicts</span><span class="p">)</span> <span class="o">=</span> <span class="n">result</span>
+
+        <span class="c1"># check that the configs are complete. If not, issue warnings</span>
+        <span class="n">config_objects</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">config_dict</span> <span class="ow">in</span> <span class="n">config_dicts</span><span class="p">:</span>
+            <span class="n">config_object</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">create_from_pipeline_configuration_data</span><span class="p">(</span>
+                <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bg_task_manager</span><span class="p">,</span>
+                <span class="n">config_loader</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">configuration_data</span><span class="o">=</span><span class="n">config_dict</span>
+            <span class="p">)</span>
+            <span class="n">config_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config_object</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">config_object</span><span class="o">.</span><span class="n">is_valid</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Configuration (</span><span class="si">%r</span><span class="s2">) was found, but is invalid.&quot;</span><span class="p">,</span> <span class="n">config_object</span><span class="p">)</span>
+
+        <span class="c1"># if no custom pipeline configs were found, we use the base config</span>
+        <span class="c1"># note: because the base config can change over time, we make sure</span>
+        <span class="c1"># to include it as an ingredient in the hash key below.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">config_dicts</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s2">&quot;No configurations were found. Using the fallback configuration.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">config_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">config</span><span class="o">.</span><span class="n">create_fallback_configuration</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_bg_task_manager</span><span class="p">,</span>
+                    <span class="bp">self</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># create a dictionary we can serialize</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;project_id&quot;</span><span class="p">:</span> <span class="n">project_id</span><span class="p">,</span>
+            <span class="s2">&quot;plugin_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span><span class="p">,</span>
+            <span class="s2">&quot;global_state_hash&quot;</span><span class="p">:</span> <span class="n">state_hash</span><span class="p">,</span>
+            <span class="s2">&quot;configurations&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="n">config</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">cfg_obj</span><span class="p">)</span> <span class="k">for</span> <span class="n">cfg_obj</span> <span class="ow">in</span> <span class="n">config_objects</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+
+        <span class="c1"># save cache</span>
+        <span class="n">file_cache</span><span class="o">.</span><span class="n">write_cache</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;project&quot;</span><span class="p">:</span> <span class="n">project_id</span><span class="p">,</span>
+                <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span><span class="p">,</span>
+                <span class="s2">&quot;engine&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span><span class="p">,</span>
+                <span class="s2">&quot;base_config&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_config_uri</span><span class="p">,</span>
+                <span class="s2">&quot;state_hash&quot;</span><span class="p">:</span> <span class="n">state_hash</span>
+            <span class="p">},</span>
+            <span class="n">data</span>
+        <span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">&quot;Got configuration objects for project </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">config_objects</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">configurations_loaded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">config_objects</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_task_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique_id</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">traceback_str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called after pipeline configuration enumeration fails.</span>
+
+<span class="sd">        :param str unique_id: unique task id</span>
+<span class="sd">        :param str group: task group</span>
+<span class="sd">        :param str message: Error message</span>
+<span class="sd">        :param str traceback_str: Full traceback</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">unique_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">project_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">[</span><span class="n">unique_id</span><span class="p">]</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">[</span><span class="n">unique_id</span><span class="p">]</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Could not determine project configurations: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">message</span><span class="p">)</span>
+
+        <span class="c1"># emit an empty list of configurations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configurations_loaded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="p">[])</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Autodesk.
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'v5.5.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+  
+ 
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-2114792-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+</body>
+</html>

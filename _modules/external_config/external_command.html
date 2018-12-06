@@ -1,0 +1,705 @@
+
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>external_config.external_command &mdash; tk-framework-shotgunutils v5.5.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="tk-framework-shotgunutils v5.5.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+    <a href='http://developer.shotgunsoftware.com'>
+    
+        <img style='width: 191px;
+                height: 60px; 
+                margin: 2px;
+                border-radius: 0px; 
+                padding: 0px;' 
+            src='../../_static/logo@2x.png'/>
+    
+    </a>
+    
+
+          
+            <a href="../../index.html" class="icon icon-home"> tk-framework-shotgunutils
+          
+
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+    
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_model.html">Shotgun Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_hierarchy_model.html">Shotgun Hierarchy Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../task_manager.html">Background Task Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../settings.html">Shotgun Toolkit Qt Settings Wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shotgun_globals.html">Shotgun Globals Access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_config.html">External Configuration Management</a></li>
+</ul>
+
+            
+          
+
+    <a href='genindex.html'>Alphabetic Index</a>
+
+    <div style='margin-top: 50px;
+                margin-left: 10px;
+                margin-right: 10px;
+                padding: 10px; 
+                color: #b3b3b3; 
+                font-size: 70%;
+                border-radius: 3px;
+                background-color: #444;
+                line-height: 18px;
+                '>    
+    <style>
+        a.custom_post_menu { display: inline; 
+                             padding: 0px; 
+                             text-decoration: underline; }
+    </style>
+
+    <b>tk-framework-shotgunutils</b> v5.5.0.<br>
+    
+        This documentation is part of the Shotgun Pipeline Toolkit.
+    
+    For more information, please visit
+    <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
+    The code associated with this documentation can be found 
+    <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
+
+    </div>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">tk-framework-shotgunutils</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>external_config.external_command</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for external_config.external_command</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2018 Shotgun Software Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># CONFIDENTIAL AND PROPRIETARY</span>
+<span class="c1">#</span>
+<span class="c1"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit</span>
+<span class="c1"># Source Code License included in this distribution package. See LICENSE.</span>
+<span class="c1"># By accessing, using, copying or modifying this work you indicate your</span>
+<span class="c1"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights</span>
+<span class="c1"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">cPickle</span>
+<span class="kn">import</span> <span class="nn">sgtk</span>
+<span class="kn">from</span> <span class="nn">sgtk.util.process</span> <span class="kn">import</span> <span class="n">subprocess_check_output</span><span class="p">,</span> \
+    <span class="n">SubprocessCalledProcessError</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">external_command_utils</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ExternalCommand"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand">[docs]</a><span class="k">class</span> <span class="nc">ExternalCommand</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents an external Toolkit command (e.g. menu option).</span>
+
+<span class="sd">    These objects are emitted by :class:`ExternalConfiguration`</span>
+<span class="sd">    and are independent, decoupled, light weight objects that</span>
+<span class="sd">    can be serialized and brought back easily.</span>
+
+<span class="sd">    A command is executed via its :meth:`execute` method, which</span>
+<span class="sd">    will launch it in the given engine.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ExternalCommand.is_compatible"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.is_compatible">[docs]</a>    <span class="k">def</span> <span class="nf">is_compatible</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determines if the given data is compatible.</span>
+
+<span class="sd">        :param dict data: Serialized data</span>
+<span class="sd">        :returns: True if the given data can be loaded, False if not.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;generation&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">external_command_utils</span><span class="o">.</span><span class="n">FORMAT_GENERATION</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">external_configuration</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a new :class:`ExternalCommand` instance based on the</span>
+<span class="sd">        data in data. This data is generated by :meth:`external_command_utils.serialize_command`.</span>
+
+<span class="sd">        :param external_configuration: associated :class:`ExternalConfiguration` instance.</span>
+<span class="sd">        :param dict data: Serialized data to be turned into an instance</span>
+<span class="sd">        :param int entity_id: The data is cached in a general form, suitable for</span>
+<span class="sd">            all entities. This means that the entity_id cached as part of the</span>
+<span class="sd">            ``data`` parameter reflects the entity for which the caching process</span>
+<span class="sd">            was executed and not necessarily the one we are after. This parameter</span>
+<span class="sd">            indicates the actual entity id for which we want the commands to be</span>
+<span class="sd">            assoiated.</span>
+<span class="sd">        :returns: :class:`ExternalCommand` instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ExternalCommand</span><span class="p">(</span>
+            <span class="n">callback_name</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;callback_name&quot;</span><span class="p">],</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;display_name&quot;</span><span class="p">],</span>
+            <span class="n">tooltip</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;tooltip&quot;</span><span class="p">],</span>
+            <span class="n">group</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;group&quot;</span><span class="p">],</span>
+            <span class="n">is_group_default</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;group_default&quot;</span><span class="p">],</span>
+            <span class="n">plugin_id</span><span class="o">=</span><span class="n">external_configuration</span><span class="o">.</span><span class="n">plugin_id</span><span class="p">,</span>
+            <span class="n">engine_name</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;engine_name&quot;</span><span class="p">],</span>
+            <span class="n">interpreter</span><span class="o">=</span><span class="n">external_configuration</span><span class="o">.</span><span class="n">interpreter</span><span class="p">,</span>
+            <span class="n">descriptor_uri</span><span class="o">=</span><span class="n">external_configuration</span><span class="o">.</span><span class="n">descriptor_uri</span><span class="p">,</span>
+            <span class="n">pipeline_config_id</span><span class="o">=</span><span class="n">external_configuration</span><span class="o">.</span><span class="n">pipeline_configuration_id</span><span class="p">,</span>
+            <span class="n">entity_type</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;entity_type&quot;</span><span class="p">],</span>
+            <span class="n">entity_id</span><span class="o">=</span><span class="n">entity_id</span><span class="p">,</span>
+            <span class="n">pipeline_config_name</span><span class="o">=</span><span class="n">external_configuration</span><span class="o">.</span><span class="n">pipeline_configuration_name</span><span class="p">,</span>
+            <span class="n">sg_deny_permissions</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;sg_deny_permissions&quot;</span><span class="p">],</span>
+            <span class="n">sg_supports_multiple_selection</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;sg_supports_multiple_selection&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">callback_name</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="p">,</span>
+            <span class="n">tooltip</span><span class="p">,</span>
+            <span class="n">group</span><span class="p">,</span>
+            <span class="n">is_group_default</span><span class="p">,</span>
+            <span class="n">plugin_id</span><span class="p">,</span>
+            <span class="n">interpreter</span><span class="p">,</span>
+            <span class="n">engine_name</span><span class="p">,</span>
+            <span class="n">descriptor_uri</span><span class="p">,</span>
+            <span class="n">pipeline_config_id</span><span class="p">,</span>
+            <span class="n">entity_type</span><span class="p">,</span>
+            <span class="n">entity_id</span><span class="p">,</span>
+            <span class="n">pipeline_config_name</span><span class="p">,</span>
+            <span class="n">sg_deny_permissions</span><span class="p">,</span>
+            <span class="n">sg_supports_multiple_selection</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.</span>
+<span class="sd">            Do not construct objects by hand.</span>
+
+<span class="sd">        :param str callback_name: Name of the associated Toolkit command callback</span>
+<span class="sd">        :param str display_name: Display name for command</span>
+<span class="sd">        :param str tooltip: Tooltip</span>
+<span class="sd">        :param str group: Group that this command belongs to</span>
+<span class="sd">        :param bool is_group_default: Indicates that this is a group default</span>
+<span class="sd">        :param str plugin_id: Plugin id</span>
+<span class="sd">        :param str interpreter: Associated Python interpreter</span>
+<span class="sd">        :param str engine_name: Engine name to execute command in</span>
+<span class="sd">        :param str descriptor_uri: Associated descriptor URI</span>
+<span class="sd">        :param int pipeline_config_id: Associated pipeline configuration id</span>
+<span class="sd">        :param str entity_type: Associated entity type</span>
+<span class="sd">        :param int entity_id: Associated entity id</span>
+<span class="sd">        :param str pipeline_config_name: Associated pipeline configuration name</span>
+<span class="sd">        :param list sg_deny_permissions: (Shotgun specific) List of permission</span>
+<span class="sd">            groups to exclude this action from.</span>
+<span class="sd">        :param bool sg_supports_multiple_selection: (Shotgun specific) Action</span>
+<span class="sd">            supports multiple selection.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ExternalCommand</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="c1"># keep a handle to the current app/engine/fw bundle for convenience</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_bundle</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_callback_name</span> <span class="o">=</span> <span class="n">callback_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_display_name</span> <span class="o">=</span> <span class="n">display_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tooltip</span> <span class="o">=</span> <span class="n">tooltip</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_group</span> <span class="o">=</span> <span class="n">group</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_group_default</span> <span class="o">=</span> <span class="n">is_group_default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span> <span class="o">=</span> <span class="n">plugin_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span> <span class="o">=</span> <span class="n">interpreter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_uri</span> <span class="o">=</span> <span class="n">descriptor_uri</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_config_id</span> <span class="o">=</span> <span class="n">pipeline_config_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span> <span class="o">=</span> <span class="n">engine_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_type</span> <span class="o">=</span> <span class="n">entity_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_id</span> <span class="o">=</span> <span class="n">entity_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_config_name</span> <span class="o">=</span> <span class="n">pipeline_config_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sg_deny_permissions</span> <span class="o">=</span> <span class="n">sg_deny_permissions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sg_supports_multiple_selection</span> <span class="o">=</span> <span class="n">sg_supports_multiple_selection</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        String representation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;ExternalCommand </span><span class="si">%s</span><span class="s2"> @ </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_display_name</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_entity_type</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_entity_id</span>
+        <span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ExternalCommand.deserialize"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.deserialize">[docs]</a>    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a :class:`ExternalCommand` instance given some serialized data.</span>
+
+<span class="sd">        :param str data: Data created by :meth:`serialize`</span>
+<span class="sd">        :returns: External Command instance.</span>
+<span class="sd">        :rtype: :class:`ExternalCommand`</span>
+<span class="sd">        :raises: :class:`RuntimeError` if data is not valid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">cPickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ExternalCommand</span><span class="p">(</span>
+            <span class="n">callback_name</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;callback_name&quot;</span><span class="p">],</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;display_name&quot;</span><span class="p">],</span>
+            <span class="n">tooltip</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;tooltip&quot;</span><span class="p">],</span>
+            <span class="n">group</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;group&quot;</span><span class="p">],</span>
+            <span class="n">is_group_default</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;is_group_default&quot;</span><span class="p">],</span>
+            <span class="n">plugin_id</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;plugin_id&quot;</span><span class="p">],</span>
+            <span class="n">engine_name</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;engine_name&quot;</span><span class="p">],</span>
+            <span class="n">interpreter</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;interpreter&quot;</span><span class="p">],</span>
+            <span class="n">descriptor_uri</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;descriptor_uri&quot;</span><span class="p">],</span>
+            <span class="n">pipeline_config_id</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;pipeline_config_id&quot;</span><span class="p">],</span>
+            <span class="n">entity_type</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;entity_type&quot;</span><span class="p">],</span>
+            <span class="n">entity_id</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;entity_id&quot;</span><span class="p">],</span>
+            <span class="n">pipeline_config_name</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;pipeline_config_name&quot;</span><span class="p">],</span>
+            <span class="n">sg_deny_permissions</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;sg_deny_permissions&quot;</span><span class="p">],</span>
+            <span class="n">sg_supports_multiple_selection</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;sg_supports_multiple_selection&quot;</span><span class="p">],</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExternalCommand.serialize"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.serialize">[docs]</a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Serializes the current object into a string.</span>
+
+<span class="sd">        For use with :meth:`deserialize`.</span>
+
+<span class="sd">        :returns: String representing the current instance.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;callback_name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback_name</span><span class="p">,</span>
+            <span class="s2">&quot;display_name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_display_name</span><span class="p">,</span>
+            <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="p">,</span>
+            <span class="s2">&quot;is_group_default&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_group_default</span><span class="p">,</span>
+            <span class="s2">&quot;tooltip&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tooltip</span><span class="p">,</span>
+            <span class="s2">&quot;plugin_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span><span class="p">,</span>
+            <span class="s2">&quot;engine_name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span><span class="p">,</span>
+            <span class="s2">&quot;interpreter&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span><span class="p">,</span>
+            <span class="s2">&quot;descriptor_uri&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_uri</span><span class="p">,</span>
+            <span class="s2">&quot;pipeline_config_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_config_id</span><span class="p">,</span>
+            <span class="s2">&quot;entity_type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_type</span><span class="p">,</span>
+            <span class="s2">&quot;entity_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_id</span><span class="p">,</span>
+            <span class="s2">&quot;pipeline_config_name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_config_name</span><span class="p">,</span>
+            <span class="s2">&quot;sg_deny_permissions&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_deny_permissions</span><span class="p">,</span>
+            <span class="s2">&quot;sg_supports_multiple_selection&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_supports_multiple_selection</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">cPickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pipeline_configuration_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The name of the Shotgun pipeline configuration this command is associated with,</span>
+<span class="sd">        or ``None`` if no association exists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_config_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">system_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The system name for the command</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">engine_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The name of the engine associated with the command</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display name, suitable for display in a menu.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_display_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Group command belongs to or None if not defined.</span>
+
+<span class="sd">        This is used in conjunction with the :meth:`group` property</span>
+<span class="sd">        and is a hint to engines how commands should be grouped together.</span>
+
+<span class="sd">        Engines which implement support for grouping will group commands which</span>
+<span class="sd">        share the same :meth:`group` name into a group of associated items</span>
+<span class="sd">        (typically as a submenu). The :meth:`group_default` boolean property</span>
+<span class="sd">        is used to indicate which item in the group should be considered the</span>
+<span class="sd">        default one to represent the group as a whole.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_group_default</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        True if this command is a default action for a group.</span>
+
+<span class="sd">        This is used in conjunction with the :meth:`group` property</span>
+<span class="sd">        and is a hint to engines how commands should be grouped together.</span>
+
+<span class="sd">        Engines which implement support for grouping will group commands which</span>
+<span class="sd">        share the same :meth:`group` name into a group of associated items</span>
+<span class="sd">        (typically as a submenu). The :meth:`group_default` boolean property</span>
+<span class="sd">        is used to indicate which item in the group should be considered the</span>
+<span class="sd">        default one to represent the group as a whole.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_group_default</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">excluded_permission_groups_hint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Legacy option used by some older Shotgun toolkit apps.</span>
+<span class="sd">        Apps may hint a list of permission groups for which</span>
+<span class="sd">        the app command should not be displayed.</span>
+
+<span class="sd">        Returns a list of Shotgun permission groups (as strings)</span>
+<span class="sd">        where this command is not appropriate.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_deny_permissions</span> <span class="ow">or</span> <span class="p">[]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">support_shotgun_multiple_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Legacy flag indicated by some older Toolkit apps,</span>
+<span class="sd">        indicating that the app can accept a list of</span>
+<span class="sd">        entity ids to operate on rather than a single item.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_supports_multiple_selection</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tooltip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Associated help text tooltip.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tooltip</span>
+
+<div class="viewcode-block" id="ExternalCommand.execute"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes the external command in a separate process.</span>
+
+<span class="sd">        .. note:: The process will be launched in an synchronous way.</span>
+<span class="sd">            It is recommended that this command is executed in a worker thread::</span>
+
+<span class="sd">                # execute external command in a thread to not block</span>
+<span class="sd">                # main thread execution</span>
+<span class="sd">                worker = threading.Thread(target=action.execute)</span>
+<span class="sd">                # if the python environment shuts down, no need</span>
+<span class="sd">                # to wait for this thread</span>
+<span class="sd">                worker.daemon = True</span>
+<span class="sd">                # launch external process</span>
+<span class="sd">                worker.start()</span>
+
+<span class="sd">        :param bool pre_cache: If set to True, starting up the command</span>
+<span class="sd">            will also include a full caching of all necessary</span>
+<span class="sd">            dependencies for all contexts and engines. If set to False,</span>
+<span class="sd">            caching will only be carried as needed in order to run</span>
+<span class="sd">            the given command. This is an advanced setting that can be</span>
+<span class="sd">            useful to set to true when launching older engines which don&#39;t</span>
+<span class="sd">            launch via a bootstrap process. In that case, the engine simply</span>
+<span class="sd">            assumes that all necessary app dependencies already exists in</span>
+<span class="sd">            the bundle cache search path and without a pre-cache, apps</span>
+<span class="sd">            may not initialize correctly.</span>
+<span class="sd">        :raises: :class:`RuntimeError` on execution failure.</span>
+<span class="sd">        :returns: Output from execution session.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execute</span><span class="p">(</span><span class="n">pre_cache</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExternalCommand.execute_on_multiple_entities"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.execute_on_multiple_entities">[docs]</a>    <span class="k">def</span> <span class="nf">execute_on_multiple_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">entity_ids</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes the external command in a separate process. This method</span>
+<span class="sd">        provides support for executing commands that support being run on</span>
+<span class="sd">        multiple entities as part of a single execution.</span>
+
+<span class="sd">        :param bool pre_cache: If set to True, starting up the command</span>
+<span class="sd">            will also include a full caching of all necessary</span>
+<span class="sd">            dependencies for all contexts and engines. If set to False,</span>
+<span class="sd">            caching will only be carried as needed in order to run</span>
+<span class="sd">            the given command. This is an advanced setting that can be</span>
+<span class="sd">            useful to set to true when launching older engines which don&#39;t</span>
+<span class="sd">            launch via a bootstrap process. In that case, the engine simply</span>
+<span class="sd">            assumes that all necessary app dependencies already exists in</span>
+<span class="sd">            the bundle cache search path and without a pre-cache, apps</span>
+<span class="sd">            may not initialize correctly.</span>
+<span class="sd">        :param list entity_ids: A list of entity ids to use when executing</span>
+<span class="sd">            the command. This is only required when running legacy commands</span>
+<span class="sd">            that support being run on multiple entities at the same time. If</span>
+<span class="sd">            not given, a list will be built on the fly containing only the</span>
+<span class="sd">            entity id associated with this command.</span>
+<span class="sd">        :raises: :class:`RuntimeError` on execution failure.</span>
+<span class="sd">        :returns: Output from execution session.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execute</span><span class="p">(</span><span class="n">pre_cache</span><span class="p">,</span> <span class="n">entity_ids</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">entity_ids</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes the external command in a separate process.</span>
+
+<span class="sd">        :param bool pre_cache: If set to True, starting up the command</span>
+<span class="sd">            will also include a full caching of all necessary</span>
+<span class="sd">            dependencies for all contexts and engines. If set to False,</span>
+<span class="sd">            caching will only be carried as needed in order to run</span>
+<span class="sd">            the given command. This is an advanced setting that can be</span>
+<span class="sd">            useful to set to true when launching older engines which don&#39;t</span>
+<span class="sd">            launch via a bootstrap process. In that case, the engine simply</span>
+<span class="sd">            assumes that all necessary app dependencies already exists in</span>
+<span class="sd">            the bundle cache search path and without a pre-cache, apps</span>
+<span class="sd">            may not initialize correctly.</span>
+<span class="sd">        :param list entity_ids: A list of entity ids to use when executing</span>
+<span class="sd">            the command. This is only required when running legacy commands</span>
+<span class="sd">            that support being run on multiple entities at the same time. If</span>
+<span class="sd">            not given, a list will be built on the fly containing only the</span>
+<span class="sd">            entity id associated with this command.</span>
+<span class="sd">        :raises: :class:`RuntimeError` on execution failure.</span>
+<span class="sd">        :returns: Output from execution session.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># local imports because this is executed from runner scripts</span>
+        <span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">create_parameter_file</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: Execute command&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># prepare execution of the command in an external process</span>
+        <span class="c1"># this will bootstrap Toolkit and execute the command.</span>
+        <span class="n">script</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span>
+                <span class="s2">&quot;scripts&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;external_runner.py&quot;</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># We might have paths in sys.path that aren&#39;t in PYTHONPATH. We&#39;ll make</span>
+        <span class="c1"># sure that we prepend our current pathing to that prior to spawning any</span>
+        <span class="c1"># subprocesses.</span>
+        <span class="c1">#</span>
+        <span class="c1"># One additional step that we&#39;ll take is to send the original PYTHONPATH</span>
+        <span class="c1"># to the external_runner we spawn, and ask it to set PYTHONPATH to that</span>
+        <span class="c1"># value before it does its work. That means we have everything required</span>
+        <span class="c1"># for external_runner when we run it, but we&#39;ll keep the environment</span>
+        <span class="c1"># clean for any process that it might spawn, like when launching a DCC.</span>
+        <span class="n">current_pypath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;PYTHONPATH&quot;</span><span class="p">)</span>
+
+        <span class="c1"># pass arguments via a pickled temp file.</span>
+        <span class="n">args_file</span> <span class="o">=</span> <span class="n">create_parameter_file</span><span class="p">(</span>
+            <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">action</span><span class="o">=</span><span class="s2">&quot;execute_command&quot;</span><span class="p">,</span>
+                <span class="n">callback_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_callback_name</span><span class="p">,</span>
+                <span class="n">configuration_uri</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_uri</span><span class="p">,</span>
+                <span class="n">pipeline_config_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_config_id</span><span class="p">,</span>
+                <span class="n">plugin_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span><span class="p">,</span>
+                <span class="n">engine_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span><span class="p">,</span>
+                <span class="n">entity_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_entity_type</span><span class="p">,</span>
+                <span class="n">entity_ids</span><span class="o">=</span><span class="n">entity_ids</span> <span class="ow">or</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_entity_id</span><span class="p">],</span>
+                <span class="n">bundle_cache_fallback_paths</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">sgtk</span><span class="o">.</span><span class="n">bundle_cache_fallback_paths</span><span class="p">,</span>
+                <span class="c1"># the engine icon becomes the process icon</span>
+                <span class="n">icon_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">icon_256</span><span class="p">,</span>
+                <span class="n">supports_multiple_selection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sg_supports_multiple_selection</span><span class="p">,</span>
+                <span class="n">pre_cache</span><span class="o">=</span><span class="n">pre_cache</span><span class="p">,</span>
+                <span class="n">pythonpath</span><span class="o">=</span><span class="n">current_pypath</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># compose the command we want to run</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span><span class="p">,</span>
+            <span class="n">script</span><span class="p">,</span>
+            <span class="n">sgtk</span><span class="o">.</span><span class="n">bootstrap</span><span class="o">.</span><span class="n">ToolkitManager</span><span class="o">.</span><span class="n">get_core_python_path</span><span class="p">(),</span>
+            <span class="n">args_file</span>
+        <span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Command arguments: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+            <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">prepend_path_to_env_var</span><span class="p">(</span><span class="s2">&quot;PYTHONPATH&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Note: passing a copy of the environment in resolves some odd behavior with</span>
+            <span class="c1"># the environment of processes spawned from the external_runner. This caused</span>
+            <span class="c1"># some very bad behavior where it looked like PYTHONPATH was inherited from</span>
+            <span class="c1"># this top-level environment rather than what is being set in external_runner</span>
+            <span class="c1"># prior to launch.</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">subprocess_check_output</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;External execution complete. Output: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">output</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">SubprocessCalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># caching failed!</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Error executing remote command </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">output</span><span class="p">))</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c1"># Leave PYTHONPATH the way we found it.</span>
+            <span class="k">if</span> <span class="n">current_pypath</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PYTHONPATH&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PYTHONPATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_pypath</span>
+
+            <span class="c1"># clean up temp file</span>
+            <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">filesystem</span><span class="o">.</span><span class="n">safe_delete_file</span><span class="p">(</span><span class="n">args_file</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">output</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Autodesk.
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'v5.5.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+  
+ 
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-2114792-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+</body>
+</html>

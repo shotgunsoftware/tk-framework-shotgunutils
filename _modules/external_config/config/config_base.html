@@ -1,0 +1,767 @@
+
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>external_config.config.config_base &mdash; tk-framework-shotgunutils v5.5.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="tk-framework-shotgunutils v5.5.0 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+    <a href='http://developer.shotgunsoftware.com'>
+    
+        <img style='width: 191px;
+                height: 60px; 
+                margin: 2px;
+                border-radius: 0px; 
+                padding: 0px;' 
+            src='../../../_static/logo@2x.png'/>
+    
+    </a>
+    
+
+          
+            <a href="../../../index.html" class="icon icon-home"> tk-framework-shotgunutils
+          
+
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+    
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../shotgun_model.html">Shotgun Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../shotgun_hierarchy_model.html">Shotgun Hierarchy Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../task_manager.html">Background Task Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../settings.html">Shotgun Toolkit Qt Settings Wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../shotgun_globals.html">Shotgun Globals Access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../external_config.html">External Configuration Management</a></li>
+</ul>
+
+            
+          
+
+    <a href='genindex.html'>Alphabetic Index</a>
+
+    <div style='margin-top: 50px;
+                margin-left: 10px;
+                margin-right: 10px;
+                padding: 10px; 
+                color: #b3b3b3; 
+                font-size: 70%;
+                border-radius: 3px;
+                background-color: #444;
+                line-height: 18px;
+                '>    
+    <style>
+        a.custom_post_menu { display: inline; 
+                             padding: 0px; 
+                             text-decoration: underline; }
+    </style>
+
+    <b>tk-framework-shotgunutils</b> v5.5.0.<br>
+    
+        This documentation is part of the Shotgun Pipeline Toolkit.
+    
+    For more information, please visit
+    <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
+    The code associated with this documentation can be found 
+    <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
+
+    </div>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">tk-framework-shotgunutils</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      
+    <li>external_config.config.config_base</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for external_config.config.config_base</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2018 Shotgun Software Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># CONFIDENTIAL AND PROPRIETARY</span>
+<span class="c1">#</span>
+<span class="c1"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit</span>
+<span class="c1"># Source Code License included in this distribution package. See LICENSE.</span>
+<span class="c1"># By accessing, using, copying or modifying this work you indicate your</span>
+<span class="c1"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights</span>
+<span class="c1"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">sgtk</span>
+<span class="kn">from</span> <span class="nn">sgtk.platform.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">sgtk.util.process</span> <span class="kn">import</span> <span class="n">subprocess_check_output</span><span class="p">,</span> <span class="n">SubprocessCalledProcessError</span>
+<span class="kn">from</span> <span class="nn">..external_command</span> <span class="kn">import</span> <span class="n">ExternalCommand</span>
+<span class="kn">from</span> <span class="nn">..util</span> <span class="kn">import</span> <span class="n">create_parameter_file</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">file_cache</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ExternalConfiguration"><a class="viewcode-back" href="../../../external_config.html#external_config.ExternalConfiguration">[docs]</a><span class="k">class</span> <span class="nc">ExternalConfiguration</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Object wrapping an external pipeline configuration.</span>
+
+<span class="sd">    **Signals**</span>
+
+<span class="sd">    :signal commands_loaded(project_id, config, commands): Gets emitted after :meth:`request_commands` has</span>
+<span class="sd">        been called and once commands have been loaded for the configuration. The</span>
+<span class="sd">        commands parameter contains a list of :class:`ExternalCommand` instances.</span>
+
+<span class="sd">    :signal commands_load_failed(project_id, config, reason): Gets emitted after</span>
+<span class="sd">        :meth:`request_commands` has been called if command loading fails for some reason.</span>
+<span class="sd">        The reason string parameter contains a message signfiying why the load failed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># grouping used by the background task manager</span>
+    <span class="n">TASK_GROUP</span> <span class="o">=</span> <span class="s2">&quot;tk-framework-shotgunutils.external_config.ExternalConfiguration&quot;</span>
+
+    <span class="c1"># Status enums:</span>
+    <span class="n">CONFIGURATION_READY</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">CONFIGURATION_INACCESSIBLE</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="n">commands_loaded</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+    <span class="c1"># Signal parameters:</span>
+    <span class="c1"># 1. project_id</span>
+    <span class="c1"># 2. entity_type</span>
+    <span class="c1"># 3. entity_id</span>
+    <span class="c1"># 4. link_entity_type</span>
+    <span class="c1"># 5. configuration instance</span>
+    <span class="c1"># 6. configuration object, list of :class:`ExternalCommand` instances</span>
+
+    <span class="n">commands_load_failed</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="c1"># signal parameters:</span>
+    <span class="c1"># 1. project_id</span>
+    <span class="c1"># 2. entity_type</span>
+    <span class="c1"># 3. entity_id</span>
+    <span class="c1"># 4. link_entity_type</span>
+    <span class="c1"># 5. configuration instance</span>
+    <span class="c1"># 6. reason for the failure</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">parent</span><span class="p">,</span>
+            <span class="n">bg_task_manager</span><span class="p">,</span>
+            <span class="n">plugin_id</span><span class="p">,</span>
+            <span class="n">engine_name</span><span class="p">,</span>
+            <span class="n">interpreter</span><span class="p">,</span>
+            <span class="n">software_hash</span><span class="p">,</span>
+            <span class="n">pipeline_config_uri</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="n">CONFIGURATION_READY</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.</span>
+<span class="sd">            Do not construct objects by hand.</span>
+
+<span class="sd">        Constructor parameters:</span>
+
+<span class="sd">        :param parent: QT parent object.</span>
+<span class="sd">        :type parent: :class:`~PySide.QtGui.QObject`</span>
+<span class="sd">        :param bg_task_manager: Background task manager to use for any asynchronous work.</span>
+<span class="sd">        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`</span>
+<span class="sd">        :param str plugin_id: Associated bootstrap plugin id</span>
+<span class="sd">        :param str engine_name: Associated engine name</span>
+<span class="sd">        :param str interpreter: Associated Python interpreter</span>
+<span class="sd">        :param str software_hash: Hash representing the state of the Shotgun software entity</span>
+<span class="sd">        :param str pipeline_config_uri: Descriptor URI string for the config</span>
+<span class="sd">        :param int status: The status of the configuration. This is defined as a enum value</span>
+<span class="sd">            provided by :class:`ExternalConfiguration`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ExternalConfiguration</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_config_uri</span> <span class="o">=</span> <span class="n">pipeline_config_uri</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span> <span class="o">=</span> <span class="n">plugin_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span> <span class="o">=</span> <span class="n">engine_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span> <span class="o">=</span> <span class="n">interpreter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_software_hash</span> <span class="o">=</span> <span class="n">software_hash</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">status</span>
+
+        <span class="c1"># boolean to track if commands have been requested for this instance</span>
+        <span class="c1"># this is related to how configs tracking remote latest versions</span>
+        <span class="c1"># have their list of commands memoized for performance reasons.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_commands_evaluated_once</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># keep a handle to the current app/engine/fw bundle for convenience</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_bundle</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bg_task_manager</span> <span class="o">=</span> <span class="n">bg_task_manager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bg_task_manager</span><span class="o">.</span><span class="n">task_completed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_completed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bg_task_manager</span><span class="o">.</span><span class="n">task_failed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_failed</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">plugin_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The plugin id associated with the configuration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">engine_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The engine name associated with the configuration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The Python interpreter to use when accessing this configuration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">software_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A hash of the state of the software entity associated with this configuration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_software_hash</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_primary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns ``True`` if this is the primary configuration, ``False`` if not.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline_configuration_name</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline_configuration_name</span> <span class="o">==</span> <span class="s2">&quot;Primary&quot;</span><span class="p">:</span>
+            <span class="c1"># all fallback configs are primary</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns ``True`` if this configuration contains valid data that can be</span>
+<span class="sd">        used in the current environment, and ``False`` if the configuration is</span>
+<span class="sd">        inaccessible for some reason.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The current status of the configuration. This will be returned as an</span>
+<span class="sd">        enum value provided by :class:`ExternalConfiguration`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pipeline_configuration_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The associated pipeline configuration id or ``None`` if not defined.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># note: subclassed implementations will override this return value</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pipeline_configuration_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The name of the associated pipeline configuration or ``None`` if not defined.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># note: subclassed implementations will override this return value</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">descriptor_uri</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The descriptor URI associated with this pipeline configuration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_config_uri</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tracking_latest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns True if this configuration is tracking an external &#39;latest version&#39;.</span>
+<span class="sd">        This means that we cannot rely on any caches - because a remote process</span>
+<span class="sd">        may release a new &quot;latest&quot; version, we cannot know simply by computing a</span>
+<span class="sd">        cache key or looking at a local state on disk whether a cached configuration</span>
+<span class="sd">        is up to date or not. The only way to determine this is by actually fully resolve</span>
+<span class="sd">        the configuration.</span>
+
+<span class="sd">        .. note:: External configurations with this property returning True will have their</span>
+<span class="sd">                  commands memoized; The first call to :meth:`request_commands` will resolve</span>
+<span class="sd">                  the associated commands and subsequent requests will simply return that</span>
+<span class="sd">                  result. In order do perform a new evaluation of the list of associated</span>
+<span class="sd">                  commands, instantiate a new External Configuration instance.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># note: subclassed implementations will override this return value</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+<div class="viewcode-block" id="ExternalConfiguration.request_commands"><a class="viewcode-back" href="../../../external_config.html#external_config.ExternalConfiguration.request_commands">[docs]</a>    <span class="k">def</span> <span class="nf">request_commands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">link_entity_type</span><span class="p">,</span> <span class="n">engine_fallback</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Request commands for the given shotgun entity.</span>
+
+<span class="sd">        A ``commands_loaded`` signal will be emitted once the commands are available.</span>
+
+<span class="sd">        :param int project_id: Associated project id</span>
+<span class="sd">        :param str entity_type: Associated entity type</span>
+<span class="sd">        :param int entity_id: Associated entity id. If this is set to None,</span>
+<span class="sd">            a best guess for a generic listing will be carried out.</span>
+<span class="sd">        :param str link_entity_type: Entity type that the item is linked to.</span>
+<span class="sd">            This is typically provided for things such as task, versions or notes,</span>
+<span class="sd">            where having different values it per linked type can be beneficial.</span>
+<span class="sd">        :param str engine_fallback: If the main engine isn&#39;t available for the given</span>
+<span class="sd">            entity id and project, request generate commands for the fallback engine</span>
+<span class="sd">            specified. This can be useful in backwards compatibility scenarios.</span>
+
+<span class="sd">        :raises: RuntimeError if this configuration&#39;s status does not allow for</span>
+<span class="sd">            commands requests.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Requested commands for </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">link_entity_type</span><span class="p">))</span>
+
+        <span class="c1"># run entire command check and generation in worker</span>
+        <span class="n">task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bg_task_manager</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_request_commands</span><span class="p">,</span>
+            <span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">TASK_GROUP</span><span class="p">,</span>
+            <span class="n">task_kwargs</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;project_id&quot;</span><span class="p">:</span> <span class="n">project_id</span><span class="p">,</span>
+                <span class="s2">&quot;entity_type&quot;</span><span class="p">:</span> <span class="n">entity_type</span><span class="p">,</span>
+                <span class="s2">&quot;entity_id&quot;</span><span class="p">:</span> <span class="n">entity_id</span><span class="p">,</span>
+                <span class="s2">&quot;link_entity_type&quot;</span><span class="p">:</span> <span class="n">link_entity_type</span><span class="p">,</span>
+                <span class="s2">&quot;engine_fallback&quot;</span><span class="p">:</span> <span class="n">engine_fallback</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">link_entity_type</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_compute_config_hash_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">link_entity_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a hash to uniquely identify the configuration.</span>
+
+<span class="sd">        :param str entity_type: Associated entity type</span>
+<span class="sd">        :param int entity_id: Associated entity id</span>
+<span class="sd">        :param str link_entity_type: Entity type that the item is linked to.</span>
+<span class="sd">            This is typically provided for things such as task, versions or notes,</span>
+<span class="sd">            where caching it per linked type can be beneficial.</span>
+<span class="sd">        :returns: dictionary of values to use for hash computation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># This needs to be implemented by subclasses.</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;_compute_config_hash_keys is not implemented.&quot;</span><span class="p">)</span>
+
+    <span class="nd">@sgtk.LogManager.log_timing</span>
+    <span class="k">def</span> <span class="nf">_request_commands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">link_entity_type</span><span class="p">,</span> <span class="n">engine_fallback</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execution, runs in a separate thread and launches an external</span>
+<span class="sd">        process to cache commands.</span>
+
+<span class="sd">        :param int project_id: Associated project id</span>
+<span class="sd">        :param str entity_type: Associated entity type</span>
+<span class="sd">        :param int entity_id: Associated entity id</span>
+<span class="sd">        :param str link_entity_type: Entity type that the item is linked to.</span>
+<span class="sd">            This is typically provided for things such as task, versions or notes,</span>
+<span class="sd">            where caching it per linked type can be beneficial.</span>
+<span class="sd">        :param str engine_fallback: If the main engine isn&#39;t available for the given</span>
+<span class="sd">            entity id and project, request generate commands for the fallback engine</span>
+<span class="sd">            specified. This can be useful in backwards compatibility scenarios.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_commands_evaluated_once</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="c1"># figure out if we have a suitable config for this on disk already</span>
+        <span class="n">cache_hash</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_config_hash_keys</span><span class="p">(</span>
+            <span class="n">entity_type</span><span class="p">,</span>
+            <span class="n">entity_id</span><span class="p">,</span>
+            <span class="n">link_entity_type</span>
+        <span class="p">)</span>
+        <span class="n">cache_path</span> <span class="o">=</span> <span class="n">file_cache</span><span class="o">.</span><span class="n">get_cache_path</span><span class="p">(</span><span class="n">cache_hash</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracking_latest</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_commands_evaluated_once</span><span class="p">:</span>
+            <span class="c1"># this configuration is tracking an external latest version</span>
+            <span class="c1"># so it&#39;s by definition never up to date. For performance</span>
+            <span class="c1"># reasons, we memoize it, and only evaluate the list of</span>
+            <span class="c1"># commands once per external config instance, tracked</span>
+            <span class="c1"># via the _commands_evaluated_once boolean.</span>
+            <span class="n">cached_data</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cached_data</span> <span class="o">=</span> <span class="n">file_cache</span><span class="o">.</span><span class="n">load_cache</span><span class="p">(</span><span class="n">cache_hash</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cached_data</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">ExternalCommand</span><span class="o">.</span><span class="n">is_compatible</span><span class="p">(</span><span class="n">cached_data</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Begin caching commands&quot;</span><span class="p">)</span>
+
+            <span class="c1"># if entity_id is None, we need to figure out an actual entity id</span>
+            <span class="c1"># go get items for. This is done by choosing the most recently</span>
+            <span class="c1"># updated item for the project</span>
+            <span class="k">if</span> <span class="n">entity_id</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="s2">&quot;No entity id specified. Resolving most most recent </span><span class="si">%s</span><span class="s2"> &quot;</span>
+                    <span class="s2">&quot;id for project.&quot;</span> <span class="o">%</span> <span class="n">entity_type</span>
+                <span class="p">)</span>
+
+                <span class="n">most_recent_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">shotgun</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span>
+                    <span class="n">entity_type</span><span class="p">,</span>
+                    <span class="p">[[</span><span class="s2">&quot;project&quot;</span><span class="p">,</span> <span class="s2">&quot;is&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Project&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">project_id</span><span class="p">}]],</span>
+                    <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                    <span class="n">order</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;field_name&quot;</span><span class="p">:</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;direction&quot;</span><span class="p">:</span> <span class="s2">&quot;desc&quot;</span><span class="p">}]</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">most_recent_id</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                        <span class="s2">&quot;There are no </span><span class="si">%s</span><span class="s2"> objects for project </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">project_id</span><span class="p">)</span>
+                    <span class="p">)</span>
+
+                <span class="n">entity_id</span> <span class="o">=</span> <span class="n">most_recent_id</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Will cache using </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">))</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># run the external process. It will write a cache file to disk or fail.</span>
+                <span class="c1">#</span>
+                <span class="c1"># We&#39;re pre-caching here, which triggers a CACHE_FULL caching policy</span>
+                <span class="c1"># for the ToolkitManager used for bootstrapping when getting commands.</span>
+                <span class="c1"># This is required because tk-multi-launchapp requires access to all</span>
+                <span class="c1"># of the engines in the config when operating via Software entities. If</span>
+                <span class="c1"># we don&#39;t have all of the engines cached on disk yet, this will cause</span>
+                <span class="c1"># them to be cached prior to us getting a list of commands.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_run_external_process</span><span class="p">(</span>
+                    <span class="n">cache_path</span><span class="p">,</span>
+                    <span class="n">entity_type</span><span class="p">,</span>
+                    <span class="n">entity_id</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">engine_name</span><span class="p">,</span>
+                    <span class="n">pre_cache</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="k">except</span> <span class="n">SubprocessCalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c1"># caching failed!</span>
+                <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">engine_fallback</span><span class="p">:</span>
+                    <span class="c1"># An indication that the engine could not be started.</span>
+                    <span class="c1"># If a fallback engine is defined, try to launch this</span>
+                    <span class="c1"># Note: the reason we are doing this as two separate</span>
+                    <span class="c1"># process invocation is because older cores don&#39;t</span>
+                    <span class="c1"># have the ability to bootstrap and then bootstrap again.</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_run_external_process</span><span class="p">(</span>
+                            <span class="n">cache_path</span><span class="p">,</span>
+                            <span class="n">entity_type</span><span class="p">,</span>
+                            <span class="n">entity_id</span><span class="p">,</span>
+                            <span class="n">engine_fallback</span><span class="p">,</span>
+                            <span class="n">pre_cache</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="k">except</span> <span class="n">SubprocessCalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Error retrieving actions: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Error retrieving actions: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+
+            <span class="c1"># now try again</span>
+            <span class="n">cached_data</span> <span class="o">=</span> <span class="n">file_cache</span><span class="o">.</span><span class="n">load_cache</span><span class="p">(</span><span class="n">cache_hash</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">cached_data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Could not locate cached commands for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cached_data</span>
+
+    <span class="nd">@sgtk.LogManager.log_timing</span>
+    <span class="k">def</span> <span class="nf">_run_external_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache_path</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">engine_name</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper method. Executes the external caching process.</span>
+
+<span class="sd">        :param int cache_path: Path to cache file to write</span>
+<span class="sd">        :param str entity_type: Associated entity type</span>
+<span class="sd">        :param int entity_id: Associated entity id</span>
+<span class="sd">        :param str engine_name: Engine to start</span>
+<span class="sd">        :param bool pre_cache: Whether to pre-cache all bundles during bootstrap</span>
+
+<span class="sd">        :raises: SubprocessCalledProcessError</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># launch external process to carry out caching.</span>
+        <span class="n">script</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span>
+                <span class="s2">&quot;..&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;scripts&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;external_runner.py&quot;</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># We might have paths in sys.path that aren&#39;t in PYTHONPATH. We&#39;ll make</span>
+        <span class="c1"># sure that we prepend our current pathing to that prior to spawning any</span>
+        <span class="c1"># subprocesses.</span>
+        <span class="n">current_pypath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;PYTHONPATH&quot;</span><span class="p">)</span>
+
+        <span class="n">args_file</span> <span class="o">=</span> <span class="n">create_parameter_file</span><span class="p">(</span>
+            <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">action</span><span class="o">=</span><span class="s2">&quot;cache_actions&quot;</span><span class="p">,</span>
+                <span class="n">cache_path</span><span class="o">=</span><span class="n">cache_path</span><span class="p">,</span>
+                <span class="n">configuration_uri</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor_uri</span><span class="p">,</span>
+                <span class="n">pipeline_config_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline_configuration_id</span><span class="p">,</span>
+                <span class="n">plugin_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plugin_id</span><span class="p">,</span>
+                <span class="n">engine_name</span><span class="o">=</span><span class="n">engine_name</span><span class="p">,</span>
+                <span class="n">entity_type</span><span class="o">=</span><span class="n">entity_type</span><span class="p">,</span>
+                <span class="n">entity_id</span><span class="o">=</span><span class="n">entity_id</span><span class="p">,</span>
+                <span class="n">bundle_cache_fallback_paths</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">sgtk</span><span class="o">.</span><span class="n">bundle_cache_fallback_paths</span><span class="p">,</span>
+                <span class="c1"># the engine icon becomes the process icon</span>
+                <span class="n">icon_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">icon_256</span><span class="p">,</span>
+                <span class="n">pre_cache</span><span class="o">=</span><span class="n">pre_cache</span><span class="p">,</span>
+                <span class="n">pythonpath</span><span class="o">=</span><span class="n">current_pypath</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="p">,</span>
+            <span class="n">script</span><span class="p">,</span>
+            <span class="n">sgtk</span><span class="o">.</span><span class="n">bootstrap</span><span class="o">.</span><span class="n">ToolkitManager</span><span class="o">.</span><span class="n">get_core_python_path</span><span class="p">(),</span>
+            <span class="n">args_file</span>
+        <span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Launching external script: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+        <span class="c1"># Ensure the credentials are still valid before launching the command in</span>
+        <span class="c1"># a separate process. We need do to this in advance because the process</span>
+        <span class="c1"># that will be launched might not have PySide and as such won&#39;t be able</span>
+        <span class="c1"># to prompt the user to re-authenticate.</span>
+        <span class="n">sgtk</span><span class="o">.</span><span class="n">get_authenticated_user</span><span class="p">()</span><span class="o">.</span><span class="n">refresh_credentials</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+            <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">prepend_path_to_env_var</span><span class="p">(</span><span class="s2">&quot;PYTHONPATH&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Note: passing a copy of the environment in resolves some odd behavior with</span>
+            <span class="c1"># the environment of processes spawned from the external_runner. This caused</span>
+            <span class="c1"># some very bad behavior where it looked like PYTHONPATH was inherited from</span>
+            <span class="c1"># this top-level environment rather than what is being set in external_runner</span>
+            <span class="c1"># prior to launch. This is less critical here when caching configs, because</span>
+            <span class="c1"># we&#39;re unlikely to spawn additional processes from the external_runner, but</span>
+            <span class="c1"># just to cover our backsides, this is safest.</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">subprocess_check_output</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;External caching complete. Output: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">output</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c1"># Leave PYTHONPATH the way we found it.</span>
+            <span class="k">if</span> <span class="n">current_pypath</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PYTHONPATH&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PYTHONPATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_pypath</span>
+
+            <span class="c1"># clean up temp file</span>
+            <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">filesystem</span><span class="o">.</span><span class="n">safe_delete_file</span><span class="p">(</span><span class="n">args_file</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_task_completed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique_id</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called after command caching completes.</span>
+
+<span class="sd">        :param str unique_id: unique task id</span>
+<span class="sd">        :param str group: task group</span>
+<span class="sd">        :param str result: return data from worker</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">unique_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">:</span>
+            <span class="c1"># this was not for us</span>
+            <span class="k">return</span>
+
+        <span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">link_entity_type</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">[</span><span class="n">unique_id</span><span class="p">]</span>
+
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">[</span><span class="n">unique_id</span><span class="p">]</span>
+
+        <span class="c1"># result contains our cached data</span>
+        <span class="c1">#</span>
+        <span class="c1"># this is a dictionary with the following structure:</span>
+        <span class="c1"># cache_data = {</span>
+        <span class="c1">#   &quot;version&quot;: external_command_utils.FORMAT_GENERATION,</span>
+        <span class="c1">#   &quot;commands&quot;: [&lt;serialized1&gt;, &lt;serialized2&gt;]</span>
+        <span class="c1"># }</span>
+        <span class="c1">#</span>
+        <span class="n">cached_data</span> <span class="o">=</span> <span class="n">result</span>
+
+        <span class="c1"># got some cached data that we can emit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands_loaded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+            <span class="n">project_id</span><span class="p">,</span>
+            <span class="n">entity_type</span><span class="p">,</span>
+            <span class="n">entity_id</span><span class="p">,</span>
+            <span class="n">link_entity_type</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">ExternalCommand</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">cached_data</span><span class="p">[</span><span class="s2">&quot;commands&quot;</span><span class="p">]]</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_task_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique_id</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">traceback_str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called if command caching fails.</span>
+
+<span class="sd">        :param str unique_id: unique task id</span>
+<span class="sd">        :param str group: task group</span>
+<span class="sd">        :param message: error message</span>
+<span class="sd">        :param traceback_str: callstack</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">unique_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">:</span>
+            <span class="c1"># this was not for us</span>
+            <span class="k">return</span>
+
+        <span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">link_entity_type</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">[</span><span class="n">unique_id</span><span class="p">]</span>
+
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">[</span><span class="n">unique_id</span><span class="p">]</span>
+
+        <span class="c1"># emit error signal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands_load_failed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+            <span class="n">project_id</span><span class="p">,</span>
+            <span class="n">entity_type</span><span class="p">,</span>
+            <span class="n">entity_id</span><span class="p">,</span>
+            <span class="n">link_entity_type</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">message</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Autodesk.
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'v5.5.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+  
+ 
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-2114792-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+</body>
+</html>

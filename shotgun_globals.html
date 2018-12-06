@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Globals Access &mdash; tk-framework-shotgunutils v5.4.5 documentation</title>
+  <title>Shotgun Globals Access &mdash; tk-framework-shotgunutils v5.5.0 documentation</title>
   
 
   
@@ -32,7 +32,8 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.4.5 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.5.0 documentation" href="index.html"/>
+        <link rel="next" title="External Configuration Management" href="external_config.html"/>
         <link rel="prev" title="Shotgun Toolkit Qt Settings Wrapper" href="settings.html"/> 
 
   
@@ -95,6 +96,7 @@
 <li class="toctree-l1"><a class="reference internal" href="task_manager.html">Background Task Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Shotgun Toolkit Qt Settings Wrapper</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Shotgun Globals Access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_config.html">External Configuration Management</a></li>
 </ul>
 
             
@@ -118,7 +120,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.4.5.<br>
+    <b>tk-framework-shotgunutils</b> v5.5.0.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -207,7 +209,7 @@ singleton can refresh its cache.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_manager</strong> (<code class="xref py py-class docutils literal"><span class="pre">task_manager.BackgroundTaskManager</span></code>) &#8211; Background task manager to use</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_manager</strong> (<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-shotgunutils/task_manager.html#task_manager.BackgroundTaskManager" title="(in tk-framework-shotgunutils vv5.4.5)"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a>) &#8211; Background task manager to use</td>
 </tr>
 </tbody>
 </table>
@@ -221,7 +223,7 @@ singleton can refresh its cache.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_manager</strong> (<code class="xref py py-class docutils literal"><span class="pre">task_manager.BackgroundTaskManager</span></code>) &#8211; Background task manager to use</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_manager</strong> (<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-shotgunutils/task_manager.html#task_manager.BackgroundTaskManager" title="(in tk-framework-shotgunutils vv5.4.5)"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a>) &#8211; Background task manager to use</td>
 </tr>
 </tbody>
 </table>
@@ -406,14 +408,14 @@ an <code class="docutils literal"><span class="pre">&lt;img&gt;</span></code> ht
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sg_entity_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; The entity type.</li>
-<li><strong>field_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; The name of the field on the entity</li>
+<li><strong>sg_entity_type</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The entity type.</li>
+<li><strong>field_name</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The name of the field on the entity</li>
 <li><strong>project_id</strong> &#8211; The id of the project entity to get a name from.
 If None, the current context&#8217;s project will be used.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><code class="xref py py-obj docutils literal"><span class="pre">list</span></code></a> of valid values defined by the schema</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A <code class="xref py py-obj docutils literal"><span class="pre">list</span></code> of valid values defined by the schema</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">ValueError</span></code> if the field has no valid values.</p>
@@ -432,8 +434,8 @@ If None, the current context&#8217;s project will be used.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sg_entity_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; the entity type</li>
-<li><strong>field_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; the field name to check editibility</li>
+<li><strong>sg_entity_type</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the entity type</li>
+<li><strong>field_name</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the field name to check editibility</li>
 <li><strong>project_id</strong> &#8211; The project Entity id. If None, the current
 context&#8217;s project will be used, or the &#8220;site&#8221;
 cache location will be returned if the current
@@ -502,7 +504,7 @@ dates as &#8220;Yesterday&#8221;, &#8220;Today&#8221;, or &#8220;Tomorrow&#8221;
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">datetime.date</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">datetime.datetime</span></code></a>) &#8211; The date convert to a string</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/2/library/datetime.html#datetime.date" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">datetime.date</span></code></a> or <a class="reference external" href="https://docs.python.org/2/library/datetime.html#datetime.datetime" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">datetime.datetime</span></code></a>) &#8211; The date convert to a string</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A String representing date appropriate for display</td>
 </tr>
@@ -518,6 +520,8 @@ dates as &#8220;Yesterday&#8221;, &#8220;Today&#8221;, or &#8220;Tomorrow&#8221;
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="external_config.html" class="btn btn-neutral float-right" title="External Configuration Management" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="settings.html" class="btn btn-neutral" title="Shotgun Toolkit Qt Settings Wrapper" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -550,7 +554,7 @@ dates as &#8220;Yesterday&#8221;, &#8220;Today&#8221;, or &#8220;Tomorrow&#8221;
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v5.4.5',
+            VERSION:'v5.5.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

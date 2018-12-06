@@ -35,4 +35,5 @@ Contents:
    task_manager
    settings
    shotgun_globals
+   external_config
 
