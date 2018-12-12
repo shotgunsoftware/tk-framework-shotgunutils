@@ -75,6 +75,10 @@ class ExternalConfigurationLoader(QtCore.QObject):
         self._engine_name = engine_name
         self._interpreter = interpreter
 
+        # This helps with testing, where we need to provide a manager with a
+        # mocked user to avoid an attempt to connect to an SG site.
+        self._bootstrap_manager = None
+
         self._shotgun_state = ConfigurationState(bg_task_manager, parent)
         self._shotgun_state.state_changed.connect(self.configurations_changed.emit)
         # always trigger a check at startup
@@ -235,7 +239,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
             ToolkitManager.get_pipeline_configurations()
         """
         # get list of configurations
-        mgr = sgtk.bootstrap.ToolkitManager()
+        mgr = self._bootstrap_manager or sgtk.bootstrap.ToolkitManager()
         mgr.plugin_id = self._plugin_id
         configs = mgr.get_pipeline_configurations(
             {"type": "Project", "id": project_id}
