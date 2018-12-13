@@ -16,7 +16,8 @@ install:
     # Travis CI servers use virtualenvs, so we need to finish the install by the following
     - python ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/pyside_postinstall.py -install
     - pip install coverage
+    - pip install coveralls
 
 # command to run tests
-script: cd tests && ./run_travis_tests.sh --with-coverage
+script: /tmp/tk-core/tests/run_tests.sh --test-root tests --with-coverage
 after_success: coveralls

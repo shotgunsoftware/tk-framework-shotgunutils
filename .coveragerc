@@ -12,7 +12,7 @@
 #
 #
 [run]
-source=../python
+source=python
 
 [report]
 exclude_lines =
