@@ -156,7 +156,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
                   a single ``configurations_loaded`` signal will be emitted, belonging
                   to the last request.
 
-        :param project_id: Project to request configurations for.
+        :param int project_id: Project to request configurations for.
         """
         # First of all, remove any existing requests for this project from
         # our internal task tracker. This will ensure that only one signal
@@ -222,20 +222,23 @@ class ExternalConfigurationLoader(QtCore.QObject):
 
             self._task_ids[unique_id] = project_id
 
-    def _execute_get_configurations(self, project_id, state_hash):
+    def _execute_get_configurations(self, project_id, state_hash, toolkit_manager=None):
         """
         Background task to load configs using the ToolkitManager.
 
         :param int project_id: Project id to load configs for.
         :param str state_hash: Hash representing the relevant
             global state of Shotgun.
+        :param toolkit_manager: An optional ToolkitManager instance to use when retrieving
+            pipeline configurations from Shotgun.
+        :type toolkit_manager: :class:`~sgtk.bootstrap.ToolkitManager`
         :returns: Tuple with (project id, state hash, list of configs), where
             the two first items are the input parameters to this method
             and the last item is the return data from
             ToolkitManager.get_pipeline_configurations()
         """
         # get list of configurations
-        mgr = sgtk.bootstrap.ToolkitManager()
+        mgr = toolkit_manager or sgtk.bootstrap.ToolkitManager()
         mgr.plugin_id = self._plugin_id
         configs = mgr.get_pipeline_configurations(
             {"type": "Project", "id": project_id}

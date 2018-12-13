@@ -1,3 +1,5 @@
+[![Reference Documentation](http://img.shields.io/badge/doc-reference-blue.svg)](http://developer.shotgunsoftware.com/tk-framework-shotgunutils)
+[![API Coverage Status](https://coveralls.io/repos/github/shotgunsoftware/tk-framework-shotgunutils/badge.svg?branch=master)](https://coveralls.io/github/shotgunsoftware/tk-framework-shotgunutils?branch=master)
 [![Build Status](https://travis-ci.org/shotgunsoftware/tk-framework-shotgunutils.svg?branch=master)](https://travis-ci.org/shotgunsoftware/tk-framework-shotgunutils)
 
 ## Documentation
