@@ -17,4 +17,5 @@ install:
     - python ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/pyside_postinstall.py -install
 
 # command to run tests
-script: cd tests && ./run_travis_tests.sh
+script: cd tests && ./run_travis_tests.sh --with-coverage
+after_success: coveralls

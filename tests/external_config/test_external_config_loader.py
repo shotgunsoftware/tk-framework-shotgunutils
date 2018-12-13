@@ -124,9 +124,12 @@ class TestExternalConfigLoader(TestShotgunUtilsFramework):
         """
         ec = self.external_config_loader
         ec.configurations_loaded = _MockedSignal()
-        ec._bootstrap_manager = ToolkitManager(self._mocked_sg_user)
         software_hash = "123"
-        result = ec._execute_get_configurations(self._project["id"], software_hash)
+        result = ec._execute_get_configurations(
+            self._project["id"],
+            software_hash,
+            toolkit_manager=ToolkitManager(self._mocked_sg_user),
+        )
 
         # If given a bogus task id it doesn't emit.
         ec._task_completed("9876", "test", [])
@@ -160,8 +163,11 @@ class TestExternalConfigLoader(TestShotgunUtilsFramework):
         Make sure we get the right config data from Shotgun.
         """
         ec = self.external_config_loader
-        ec._bootstrap_manager = ToolkitManager(self._mocked_sg_user)
-        res_project_id, res_hash, res_pcs = ec._execute_get_configurations(self._project["id"], "123")
+        res_project_id, res_hash, res_pcs = ec._execute_get_configurations(
+            self._project["id"],
+            "123",
+            toolkit_manager=ToolkitManager(self._mocked_sg_user),
+        )
 
         self.assertEqual(res_project_id, self._project["id"])
         self.assertEqual(res_hash, "123")
