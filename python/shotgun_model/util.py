@@ -148,6 +148,12 @@ def sanitize_qt(val):
             new_val[safe_key] = safe_val
         return new_val
 
+    elif isinstance(val, long):
+        try:
+            val = int(val)
+        except ValueError:
+            pass
+        return val
     else:
         return val        
 
