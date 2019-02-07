@@ -149,10 +149,7 @@ def sanitize_qt(val):
         return new_val
 
     elif isinstance(val, long):
-        try:
-            val = int(val)
-        except ValueError:
-            pass
+        val = int(val)
         return val
     else:
         return val        
