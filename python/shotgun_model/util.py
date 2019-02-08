@@ -148,15 +148,10 @@ def sanitize_qt(val):
             new_val[safe_key] = safe_val
         return new_val
 
-    """
-    This is a workaround for the JIRA ticket 
-    https://jira.autodesk.com/browse/SHOT-2806
-    QT Version: 5.9.5
-    PySide Version: 5.9.0a1
-    VRED version: 2020
-
-    The value should be `int` but it is `long`. 
-    """
+    # QT Version: 5.9.5
+    # PySide Version: 5.9.0a1
+    # VRED version: 2020
+    # The value should be `int` but it is `long`.
     elif isinstance(val, long):
         val = int(val)
         return val
