@@ -150,7 +150,6 @@ def sanitize_qt(val):
 
     # QT Version: 5.9.5
     # PySide Version: 5.9.0a1
-    # VRED version: 2020
     # The value should be `int` but it is `long`.
     elif isinstance(val, long):
         val = int(val)
