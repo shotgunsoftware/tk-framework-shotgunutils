@@ -432,7 +432,6 @@ class ExternalCommand(object):
                 supports_multiple_selection=self._sg_supports_multiple_selection,
                 pre_cache=pre_cache,
                 pythonpath=current_pypath,
-                # Todo: Do I need to add icon here as well?
             )
         )
         # compose the command we want to run
