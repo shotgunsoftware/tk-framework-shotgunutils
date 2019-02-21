@@ -76,6 +76,7 @@ class ExternalCommand(object):
             pipeline_config_name=external_configuration.pipeline_configuration_name,
             sg_deny_permissions=data["sg_deny_permissions"],
             sg_supports_multiple_selection=data["sg_supports_multiple_selection"],
+            icon=data["icon"]
         )
 
     def __init__(
@@ -95,6 +96,7 @@ class ExternalCommand(object):
             pipeline_config_name,
             sg_deny_permissions,
             sg_supports_multiple_selection,
+            icon,
     ):
         """
         .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
@@ -117,6 +119,7 @@ class ExternalCommand(object):
             groups to exclude this action from.
         :param bool sg_supports_multiple_selection: (Shotgun specific) Action
             supports multiple selection.
+        :param str icon: The path to a square png icon file representing this item
         """
         super(ExternalCommand, self).__init__()
 
@@ -138,6 +141,7 @@ class ExternalCommand(object):
         self._pipeline_config_name = pipeline_config_name
         self._sg_deny_permissions = sg_deny_permissions
         self._sg_supports_multiple_selection = sg_supports_multiple_selection
+        self._icon = icon
 
     def __repr__(self):
         """
@@ -178,6 +182,7 @@ class ExternalCommand(object):
             pipeline_config_name=data["pipeline_config_name"],
             sg_deny_permissions=data["sg_deny_permissions"],
             sg_supports_multiple_selection=data["sg_supports_multiple_selection"],
+            icon=data["icon"]
         )
 
     def serialize(self):
@@ -204,7 +209,8 @@ class ExternalCommand(object):
             "entity_id": self._entity_id,
             "pipeline_config_name": self._pipeline_config_name,
             "sg_deny_permissions": self._sg_deny_permissions,
-            "sg_supports_multiple_selection": self._sg_supports_multiple_selection
+            "sg_supports_multiple_selection": self._sg_supports_multiple_selection,
+            "icon": self._icon
         }
         return cPickle.dumps(data)
 
@@ -236,6 +242,13 @@ class ExternalCommand(object):
         Display name, suitable for display in a menu.
         """
         return self._display_name
+
+    @property
+    def icon(self):
+        """
+        The path to a square png icon file representing this item
+        """
+        return self._icon
 
     @property
     def group(self):
@@ -419,6 +432,7 @@ class ExternalCommand(object):
                 supports_multiple_selection=self._sg_supports_multiple_selection,
                 pre_cache=pre_cache,
                 pythonpath=current_pypath,
+                # Todo: Do I need to add icon here as well?
             )
         )
         # compose the command we want to run
