@@ -11,9 +11,6 @@ import os
 import sys
 import cPickle
 import sgtk
-from sgtk.util.process import subprocess_check_output, \
-    SubprocessCalledProcessError
-
 from . import external_command_utils
 
 logger = sgtk.platform.get_logger(__name__)
@@ -452,9 +449,9 @@ class ExternalCommand(object):
             # some very bad behavior where it looked like PYTHONPATH was inherited from
             # this top-level environment rather than what is being set in external_runner
             # prior to launch.
-            output = subprocess_check_output(args, env=os.environ.copy())
+            output = sgtk.util.process.subprocess_check_output(args, env=os.environ.copy())
             logger.debug("External execution complete. Output: %s" % output)
-        except SubprocessCalledProcessError as e:
+        except sgtk.util.process.SubprocessCalledProcessError as e:
             # caching failed!
             raise RuntimeError("Error executing remote command %s: %s" % (self, e.output))
         finally:
