@@ -11,11 +11,9 @@
 import sys
 import os
 
-from mock import patch, Mock
+from mock import patch
 from sgtk.util import process
 from sgtk.util import filesystem
-
-from tank_test.tank_test_base import *
 
 # import the test base class
 test_python_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "python"))

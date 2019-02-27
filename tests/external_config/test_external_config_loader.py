@@ -11,7 +11,6 @@
 import sys
 import os
 
-from tank_test.tank_test_base import *
 from mock import patch, Mock
 from sgtk.bootstrap import ToolkitManager
 
