@@ -11,9 +11,6 @@ import os
 import sys
 import cPickle
 import sgtk
-from sgtk.util.process import subprocess_check_output, \
-    SubprocessCalledProcessError
-
 from . import external_command_utils
 
 logger = sgtk.platform.get_logger(__name__)
@@ -76,6 +73,7 @@ class ExternalCommand(object):
             pipeline_config_name=external_configuration.pipeline_configuration_name,
             sg_deny_permissions=data["sg_deny_permissions"],
             sg_supports_multiple_selection=data["sg_supports_multiple_selection"],
+            icon=data["icon"]
         )
 
     def __init__(
@@ -95,6 +93,7 @@ class ExternalCommand(object):
             pipeline_config_name,
             sg_deny_permissions,
             sg_supports_multiple_selection,
+            icon,
     ):
         """
         .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
@@ -117,6 +116,7 @@ class ExternalCommand(object):
             groups to exclude this action from.
         :param bool sg_supports_multiple_selection: (Shotgun specific) Action
             supports multiple selection.
+        :param str icon: The path to a square png icon file representing this item
         """
         super(ExternalCommand, self).__init__()
 
@@ -138,6 +138,7 @@ class ExternalCommand(object):
         self._pipeline_config_name = pipeline_config_name
         self._sg_deny_permissions = sg_deny_permissions
         self._sg_supports_multiple_selection = sg_supports_multiple_selection
+        self._icon = icon
 
     def __repr__(self):
         """
@@ -178,6 +179,7 @@ class ExternalCommand(object):
             pipeline_config_name=data["pipeline_config_name"],
             sg_deny_permissions=data["sg_deny_permissions"],
             sg_supports_multiple_selection=data["sg_supports_multiple_selection"],
+            icon=data["icon"]
         )
 
     def serialize(self):
@@ -204,7 +206,8 @@ class ExternalCommand(object):
             "entity_id": self._entity_id,
             "pipeline_config_name": self._pipeline_config_name,
             "sg_deny_permissions": self._sg_deny_permissions,
-            "sg_supports_multiple_selection": self._sg_supports_multiple_selection
+            "sg_supports_multiple_selection": self._sg_supports_multiple_selection,
+            "icon": self._icon
         }
         return cPickle.dumps(data)
 
@@ -236,6 +239,13 @@ class ExternalCommand(object):
         Display name, suitable for display in a menu.
         """
         return self._display_name
+
+    @property
+    def icon(self):
+        """
+        The path to a square png icon file representing this item
+        """
+        return self._icon
 
     @property
     def group(self):
@@ -439,9 +449,9 @@ class ExternalCommand(object):
             # some very bad behavior where it looked like PYTHONPATH was inherited from
             # this top-level environment rather than what is being set in external_runner
             # prior to launch.
-            output = subprocess_check_output(args, env=os.environ.copy())
+            output = sgtk.util.process.subprocess_check_output(args, env=os.environ.copy())
             logger.debug("External execution complete. Output: %s" % output)
-        except SubprocessCalledProcessError as e:
+        except sgtk.util.process.SubprocessCalledProcessError as e:
             # caching failed!
             raise RuntimeError("Error executing remote command %s: %s" % (self, e.output))
         finally:
