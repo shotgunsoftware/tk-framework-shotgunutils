@@ -9,9 +9,10 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 from mock import patch
-from sgtk.util import process
-from sgtk.util import filesystem
-from external_config_base import ExternalConfigBase
+from sgtk.util import process # noqa
+from sgtk.util import filesystem #noqa
+from . import ExternalConfigBase, _MockedSignal
+from tank_test.tank_test_base import setUpModule # noqa
 
 
 class TestExternalCommand(ExternalConfigBase):

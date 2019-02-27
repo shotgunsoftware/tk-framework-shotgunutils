@@ -10,9 +10,9 @@
 
 import sys
 
-from mock import patch, Mock
 from sgtk.bootstrap import ToolkitManager
-from external_config_base import ExternalConfigBase, _MockedSignal, _MockedShotgunUser
+from . import ExternalConfigBase, _MockedSignal, _MockedShotgunUser
+from tank_test.tank_test_base import setUpModule # noqa
 
 
 class TestExternalConfigLoader(ExternalConfigBase):
