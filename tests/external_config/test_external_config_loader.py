@@ -9,14 +9,9 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sys
-import os
 
 from mock import patch, Mock
 from sgtk.bootstrap import ToolkitManager
-
-# import the test base class
-test_python_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "python"))
-sys.path.append(test_python_path)
 from external_config_base import ExternalConfigBase, _MockedSignal, _MockedShotgunUser
 
 
