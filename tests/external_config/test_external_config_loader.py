@@ -11,7 +11,7 @@
 import sys
 
 from sgtk.bootstrap import ToolkitManager
-from . import ExternalConfigBase, _MockedSignal, _MockedShotgunUser
+from . import ExternalConfigBase, _MockedSignal
 from tank_test.tank_test_base import setUpModule # noqa
 
 

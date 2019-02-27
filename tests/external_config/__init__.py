@@ -9,13 +9,8 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sys
-import os
 
 from mock import Mock
-
-# import the test base class
-test_python_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "python"))
-sys.path.append(test_python_path)
 from base_test import TestShotgunUtilsFramework
 
 

@@ -9,10 +9,11 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 from mock import patch
+
 from sgtk.util import process # noqa
-from sgtk.util import filesystem #noqa
-from . import ExternalConfigBase, _MockedSignal
+from sgtk.util import filesystem # noqa
 from tank_test.tank_test_base import setUpModule # noqa
+from . import ExternalConfigBase
 
 
 class TestExternalCommand(ExternalConfigBase):
@@ -60,13 +61,22 @@ class TestExternalCommand(ExternalConfigBase):
 
     @property
     def ec_data(self):
+        """
+        A dictionary of the test data used to create the ExternalCommand object
+        """
         return self._data
 
     @property
     def ec(self):
+        """
+        An ExternalCommand test instance
+        """
         return self._external_command
 
     def test_properties(self):
+        """
+        Make sure public properties can be accessed without exception
+        """
         self.assertEquals(self.ec.pipeline_configuration_name, self._pipeline_configuration_id)
         # Yes, the prop. name and dict key are different
         self.assertEquals(self.ec.system_name, self.ec_data["callback_name"])
@@ -84,7 +94,9 @@ class TestExternalCommand(ExternalConfigBase):
         self.assertTrue(len(repr(self.ec)) > 0)
 
     def test_serialize_deserialize(self):
-
+        """
+        Make sure that serializing and deserialize an ExternalCommand instance produce a similar object.
+        """
         # Serialize our test base object
         a_pickle = self.ec.serialize()
 
