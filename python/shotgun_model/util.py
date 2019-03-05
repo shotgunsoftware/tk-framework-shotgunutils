@@ -148,6 +148,12 @@ def sanitize_qt(val):
             new_val[safe_key] = safe_val
         return new_val
 
+    # QT Version: 5.9.5
+    # PySide Version: 5.9.0a1
+    # The value should be `int` but it is `long`.
+    elif isinstance(val, long):
+        val = int(val)
+        return val
     else:
         return val        
 
