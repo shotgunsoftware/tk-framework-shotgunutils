@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>External Configuration Management &mdash; tk-framework-shotgunutils v5.5.0 documentation</title>
+  <title>External Configuration Management &mdash; tk-framework-shotgunutils v5.6.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.5.0 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.6.1 documentation" href="index.html"/>
         <link rel="prev" title="Shotgun Globals Access" href="shotgun_globals.html"/> 
 
   
@@ -125,7 +125,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.5.0.<br>
+    <b>tk-framework-shotgunutils</b> v5.6.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -312,7 +312,7 @@ to the last request.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>project_id</strong> &#8211; Project to request configurations for.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>project_id</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; Project to request configurations for.</td>
 </tr>
 </tbody>
 </table>
@@ -489,7 +489,7 @@ commands requests.</p>
 <h2>Class ExternalCommand<a class="headerlink" href="#class-externalcommand" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="external_config.ExternalCommand">
-<em class="property">class </em><code class="descclassname">external_config.</code><code class="descname">ExternalCommand</code><span class="sig-paren">(</span><em>callback_name</em>, <em>display_name</em>, <em>tooltip</em>, <em>group</em>, <em>is_group_default</em>, <em>plugin_id</em>, <em>interpreter</em>, <em>engine_name</em>, <em>descriptor_uri</em>, <em>pipeline_config_id</em>, <em>entity_type</em>, <em>entity_id</em>, <em>pipeline_config_name</em>, <em>sg_deny_permissions</em>, <em>sg_supports_multiple_selection</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/external_config/external_command.html#ExternalCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#external_config.ExternalCommand" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">external_config.</code><code class="descname">ExternalCommand</code><span class="sig-paren">(</span><em>callback_name</em>, <em>display_name</em>, <em>tooltip</em>, <em>group</em>, <em>is_group_default</em>, <em>plugin_id</em>, <em>interpreter</em>, <em>engine_name</em>, <em>descriptor_uri</em>, <em>pipeline_config_id</em>, <em>entity_type</em>, <em>entity_id</em>, <em>pipeline_config_name</em>, <em>sg_deny_permissions</em>, <em>sg_supports_multiple_selection</em>, <em>icon</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/external_config/external_command.html#ExternalCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#external_config.ExternalCommand" title="Permalink to this definition">¶</a></dt>
 <dd><p>Represents an external Toolkit command (e.g. menu option).</p>
 <p>These objects are emitted by <a class="reference internal" href="#external_config.ExternalConfiguration" title="external_config.ExternalConfiguration"><code class="xref py py-class docutils literal"><span class="pre">ExternalConfiguration</span></code></a>
 and are independent, decoupled, light weight objects that
@@ -523,6 +523,7 @@ Do not construct objects by hand.</p>
 groups to exclude this action from.</li>
 <li><strong>sg_supports_multiple_selection</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) &#8211; (Shotgun specific) Action
 supports multiple selection.</li>
+<li><strong>icon</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The path to a square png icon file representing this item</li>
 </ul>
 </td>
 </tr>
@@ -604,6 +605,12 @@ or <code class="docutils literal"><span class="pre">None</span></code> if no ass
 <dt id="external_config.ExternalCommand.display_name">
 <code class="descname">display_name</code><a class="headerlink" href="#external_config.ExternalCommand.display_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Display name, suitable for display in a menu.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="external_config.ExternalCommand.icon">
+<code class="descname">icon</code><a class="headerlink" href="#external_config.ExternalCommand.icon" title="Permalink to this definition">¶</a></dt>
+<dd><p>The path to a square png icon file representing this item</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -759,7 +766,7 @@ entity id associated with this command.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Autodesk.
+        &copy; Copyright 2019, Autodesk.
 
     </p>
   </div> 
@@ -780,7 +787,7 @@ entity id associated with this command.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v5.5.0',
+            VERSION:'v5.6.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

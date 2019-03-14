@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>external_config.external_config_loader &mdash; tk-framework-shotgunutils v5.5.0 documentation</title>
+  <title>external_config.external_config_loader &mdash; tk-framework-shotgunutils v5.6.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.5.0 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.6.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -119,7 +119,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.5.0.<br>
+    <b>tk-framework-shotgunutils</b> v5.6.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -331,7 +331,7 @@
 <span class="sd">                  a single ``configurations_loaded`` signal will be emitted, belonging</span>
 <span class="sd">                  to the last request.</span>
 
-<span class="sd">        :param project_id: Project to request configurations for.</span>
+<span class="sd">        :param int project_id: Project to request configurations for.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># First of all, remove any existing requests for this project from</span>
         <span class="c1"># our internal task tracker. This will ensure that only one signal</span>
@@ -397,20 +397,23 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">[</span><span class="n">unique_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">project_id</span></div>
 
-    <span class="k">def</span> <span class="nf">_execute_get_configurations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="p">,</span> <span class="n">state_hash</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_execute_get_configurations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="p">,</span> <span class="n">state_hash</span><span class="p">,</span> <span class="n">toolkit_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Background task to load configs using the ToolkitManager.</span>
 
 <span class="sd">        :param int project_id: Project id to load configs for.</span>
 <span class="sd">        :param str state_hash: Hash representing the relevant</span>
 <span class="sd">            global state of Shotgun.</span>
+<span class="sd">        :param toolkit_manager: An optional ToolkitManager instance to use when retrieving</span>
+<span class="sd">            pipeline configurations from Shotgun.</span>
+<span class="sd">        :type toolkit_manager: :class:`~sgtk.bootstrap.ToolkitManager`</span>
 <span class="sd">        :returns: Tuple with (project id, state hash, list of configs), where</span>
 <span class="sd">            the two first items are the input parameters to this method</span>
 <span class="sd">            and the last item is the return data from</span>
 <span class="sd">            ToolkitManager.get_pipeline_configurations()</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># get list of configurations</span>
-        <span class="n">mgr</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">bootstrap</span><span class="o">.</span><span class="n">ToolkitManager</span><span class="p">()</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">toolkit_manager</span> <span class="ow">or</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">bootstrap</span><span class="o">.</span><span class="n">ToolkitManager</span><span class="p">()</span>
         <span class="n">mgr</span><span class="o">.</span><span class="n">plugin_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span>
         <span class="n">configs</span> <span class="o">=</span> <span class="n">mgr</span><span class="o">.</span><span class="n">get_pipeline_configurations</span><span class="p">(</span>
             <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Project&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">project_id</span><span class="p">}</span>
@@ -520,7 +523,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Autodesk.
+        &copy; Copyright 2019, Autodesk.
 
     </p>
   </div> 
@@ -541,7 +544,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.5.0',
+            VERSION:'v5.6.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
