@@ -22,7 +22,7 @@ The sample code below shows how you can use the globals in your Toolkit App Code
     shotgun_globals.register_bg_task_manager(task_manager)
 
     # at runtime, access things
-    get_type_display_name("CustomEntity01")
+    shotgun_globals.get_type_display_name("CustomEntity01")
 
     # at shutdown time, unregister
     shotgun_globals.unregister_bg_task_manager(task_manager)
