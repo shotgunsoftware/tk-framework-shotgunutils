@@ -15,7 +15,7 @@ The sample code below shows how you can use the globals in your Toolkit App Code
     # typically, in your UI or app constructor, create a
     # task manager
     task_manager = task_manager.BackgroundTaskManager(self)
-    task_manager.start()
+    task_manager.start_processing()
     
     # register it with the globals module so that it can
     # use it to fetch data
@@ -26,7 +26,7 @@ The sample code below shows how you can use the globals in your Toolkit App Code
 
     # at shutdown time, unregister
     shotgun_globals.unregister_bg_task_manager(task_manager)
-    task_manager.stop()
+    task_manager.shut_down()
 
 
 
