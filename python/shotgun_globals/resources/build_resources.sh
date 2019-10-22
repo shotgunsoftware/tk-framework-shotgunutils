@@ -12,7 +12,7 @@
 
 # The path to output all built .py files to:
 UI_PYTHON_PATH=../ui
-
+PYTHON_BASE="/Applications/Shotgun.app/Contents/Resources/Python"
 
 # Helper functions to build UI files
 function build_qt {
@@ -26,11 +26,11 @@ function build_qt {
 }
 
 function build_ui {
-    build_qt "pyside-uic --from-imports" "$1.ui" "$1"
+    build_qt "${PYTHON_BASE}/bin/python ${PYTHON_BASE}/bin/pyside-uic -py3 --from-imports" "$1.ui" "$1"
 }
 
 function build_res {
-    build_qt "pyside-rcc" "$1.qrc" "$1_rc"
+    build_qt "${PYTHON_BASE}/bin/pyside-rcc -py3" "$1.qrc" "$1_rc"
 }
 
 
