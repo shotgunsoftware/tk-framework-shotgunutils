@@ -1,11 +1,11 @@
 # Copyright (c) 2013 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 from .shotgun_model import ShotgunModel
@@ -14,35 +14,44 @@ from .shotgun_model import ShotgunModel
 class SimpleShotgunModel(ShotgunModel):
     """
     Convenience wrapper around the Shotgun model for quick and easy access.
-    
-    Use this when you want to prototype data modeling or if your are looking 
-    for a simple flat data set reflecting a shotgun query. All you need to do 
-    is to instantiate the class (typically once, in your constructor) and then 
-    call :meth:`load_data` to specify which shotgun query to load up in the model. 
-    Subsequently call :meth:`load_data` whenever you wish to change the Shotgun 
+
+    Use this when you want to prototype data modeling or if your are looking
+    for a simple flat data set reflecting a shotgun query. All you need to do
+    is to instantiate the class (typically once, in your constructor) and then
+    call :meth:`load_data` to specify which shotgun query to load up in the model.
+    Subsequently call :meth:`load_data` whenever you wish to change the Shotgun
     query associated with the model.
 
-    This class derives from :class:`ShotgunModel` so all the customization methods 
-    available in the normal :class:`ShotgunModel` can also be subclassed from this class.    
+    This class derives from :class:`ShotgunModel` so all the customization methods
+    available in the normal :class:`ShotgunModel` can also be subclassed from this class.
     """
- 
+
     def __init__(self, parent, bg_task_manager=None):
         """
         :param parent: QWidget which this model will be parented under.
-        :type parent: :class:`~PySide.QtGui.QWidget`                   
+        :type parent: :class:`~PySide.QtGui.QWidget`
         :param bg_task_manager:     Background task manager to use for any asynchronous work.  If
                                     this is None then a task manager will be created as needed.
-        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`                                    
+        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         """
-        ShotgunModel.__init__(self, 
-            parent=parent, 
+        ShotgunModel.__init__(
+            self,
+            parent=parent,
             download_thumbs=True,
-            bg_load_thumbs=True, 
-            bg_task_manager=bg_task_manager)
+            bg_load_thumbs=True,
+            bg_task_manager=bg_task_manager,
+        )
 
     def load_data(
-        self, entity_type, filters=None, fields=None, order=None, limit=None,
-        columns=None, additional_filter_presets=None, editable_columns=None
+        self,
+        entity_type,
+        filters=None,
+        fields=None,
+        order=None,
+        limit=None,
+        columns=None,
+        additional_filter_presets=None,
+        editable_columns=None,
     ):
         """
         Loads shotgun data into the model, using the cache if possible.

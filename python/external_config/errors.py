@@ -13,4 +13,5 @@ class ExternalConfigParseError(RuntimeError):
     """
     Indicates that the given serialized data is not usable
     """
+
     pass

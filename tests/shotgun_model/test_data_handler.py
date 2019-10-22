@@ -1,11 +1,11 @@
 # Copyright (c) 2016 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sys
@@ -14,7 +14,9 @@ import os
 from tank_test.tank_test_base import *
 
 # import the test base class
-test_python_path = os.path.abspath(os.path.join( os.path.dirname(__file__), "..", "python"))
+test_python_path = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "python")
+)
 sys.path.append(test_python_path)
 from base_test import TestShotgunUtilsFramework
 
@@ -23,11 +25,11 @@ class TestDataHandler(TestShotgunUtilsFramework):
     """
     Tests for the data handler low level io
     """
-    
+
     def setUp(self):
         """
         Fixtures setup
-        """        
+        """
         super(TestDataHandler, self).setUp()
         self.shotgun_model = self.framework.import_module("shotgun_model")
 
@@ -80,4 +82,3 @@ class TestDataHandler(TestShotgunUtilsFramework):
 
         # but it is loaded
         self.assertEquals(dh.is_cache_loaded(), False)
-

@@ -51,11 +51,11 @@ class BackgroundTaskManager(QtCore.QObject):
     """
 
     # signal emitted when a task has been completed
-    task_completed = QtCore.Signal(int, object, object)# uid, group, result
+    task_completed = QtCore.Signal(int, object, object)  # uid, group, result
     # signal emitted when a task fails for some reason
-    task_failed = QtCore.Signal(int, object, str, str)# uid, group, msg, traceback
+    task_failed = QtCore.Signal(int, object, str, str)  # uid, group, msg, traceback
     # signal emitted when all tasks in a group have finished
-    task_group_finished = QtCore.Signal(object)# group
+    task_group_finished = QtCore.Signal(object)  # group
 
     def __init__(self, parent, start_processing=False, max_threads=8):
         """
@@ -93,7 +93,9 @@ class BackgroundTaskManager(QtCore.QObject):
 
         # Create the results dispatcher
         self._results_dispatcher = ResultsDispatcher(self)
-        self._results_dispatcher.task_completed.connect(self._on_worker_thread_task_completed)
+        self._results_dispatcher.task_completed.connect(
+            self._on_worker_thread_task_completed
+        )
         self._results_dispatcher.task_failed.connect(self._on_worker_thread_task_failed)
         self._results_dispatcher.start()
 
@@ -156,7 +158,9 @@ class BackgroundTaskManager(QtCore.QObject):
         self.stop_all_tasks()
 
         # shut down all worker threads:
-        self._debug_log("Waiting for %d background threads to stop..." % len(self._all_threads))
+        self._debug_log(
+            "Waiting for %d background threads to stop..." % len(self._all_threads)
+        )
         for thread in self._all_threads:
             thread.shut_down()
         self._available_threads = []
@@ -166,7 +170,15 @@ class BackgroundTaskManager(QtCore.QObject):
         self._results_dispatcher.shut_down()
         self._debug_log("Shut down successfully!")
 
-    def add_task(self, cbl, priority=None, group=None, upstream_task_ids=None, task_args=None, task_kwargs=None):
+    def add_task(
+        self,
+        cbl,
+        priority=None,
+        group=None,
+        upstream_task_ids=None,
+        task_args=None,
+        task_kwargs=None,
+    ):
         """
         Add a new task to the queue.  A task is a callable method/class together with any arguments that
         should be passed to the callable when it is called.
@@ -186,7 +198,9 @@ class BackgroundTaskManager(QtCore.QObject):
         :returns:                   A unique id representing the task.
         """
         if not callable(cbl):
-            raise TankError("The task function, method or object '%s' must be callable!" % cbl)
+            raise TankError(
+                "The task function, method or object '%s' must be callable!" % cbl
+            )
 
         upstream_task_ids = set(upstream_task_ids or [])
 
@@ -214,7 +228,9 @@ class BackgroundTaskManager(QtCore.QObject):
 
         return new_task.uid
 
-    def add_pass_through_task(self, priority=None, group=None, upstream_task_ids=None, task_kwargs=None):
+    def add_pass_through_task(
+        self, priority=None, group=None, upstream_task_ids=None, task_kwargs=None
+    ):
         """
         Add a pass-through task to the queue.  A pass-through task doesn't perform any work but can be useful
         when synchronising other tasks (e.g. pulling the results from multiple upstream tasks into a single task)
@@ -232,7 +248,13 @@ class BackgroundTaskManager(QtCore.QObject):
         :returns:                   A unique id representing the task.
 
         """
-        return self.add_task(self._task_pass_through, priority, group, upstream_task_ids, task_kwargs=task_kwargs)
+        return self.add_task(
+            self._task_pass_through,
+            priority,
+            group,
+            upstream_task_ids,
+            task_kwargs=task_kwargs,
+        )
 
     def stop_task(self, task_id, stop_upstream=True, stop_downstream=True):
         """
@@ -361,7 +383,9 @@ class BackgroundTaskManager(QtCore.QObject):
             # for some reason (probably memory corruption somewhere else) I've occasionally seen the above
             # creation of a worker thread return another arbitrary object!  Added this in here so the code
             # will at least continue correctly and not do unexpected things!
-            self._bundle.log_error("Failed to create background worker thread for task Manager!")
+            self._bundle.log_error(
+                "Failed to create background worker thread for task Manager!"
+            )
             return None
         self._all_threads.append(thread)
 
@@ -369,7 +393,10 @@ class BackgroundTaskManager(QtCore.QObject):
         thread.start()
 
         # log some debug:
-        self._debug_log("Started new background worker thread (num threads=%d)" % len(self._all_threads))
+        self._debug_log(
+            "Started new background worker thread (num threads=%d)"
+            % len(self._all_threads)
+        )
 
         return thread
 
@@ -441,7 +468,8 @@ class BackgroundTaskManager(QtCore.QObject):
             num_tasks_left += len(pending_tasks)
 
         self._low_level_debug_log(
-            " > Currently running tasks: '%s' - %d left in queue" % (self._running_tasks.keys(), num_tasks_left)
+            " > Currently running tasks: '%s' - %d left in queue"
+            % (self._running_tasks.keys(), num_tasks_left)
         )
 
         # and run the task
@@ -513,7 +541,9 @@ class BackgroundTaskManager(QtCore.QObject):
                     failed_task = failed_tasks.pop(0)
 
                     # find any downstream tasks:
-                    for ds_task_id in self._downstream_task_map.get(failed_task.uid) or []:
+                    for ds_task_id in (
+                        self._downstream_task_map.get(failed_task.uid) or []
+                    ):
                         ds_task = self._tasks_by_id.get(ds_task_id)
                         if not ds_task or ds_task.uid in failed_task_ids:
                             # no task or already found
@@ -560,8 +590,10 @@ class BackgroundTaskManager(QtCore.QObject):
                 del self._pending_tasks_by_priority[task.priority]
 
         # remove this task from all other maps:
-        if (task.group in self._group_task_map and
-                task.uid in self._group_task_map[task.group]):
+        if (
+            task.group in self._group_task_map
+            and task.uid in self._group_task_map[task.group]
+        ):
             self._group_task_map[task.group].remove(task.uid)
             if not self._group_task_map[task.group]:
                 group_completed = True

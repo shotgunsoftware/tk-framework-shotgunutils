@@ -73,27 +73,27 @@ class ExternalCommand(object):
             pipeline_config_name=external_configuration.pipeline_configuration_name,
             sg_deny_permissions=data["sg_deny_permissions"],
             sg_supports_multiple_selection=data["sg_supports_multiple_selection"],
-            icon=data["icon"]
+            icon=data["icon"],
         )
 
     def __init__(
-            self,
-            callback_name,
-            display_name,
-            tooltip,
-            group,
-            is_group_default,
-            plugin_id,
-            interpreter,
-            engine_name,
-            descriptor_uri,
-            pipeline_config_id,
-            entity_type,
-            entity_id,
-            pipeline_config_name,
-            sg_deny_permissions,
-            sg_supports_multiple_selection,
-            icon,
+        self,
+        callback_name,
+        display_name,
+        tooltip,
+        group,
+        is_group_default,
+        plugin_id,
+        interpreter,
+        engine_name,
+        descriptor_uri,
+        pipeline_config_id,
+        entity_type,
+        entity_id,
+        pipeline_config_name,
+        sg_deny_permissions,
+        sg_supports_multiple_selection,
+        icon,
     ):
         """
         .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
@@ -148,7 +148,7 @@ class ExternalCommand(object):
             self._display_name,
             self._engine_name,
             self._entity_type,
-            self._entity_id
+            self._entity_id,
         )
 
     @classmethod
@@ -179,7 +179,7 @@ class ExternalCommand(object):
             pipeline_config_name=data["pipeline_config_name"],
             sg_deny_permissions=data["sg_deny_permissions"],
             sg_supports_multiple_selection=data["sg_supports_multiple_selection"],
-            icon=data["icon"]
+            icon=data["icon"],
         )
 
     def serialize(self):
@@ -207,7 +207,7 @@ class ExternalCommand(object):
             "pipeline_config_name": self._pipeline_config_name,
             "sg_deny_permissions": self._sg_deny_permissions,
             "sg_supports_multiple_selection": self._sg_supports_multiple_selection,
-            "icon": self._icon
+            "icon": self._icon,
         }
         return cPickle.dumps(data)
 
@@ -394,11 +394,7 @@ class ExternalCommand(object):
         # prepare execution of the command in an external process
         # this will bootstrap Toolkit and execute the command.
         script = os.path.abspath(
-            os.path.join(
-                os.path.dirname(__file__),
-                "scripts",
-                "external_runner.py"
-            )
+            os.path.join(os.path.dirname(__file__), "scripts", "external_runner.py")
         )
 
         # We might have paths in sys.path that aren't in PYTHONPATH. We'll make
@@ -436,7 +432,7 @@ class ExternalCommand(object):
             self._interpreter,
             script,
             sgtk.bootstrap.ToolkitManager.get_core_python_path(),
-            args_file
+            args_file,
         ]
         logger.debug("Command arguments: %s", args)
 
@@ -449,11 +445,15 @@ class ExternalCommand(object):
             # some very bad behavior where it looked like PYTHONPATH was inherited from
             # this top-level environment rather than what is being set in external_runner
             # prior to launch.
-            output = sgtk.util.process.subprocess_check_output(args, env=os.environ.copy())
+            output = sgtk.util.process.subprocess_check_output(
+                args, env=os.environ.copy()
+            )
             logger.debug("External execution complete. Output: %s" % output)
         except sgtk.util.process.SubprocessCalledProcessError as e:
             # caching failed!
-            raise RuntimeError("Error executing remote command %s: %s" % (self, e.output))
+            raise RuntimeError(
+                "Error executing remote command %s: %s" % (self, e.output)
+            )
         finally:
             # Leave PYTHONPATH the way we found it.
             if current_pypath is None:
@@ -465,4 +465,3 @@ class ExternalCommand(object):
             sgtk.util.filesystem.safe_delete_file(args_file)
 
         return output
-

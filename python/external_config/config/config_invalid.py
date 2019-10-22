@@ -22,15 +22,15 @@ class InvalidExternalConfiguration(ExternalConfiguration):
     """
 
     def __init__(
-            self,
-            parent,
-            bg_task_manager,
-            plugin_id,
-            engine_name,
-            interpreter,
-            software_hash,
-            pipeline_config_id,
-            status=ExternalConfiguration.CONFIGURATION_INACCESSIBLE
+        self,
+        parent,
+        bg_task_manager,
+        plugin_id,
+        engine_name,
+        interpreter,
+        software_hash,
+        pipeline_config_id,
+        status=ExternalConfiguration.CONFIGURATION_INACCESSIBLE,
     ):
         """
         .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
@@ -56,7 +56,7 @@ class InvalidExternalConfiguration(ExternalConfiguration):
             interpreter=interpreter,
             software_hash=software_hash,
             pipeline_config_uri=None,
-            status=status
+            status=status,
         )
 
         self._pipeline_configuration_id = pipeline_config_id
@@ -93,7 +93,6 @@ class InvalidExternalConfiguration(ExternalConfiguration):
         :raises: RuntimeError
         """
         logger.debug("Commands were requested from an invalid configuration: %r", self)
-        raise RuntimeError("It is not possible to request commands from an invalid configuration.")
-
-
-
+        raise RuntimeError(
+            "It is not possible to request commands from an invalid configuration."
+        )

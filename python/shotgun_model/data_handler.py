@@ -51,6 +51,7 @@ class ShotgunDataHandler(object):
     is always sent as ShotgunItemData object to provide a full
     encapsulation around the internals of this class.
     """
+
     # version of binary format - increment this whenever changes
     # are made which renders the cache files non-backwards compatible.
     FORMAT_VERSION = 27
@@ -80,7 +81,7 @@ class ShotgunDataHandler(object):
             return "<%s@%s (%d items)>" % (
                 self.__class__.__name__,
                 self._cache_path,
-                self._cache.size
+                self._cache.size,
             )
 
     def is_cache_available(self):
@@ -110,7 +111,7 @@ class ShotgunDataHandler(object):
         if os.path.exists(self._cache_path):
             try:
                 os.remove(self._cache_path)
-            except Exception, e:
+            except Exception as e:
                 self._log_warning(
                     "Could not remove cache file '%s' "
                     "from disk. Details: %s" % (self._cache_path, e)
@@ -141,12 +142,16 @@ class ShotgunDataHandler(object):
                     file_version = pickler.load()
                     if file_version != self.FORMAT_VERSION:
                         raise ShotgunModelDataError(
-                            "Cache file has version %s - version %s is required" % (file_version, self.FORMAT_VERSION)
+                            "Cache file has version %s - version %s is required"
+                            % (file_version, self.FORMAT_VERSION)
                         )
                     raw_cache_data = pickler.load()
                     self._cache = ShotgunDataHandlerCache(raw_cache_data)
-            except Exception, e:
-                self._log_debug("Cache '%s' not valid - ignoring. Details: %s" % (self._cache_path, e))
+            except Exception as e:
+                self._log_debug(
+                    "Cache '%s' not valid - ignoring. Details: %s"
+                    % (self._cache_path, e)
+                )
 
         else:
             self._log_debug("No cache found on disk. Starting from empty data store.")
@@ -178,8 +183,8 @@ class ShotgunDataHandler(object):
         # todo: upgrade to 0.18 filesystem methods
         if not os.path.exists(cache_dir):
             try:
-                os.makedirs(cache_dir, 0777)
-            except OSError, e:
+                os.makedirs(cache_dir, 0o777)
+            except OSError as e:
                 # Race conditions are perfectly possible on some network
                 # storage setups so make sure that we ignore any file
                 # already exists errors, as they are not really errors!
@@ -210,13 +215,16 @@ class ShotgunDataHandler(object):
                     pickler.dump(self._cache.raw_data)
 
             # and ensure the cache file has got open permissions
-            os.chmod(self._cache_path, 0666)
+            os.chmod(self._cache_path, 0o666)
 
         finally:
             # set mask back to previous value
             os.umask(old_umask)
 
-        self._log_debug("Completed save of %s. Size %s bytes" % (self, os.path.getsize(self._cache_path)))
+        self._log_debug(
+            "Completed save of %s. Size %s bytes"
+            % (self, os.path.getsize(self._cache_path))
+        )
 
     def get_data_item_from_uid(self, unique_id):
         """

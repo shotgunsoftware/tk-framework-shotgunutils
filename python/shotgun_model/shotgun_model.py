@@ -22,6 +22,7 @@ from .shotgun_query_model import ShotgunQueryModel
 from .data_handler_find import ShotgunFindDataHandler
 from .util import get_sanitized_data, get_sg_data, sanitize_for_qt_model
 
+
 class ShotgunModel(ShotgunQueryModel):
     """
     A Qt Model representing a Shotgun query.
@@ -44,7 +45,14 @@ class ShotgunModel(ShotgunQueryModel):
     # header value for the first column
     FIRST_COLUMN_HEADER = "Name"
 
-    def __init__(self, parent, download_thumbs=True, schema_generation=0, bg_load_thumbs=True, bg_task_manager=None):
+    def __init__(
+        self,
+        parent,
+        download_thumbs=True,
+        schema_generation=0,
+        bg_load_thumbs=True,
+        bg_task_manager=None,
+    ):
         """
         :param parent: Parent object.
         :type parent: :class:`~PySide.QtGui.QWidget`
@@ -77,8 +85,7 @@ class ShotgunModel(ShotgunQueryModel):
         """
         String representation of this instance
         """
-        return "<%s entity_type:%s>" % (
-            self.__class__.__name__, self.__entity_type)
+        return "<%s entity_type:%s>" % (self.__class__.__name__, self.__entity_type)
 
     ########################################################################################
     # public methods
@@ -101,7 +108,9 @@ class ShotgunModel(ShotgunQueryModel):
         :param entity_id: Shotgun entity id to look for
         :returns: :class:`~PySide.QtGui.QStandardItem` or None if not found
         """
-        self._log_debug("Resolving model item for entity %s:%s" % (entity_type, entity_id))
+        self._log_debug(
+            "Resolving model item for entity %s:%s" % (entity_type, entity_id)
+        )
 
         if entity_type != self.__entity_type:
             self._log_debug("...entity type is not part of this model!")
@@ -213,14 +222,26 @@ class ShotgunModel(ShotgunQueryModel):
             "column_idx": the column number in the model associated with the additional field
         """
         # column is one greater than the index because of the default initial column
-        return [{"column_idx": i + 1, "field": field} for (i, field) in enumerate(self.__column_fields)]
+        return [
+            {"column_idx": i + 1, "field": field}
+            for (i, field) in enumerate(self.__column_fields)
+        ]
 
     ########################################################################################
     # protected methods
 
     def _load_data(
-        self, entity_type, filters, hierarchy, fields, order=None, seed=None, limit=None,
-        columns=None, additional_filter_presets=None, editable_columns=None
+        self,
+        entity_type,
+        filters,
+        hierarchy,
+        fields,
+        order=None,
+        seed=None,
+        limit=None,
+        columns=None,
+        additional_filter_presets=None,
+        editable_columns=None,
     ):
         """
         This is the main method to use to configure the model. You basically
@@ -315,8 +336,7 @@ class ShotgunModel(ShotgunQueryModel):
         # make sure `editable_fields` is a subset of `column_fields`
         if not set(self.__editable_fields).issubset(set(self.__column_fields)):
             raise sgtk.TankError(
-                "The `editable_fields` argument is not a subset of "
-                "`column_fields`."
+                "The `editable_fields` argument is not a subset of " "`column_fields`."
             )
 
         self._log_debug("")
@@ -340,7 +360,7 @@ class ShotgunModel(ShotgunQueryModel):
             self.__download_thumbs,
             self.__limit,
             self.__additional_filter_presets,
-            self.__compute_cache_path(seed)
+            self.__compute_cache_path(seed),
         )
         # load up from disk
         self._log_debug("Loading data from cache file into memory...")
@@ -352,8 +372,7 @@ class ShotgunModel(ShotgunQueryModel):
 
         # set our headers
         headers = [self.FIRST_COLUMN_HEADER] + self._get_additional_column_headers(
-            self.__entity_type,
-            self.__column_fields,
+            self.__entity_type, self.__column_fields
         )
         self.setHorizontalHeaderLabels(headers)
 
@@ -362,9 +381,7 @@ class ShotgunModel(ShotgunQueryModel):
         # construct the top level nodes
         self._log_debug("Creating model nodes for top level of data tree...")
         nodes_generated = self._data_handler.generate_child_nodes(
-            None,
-            root,
-            self._create_item
+            None, root, self._create_item
         )
 
         # if we got some data, emit cache load signal
@@ -431,7 +448,7 @@ class ShotgunModel(ShotgunQueryModel):
                             field,
                             sg_data[field],
                             sg_data.get("type"),
-                            sg_data.get("id")
+                            sg_data.get("id"),
                         )
 
     def _set_tooltip(self, item, sg_item):
@@ -477,27 +494,32 @@ class ShotgunModel(ShotgunQueryModel):
         if isinstance(sg_item[field], dict) and "type" in sg_item[field]:
             # This is scenario 1 described above.
             item.setToolTip(
-                "%s '%s'" % (
+                "%s '%s'"
+                % (
                     self._shotgun_globals.get_type_display_name(sg_item[field]["type"]),
-                    item.text()
+                    item.text(),
                 )
             )
         elif "." in field:
             # This is scenario 2 described above. We only want to get the last entity and field.
             _, sub_entity_type, sub_entity_field_name = field.rsplit(".", 2)
             item.setToolTip(
-                "%s %s '%s'" % (
+                "%s %s '%s'"
+                % (
                     self._shotgun_globals.get_type_display_name(sub_entity_type),
-                    self._shotgun_globals.get_field_display_name(sub_entity_type, sub_entity_field_name),
-                    item.text()
+                    self._shotgun_globals.get_field_display_name(
+                        sub_entity_type, sub_entity_field_name
+                    ),
+                    item.text(),
                 )
             )
         else:
             # This is scenario 3 described above.
             item.setToolTip(
-                "%s '%s'" % (
+                "%s '%s'"
+                % (
                     self._shotgun_globals.get_type_display_name(sg_item["type"]),
-                    item.text()
+                    item.text(),
                 )
             )
 
@@ -542,7 +564,9 @@ class ShotgunModel(ShotgunQueryModel):
 
                 # set associated field role to be the column value itself
                 value = data.get(column)
-                column_item.setData(sanitize_for_qt_model(value), self.SG_ASSOCIATED_FIELD_ROLE)
+                column_item.setData(
+                    sanitize_for_qt_model(value), self.SG_ASSOCIATED_FIELD_ROLE
+                )
 
                 items.append(column_item)
 
@@ -558,7 +582,10 @@ class ShotgunModel(ShotgunQueryModel):
         :returns: list of strings to use as the headers
         """
         # default implementation will set the headers to the display names for the fields
-        return [self._shotgun_globals.get_field_display_name(entity_type, c) for c in columns]
+        return [
+            self._shotgun_globals.get_field_display_name(entity_type, c)
+            for c in columns
+        ]
 
     def _get_columns(self, item, is_leaf):
         """
@@ -611,7 +638,9 @@ class ShotgunModel(ShotgunQueryModel):
         :param :class:`ShotgunItemData` data_item: Data to update item with
         """
 
-        field_display_name = self.__generate_display_name(data_item.field, data_item.shotgun_data)
+        field_display_name = self.__generate_display_name(
+            data_item.field, data_item.shotgun_data
+        )
         item.setText(field_display_name)
 
         # keep tabs of which items we are creating
@@ -627,7 +656,7 @@ class ShotgunModel(ShotgunQueryModel):
         # store the actual value we have
         item.setData(
             {"name": data_item.field, "value": data_item.shotgun_data[data_item.field]},
-            self.SG_ASSOCIATED_FIELD_ROLE
+            self.SG_ASSOCIATED_FIELD_ROLE,
         )
 
         if data_item.is_leaf():
@@ -636,7 +665,9 @@ class ShotgunModel(ShotgunQueryModel):
             # note: Qt automatically changes everything to be unicode
             # according to strange rules of its own, so force convert
             # all shotgun values to be proper unicode prior to setData
-            item.setData(sanitize_for_qt_model(data_item.shotgun_data), self.SG_DATA_ROLE)
+            item.setData(
+                sanitize_for_qt_model(data_item.shotgun_data), self.SG_DATA_ROLE
+            )
 
         # Now we got the object set up. Now start calling custom methods:
 
@@ -737,7 +768,7 @@ class ShotgunModel(ShotgunQueryModel):
             "sg",
             self.__entity_type,
             params_hash.hexdigest(),
-            "%s.%s" % (filter_hash.hexdigest(), ShotgunFindDataHandler.FORMAT_VERSION)
+            "%s.%s" % (filter_hash.hexdigest(), ShotgunFindDataHandler.FORMAT_VERSION),
         )
 
         if sys.platform == "win32" and len(data_cache_path) > 250:

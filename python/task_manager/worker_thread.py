@@ -86,23 +86,22 @@ class WorkerThread(QtCore.QThread):
                         if not self._process_tasks:
                             break
                         # emit the result (non-blocking):
-                        self._results_dispatcher.emit_completed(self, task_to_process, result)
-                except Exception, e:
+                        self._results_dispatcher.emit_completed(
+                            self, task_to_process, result
+                        )
+                except Exception as e:
                     # something went wrong so emit failed signal:
                     with self._mutex:
                         if not self._process_tasks:
                             break
                         tb = traceback.format_exc()
                         # emit failed signal (non-blocking):
-                        self._results_dispatcher.emit_failure(self, task_to_process, str(e), tb)
+                        self._results_dispatcher.emit_failure(
+                            self, task_to_process, str(e), tb
+                        )
         except RuntimeError:
             # We have a situation in Qt5 where it appears that the thread
             # is being garbage collected more quickly than in Qt4. In this
             # case, we can be pretty sure that we're being shut down, and
             # can simply return out of the run loop.
             return
-
-
-
-
-

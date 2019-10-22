@@ -31,10 +31,8 @@ def create_parameter_file(data):
         pickle.dump(data, fh, pickle.HIGHEST_PROTOCOL)
 
     logger.debug(
-        "Created parameter file '%s' with the following data: %s" % (
-            param_file,
-            pprint.pformat(data)
-        )
+        "Created parameter file '%s' with the following data: %s"
+        % (param_file, pprint.pformat(data))
     )
 
     return param_file

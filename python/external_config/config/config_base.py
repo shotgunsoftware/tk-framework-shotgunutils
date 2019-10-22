@@ -62,15 +62,15 @@ class ExternalConfiguration(QtCore.QObject):
     # 6. reason for the failure
 
     def __init__(
-            self,
-            parent,
-            bg_task_manager,
-            plugin_id,
-            engine_name,
-            interpreter,
-            software_hash,
-            pipeline_config_uri,
-            status=CONFIGURATION_READY
+        self,
+        parent,
+        bg_task_manager,
+        plugin_id,
+        engine_name,
+        interpreter,
+        software_hash,
+        pipeline_config_uri,
+        status=CONFIGURATION_READY,
     ):
         """
         .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
@@ -146,7 +146,10 @@ class ExternalConfiguration(QtCore.QObject):
         """
         Returns ``True`` if this is the primary configuration, ``False`` if not.
         """
-        if self.pipeline_configuration_name is None or self.pipeline_configuration_name == "Primary":
+        if (
+            self.pipeline_configuration_name is None
+            or self.pipeline_configuration_name == "Primary"
+        ):
             # all fallback configs are primary
             return True
         else:
@@ -212,7 +215,9 @@ class ExternalConfiguration(QtCore.QObject):
         # note: subclassed implementations will override this return value
         return False
 
-    def request_commands(self, project_id, entity_type, entity_id, link_entity_type, engine_fallback=None):
+    def request_commands(
+        self, project_id, entity_type, entity_id, link_entity_type, engine_fallback=None
+    ):
         """
         Request commands for the given shotgun entity.
 
@@ -232,7 +237,10 @@ class ExternalConfiguration(QtCore.QObject):
         :raises: RuntimeError if this configuration's status does not allow for
             commands requests.
         """
-        logger.debug("Requested commands for %s: %s %s %s" % (self, entity_type, entity_id, link_entity_type))
+        logger.debug(
+            "Requested commands for %s: %s %s %s"
+            % (self, entity_type, entity_id, link_entity_type)
+        )
 
         # run entire command check and generation in worker
         task_id = self._bg_task_manager.add_task(
@@ -243,8 +251,8 @@ class ExternalConfiguration(QtCore.QObject):
                 "entity_type": entity_type,
                 "entity_id": entity_id,
                 "link_entity_type": link_entity_type,
-                "engine_fallback": engine_fallback
-            }
+                "engine_fallback": engine_fallback,
+            },
         )
         self._task_ids[task_id] = (project_id, entity_type, entity_id, link_entity_type)
 
@@ -263,7 +271,9 @@ class ExternalConfiguration(QtCore.QObject):
         raise NotImplementedError("_compute_config_hash_keys is not implemented.")
 
     @sgtk.LogManager.log_timing
-    def _request_commands(self, project_id, entity_type, entity_id, link_entity_type, engine_fallback):
+    def _request_commands(
+        self, project_id, entity_type, entity_id, link_entity_type, engine_fallback
+    ):
         """
         Execution, runs in a separate thread and launches an external
         process to cache commands.
@@ -282,9 +292,7 @@ class ExternalConfiguration(QtCore.QObject):
 
         # figure out if we have a suitable config for this on disk already
         cache_hash = self._compute_config_hash_keys(
-            entity_type,
-            entity_id,
-            link_entity_type
+            entity_type, entity_id, link_entity_type
         )
         cache_path = file_cache.get_cache_path(cache_hash)
 
@@ -314,12 +322,13 @@ class ExternalConfiguration(QtCore.QObject):
                     entity_type,
                     [["project", "is", {"type": "Project", "id": project_id}]],
                     ["id"],
-                    order=[{"field_name": "id", "direction": "desc"}]
+                    order=[{"field_name": "id", "direction": "desc"}],
                 )
 
                 if most_recent_id is None:
                     raise RuntimeError(
-                        "There are no %s objects for project %s." % (entity_type, project_id)
+                        "There are no %s objects for project %s."
+                        % (entity_type, project_id)
                     )
 
                 entity_id = most_recent_id["id"]
@@ -335,11 +344,7 @@ class ExternalConfiguration(QtCore.QObject):
                 # we don't have all of the engines cached on disk yet, this will cause
                 # them to be cached prior to us getting a list of commands.
                 self._run_external_process(
-                    cache_path,
-                    entity_type,
-                    entity_id,
-                    self.engine_name,
-                    pre_cache=True,
+                    cache_path, entity_type, entity_id, self.engine_name, pre_cache=True
                 )
 
             except SubprocessCalledProcessError as e:
@@ -373,7 +378,9 @@ class ExternalConfiguration(QtCore.QObject):
         return cached_data
 
     @sgtk.LogManager.log_timing
-    def _run_external_process(self, cache_path, entity_type, entity_id, engine_name, pre_cache=False):
+    def _run_external_process(
+        self, cache_path, entity_type, entity_id, engine_name, pre_cache=False
+    ):
         """
         Helper method. Executes the external caching process.
 
@@ -388,10 +395,7 @@ class ExternalConfiguration(QtCore.QObject):
         # launch external process to carry out caching.
         script = os.path.abspath(
             os.path.join(
-                os.path.dirname(__file__),
-                "..",
-                "scripts",
-                "external_runner.py"
+                os.path.dirname(__file__), "..", "scripts", "external_runner.py"
             )
         )
 
@@ -422,7 +426,7 @@ class ExternalConfiguration(QtCore.QObject):
             self.interpreter,
             script,
             sgtk.bootstrap.ToolkitManager.get_core_python_path(),
-            args_file
+            args_file,
         ]
         logger.debug("Launching external script: %s", args)
 
@@ -467,7 +471,9 @@ class ExternalConfiguration(QtCore.QObject):
             # this was not for us
             return
 
-        (project_id, entity_type, entity_id, link_entity_type) = self._task_ids[unique_id]
+        (project_id, entity_type, entity_id, link_entity_type) = self._task_ids[
+            unique_id
+        ]
 
         del self._task_ids[unique_id]
 
@@ -488,7 +494,10 @@ class ExternalConfiguration(QtCore.QObject):
             entity_id,
             link_entity_type,
             self,
-            [ExternalCommand.create(self, d, entity_id) for d in cached_data["commands"]]
+            [
+                ExternalCommand.create(self, d, entity_id)
+                for d in cached_data["commands"]
+            ],
         )
 
     def _task_failed(self, unique_id, group, message, traceback_str):
@@ -504,17 +513,13 @@ class ExternalConfiguration(QtCore.QObject):
             # this was not for us
             return
 
-        (project_id, entity_type, entity_id, link_entity_type) = self._task_ids[unique_id]
+        (project_id, entity_type, entity_id, link_entity_type) = self._task_ids[
+            unique_id
+        ]
 
         del self._task_ids[unique_id]
 
         # emit error signal
         self.commands_load_failed.emit(
-            project_id,
-            entity_type,
-            entity_id,
-            link_entity_type,
-            self,
-            message
+            project_id, entity_type, entity_id, link_entity_type, self, message
         )
-

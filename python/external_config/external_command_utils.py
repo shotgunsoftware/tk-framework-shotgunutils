@@ -39,7 +39,6 @@ def serialize_command(engine_name, entity_type, command_name, properties):
         "icon": properties.get("icon"),
         "group": properties.get("group"),
         "group_default": properties.get("group_default") or False,
-
         # special for shotgun
         "sg_deny_permissions": properties.get("deny_permissions"),
         "sg_supports_multiple_selection": properties.get("supports_multiple_selection"),

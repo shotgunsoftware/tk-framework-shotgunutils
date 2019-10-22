@@ -26,8 +26,16 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
     """
 
     def __init__(
-        self, entity_type, filters, order, hierarchy, fields, download_thumbs,
-        limit, additional_filter_presets, cache_path
+        self,
+        entity_type,
+        filters,
+        order,
+        hierarchy,
+        fields,
+        download_thumbs,
+        limit,
+        additional_filter_presets,
+        cache_path,
     ):
         """
         :param entity_type:               Shotgun entity type to download
@@ -123,9 +131,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
             fields = fields + ["image"]
         fields = list(set(fields))
 
-        find_kwargs = dict(
-            limit=self.__limit,
-        )
+        find_kwargs = dict(limit=self.__limit)
 
         # We only want to include the filter presets kwarg if it was explicitly asked
         # for. The reason for this is that it's a Shotgun 7.0 feature server side, and
@@ -134,11 +140,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
             find_kwargs["additional_filter_presets"] = self.__additional_filter_presets
 
         request_id = data_retriever.execute_find(
-            self.__entity_type,
-            self.__filters,
-            fields,
-            self.__order,
-            **find_kwargs
+            self.__entity_type, self.__filters, fields, self.__order, **find_kwargs
         )
 
         return request_id
@@ -206,11 +208,13 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
             # Create items by drilling down the hierarchy
             for field_name in self.__hierarchy:
 
-                on_leaf_level = (self.__hierarchy[-1] == field_name)
+                on_leaf_level = self.__hierarchy[-1] == field_name
 
                 if not on_leaf_level:
                     # generate path for this item
-                    unique_field_value = self.__generate_unique_key(parent_uid, field_name, sg_item)
+                    unique_field_value = self.__generate_unique_key(
+                        parent_uid, field_name, sg_item
+                    )
                 else:
                     # on the leaf level, use the entity id as the unique key
                     unique_field_value = sg_item["id"]
@@ -219,29 +223,31 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                 if on_leaf_level:
                     # this is an actual entity - insert into our new tree
                     new_cache.add_item(
-                        parent_uid,
-                        sg_item,
-                        field_name,
-                        True,
-                        unique_field_value
+                        parent_uid, sg_item, field_name, True, unique_field_value
                     )
 
                     # now check with prev data structure to see if it has changed
                     if not self._cache.item_exists(unique_field_value):
                         # this is a new node that wasn't there before
-                        diff_list.append({
-                            "data": new_cache.get_entry_by_uid(unique_field_value),
-                            "mode": self.ADDED
-                        })
+                        diff_list.append(
+                            {
+                                "data": new_cache.get_entry_by_uid(unique_field_value),
+                                "mode": self.ADDED,
+                            }
+                        )
                         num_adds += 1
                     else:
                         # record already existed in prev dataset. Check if value has changed
                         old_record = self._cache.get_shotgun_data(unique_field_value)
                         if not compare_shotgun_data(old_record, sg_item):
-                            diff_list.append({
-                                "data": new_cache.get_entry_by_uid(unique_field_value),
-                                "mode": self.UPDATED
-                            })
+                            diff_list.append(
+                                {
+                                    "data": new_cache.get_entry_by_uid(
+                                        unique_field_value
+                                    ),
+                                    "mode": self.UPDATED,
+                                }
+                            )
                             num_modifications += 1
 
                 else:
@@ -250,34 +256,42 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                         # item is not yet inserted in our new tree so add it
                         # because these are parent items like project nodes
                         new_cache.add_item(
-                            parent_uid,
-                            sg_item,
-                            field_name,
-                            False,
-                            unique_field_value
+                            parent_uid, sg_item, field_name, False, unique_field_value
                         )
 
                         # now check with prev data structure to see if it has changed
                         if not self._cache.item_exists(unique_field_value):
                             # this is a new node that wasn't there before
-                            diff_list.append({
-                                "data": new_cache.get_entry_by_uid(unique_field_value),
-                                "mode": self.ADDED
-                            })
+                            diff_list.append(
+                                {
+                                    "data": new_cache.get_entry_by_uid(
+                                        unique_field_value
+                                    ),
+                                    "mode": self.ADDED,
+                                }
+                            )
                             num_adds += 1
                         else:
                             # record already existed in prev dataset. Check if value has changed
-                            current_record = self._cache.get_shotgun_data(unique_field_value)
+                            current_record = self._cache.get_shotgun_data(
+                                unique_field_value
+                            )
                             # don't compare the whole record but just the part that relates to this
                             # intermediate node value. For example, we may be looking at a project node
                             # in the hierarchy but the full sg record contains all the data for a shot.
                             # in this case, just run the comparison on the project subset of the full
                             # shot data dict.
-                            if not compare_shotgun_data(current_record.get(field_name), sg_item.get(field_name)):
-                                diff_list.append({
-                                    "data": self._cache.get_entry_by_uid(unique_field_value),
-                                    "mode": self.UPDATED
-                                })
+                            if not compare_shotgun_data(
+                                current_record.get(field_name), sg_item.get(field_name)
+                            ):
+                                diff_list.append(
+                                    {
+                                        "data": self._cache.get_entry_by_uid(
+                                            unique_field_value
+                                        ),
+                                        "mode": self.UPDATED,
+                                    }
+                                )
                                 num_modifications += 1
 
                     # recurse down to the next level
@@ -290,10 +304,12 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         new_uids = set(new_cache.uids)
 
         for deleted_uid in current_uids.difference(new_uids):
-            diff_list.append({
-                "data": self._cache.get_entry_by_uid(deleted_uid),
-                "mode": self.DELETED
-            })
+            diff_list.append(
+                {
+                    "data": self._cache.get_entry_by_uid(deleted_uid),
+                    "mode": self.DELETED,
+                }
+            )
             num_deletes += 1
 
         # Lastly, swap in the new cache
@@ -306,9 +322,13 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         # and set the new cache
         self._cache = new_cache
 
-        self._log_debug("Shotgun data (%d records) received and processed. " % len(sg_data))
+        self._log_debug(
+            "Shotgun data (%d records) received and processed. " % len(sg_data)
+        )
         self._log_debug("    The new tree is %d records." % self._cache.size)
-        self._log_debug("    There were %d diffs from in-memory cache:" % len(diff_list))
+        self._log_debug(
+            "    There were %d diffs from in-memory cache:" % len(diff_list)
+        )
         self._log_debug("    Number of new records: %d" % num_adds)
         self._log_debug("    Number of deleted records: %d" % num_deletes)
         self._log_debug("    Number of modified records: %d" % num_modifications)

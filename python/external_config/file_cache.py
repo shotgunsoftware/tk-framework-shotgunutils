@@ -19,6 +19,7 @@ logger = sgtk.platform.get_logger(__name__)
 # the cache path
 FOLDER_PREFIX_KEY = "prefix"
 
+
 def load_cache(identifier_dict):
     """
     Loads a cache from disk given a dictionary of identifiers,
@@ -31,6 +32,7 @@ def load_cache(identifier_dict):
     """
     cache_path = get_cache_path(identifier_dict)
     return load_cache_file(cache_path)
+
 
 @sgtk.LogManager.log_timing
 def load_cache_file(cache_path):
@@ -50,11 +52,15 @@ def load_cache_file(cache_path):
             with open(cache_path, "rb") as fh:
                 content = pickle.load(fh)
         except Exception as e:
-            logger.debug("Cache '%s' not valid - ignoring. Details: %s" % (cache_path, e), exec_info=True)
+            logger.debug(
+                "Cache '%s' not valid - ignoring. Details: %s" % (cache_path, e),
+                exec_info=True,
+            )
     else:
         logger.debug("No cache found on disk.")
 
     return content
+
 
 @sgtk.LogManager.log_timing
 def delete_cache(identifier_dict):
@@ -104,12 +110,14 @@ def write_cache_file(path, data):
             pickle.dump(data, fh)
 
         # and ensure the cache file has got open permissions
-        os.chmod(path, 0666)
+        os.chmod(path, 0o666)
 
     except Exception as e:
         logger.debug("Could not write '%s'. Details: %s" % (path, e), exec_info=True)
     else:
-        logger.debug("Completed save of %s. Size %s bytes" % (path, os.path.getsize(path)))
+        logger.debug(
+            "Completed save of %s. Size %s bytes" % (path, os.path.getsize(path))
+        )
 
 
 def get_cache_path(identifier_dict):
@@ -146,13 +154,11 @@ def get_cache_path(identifier_dict):
             cache_location,
             "external_cfg",
             identifier_dict[FOLDER_PREFIX_KEY],
-            "%s.pkl" % params_hash.hexdigest()
+            "%s.pkl" % params_hash.hexdigest(),
         )
     else:
         data_cache_path = os.path.join(
-            cache_location,
-            "external_cfg",
-            "%s.pkl" % params_hash.hexdigest()
+            cache_location, "external_cfg", "%s.pkl" % params_hash.hexdigest()
         )
 
     logger.debug(

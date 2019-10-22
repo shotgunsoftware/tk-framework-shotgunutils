@@ -1,11 +1,11 @@
 # Copyright (c) 2013 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
@@ -13,6 +13,7 @@ from sgtk.platform.qt import QtGui, QtCore
 
 from .shotgun_model import ShotgunModel
 from .util import get_sg_data, get_sanitized_data
+
 
 class ShotgunEntityModel(ShotgunModel):
     """
@@ -25,15 +26,24 @@ class ShotgunEntityModel(ShotgunModel):
     # global cache of step colours - avoids querying from Shotgun multiple times!
     _SG_STEP_COLOURS = {}
 
-    def __init__(self, entity_type, filters, hierarchy, fields, parent,
-                 download_thumbs=False, schema_generation=0, bg_load_thumbs=True,
-                 bg_task_manager=None):
+    def __init__(
+        self,
+        entity_type,
+        filters,
+        hierarchy,
+        fields,
+        parent,
+        download_thumbs=False,
+        schema_generation=0,
+        bg_load_thumbs=True,
+        bg_task_manager=None,
+    ):
         """
         :param entity_type:         The type of the entities that should be loaded into this model.
-        :param filters:             A list of filters to be applied to entities in the model - these 
-                                    will be passed to the Shotgun API find() call when populating the 
+        :param filters:             A list of filters to be applied to entities in the model - these
+                                    will be passed to the Shotgun API find() call when populating the
                                     model
-        :param hierarchy:           List of Shotgun fields that will be used to define the structure 
+        :param hierarchy:           List of Shotgun fields that will be used to define the structure
                                     of the items in the model.
         :param fields:              List of Shotgun fields to populate the items in the model with.
                                     These will be passed to the Shotgun API find() call when populating
@@ -57,14 +67,18 @@ class ShotgunEntityModel(ShotgunModel):
         fields = fields or []
 
         # default icon
-        self._default_icon = QtGui.QIcon(QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Folder_dark.png"))
+        self._default_icon = QtGui.QIcon(
+            QtGui.QPixmap(":/tk-framework-shotgunutils/icon_Folder_dark.png")
+        )
 
-        ShotgunModel.__init__(self, 
-                              parent = parent,
-                              download_thumbs = download_thumbs,
-                              schema_generation = schema_generation,
-                              bg_load_thumbs = bg_load_thumbs,
-                              bg_task_manager = bg_task_manager)
+        ShotgunModel.__init__(
+            self,
+            parent=parent,
+            download_thumbs=download_thumbs,
+            schema_generation=schema_generation,
+            bg_load_thumbs=bg_load_thumbs,
+            bg_task_manager=bg_task_manager,
+        )
 
         # load the data from the cache:
         self._load_data(entity_type, filters, hierarchy, fields)
@@ -90,14 +104,14 @@ class ShotgunEntityModel(ShotgunModel):
 
     def get_entities(self, item):
         """
-        Get entities for the current item by traversing up the tree and pulling entity information 
+        Get entities for the current item by traversing up the tree and pulling entity information
         from each item if possible
 
         :param item:    The item to find entities for.
         :type  item:    :class:`~PySide.QtGui.QStandardItem`
         :returns:       A list of Shotgun entity dictionaries in the order they were found starting from
                         the specified item.  Each dictionary will contain all the entity information stored
-                        by the model which is usually determined by the list of fields passed during 
+                        by the model which is usually determined by the list of fields passed during
                         construction plus name/code, type and id.
 
                         For non-leaf items that represent Shotgun entities, the dictionary will typically
@@ -119,8 +133,8 @@ class ShotgunEntityModel(ShotgunModel):
 
         :param item:    The item to retrieve the entity details for.
         :type  item:    :class:`~PySide.QtGui.QStandardItem`
-        :returns:       A Shotgun entity dictionary for the item if it represents an entity, otherwise 
-                        None.  The dictionary will contain all the entity information stored by the model 
+        :returns:       A Shotgun entity dictionary for the item if it represents an entity, otherwise
+                        None.  The dictionary will contain all the entity information stored by the model
                         which is usually determined by the list of fields passed during construction plus
                         name/code, type and id.
         """
@@ -132,10 +146,12 @@ class ShotgunEntityModel(ShotgunModel):
         # item doesn't represent an entity directly so look for an entity in the field data instead:
         field_data = get_sanitized_data(item, self.SG_ASSOCIATED_FIELD_ROLE)
         field_value = field_data.get("value")
-        if (field_value 
-            and isinstance(field_value, dict) 
-            and "id" in field_value 
-            and "type" in field_value):
+        if (
+            field_value
+            and isinstance(field_value, dict)
+            and "id" in field_value
+            and "type" in field_value
+        ):
             return field_value
 
         return None
@@ -168,7 +184,11 @@ class ShotgunEntityModel(ShotgunModel):
         field_value = field_data["value"]
 
         entity_icon = None
-        if isinstance(field_value, dict) and "name" in field_value and "type" in field_value:
+        if (
+            isinstance(field_value, dict)
+            and "name" in field_value
+            and "type" in field_value
+        ):
             # this is an intermediate node which is an entity type link
             entity_icon = self._get_default_thumbnail(field_value)
         elif sg_data:
@@ -184,8 +204,8 @@ class ShotgunEntityModel(ShotgunModel):
 
         :param sg_entity:   A Shotgun entity dictionary for the entity to get the
                             icon for.
-        :returns:           A QIcon for the entity if available.  For Step entities, a swatch 
-                            representing the step colour is returned.  If no icon is available 
+        :returns:           A QIcon for the entity if available.  For Step entities, a swatch
+                            representing the step colour is returned.  If no icon is available
                             for the entity type then the default icon is returned
         """
         if sg_entity.get("type") == "Step":
@@ -202,10 +222,12 @@ class ShotgunEntityModel(ShotgunModel):
                         for sg_step in sg_steps:
                             colour = None
                             try:
-                                colour = tuple([int(c) for c in sg_step.get("color").split(",")])
+                                colour = tuple(
+                                    [int(c) for c in sg_step.get("color").split(",")]
+                                )
                             except:
                                 pass
-                            ShotgunEntityModel._SG_STEP_COLOURS[sg_step["id"]] = colour  
+                            ShotgunEntityModel._SG_STEP_COLOURS[sg_step["id"]] = colour
                     except:
                         pass
                 colour = ShotgunEntityModel._SG_STEP_COLOURS[step_id]
@@ -231,4 +253,3 @@ class ShotgunEntityModel(ShotgunModel):
 
         # just return the entity icon or the default icon if there is no entity icon:
         return self.get_entity_icon(sg_entity.get("type")) or self._default_icon
-

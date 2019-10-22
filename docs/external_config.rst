@@ -45,6 +45,3 @@ Class ExternalCommand
     :members:
     :inherited-members:
     :exclude-members: create
-
-
-

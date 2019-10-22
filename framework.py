@@ -16,16 +16,12 @@ import datetime
 import os
 import time
 
+
 class ShotgunUtilsFramework(sgtk.platform.Framework):
 
     # List of top folders in the cache which should be considered for old
     # data clean up.
-    _CLEANUP_FOLDERS = [
-        "sg",
-        "sg_nav",
-        "thumbs",
-        "multi_context"
-    ]
+    _CLEANUP_FOLDERS = ["sg", "sg_nav", "thumbs", "multi_context"]
     # Number of days a file without modification should be kept around
     # before being considered for clean up.
     _CLEANUP_GRACE_PERIOD = 60
@@ -80,9 +76,7 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
         never be removed by the clean up.
         """
         try:
-            self.log_debug(
-                "Posting old cached data clean up..."
-            )
+            self.log_debug("Posting old cached data clean up...")
             self._stop_cleanup = False
 
             grace_period = self._CLEANUP_GRACE_PERIOD
@@ -95,12 +89,18 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
             if hasattr(self, "site_cache_location"):
                 # This was introduced in tk-core v0.18.119 but we don't have an
                 # explicit dependency to it, so check if the attribute is available.
-                cache_locations.extend([
-                    os.path.join(self.site_cache_location, folder) for folder in self._CLEANUP_FOLDERS
-                ])
-            cache_locations.extend([
-                os.path.join(self.cache_location, folder) for folder in self._CLEANUP_FOLDERS
-            ])
+                cache_locations.extend(
+                    [
+                        os.path.join(self.site_cache_location, folder)
+                        for folder in self._CLEANUP_FOLDERS
+                    ]
+                )
+            cache_locations.extend(
+                [
+                    os.path.join(self.cache_location, folder)
+                    for folder in self._CLEANUP_FOLDERS
+                ]
+            )
             self.logger.debug(
                 "Cleaning all files with a modification date older than %s under locations "
                 "%s" % ((now - delta), ", ".join(cache_locations))
@@ -111,7 +111,7 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
             self._bg_cleanup_thread = threading.Thread(
                 target=self._remove_old_cached_data,
                 args=[grace_period] + cache_locations,
-                name="%s Clean Up" % self.name
+                name="%s Clean Up" % self.name,
             )
             self._bg_cleanup_thread.start()
         except Exception as e:
@@ -134,8 +134,8 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
         # Datetime total_seconds was introduced in Python 2.7, so compute the
         # value ourself.
         grace_in_seconds = (
-            delta.microseconds + (delta.seconds + delta.days * 24 * 3600) * 10**6
-        ) / 10**6
+            delta.microseconds + (delta.seconds + delta.days * 24 * 3600) * 10 ** 6
+        ) / 10 ** 6
 
         # Please note that we can't log any message from this background thread
         # without the risk of causing deadlocks.
@@ -172,4 +172,3 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
                     except Exception as e:
                         # Silently ignore the error
                         pass
-

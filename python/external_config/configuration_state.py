@@ -38,6 +38,7 @@ class ConfigurationState(QtCore.QObject):
         it was last checked.
 
     """
+
     state_changed = QtCore.Signal()
 
     def __init__(self, bg_task_manager, parent):
@@ -51,12 +52,7 @@ class ConfigurationState(QtCore.QObject):
         """
         super(ConfigurationState, self).__init__(parent)
 
-        self._software_model = ConfigStateModel(
-            "Software",
-            [],
-            bg_task_manager,
-            parent
-        )
+        self._software_model = ConfigStateModel("Software", [], bg_task_manager, parent)
 
         # Determine the overall state of pipeline configurations
         # based on configs linked to active projects plus any
@@ -69,15 +65,17 @@ class ConfigurationState(QtCore.QObject):
                     "filters": [
                         ["project.Project.archived", "is", False],
                         ["project", "is", None],
-                    ]
+                    ],
                 }
             ],
             bg_task_manager,
-            parent
+            parent,
         )
 
         self._software_model.data_refreshed.connect(self._on_software_refreshed)
-        self._pipeline_config_model.data_refreshed.connect(self._on_pipeline_configs_refreshed)
+        self._pipeline_config_model.data_refreshed.connect(
+            self._on_pipeline_configs_refreshed
+        )
 
     def refresh(self):
         """
@@ -119,7 +117,7 @@ class ConfigurationState(QtCore.QObject):
         return "%s%s%s" % (
             self.get_software_hash(),
             pc_hash,
-            os.environ.get("TK_BOOTSTRAP_CONFIG_OVERRIDE")
+            os.environ.get("TK_BOOTSTRAP_CONFIG_OVERRIDE"),
         )
 
     def _on_software_refreshed(self, has_changed):
@@ -165,9 +163,7 @@ class ConfigStateModel(ShotgunModel):
         :type parent: :class:`~PySide.QtGui.QObject`
         """
         super(ConfigStateModel, self).__init__(
-            parent,
-            download_thumbs=False,
-            bg_task_manager=bg_task_manager
+            parent, download_thumbs=False, bg_task_manager=bg_task_manager
         )
         self._entity_type = entity_type
         self._filters = filters
@@ -182,12 +178,7 @@ class ConfigStateModel(ShotgunModel):
 
         hierarchy = ["id"]
         fields = ["updated_at", "id"]
-        self._load_data(
-            self._entity_type,
-            self._filters,
-            hierarchy,
-            fields,
-        )
+        self._load_data(self._entity_type, self._filters, hierarchy, fields)
         self._refresh_data()
 
     def get_hash(self):
@@ -203,7 +194,7 @@ class ConfigStateModel(ShotgunModel):
             # note: there *may* be a bug when deleting items out of a shotgun
             #       model in certain cases, so in order to ensure we
             #       get a correct representation, include entity_ids in the hash.
-            return hash(str(sg_data+self.entity_ids))
+            return hash(str(sg_data + self.entity_ids))
 
     def _get_sg_data(self):
         """
@@ -221,5 +212,3 @@ class ConfigStateModel(ShotgunModel):
                 data.append(item.get_sg_data())
 
         return data
-
-

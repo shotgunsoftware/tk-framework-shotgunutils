@@ -1,11 +1,11 @@
 # Copyright (c) 2013 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import tank
@@ -22,32 +22,33 @@ HAS_QBYTEARRAY = hasattr(QtCore, "QByteArray")
 def get_sg_data(item):
     """
     Helper method.
-    
+
     Retrieves the shotgun data associated with the object passed in.
     The object passed in is typically a QStandardItem or a QModelIndex
     or any other object which implements a data(ROLE) method signature.
-    
+
     :param item: QStandardItem or QModelIndex or similar
     :returns: Shotgun data or None if no data was associated
     """
     from .shotgun_model import ShotgunModel
+
     return get_sanitized_data(item, ShotgunModel.SG_DATA_ROLE)
 
 
 def get_sanitized_data(item, role):
     """
-    Alternative method to the data() methods offered on 
+    Alternative method to the data() methods offered on
     QStandardItem and QModelIndex. This helper method ensures
-    that complex data is returned in a correct and consistent 
+    that complex data is returned in a correct and consistent
     fashion. All string data is returned as utf-8 encoded byte
-    streams and complex data structures are returned as 
+    streams and complex data structures are returned as
     python native objects (rather than QVariants).
 
     Using this method whenever working with complex model data
     ensures that the code behaves consistently across pyside
     and pyqt and is using utf-8 encoded strings rather than
     unicode.
-    
+
     :param item: QStandardItem or QModelIndex or similar
     :param role: Role identifier to be passed to the item object's data() method.
     :returns: native python objects
@@ -60,16 +61,16 @@ def get_sanitized_data(item, role):
 
 def sanitize_for_qt_model(val):
     """
-    Useful when you have shotgun (or other) data and want to 
+    Useful when you have shotgun (or other) data and want to
     prepare it for storage as role data in a model.
 
     Qt/pyside/pyqt automatically changes the data to be unicode
-    according to internal rules of its own, sometimes resulting in 
+    according to internal rules of its own, sometimes resulting in
     unicode errors. A safe strategy for storing unicode data inside
     Qt model roles is therefore to ensure everything is converted to
-    unicode prior to insertion into the model. This method ensures 
+    unicode prior to insertion into the model. This method ensures
     that. All string values will be coonverted to unicode. UTF-8
-    is assumed for all strings: 
+    is assumed for all strings:
 
     in:  {"a":"aaa", "b": 123, "c": {"x":"y", "z":"aa"}, "d": [ {"x":"y", "z":"aa"} ] }
     out: {'a': u'aaa', 'c': {'x': u'y', 'z': u'aa'}, 'b': 123, 'd': [{'x': u'y', 'z': u'aa'}]}
@@ -109,23 +110,23 @@ def sanitize_qt(val):
     - QVariants are converted to native python structures
     - QStrings are coverted to utf-8 encoded strs
     - unicode objets are converted to utf-8 encoded strs
-    
+
     :param val: input object
-    :returns: cleaned up data 
+    :returns: cleaned up data
     """
 
     # test things in order of probable occurrence for speed
     if val is None:
         return None
-    
+
     elif isinstance(val, unicode):
         return val.encode("UTF-8")
-    
+
     elif HAS_QSTRING and isinstance(val, QtCore.QString):
         # convert any QStrings to utf-8 encoded strings
         # note the cast to str because pyqt returns a QByteArray
         return str(val.toUtf8())
-    
+
     elif HAS_QBYTEARRAY and isinstance(val, QtCore.QByteArray):
         # convert byte arrays to strs
         return str(val)
@@ -134,11 +135,11 @@ def sanitize_qt(val):
         # convert any QVariant to their python native equivalents
         val = val.toPyObject()
         # and then sanitize this
-        return sanitize_qt(val)    
-    
+        return sanitize_qt(val)
+
     elif isinstance(val, list):
         return [sanitize_qt(d) for d in val]
-    
+
     elif isinstance(val, dict):
         new_val = {}
         for (k, v) in val.iteritems():
@@ -155,7 +156,7 @@ def sanitize_qt(val):
         val = int(val)
         return val
     else:
-        return val        
+        return val
 
 
 def compare_shotgun_data(a, b):
@@ -195,9 +196,13 @@ def compare_shotgun_data(a, b):
     #
     # the query string changes all the times, so when we check if an item
     # is out of date, omit it.
-    elif (isinstance(a, str) and isinstance(b, str) and
-          a.startswith("http") and b.startswith("http") and
-          ("amazonaws" in a or "AccessKeyId" in a)):
+    elif (
+        isinstance(a, str)
+        and isinstance(b, str)
+        and a.startswith("http")
+        and b.startswith("http")
+        and ("amazonaws" in a or "AccessKeyId" in a)
+    ):
         # attempt to parse values are urls and eliminate the querystring
         # compare hostname + path only
         url_obj_a = urlparse.urlparse(a)
