@@ -94,5 +94,3 @@ class ShotgunItemData(object):
         Flag to indicate if this item is a leaf in the tree
         """
         return self._data[ShotgunDataHandlerCache.IS_LEAF]
-
-

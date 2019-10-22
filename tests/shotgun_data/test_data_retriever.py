@@ -17,7 +17,9 @@ from mock import patch
 from tank_test.tank_test_base import *
 
 # import the test base class
-test_python_path = os.path.abspath(os.path.join( os.path.dirname(__file__), "..", "python"))
+test_python_path = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "python")
+)
 sys.path.append(test_python_path)
 from base_test import TestShotgunUtilsFramework
 
@@ -39,7 +41,9 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         """
         Test thumbnail caching
         """
-        dummy_thumb_path = os.path.join(self.fixtures_root, "resources", "thumbnail.png")
+        dummy_thumb_path = os.path.join(
+            self.fixtures_root, "resources", "thumbnail.png"
+        )
         extension = "png"
 
         def _download_url(sg, url, location, use_url_extension=False):
@@ -60,9 +64,7 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         # We run tasks which usually run on a background task manager directly
         # here for the ease of testing.
         result = retriever._task_download_thumbnail(
-            None,
-            "https:://foo/bar/blah.png",
-            "Asset", 1, None, False
+            None, "https:://foo/bar/blah.png", "Asset", 1, None, False
         )
         thumb_path = result["thumb_path"]
         self.assertIsNotNone(thumb_path)
@@ -84,19 +86,21 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         self.assertEqual(int(os.path.getmtime(thumb_path)), 0)
         self.assertEqual(
             retriever.download_thumbnail("https:://foo/bar/blah.png", self.framework),
-            thumb_path
+            thumb_path,
         )
         self.assertGreaterEqual(os.path.getmtime(thumb_path), now)
         os.utime(thumb_path, (0, 0))
         self.assertEqual(int(os.path.getmtime(thumb_path)), 0)
         self.assertEqual(
-            retriever._task_check_attachment({
-                "this_file": {
-                    "url": "https:://foo/bar/blah.png",
-                    "name": os.path.basename(thumb_path)
+            retriever._task_check_attachment(
+                {
+                    "this_file": {
+                        "url": "https:://foo/bar/blah.png",
+                        "name": os.path.basename(thumb_path),
+                    }
                 }
-            })["file_path"],
-            thumb_path
+            )["file_path"],
+            thumb_path,
         )
         self.assertGreaterEqual(os.path.getmtime(thumb_path), now)
         # download_thumbnail_source seems to have a slightly different logic
@@ -107,11 +111,9 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         self.assertEqual(int(os.path.getmtime(thumb_path)), 0)
         patched.side_effect = RuntimeError
         self.assertEqual(
-            retriever.download_thumbnail_source("Asset", 1, self.framework),
-            thumb_path
+            retriever.download_thumbnail_source("Asset", 1, self.framework), thumb_path
         )
         self.assertGreaterEqual(os.path.getmtime(thumb_path), now)
-
 
     def test_cleaning_cached_data(self):
         """
@@ -129,18 +131,20 @@ class TestDataRetriever(TestShotgunUtilsFramework):
 
         dummy_files = []
         for folder in top_cleanup_folders:
-            dummy_files.extend([
-                os.path.join(folder, "foo.txt"),
-                os.path.join(folder, "blah.txt"),
-                os.path.join(folder, "test", "foo.txt"),
-                os.path.join(folder, "test", "blah.txt")
-            ])
+            dummy_files.extend(
+                [
+                    os.path.join(folder, "foo.txt"),
+                    os.path.join(folder, "blah.txt"),
+                    os.path.join(folder, "test", "foo.txt"),
+                    os.path.join(folder, "test", "blah.txt"),
+                ]
+            )
         os.mkdir(os.path.join(bundle.site_cache_location, "test"))
         preserved_files = [
             os.path.join(bundle.site_cache_location, "test", "foo.txt"),
             os.path.join(bundle.site_cache_location, "blah.txt"),
             os.path.join(bundle.cache_location, "test", "foo.txt"),
-            os.path.join(bundle.cache_location, "blah.txt")
+            os.path.join(bundle.cache_location, "blah.txt"),
         ]
         for dummy_file in dummy_files + preserved_files:
             self.create_file(dummy_file)
@@ -157,13 +161,11 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         # Datetime total_seconds was introduced in Python 2.7, so compute the
         # value ourself
         one_day_in_seconds = (
-            one_day_delta.microseconds + (one_day_delta.seconds + one_day_delta.days * 24 * 3600) * 10**6
-        ) / 10**6
+            one_day_delta.microseconds
+            + (one_day_delta.seconds + one_day_delta.days * 24 * 3600) * 10 ** 6
+        ) / 10 ** 6
         day_before_timestamp = time.time() - one_day_in_seconds
-        os.utime(
-            dummy_file,
-            (day_before_timestamp, day_before_timestamp)
-        )
+        os.utime(dummy_file, (day_before_timestamp, day_before_timestamp))
         bundle._remove_old_cached_data(1, *top_cleanup_folders)
         # It should be gone, but all the others kept
         self.assertFalse(os.path.exists(dummy_file))
@@ -172,10 +174,7 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         # Test that cleaning up all files work but keep the files we should never
         # delete.
         for dummy_file in dummy_files + preserved_files:
-            os.utime(
-                dummy_file,
-                (day_before_timestamp, day_before_timestamp)
-            )
+            os.utime(dummy_file, (day_before_timestamp, day_before_timestamp))
         bundle._remove_old_cached_data(1, *top_cleanup_folders)
         for dummy_file in dummy_files:
             self.assertFalse(os.path.exists(dummy_file))

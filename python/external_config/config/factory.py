@@ -23,7 +23,9 @@ logger = sgtk.platform.get_logger(__name__)
 CONFIGURATION_GENERATION = 11
 
 
-def create_from_pipeline_configuration_data(parent, bg_task_manager, config_loader, configuration_data):
+def create_from_pipeline_configuration_data(
+    parent, bg_task_manager, config_loader, configuration_data
+):
     """
     Creates a :class`ExternalConfiguration` subclass given
     a set of input data, as returned by ToolkitManager.get_pipeline_configurations()
@@ -157,7 +159,7 @@ def serialize(config_object):
         "pipeline_config_name": config_object.pipeline_configuration_name,
         "config_uri": config_object.descriptor_uri,
         "status": config_object.status,
-        "class_name": config_object.__class__.__name__
+        "class_name": config_object.__class__.__name__,
     }
 
     if isinstance(config_object, LiveExternalConfiguration):
@@ -180,10 +182,8 @@ def deserialize(parent, bg_task_manager, data):
     """
     if data.get("GENERATION") != CONFIGURATION_GENERATION:
         raise ExternalConfigParseError(
-            "Serialized format is version %s. Required version is %s" % (
-                data.get("GENERATION"),
-                CONFIGURATION_GENERATION
-            )
+            "Serialized format is version %s. Required version is %s"
+            % (data.get("GENERATION"), CONFIGURATION_GENERATION)
         )
 
     if data["class_name"] == "ImmutableExternalConfiguration":
@@ -236,6 +236,6 @@ def deserialize(parent, bg_task_manager, data):
             data["status"],
         )
     else:
-        raise ExternalConfigParseError("Don't know how to deserialize class %s" % data["class_name"])
-
-
+        raise ExternalConfigParseError(
+            "Don't know how to deserialize class %s" % data["class_name"]
+        )

@@ -57,7 +57,5 @@ class SimpleShotgunHierarchyModel(ShotgunHierarchyModel):
 
         """
         super(SimpleShotgunHierarchyModel, self)._load_data(
-            seed_entity_field,
-            root=root,
-            entity_fields=entity_fields
+            seed_entity_field, root=root, entity_fields=entity_fields
         )

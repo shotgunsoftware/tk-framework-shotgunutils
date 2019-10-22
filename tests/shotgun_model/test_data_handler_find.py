@@ -1,11 +1,11 @@
 # Copyright (c) 2016 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sys
@@ -15,7 +15,9 @@ from mock import patch, Mock, call
 from tank_test.tank_test_base import *
 
 # import the test base class
-test_python_path = os.path.abspath(os.path.join( os.path.dirname(__file__), "..", "python"))
+test_python_path = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "python")
+)
 sys.path.append(test_python_path)
 from base_test import TestShotgunUtilsFramework
 
@@ -24,11 +26,11 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
     """
     Tests for the data handler low level io
     """
-    
+
     def setUp(self):
         """
         Fixtures setup
-        """        
+        """
         super(TestShotgunFindDataHandler, self).setUp()
         self.shotgun_model = self.framework.import_module("shotgun_model")
 
@@ -47,7 +49,7 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
             download_thumbs=True,
             limit=None,
             additional_filter_presets=None,
-            cache_path=test_path
+            cache_path=test_path,
         )
 
         dh.load_cache()
@@ -61,11 +63,7 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         request_id = dh.generate_data_request(mock_data_retriever)
 
         mock_data_retriever.execute_find.assert_called_once_with(
-            "Asset",
-            [],
-            ['code', 'image', 'sg_asset_type'],
-            None,
-            limit=None
+            "Asset", [], ["code", "image", "sg_asset_type"], None, limit=None
         )
 
         self.assertEqual(request_id, 1234)
@@ -85,7 +83,7 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
             download_thumbs=True,
             limit=None,
             additional_filter_presets=None,
-            cache_path=test_path
+            cache_path=test_path,
         )
 
         dh.load_cache()
@@ -111,7 +109,7 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         self.assertEqual(prop_data.field, "sg_asset_type")
         self.assertEqual(
             prop_data.shotgun_data,
-            {'code': 'foo', 'type': 'Asset', 'id': 1234, 'sg_asset_type': 'Prop'}
+            {"code": "foo", "type": "Asset", "id": 1234, "sg_asset_type": "Prop"},
         )
         self.assertEqual(prop_data.parent, None)
         self.assertEqual(prop_data.is_leaf(), False)
@@ -120,7 +118,7 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         self.assertEqual(asset_data.field, "code")
         self.assertEqual(
             asset_data.shotgun_data,
-            {'code': 'foo', 'type': 'Asset', 'id': 1234, 'sg_asset_type': 'Prop'}
+            {"code": "foo", "type": "Asset", "id": 1234, "sg_asset_type": "Prop"},
         )
         self.assertEqual(asset_data.parent, prop_data)
         self.assertEqual(asset_data.is_leaf(), True)
@@ -130,7 +128,12 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
 
         # now apply an update
         sg_data = [
-            {"code": "foo_renamed", "type": "Asset", "id": 1234, "sg_asset_type": "Prop"}
+            {
+                "code": "foo_renamed",
+                "type": "Asset",
+                "id": 1234,
+                "sg_asset_type": "Prop",
+            }
         ]
         diff = dh.update_data(sg_data)
 
@@ -141,7 +144,12 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         self.assertEqual(asset_data.unique_id, 1234)
         self.assertEqual(
             asset_data.shotgun_data,
-            {'code': 'foo_renamed', 'type': 'Asset', 'id': 1234, 'sg_asset_type': 'Prop'}
+            {
+                "code": "foo_renamed",
+                "type": "Asset",
+                "id": 1234,
+                "sg_asset_type": "Prop",
+            },
         )
 
         # test the data
@@ -151,7 +159,12 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
 
         # update a complex update
         sg_data = [
-            {"code": "new_asset", "type": "Asset", "id": 3333, "sg_asset_type": "Character"}
+            {
+                "code": "new_asset",
+                "type": "Asset",
+                "id": 3333,
+                "sg_asset_type": "Character",
+            }
         ]
         diff = dh.update_data(sg_data)
 
@@ -179,7 +192,6 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         self.assertEquals(dh.get_data_item_from_uid("/Character"), diff[0]["data"])
         self.assertEquals(dh.get_data_item_from_uid("/Prop"), None)
 
-
     def test_generate_child_nodes(self):
         """
         Tests child node generation from cache
@@ -196,7 +208,7 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
             download_thumbs=True,
             limit=None,
             additional_filter_presets=None,
-            cache_path=test_path
+            cache_path=test_path,
         )
 
         dh.load_cache()
@@ -211,7 +223,6 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
             {"code": "c_baz", "type": "Asset", "id": 6, "sg_asset_type": "Character"},
         ]
         dh.update_data(sg_data)
-
 
         callback = Mock()
 

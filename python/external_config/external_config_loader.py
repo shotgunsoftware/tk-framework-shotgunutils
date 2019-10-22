@@ -49,7 +49,9 @@ class ExternalConfigurationLoader(QtCore.QObject):
     # grouping used by the background task manager
     TASK_GROUP = "tk-framework-shotgunutils.external_config.ExternalConfigurationLoader"
 
-    def __init__(self, interpreter, engine_name, plugin_id, base_config, bg_task_manager, parent):
+    def __init__(
+        self, interpreter, engine_name, plugin_id, base_config, bg_task_manager, parent
+    ):
         """
         Initialize the class with the following parameters:
 
@@ -167,7 +169,8 @@ class ExternalConfigurationLoader(QtCore.QObject):
         for task_id in self._task_ids.keys():
             if self._task_ids[task_id] == project_id:
                 logger.debug(
-                    "Discarding existing request_configurations request for project %s" % project_id
+                    "Discarding existing request_configurations request for project %s"
+                    % project_id
                 )
                 del self._task_ids[task_id]
 
@@ -177,7 +180,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
             "plugin": self._plugin_id,
             "engine": self._engine_name,
             "base_config": self._base_config_uri,
-            "state_hash": self._shotgun_state.get_configuration_hash()
+            "state_hash": self._shotgun_state.get_configuration_hash(),
         }
 
         config_data = file_cache.load_cache(config_cache_key)
@@ -203,7 +206,9 @@ class ExternalConfigurationLoader(QtCore.QObject):
                 # Shotgun have been fixed in the interim since the cache was built.
                 if [c for c in config_objects if not c.is_valid]:
                     file_cache.delete_cache(config_cache_key)
-                    logger.debug("Detected an invalid config in the cache. Recaching from scratch...")
+                    logger.debug(
+                        "Detected an invalid config in the cache. Recaching from scratch..."
+                    )
                 else:
                     self.configurations_loaded.emit(project_id, config_objects)
                     config_data_emitted = True
@@ -216,8 +221,8 @@ class ExternalConfigurationLoader(QtCore.QObject):
                 group=self.TASK_GROUP,
                 task_kwargs={
                     "project_id": project_id,
-                    "state_hash": self._shotgun_state.get_configuration_hash()
-                }
+                    "state_hash": self._shotgun_state.get_configuration_hash(),
+                },
             )
 
             self._task_ids[unique_id] = project_id
@@ -240,9 +245,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
         # get list of configurations
         mgr = toolkit_manager or sgtk.bootstrap.ToolkitManager()
         mgr.plugin_id = self._plugin_id
-        configs = mgr.get_pipeline_configurations(
-            {"type": "Project", "id": project_id}
-        )
+        configs = mgr.get_pipeline_configurations({"type": "Project", "id": project_id})
         return (project_id, state_hash, configs)
 
     def _task_completed(self, unique_id, group, result):
@@ -268,12 +271,14 @@ class ExternalConfigurationLoader(QtCore.QObject):
                 parent=self,
                 bg_task_manager=self._bg_task_manager,
                 config_loader=self,
-                configuration_data=config_dict
+                configuration_data=config_dict,
             )
             config_objects.append(config_object)
 
             if not config_object.is_valid:
-                logger.debug("Configuration (%r) was found, but is invalid.", config_object)
+                logger.debug(
+                    "Configuration (%r) was found, but is invalid.", config_object
+                )
 
         # if no custom pipeline configs were found, we use the base config
         # note: because the base config can change over time, we make sure
@@ -283,11 +288,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
                 "No configurations were found. Using the fallback configuration."
             )
             config_objects.append(
-                config.create_fallback_configuration(
-                    self,
-                    self._bg_task_manager,
-                    self
-                )
+                config.create_fallback_configuration(self, self._bg_task_manager, self)
             )
 
         # create a dictionary we can serialize
@@ -295,9 +296,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
             "project_id": project_id,
             "plugin_id": self._plugin_id,
             "global_state_hash": state_hash,
-            "configurations": [
-                config.serialize(cfg_obj) for cfg_obj in config_objects
-            ]
+            "configurations": [config.serialize(cfg_obj) for cfg_obj in config_objects],
         }
 
         # save cache
@@ -307,13 +306,14 @@ class ExternalConfigurationLoader(QtCore.QObject):
                 "plugin": self._plugin_id,
                 "engine": self._engine_name,
                 "base_config": self._base_config_uri,
-                "state_hash": state_hash
+                "state_hash": state_hash,
             },
-            data
+            data,
         )
 
         logger.debug(
-            "Got configuration objects for project %s: %s" % (project_id, config_objects)
+            "Got configuration objects for project %s: %s"
+            % (project_id, config_objects)
         )
 
         self.configurations_loaded.emit(project_id, config_objects)

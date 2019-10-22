@@ -1,11 +1,11 @@
 # Copyright (c) 2016 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
@@ -31,6 +31,7 @@ class TestShotgunUtilsFramework(TankTestBase):
         self.shotgun_model = self.framework.import_module("shotgun_model")
 
     """
+
     def setUp(self):
         """
         Fixtures setup
@@ -41,7 +42,9 @@ class TestShotgunUtilsFramework(TankTestBase):
         # set up an environment variable that points to the root of the
         # framework so we can specify its location in the environment fixture
 
-        self.framework_root = os.path.abspath(os.path.join( os.path.dirname(__file__), "..", ".."))
+        self.framework_root = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..")
+        )
         os.environ["FRAMEWORK_ROOT"] = self.framework_root
 
         # Add these to mocked shotgun
@@ -57,7 +60,7 @@ class TestShotgunUtilsFramework(TankTestBase):
         self.engine = sgtk.platform.start_engine("test_engine", self.tk, context)
 
         self.app = self.engine.apps["test_app"]
-        self.framework = self.app.frameworks['tk-framework-shotgunutils']
+        self.framework = self.app.frameworks["tk-framework-shotgunutils"]
 
     def tearDown(self):
         """
@@ -70,4 +73,3 @@ class TestShotgunUtilsFramework(TankTestBase):
 
         # important to call base class so it can clean up memory
         super(TestShotgunUtilsFramework, self).tearDown()
-

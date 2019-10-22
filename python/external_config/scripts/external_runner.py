@@ -32,10 +32,12 @@ qt_importer = sgtk.util.qt_importer.QtImporter()
 LOGGER_NAME = "tk-framework-shotgunutils.multi_context.external_runner"
 logger = sgtk.LogManager.get_logger(LOGGER_NAME)
 
+
 class EngineStartupError(Exception):
     """
     Indicates that bootstrapping into the engine failed.
     """
+
 
 class QtTaskRunner(qt_importer.QtCore.QObject):
     """
@@ -185,9 +187,13 @@ def _write_cache_file(path, data):
             # and ensure the cache file has got open permissions
             os.chmod(path, 0o666)
         except Exception as e:
-            logger.debug("Could not write '%s'. Details: %s" % (path, e), exec_info=True)
+            logger.debug(
+                "Could not write '%s'. Details: %s" % (path, e), exec_info=True
+            )
         else:
-            logger.debug("Completed save of %s. Size %s bytes" % (path, os.path.getsize(path)))
+            logger.debug(
+                "Completed save of %s. Size %s bytes" % (path, os.path.getsize(path))
+            )
     finally:
         os.umask(old_umask)
 
@@ -217,7 +223,7 @@ def start_engine(
     entity_type,
     entity_id,
     bundle_cache_fallback_paths,
-    pre_cache
+    pre_cache,
 ):
     """
     Bootstraps into an engine.
@@ -260,8 +266,7 @@ def start_engine(
     logger.debug("Starting %s using entity %s %s", engine_name, entity_type, entity_id)
     try:
         engine = manager.bootstrap_engine(
-            engine_name,
-            entity={"type": entity_type, "id": entity_id}
+            engine_name, entity={"type": entity_type, "id": entity_id}
         )
 
     #
@@ -298,14 +303,12 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
     :param str cache_path: Path to write cached data to
     """
     # import modules from shotgun-utils fw for serialization
-    utils_folder = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", )
-    )
+    utils_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     external_command_utils = _import_py_file(utils_folder, "external_command_utils")
 
     cache_data = {
         "generation": external_command_utils.FORMAT_GENERATION,
-        "commands": []
+        "commands": [],
     }
     if engine is None:
         logger.debug("No engine running - caching empty list of commands.")
@@ -320,10 +323,7 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
             if external_command_utils.enabled_on_current_os(data["properties"]):
                 cache_data["commands"].append(
                     external_command_utils.serialize_command(
-                        engine.name,
-                        entity_type,
-                        cmd_name,
-                        data["properties"]
+                        engine.name, entity_type, cmd_name, data["properties"]
                     )
                 )
         logger.debug("Engine commands processed.")
@@ -352,9 +352,7 @@ def main():
             os.environ["PYTHONPATH"] = arg_data["pythonpath"]
 
     # Add application icon
-    qt_application.setWindowIcon(
-        qt_importer.QtGui.QIcon(arg_data["icon_path"])
-    )
+    qt_application.setWindowIcon(qt_importer.QtGui.QIcon(arg_data["icon_path"]))
 
     action = arg_data["action"]
     engine = None
@@ -384,11 +382,14 @@ def main():
             # relevant state. The error to look for is on the following form:
             # TankMissingEnvironmentFile: Missing environment file: /path/to/env/shotgun_camera.yml
             #
-            if re.match("^Missing environment file:.*shotgun_[a-zA-Z0-9]+\.yml$", str(e)):
+            if re.match(
+                "^Missing environment file:.*shotgun_[a-zA-Z0-9]+\.yml$", str(e)
+            ):
                 logger.debug(
                     "Bootstrap returned legacy fallback exception '%s'. "
                     "An empty list of actions will be cached for the "
-                    "given entity type.", str(e)
+                    "given entity type.",
+                    str(e),
                 )
             else:
                 # bubble the error
@@ -398,7 +399,7 @@ def main():
             engine,
             arg_data["entity_type"],
             arg_data["entity_id"],
-            arg_data["cache_path"]
+            arg_data["cache_path"],
         )
 
     elif action == "execute_command":
@@ -435,9 +436,7 @@ def main():
             # a special method using the following interface:
             # execute_old_style_command(cmd_name, entity_type, entity_ids)
             engine.execute_old_style_command(
-                callback_name,
-                arg_data["entity_type"],
-                arg_data["entity_ids"],
+                callback_name, arg_data["entity_type"], arg_data["entity_ids"]
             )
         else:
             # standard route - just run the callback

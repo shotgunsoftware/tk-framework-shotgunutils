@@ -183,5 +183,3 @@ refreshes its data asynchronously.
     .. automethod:: _set_tooltip
 
     **Instance Methods**
-
-

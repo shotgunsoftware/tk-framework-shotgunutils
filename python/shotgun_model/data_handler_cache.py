@@ -11,6 +11,7 @@
 
 from .util import compare_shotgun_data
 
+
 class ShotgunDataHandlerCache(object):
     """
     Low level convenience wrapper around a data handler cache.
@@ -33,8 +34,8 @@ class ShotgunDataHandlerCache(object):
             # init clear cache
             self._cache = {
                 self.CACHE_CHILDREN: {},  # hierarchy
-                self.CACHE_BY_UID: {},    # uid-based lookup
-                self.UID: None            # the uid of the root is None
+                self.CACHE_BY_UID: {},  # uid-based lookup
+                self.UID: None,  # the uid of the root is None
             }
 
     @property
@@ -69,7 +70,9 @@ class ShotgunDataHandlerCache(object):
         if parent_uid is None:
             return self._cache[self.CACHE_CHILDREN].iterkeys()
         else:
-            return self._cache[self.CACHE_BY_UID][parent_uid][self.CACHE_CHILDREN].iterkeys()
+            return self._cache[self.CACHE_BY_UID][parent_uid][
+                self.CACHE_CHILDREN
+            ].iterkeys()
 
     def item_exists(self, unique_id):
         """
@@ -96,7 +99,8 @@ class ShotgunDataHandlerCache(object):
         :param unique_id: unique id for cache item
         :returns: :class:`ShotgunItemData` instance or None if not found.
         """
-        from .data_item import ShotgunItemData # local import to avoid cycles
+        from .data_item import ShotgunItemData  # local import to avoid cycles
+
         data = self._cache[self.CACHE_BY_UID].get(unique_id)
         return ShotgunItemData(data) if data else None
 
@@ -170,7 +174,7 @@ class ShotgunDataHandlerCache(object):
                 self.IS_LEAF: is_leaf,
                 self.UID: uid,
                 self.PARENT: parent_node,
-                self.CACHE_CHILDREN: {}
+                self.CACHE_CHILDREN: {},
             }
 
             parent_node[self.CACHE_CHILDREN][uid] = item
@@ -192,8 +196,3 @@ class ShotgunDataHandlerCache(object):
             parent = item[self.PARENT]
             del parent[self.CACHE_CHILDREN][unique_id]
         return item_data
-
-
-
-
-

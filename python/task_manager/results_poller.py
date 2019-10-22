@@ -149,7 +149,9 @@ class ResultsDispatcher(QtCore.QThread):
             # We could also add the events to invoke into a second queue meant to
             # be consumed by the background task manager, but it would only add
             # complexity to the design and it wouldn't provide any significant speed gain.
-            QtCore.QMetaObject.invokeMethod(self, "_do_invoke", QtCore.Qt.BlockingQueuedConnection)
+            QtCore.QMetaObject.invokeMethod(
+                self, "_do_invoke", QtCore.Qt.BlockingQueuedConnection
+            )
 
     @QtCore.Slot()
     def _do_invoke(self):
@@ -162,7 +164,9 @@ class ResultsDispatcher(QtCore.QThread):
             if isinstance(event, _TaskCompletedEvent):
                 self.task_completed.emit(event.worker_thread, event.task, event.result)
             elif isinstance(event, _TaskFailedEvent):
-                self.task_failed.emit(event.worker_thread, event.task, event.message, event.traceback)
+                self.task_failed.emit(
+                    event.worker_thread, event.task, event.message, event.traceback
+                )
             else:
                 raise Exception("Unknown event type: %s" % type(event).__name__)
         except Exception:

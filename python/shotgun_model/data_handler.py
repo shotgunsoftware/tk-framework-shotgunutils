@@ -51,6 +51,7 @@ class ShotgunDataHandler(object):
     is always sent as ShotgunItemData object to provide a full
     encapsulation around the internals of this class.
     """
+
     # version of binary format - increment this whenever changes
     # are made which renders the cache files non-backwards compatible.
     FORMAT_VERSION = 27
@@ -80,7 +81,7 @@ class ShotgunDataHandler(object):
             return "<%s@%s (%d items)>" % (
                 self.__class__.__name__,
                 self._cache_path,
-                self._cache.size
+                self._cache.size,
             )
 
     def is_cache_available(self):
@@ -141,12 +142,16 @@ class ShotgunDataHandler(object):
                     file_version = pickler.load()
                     if file_version != self.FORMAT_VERSION:
                         raise ShotgunModelDataError(
-                            "Cache file has version %s - version %s is required" % (file_version, self.FORMAT_VERSION)
+                            "Cache file has version %s - version %s is required"
+                            % (file_version, self.FORMAT_VERSION)
                         )
                     raw_cache_data = pickler.load()
                     self._cache = ShotgunDataHandlerCache(raw_cache_data)
             except Exception as e:
-                self._log_debug("Cache '%s' not valid - ignoring. Details: %s" % (self._cache_path, e))
+                self._log_debug(
+                    "Cache '%s' not valid - ignoring. Details: %s"
+                    % (self._cache_path, e)
+                )
 
         else:
             self._log_debug("No cache found on disk. Starting from empty data store.")
@@ -216,7 +221,10 @@ class ShotgunDataHandler(object):
             # set mask back to previous value
             os.umask(old_umask)
 
-        self._log_debug("Completed save of %s. Size %s bytes" % (self, os.path.getsize(self._cache_path)))
+        self._log_debug(
+            "Completed save of %s. Size %s bytes"
+            % (self, os.path.getsize(self._cache_path))
+        )
 
     def get_data_item_from_uid(self, unique_id):
         """

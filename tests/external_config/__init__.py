@@ -18,6 +18,7 @@ class _MockedShotgunUser(object):
     """
     A fake shotgun user object that we can pass to the manager.
     """
+
     def __init__(self, mockgun, login):
         self._mockgun = mockgun
         self._login = login
@@ -40,6 +41,7 @@ class _MockedSignal(object):
     """
     A fake Qt signal object with mocked emit and connect methods.
     """
+
     def __init__(self, *args, **kwargs):
         self.emit = Mock()
         self.connect = Mock()
@@ -49,6 +51,7 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
     """
     Tests for the external config loader.
     """
+
     def setUp(self):
         """
         Initial setup.
@@ -58,7 +61,9 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
         self._john_doe = self.mockgun.create("HumanUser", {"login": "john.doe"})
         self._project = self.mockgun.create("Project", {"name": "my_project"})
         self._mocked_sg_user = _MockedShotgunUser(self.mockgun, "john.doe")
-        self._descriptor = "sgtk:descriptor:app_store?name=tk-config-basic&version=v1.2.3"
+        self._descriptor = (
+            "sgtk:descriptor:app_store?name=tk-config-basic&version=v1.2.3"
+        )
         self._pc = self.mockgun.create(
             "PipelineConfiguration",
             dict(
@@ -71,7 +76,7 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
                 plugin_ids="basic.*",
                 descriptor=self._descriptor,
                 uploaded_config=None,
-            )
+            ),
         )
 
         self.external_config = self.framework.import_module("external_config")

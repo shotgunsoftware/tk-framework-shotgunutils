@@ -12,5 +12,3 @@ engines:
 frameworks:
   tk-framework-shotgunutils_v4.x.x:
     location: {type: path, path: '$FRAMEWORK_ROOT' }
-
-                

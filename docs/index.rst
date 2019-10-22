@@ -36,4 +36,3 @@ Contents:
    settings
    shotgun_globals
    external_config
-

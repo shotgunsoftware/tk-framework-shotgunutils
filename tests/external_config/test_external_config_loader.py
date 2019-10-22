@@ -12,19 +12,19 @@ import sys
 
 from sgtk.bootstrap import ToolkitManager
 from . import ExternalConfigBase, _MockedSignal
-from tank_test.tank_test_base import setUpModule # noqa
+from tank_test.tank_test_base import setUpModule  # noqa
 
 
 class TestExternalConfigLoader(ExternalConfigBase):
     """
     Tests for the external config loader.
     """
+
     def setUp(self):
         """
         Initial setup.
-        """        
+        """
         super(TestExternalConfigLoader, self).setUp()
-
 
     def test_task_failed(self):
         """
@@ -104,5 +104,3 @@ class TestExternalConfigLoader(ExternalConfigBase):
         self.assertEqual(res_hash, "123")
         self.assertEqual(len(res_pcs), 1)
         self.assertEqual(res_pcs[0]["id"], self._pc["id"])
-
-        

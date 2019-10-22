@@ -19,7 +19,7 @@ import datetime
 # the way later on when it might be used from a thread.
 #
 # https://stackoverflow.com/questions/16309650/python-importerror-for-strptime-in-spyder-for-windows-7
-datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
+datetime.datetime.strptime("2012-01-01", "%Y-%m-%d")
 
 from sgtk.platform.qt import QtCore, QtGui
 
@@ -106,7 +106,6 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     _SG_ITEM_HAS_CHILDREN = QtCore.Qt.UserRole + 4
     _SG_ITEM_UNIQUE_ID = QtCore.Qt.UserRole + 5
 
-
     def __init__(self, parent, bg_load_thumbs, bg_task_manager=None):
         """
         Initializes the model and provides some default convenience members.
@@ -160,11 +159,14 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         # set up data retriever and start work:
         self._sg_data_retriever = self._shotgun_data.ShotgunDataRetriever(
-            parent=self,
-            bg_task_manager=bg_task_manager
+            parent=self, bg_task_manager=bg_task_manager
         )
-        self._sg_data_retriever.work_completed.connect(self.__on_data_retriever_work_completed)
-        self._sg_data_retriever.work_failure.connect(self.__on_data_retriever_work_failure)
+        self._sg_data_retriever.work_completed.connect(
+            self.__on_data_retriever_work_completed
+        )
+        self._sg_data_retriever.work_failure.connect(
+            self.__on_data_retriever_work_failure
+        )
         self._sg_data_retriever.start()
 
     ############################################################################
@@ -402,7 +404,6 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         # has children.
         return current_child_item_count == 0 and data_has_children
 
-
     ############################################################################
     # abstract, protected methods. these methods should be implemented by
     # subclasses to provide a consistent developer experience.
@@ -437,7 +438,6 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             "The '_update_item' method has not been "
             "implemented for this ShotgunQueryModel subclass."
         )
-
 
     ############################################################################
     # These methods provide the developer experience for shotgun query models.
@@ -689,9 +689,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         # request the data asynchronously from the data handler
         self.__current_work_id = self._data_handler.generate_data_request(
-            self._sg_data_retriever,
-            *args,
-            **kwargs
+            self._sg_data_retriever, *args, **kwargs
         )
 
         if self.__current_work_id is None:
@@ -729,20 +727,13 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             raise sgtk.ShotgunModelError("Data retriever is not available!")
 
         uid = self._sg_data_retriever.request_thumbnail(
-            url,
-            entity_type,
-            entity_id,
-            field,
-            self.__bg_load_thumbs
+            url, entity_type, entity_id, field, self.__bg_load_thumbs
         )
 
         # keep tabs of this and call out later - note that we use a weakref to allow
         # the model item to be gc'd if it's removed from the model before the thumb
         # request completes.
-        self.__thumb_map[uid] = {
-            "item_ref": weakref.ref(item),
-            "field": field
-        }
+        self.__thumb_map[uid] = {"item_ref": weakref.ref(item), "field": field}
 
     def _ensure_item_loaded(self, uid):
         """
@@ -767,7 +758,9 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         if not item:
 
             # item was not part of the model. Attempt to load its parents until it is visible.
-            self._log_debug("Item %s does not exist in the tree - will expand tree." % data_item)
+            self._log_debug(
+                "Item %s does not exist in the tree - will expand tree." % data_item
+            )
 
             # now get a list of all parents and recurse back down towards
             # the node we want to load. If at any level, the data has not
@@ -788,14 +781,17 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                 item = self._get_item_by_unique_id(data_item.unique_id)
                 if not item:
                     self._log_debug(
-                        "Data item %s does not exist in model - fetching parent's children..." % data_item
+                        "Data item %s does not exist in model - fetching parent's children..."
+                        % data_item
                     )
                     # this parent does not yet exist in the tree
                     # find the parent and kick it to expand it
 
                     # assume that the top level is always loaded in tree
                     # so that it's always safe to do data_item.parent.uid here
-                    parent_item = self._get_item_by_unique_id(data_item.parent.unique_id)
+                    parent_item = self._get_item_by_unique_id(
+                        data_item.parent.unique_id
+                    )
                     # get model index
                     parent_model_index = parent_item.index()
                     # kick it
@@ -907,7 +903,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         :param uid: The unique id of the work that failed
         :param msg: The error message returned for the failure
         """
-        uid = sanitize_qt(uid) # qstring on pyqt, str on pyside
+        uid = sanitize_qt(uid)  # qstring on pyqt, str on pyside
         msg = sanitize_qt(msg)
 
         if self.__current_work_id != uid:
@@ -962,7 +958,9 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                 if self.__bg_load_thumbs:
                     # worker thread already loaded the thumbnail in as a QImage.
                     # call a separate method.
-                    self._populate_thumbnail_image(item, sg_field, thumbnail, thumbnail_path)
+                    self._populate_thumbnail_image(
+                        item, sg_field, thumbnail, thumbnail_path
+                    )
                 else:
                     # worker thread only ensured that the image exists
                     # call method to populate it
@@ -1030,7 +1028,9 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                     else:
                         # this item has a well defined parent
                         # see if this exists in the tree
-                        parent_model_item = self._get_item_by_unique_id(parent_data_item.unique_id)
+                        parent_model_item = self._get_item_by_unique_id(
+                            parent_data_item.unique_id
+                        )
 
                     if parent_model_item:
                         # The parent exists in the view. It might not because of
@@ -1039,7 +1039,9 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                         # the new ones now. If not, we let fetchMore does its job
                         # later in lazy loading mode.
                         if not self.canFetchMore(parent_model_item.index()):
-                            self._log_debug("Creating new model item for %s" % data_item)
+                            self._log_debug(
+                                "Creating new model item for %s" % data_item
+                            )
                             self._create_item(parent_model_item, data_item)
 
                 elif item["mode"] == self._data_handler.DELETED:

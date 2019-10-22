@@ -26,15 +26,15 @@ class FallbackExternalConfiguration(ExternalConfiguration):
     """
 
     def __init__(
-            self,
-            parent,
-            bg_task_manager,
-            plugin_id,
-            engine_name,
-            interpreter,
-            software_hash,
-            pipeline_config_uri,
-            status=ExternalConfiguration.CONFIGURATION_READY
+        self,
+        parent,
+        bg_task_manager,
+        plugin_id,
+        engine_name,
+        interpreter,
+        software_hash,
+        pipeline_config_uri,
+        status=ExternalConfiguration.CONFIGURATION_READY,
     ):
         """
         .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
@@ -58,7 +58,7 @@ class FallbackExternalConfiguration(ExternalConfiguration):
             interpreter,
             software_hash,
             pipeline_config_uri,
-            status
+            status,
         )
 
         # is our config uri tracking the latest version?
@@ -99,4 +99,3 @@ class FallbackExternalConfiguration(ExternalConfiguration):
             "link_type": link_entity_type,
         }
         return cache_key
-

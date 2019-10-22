@@ -14,6 +14,7 @@ from tank.platform.qt import QtGui
 from .util import sanitize_qt
 from .util import get_sg_data as util_get_sg_data
 
+
 class ShotgunStandardItem(QtGui.QStandardItem):
     """
     Special implementation of StandardItem which bridges PyQt and PySide.

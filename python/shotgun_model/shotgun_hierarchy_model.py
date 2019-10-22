@@ -63,7 +63,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
     async_item_retrieval_completed = QtCore.Signal(object)
 
-    def __init__(self, parent, schema_generation=0, bg_task_manager=None, include_root=None):
+    def __init__(
+        self, parent, schema_generation=0, bg_task_manager=None, include_root=None
+    ):
         """
         Initialize the Hierarcy model.
 
@@ -95,14 +97,14 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             If ``include_root`` is `None`, no root item will be added.
         """
         super(ShotgunHierarchyModel, self).__init__(
-            parent,
-            bg_load_thumbs=True,
-            bg_task_manager=bg_task_manager
+            parent, bg_load_thumbs=True, bg_task_manager=bg_task_manager
         )
 
         # check for hierarchy support
-        (self._hierarchy_is_supported, self._hierarchy_not_supported_reason) = \
-            self.__hierarchy_is_supported()
+        (
+            self._hierarchy_is_supported,
+            self._hierarchy_not_supported_reason,
+        ) = self.__hierarchy_is_supported()
 
         if not self._hierarchy_is_supported:
             self._log_warning(self._hierarchy_not_supported_reason)
@@ -115,10 +117,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         self._schema_generation = schema_generation
 
         # keep these icons around so they're not constantly being created
-        self._folder_icon = QtGui.QIcon(
-            ":tk-framework-shotgunutils/icon_Folder.png")
-        self._none_icon = QtGui.QIcon(
-            ":tk-framework-shotgunutils/icon_None_dark.png")
+        self._folder_icon = QtGui.QIcon(":tk-framework-shotgunutils/icon_Folder.png")
+        self._none_icon = QtGui.QIcon(":tk-framework-shotgunutils/icon_None_dark.png")
 
         # Define the foreground color of "empty" items.
         # These special items are used as placeholders in the tree where the
@@ -137,6 +137,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         # local import to avoid doc generation issues
         from ..utils import color_mix
+
         self._empty_item_color = color_mix(text_color, 1, base_color, 2)
 
     def __repr__(self):
@@ -144,7 +145,10 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         String representation of this instance
         """
         return "<%s path:%s seed:%s>" % (
-            self.__class__.__name__, self._path, self._seed_entity_field)
+            self.__class__.__name__,
+            self._path,
+            self._seed_entity_field,
+        )
 
     ############################################################################
     # public methods
@@ -187,9 +191,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
             logger.debug("Fetching more on %s" % path_to_refresh[0])
             # Fetch data from this path's parent.
-            model.fetchMore(
-                model.item_from_path(path_to_refresh[0]).index()
-            )
+            model.fetchMore(model.item_from_path(path_to_refresh[0]).index())
 
             self._path_to_refresh = path_to_refresh
 
@@ -200,7 +202,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             :param item: The ShotgunHierarchyItem that was loaded.
             """
             if item.data(self.parent()._SG_ITEM_UNIQUE_ID) != self._path_to_refresh[1]:
-                logger.debug("Skipping node %s", item.data(self.parent()._SG_ITEM_UNIQUE_ID))
+                logger.debug(
+                    "Skipping node %s", item.data(self.parent()._SG_ITEM_UNIQUE_ID)
+                )
                 return
             logger.debug(
                 "Model item refreshed: %s", item.data(self.parent()._SG_ITEM_UNIQUE_ID)
@@ -241,7 +245,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             # We've written a workaround for it in the ShotgunDataRetriever, which we will be
             # using here.
 
-            sg_result = self._sg_data_retriever._task_execute_nav_search_entity("/", entity)["sg_result"]
+            sg_result = self._sg_data_retriever._task_execute_nav_search_entity(
+                "/", entity
+            )["sg_result"]
 
             if len(sg_result) == 0:
                 logger.warning("Entity %s not found. Picking /.", entity)
@@ -252,7 +258,9 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
                 if len(sg_result) > 1:
                     logger.info(
                         "Entity %s found %d times with nav_search_entity endpoint. Picking %s.",
-                        entity, len(sg_result), pprint.pformat(sg_data)
+                        entity,
+                        len(sg_result),
+                        pprint.pformat(sg_data),
                     )
                     logger.info("Other choices were %s", sg_result[1:])
 
@@ -289,8 +297,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             # This time around this node will already have been refreshed
             # and the code will dig deeper. At some point the last entry
             # in the list will be reached and we will emit the item.
-            logger.debug("Refreshing paths: %s", paths[idx - 1:])
-            self._NodeRefresher(paths[idx - 1:], self)
+            logger.debug("Refreshing paths: %s", paths[idx - 1 :])
+            self._NodeRefresher(paths[idx - 1 :], self)
             return
 
         logger.debug("Deep load has been completed for %s", paths[-1])
@@ -362,11 +370,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             item.setForeground(self._empty_item_color)
 
     def _load_data(
-        self,
-        seed_entity_field,
-        root=None,
-        entity_fields=None,
-        cache_seed=None
+        self, seed_entity_field, root=None, entity_fields=None, cache_seed=None
     ):
         """
         This is the main method to use to configure the hierarchy model. You
@@ -455,7 +459,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             self._seed_entity_field,
             self._entity_fields,
             self.__compute_cache_path(cache_seed),
-            include_root=self._include_root
+            include_root=self._include_root,
         )
 
         # load up from disk
@@ -467,18 +471,14 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         logger.debug("External data population done.")
 
         # only one column. give it a default value
-        self.setHorizontalHeaderLabels(
-            ["%s Hierarchy" % (self._seed_entity_field,)]
-        )
+        self.setHorizontalHeaderLabels(["%s Hierarchy" % (self._seed_entity_field,)])
 
         root = self.invisibleRootItem()
 
         # construct the top level nodes
         logger.debug("Creating model nodes for top level of data tree...")
         nodes_generated = self._data_handler.generate_child_nodes(
-            None,
-            root,
-            self._create_item
+            None, root, self._create_item
         )
 
         # if we got some data, emit cache load signal
@@ -626,8 +626,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
 
         # convert the seed entity field into a path segment.
         # example: Version.entity => Version/entity
-        seed_entity_field_path = os.path.join(
-            *self._seed_entity_field.split("."))
+        seed_entity_field_path = os.path.join(*self._seed_entity_field.split("."))
 
         # Organize files on disk based on the seed_entity field path segment and
         # then param and entity field hashes
@@ -646,7 +645,8 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             "sg_nav",
             seed_entity_field_path,
             params_hash.hexdigest(),
-            "%s.%s" % (entity_field_hash.hexdigest(), ShotgunNavDataHandler.FORMAT_VERSION)
+            "%s.%s"
+            % (entity_field_hash.hexdigest(), ShotgunNavDataHandler.FORMAT_VERSION),
         )
 
         # warn if the path is longer than the windows max path limitation
@@ -675,13 +675,21 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         server_caps = sg_connection.server_caps
 
         # make sure we're greater than or equal to SG v7.0.2
-        if not (hasattr(sg_connection, "server_caps") and
-                server_caps.version and
-                server_caps.version >= (7, 0, 2)):
-            return (False, "The version of SG being used does not support querying for the project "
-                    "hierarchy. v7.0.2 is required.")
+        if not (
+            hasattr(sg_connection, "server_caps")
+            and server_caps.version
+            and server_caps.version >= (7, 0, 2)
+        ):
+            return (
+                False,
+                "The version of SG being used does not support querying for the project "
+                "hierarchy. v7.0.2 is required.",
+            )
         elif not hasattr(sg_connection, "nav_expand"):
-            return (False, "The version of the python-api being used does not support querying for "
-                    "the project hierarchy.")
+            return (
+                False,
+                "The version of the python-api being used does not support querying for "
+                "the project hierarchy.",
+            )
 
         return (True, None)

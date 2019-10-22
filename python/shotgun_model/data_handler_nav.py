@@ -30,7 +30,9 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
     _SG_PATH_FIELD = "path"
     _SG_PARENT_PATH_FIELD = "parent_path"
 
-    def __init__(self, root_path, seed_entity_field, entity_fields, cache_path, include_root=None):
+    def __init__(
+        self, root_path, seed_entity_field, entity_fields, cache_path, include_root=None
+    ):
         """
         :param str root_path: The path to the root of the hierarchy to display.
             This corresponds to the ``path`` argument of the
@@ -82,9 +84,7 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
         self._log_debug("generate_data_request for path %s" % path)
 
         worker_id = data_retriever.execute_nav_expand(
-            path,
-            self.__seed_entity_field,
-            self.__entity_fields
+            path, self.__seed_entity_field, self.__entity_fields
         )
 
         return worker_id
@@ -205,37 +205,42 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
                 sg_data=sg_item,
                 field_name=None,
                 is_leaf=not sg_item["has_children"],
-                uid=unique_field_value
+                uid=unique_field_value,
             )
 
             if not already_exists:
                 # item was added
-                diff_list.append({
-                    "data": self._cache.get_entry_by_uid(unique_field_value),
-                    "mode": self.ADDED
-                })
+                diff_list.append(
+                    {
+                        "data": self._cache.get_entry_by_uid(unique_field_value),
+                        "mode": self.ADDED,
+                    }
+                )
                 num_adds += 1
 
             elif updated:
                 # item existed but was updated
-                diff_list.append({
-                    "data": self._cache.get_entry_by_uid(unique_field_value),
-                    "mode": self.UPDATED
-                })
+                diff_list.append(
+                    {
+                        "data": self._cache.get_entry_by_uid(unique_field_value),
+                        "mode": self.UPDATED,
+                    }
+                )
                 num_modifications += 1
 
         # now figure out if anything has been removed
         for deleted_uid in previous_uids.difference(new_uids):
             item = self._cache.take_item(deleted_uid)
-            diff_list.append({
-                "data": item,
-                "mode": self.DELETED
-            })
+            diff_list.append({"data": item, "mode": self.DELETED})
             num_deletes += 1
 
-        self._log_debug("Shotgun data (%d records) received and processed. " % len(sg_data))
+        self._log_debug(
+            "Shotgun data (%d records) received and processed. " % len(sg_data)
+        )
         self._log_debug("    The new tree is %d records." % self._cache.size)
-        self._log_debug("    There were %d diffs from in-memory cache:" % len(diff_list))
+        self._log_debug(
+            "    There were %d diffs from in-memory cache:" % len(diff_list)
+        )
         self._log_debug("    Number of new records: %d" % num_adds)
         self._log_debug("    Number of deleted records: %d" % num_deletes)
         self._log_debug("    Number of modified records: %d" % num_modifications)

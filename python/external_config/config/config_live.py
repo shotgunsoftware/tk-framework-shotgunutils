@@ -29,18 +29,18 @@ class LiveExternalConfiguration(ExternalConfiguration):
     """
 
     def __init__(
-            self,
-            parent,
-            bg_task_manager,
-            plugin_id,
-            engine_name,
-            interpreter,
-            software_hash,
-            pipeline_config_id,
-            pipeline_config_name,
-            pipeline_config_uri,
-            pipeline_config_folder,
-            status=ExternalConfiguration.CONFIGURATION_READY
+        self,
+        parent,
+        bg_task_manager,
+        plugin_id,
+        engine_name,
+        interpreter,
+        software_hash,
+        pipeline_config_id,
+        pipeline_config_name,
+        pipeline_config_uri,
+        pipeline_config_folder,
+        status=ExternalConfiguration.CONFIGURATION_READY,
     ):
         """
         .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.
@@ -67,7 +67,7 @@ class LiveExternalConfiguration(ExternalConfiguration):
             interpreter,
             software_hash,
             pipeline_config_uri,
-            status
+            status,
         )
 
         self._pipeline_configuration_id = pipeline_config_id
@@ -80,7 +80,7 @@ class LiveExternalConfiguration(ExternalConfiguration):
         """
         return "<LiveExternalConfiguration id %d@%s>" % (
             self._pipeline_configuration_id,
-            self.descriptor_uri
+            self.descriptor_uri,
         )
 
     @property
@@ -123,7 +123,7 @@ class LiveExternalConfiguration(ExternalConfiguration):
             "type": entity_type,
             "link_type": link_entity_type,
             # because this cache is mutable, we need to look deeper to calculate its uniqueness.
-            "env_mtime_hash": self._get_environment_hash()
+            "env_mtime_hash": self._get_environment_hash(),
         }
 
         return cache_key
@@ -164,5 +164,3 @@ class LiveExternalConfiguration(ExternalConfiguration):
 
         logger.debug("Checked %d files" % num_files)
         return env_hash.hexdigest()
-
-
