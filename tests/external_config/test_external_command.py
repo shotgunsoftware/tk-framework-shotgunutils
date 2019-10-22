@@ -115,7 +115,7 @@ class TestExternalCommand(ExternalConfigBase):
         # Test that new object similarity with original one
         # Unfortunately the ExternalCommand object is not implementing a custom equal method
         # we have to check properties one by one.
-        self.assertNotEquals(self.ec, ec2)
+        self.assertNotEqual(self.ec, ec2)
         self.assertEqual(
             self.ec.pipeline_configuration_name, ec2.pipeline_configuration_name
         )

@@ -149,7 +149,7 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         for dummy_file in dummy_files + preserved_files:
             self.create_file(dummy_file)
         # Test we can't use bad values
-        with self.assertRaisesRegexp(ValueError, "Invalid grace period value"):
+        with self.assertRaisesRegex(ValueError, "Invalid grace period value"):
             bundle._remove_old_cached_data(-1, *top_cleanup_folders)
         # One day grace period clean up shouldn't delete anything
         bundle._remove_old_cached_data(1, *top_cleanup_folders)
