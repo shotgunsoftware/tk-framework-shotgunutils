@@ -199,7 +199,7 @@ class CachedShotgunSchema(QtCore.QObject):
                     # recached.
                     if "statuses" in status_data and "status_order" in status_data:
                         self._status_data[project_id] = status_data
-            except Exception, e:
+            except Exception as e:
                 self._bundle.log_warning("Could not open cached status "
                                          "file '%s': %s" % (status_cache_path, e))
             else:
@@ -226,7 +226,7 @@ class CachedShotgunSchema(QtCore.QObject):
                     data = pickle.load(fh)
                     self._field_schema[project_id] = data["field_schema"]
                     self._type_schema[project_id] = data["type_schema"]
-            except Exception, e:
+            except Exception as e:
                 self._bundle.log_warning("Could not open cached schema "
                                          "file '%s': %s" % (schema_cache_path, e))
             else:
@@ -359,7 +359,7 @@ class CachedShotgunSchema(QtCore.QObject):
                     )
                     pickle.dump(data, fh)
                     self._bundle.log_debug("...done")
-            except Exception, e:
+            except Exception as e:
                 self._bundle.log_warning(
                     "Could not write schema "
                     "file '%s': %s" % (self._get_schema_cache_path(project_id), e)
@@ -390,7 +390,7 @@ class CachedShotgunSchema(QtCore.QObject):
                 with open(self._get_status_cache_path(project_id), "wb") as fh:
                     pickle.dump(self._status_data[project_id], fh)
                     self._bundle.log_debug("...done")
-            except Exception, e:
+            except Exception as e:
                 self._bundle.log_warning(
                     "Could not write status "
                     "file '%s': %s" % (self._get_status_cache_path(project_id), e)
@@ -444,7 +444,7 @@ class CachedShotgunSchema(QtCore.QObject):
                 # signals were never connected or somehow disconnected externally
                 try:
                     data_retriever.work_completed.disconnect(self._on_worker_signal)
-                except (TypeError, RuntimeError), e:  # was never connected
+                except (TypeError, RuntimeError) as e:  # was never connected
                     self._bundle.log_warning(
                         "Could not disconnect '_on_worker_signal' slot from "
                         "the task manager's 'work_completed' signal: %s" % (e,)
@@ -452,7 +452,7 @@ class CachedShotgunSchema(QtCore.QObject):
 
                 try:
                     data_retriever.work_failure.disconnect(self._on_worker_failure)
-                except (TypeError, RuntimeError), e:  # was never connected
+                except (TypeError, RuntimeError) as e:  # was never connected
                     self._bundle.log_warning(
                         "Could not disconnect '_on_worker_failure' slot from "
                         "the task manager's 'work_failure' signal: %s" % (e,)
@@ -948,7 +948,7 @@ class CachedShotgunSchema(QtCore.QObject):
             self._bundle.log_debug("Removing schema cache file : %s" % schema_cache)
             try:
                 os.remove(schema_cache)
-            except Exception, e:
+            except Exception as e:
                 self._bundle.log_error(
                     "Caught error attempting to remove schema cache file [%s] :\n%s" %
                     (schema_cache, e)
@@ -960,7 +960,7 @@ class CachedShotgunSchema(QtCore.QObject):
             self._bundle.log_debug("Removing status cache file : %s" % status_cache)
             try:
                 os.remove(status_cache)
-            except Exception, e:
+            except Exception as e:
                 self._bundle.log_error(
                     "Caught error attempting to remove status cache file [%s] :\n%s" %
                     (status_cache, e)

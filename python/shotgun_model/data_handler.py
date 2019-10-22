@@ -110,7 +110,7 @@ class ShotgunDataHandler(object):
         if os.path.exists(self._cache_path):
             try:
                 os.remove(self._cache_path)
-            except Exception, e:
+            except Exception as e:
                 self._log_warning(
                     "Could not remove cache file '%s' "
                     "from disk. Details: %s" % (self._cache_path, e)
@@ -145,7 +145,7 @@ class ShotgunDataHandler(object):
                         )
                     raw_cache_data = pickler.load()
                     self._cache = ShotgunDataHandlerCache(raw_cache_data)
-            except Exception, e:
+            except Exception as e:
                 self._log_debug("Cache '%s' not valid - ignoring. Details: %s" % (self._cache_path, e))
 
         else:
@@ -178,8 +178,8 @@ class ShotgunDataHandler(object):
         # todo: upgrade to 0.18 filesystem methods
         if not os.path.exists(cache_dir):
             try:
-                os.makedirs(cache_dir, 0777)
-            except OSError, e:
+                os.makedirs(cache_dir, 0o777)
+            except OSError as e:
                 # Race conditions are perfectly possible on some network
                 # storage setups so make sure that we ignore any file
                 # already exists errors, as they are not really errors!
@@ -210,7 +210,7 @@ class ShotgunDataHandler(object):
                     pickler.dump(self._cache.raw_data)
 
             # and ensure the cache file has got open permissions
-            os.chmod(self._cache_path, 0666)
+            os.chmod(self._cache_path, 0o666)
 
         finally:
             # set mask back to previous value

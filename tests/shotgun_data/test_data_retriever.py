@@ -80,14 +80,14 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         # Cause download attempts to raise an error and try other methods updating
         # thumbnails and check that the modification time is updated.
         patched.side_effect = RuntimeError
-        os.utime(thumb_path, (0,0))
+        os.utime(thumb_path, (0, 0))
         self.assertEqual(int(os.path.getmtime(thumb_path)), 0)
         self.assertEqual(
             retriever.download_thumbnail("https:://foo/bar/blah.png", self.framework),
             thumb_path
         )
         self.assertGreaterEqual(os.path.getmtime(thumb_path), now)
-        os.utime(thumb_path, (0,0))
+        os.utime(thumb_path, (0, 0))
         self.assertEqual(int(os.path.getmtime(thumb_path)), 0)
         self.assertEqual(
             retriever._task_check_attachment({
@@ -103,7 +103,7 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         # for the file name, do a faked download first and check updates.
         patched.side_effect = _download_url
         thumb_path = retriever.download_thumbnail_source("Asset", 1, self.framework)
-        os.utime(thumb_path, (0,0))
+        os.utime(thumb_path, (0, 0))
         self.assertEqual(int(os.path.getmtime(thumb_path)), 0)
         patched.side_effect = RuntimeError
         self.assertEqual(

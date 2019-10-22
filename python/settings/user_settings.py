@@ -106,7 +106,7 @@ class UserSettings(object):
         try:
             value_str = pickle.dumps( sanitize_qt(value) )
             self.__settings.setValue(full_name, value_str)
-        except Exception, e:
+        except Exception as e:
             self.__fw.log_warning("Error storing user setting '%s'. Error details: %s" % (full_name, e))
         
     
@@ -130,7 +130,7 @@ class UserSettings(object):
                 resolved_val = default
             else:
                 resolved_val = pickle.loads(raw_value)
-        except Exception, e:
+        except Exception as e:
             self.__fw.log_warning("Error retrieving value for stored user setting '%s' - reverting to "
                                   "to default value. Error details: %s" % (full_name, e))
             resolved_val = default

@@ -206,7 +206,7 @@ class ShotgunDataRetriever(QtCore.QObject):
             # modify the permissions of the file so it's writeable by others
             old_umask = os.umask(0)
             try:
-                os.chmod(path_to_cached_thumb, 0666)
+                os.chmod(path_to_cached_thumb, 0o666)
             finally:
                 os.umask(old_umask)
         else:
@@ -264,7 +264,7 @@ class ShotgunDataRetriever(QtCore.QObject):
                     bundle.shotgun, thumb_source_url, path_to_cached_thumb, True
                 )
                 path_to_cached_thumb = full_path
-            except TypeError, e:
+            except TypeError as e:
                 # This may be raised if an older version of core is in use
                 # that doesn't have the final `use_url_extension` arg implemented
                 # in sgtk.util.download_url() (set to True above). Since the source
@@ -283,7 +283,7 @@ class ShotgunDataRetriever(QtCore.QObject):
             # modify the permissions of the file so it's writeable by others
             old_umask = os.umask(0)
             try:
-                os.chmod(path_to_cached_thumb, 0666)
+                os.chmod(path_to_cached_thumb, 0o666)
             finally:
                 os.umask(old_umask)
         else:
@@ -332,14 +332,14 @@ class ShotgunDataRetriever(QtCore.QObject):
             # signals were never connected or somehow disconnected externally.
             try:
                 self._task_manager.task_completed.disconnect(self._on_task_completed)
-            except (TypeError, RuntimeError), e:  # was never connected
+            except (TypeError, RuntimeError) as e:  # was never connected
                 self._bundle.log_warning(
                     "Could not disconnect '_on_task_completed' slot from the "
                     "task manager's 'task_completed' signal: %s" % (e,)
                 )
             try:
                 self._task_manager.task_failed.disconnect(self._on_task_failed)
-            except (TypeError, RuntimeError), e:  # was never connected
+            except (TypeError, RuntimeError) as e:  # was never connected
                 self._bundle.log_debug(
                     "Could not disconnect '_on_task_failed' slot from the "
                     "task manager's 'task_failed' signal: %s" % (e,)
@@ -838,7 +838,7 @@ class ShotgunDataRetriever(QtCore.QObject):
                 file_path = "%s.jpeg" % file_path
                 sgtk.util.download_url(self._bundle.shotgun, url, file_path)
 
-        except TankError, e:
+        except TankError as e:
             if field is not None:
                 sg_data = self._bundle.shotgun.find_one(
                     entity_type,
@@ -882,7 +882,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         # permissions we have to modify the permissions so that it's writeable by others
         old_umask = os.umask(0)
         try:
-            os.chmod(file_path, 0666)
+            os.chmod(file_path, 0o666)
         finally:
             os.umask(old_umask)
 

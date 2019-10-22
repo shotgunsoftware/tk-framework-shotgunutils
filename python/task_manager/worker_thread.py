@@ -87,7 +87,7 @@ class WorkerThread(QtCore.QThread):
                             break
                         # emit the result (non-blocking):
                         self._results_dispatcher.emit_completed(self, task_to_process, result)
-                except Exception, e:
+                except Exception as e:
                     # something went wrong so emit failed signal:
                     with self._mutex:
                         if not self._process_tasks:

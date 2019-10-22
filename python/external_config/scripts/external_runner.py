@@ -8,6 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+from __future__ import print_function
 import os
 import re
 import imp
@@ -116,7 +117,7 @@ class QtTaskRunner(qt_importer.QtCore.QObject):
             logger.exception("Could not start engine.")
 
             # push message to stdout
-            print "Engine could not be started: %s. For details, see log files." % e
+            print("Engine could not be started: %s. For details, see log files." % e)
 
         except Exception as e:
             self._status = self.GENERAL_ERROR
@@ -125,8 +126,8 @@ class QtTaskRunner(qt_importer.QtCore.QObject):
             logger.exception("Could not bootstrap configuration.")
 
             # push it to stdout so that the parent process will get it
-            print "A general error was raised:"
-            print traceback.format_exc()
+            print("A general error was raised:")
+            print(traceback.format_exc())
 
         finally:
             # broadcast that we have finished this command
@@ -182,7 +183,7 @@ def _write_cache_file(path, data):
             with open(path, "wb") as fh:
                 cPickle.dump(data, fh)
             # and ensure the cache file has got open permissions
-            os.chmod(path, 0666)
+            os.chmod(path, 0o666)
         except Exception as e:
             logger.debug("Could not write '%s'. Details: %s" % (path, e), exec_info=True)
         else:

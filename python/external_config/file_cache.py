@@ -104,7 +104,7 @@ def write_cache_file(path, data):
             pickle.dump(data, fh)
 
         # and ensure the cache file has got open permissions
-        os.chmod(path, 0666)
+        os.chmod(path, 0o666)
 
     except Exception as e:
         logger.debug("Could not write '%s'. Details: %s" % (path, e), exec_info=True)
