@@ -11,6 +11,7 @@ import os
 import six.moves.cPickle as pickle
 import hashlib
 import sgtk
+import six
 
 logger = sgtk.platform.get_logger(__name__)
 
@@ -136,7 +137,7 @@ def get_cache_path(identifier_dict):
     :retuns: path on disk, relative to the current bundle's cache location.
     """
     params_hash = hashlib.md5()
-    for (k, v) in identifier_dict.iteritems():
+    for (k, v) in identifier_dict.items():
         params_hash.update(str(k))
         params_hash.update(str(v))
 

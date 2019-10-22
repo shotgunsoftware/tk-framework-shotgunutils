@@ -128,7 +128,7 @@ class BackgroundTask(object):
                         then it will be ignored.
         """
         if result and isinstance(result, dict):
-            self._kwargs = dict(self._kwargs.items() + result.items())
+            self._kwargs = dict(list(self._kwargs.items()) + list(result.items()))
 
     def run(self):
         """

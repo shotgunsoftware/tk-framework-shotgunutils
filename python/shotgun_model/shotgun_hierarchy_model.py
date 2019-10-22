@@ -22,6 +22,7 @@ from .shotgun_hierarchy_item import ShotgunHierarchyItem
 from .shotgun_query_model import ShotgunQueryModel
 from .data_handler_nav import ShotgunNavDataHandler
 from .util import sanitize_for_qt_model
+import six
 
 logger = sgtk.platform.get_logger(__name__)
 
@@ -620,7 +621,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         params_hash.update(str(cache_seed))
 
         # iterate through the sorted entity fields to ensure consistent order
-        for (entity_type, fields) in sorted(self._entity_fields.iteritems()):
+        for (entity_type, fields) in sorted(self._entity_fields.items()):
             for field in fields:
                 entity_field_hash.update("%s.%s" % (entity_type, field))
 

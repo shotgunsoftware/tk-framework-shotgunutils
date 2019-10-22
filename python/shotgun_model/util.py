@@ -12,6 +12,7 @@ import tank
 from tank.platform.qt import QtCore, QtGui
 
 import six.moves.urllib.parse
+import six
 
 # precalculated for performance
 HAS_QVARIANT = hasattr(QtCore, "QVariant")
@@ -92,7 +93,7 @@ def sanitize_for_qt_model(val):
 
     elif isinstance(val, dict):
         new_val = {}
-        for (k, v) in val.iteritems():
+        for (k, v) in six.iteritems(val):
             # go through dictionary and convert each value separately
             new_val[k] = sanitize_for_qt_model(v)
         return new_val
@@ -142,7 +143,7 @@ def sanitize_qt(val):
 
     elif isinstance(val, dict):
         new_val = {}
-        for (k, v) in val.iteritems():
+        for (k, v) in six.iteritems(val):
             # both keys and values can be bad
             safe_key = sanitize_qt(k)
             safe_val = sanitize_qt(v)

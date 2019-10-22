@@ -17,6 +17,7 @@ import errno
 import six.moves.cPickle
 import inspect
 import traceback
+import six
 
 # handle imports
 path_to_sgtk = sys.argv[1]
@@ -315,7 +316,7 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
 
     else:
         logger.debug("Processing engine commands...")
-        for cmd_name, data in engine.commands.iteritems():
+        for cmd_name, data in engine.commands.items():
             logger.debug("Processing command: %s" % cmd_name)
 
             # note: we are baking the current operating system into the cache,

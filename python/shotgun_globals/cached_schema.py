@@ -255,9 +255,8 @@ class CachedShotgunSchema(QtCore.QObject):
         # or not. Later on, when we have the ability to check the current
         # metaschema generation via the shotgun API, this can be handled in a
         # more graceful fashion.
-        if (
-            not self._is_schema_loaded(project_id)
-            and project_id not in self._sg_schema_query_ids.values()
+        if not self._is_schema_loaded(project_id) and project_id not in list(
+            self._sg_schema_query_ids.values()
         ):
             # schema is not requested and not loaded.
             # If a schema was requested for a project that isn't the current project, then
@@ -295,9 +294,8 @@ class CachedShotgunSchema(QtCore.QObject):
         current_project_id = self._get_current_project_id()
         project_id = project_id or current_project_id
 
-        if (
-            not self._is_status_loaded(project_id)
-            and project_id not in self._sg_status_query_ids.values()
+        if not self._is_status_loaded(project_id) and project_id not in list(
+            self._sg_status_query_ids.values()
         ):
             # If statuses were requested for a project that isn't the current project, then
             # let's check to see if we can get it from disk before we resort to going to
@@ -518,7 +516,7 @@ class CachedShotgunSchema(QtCore.QObject):
             project_id in self._field_schema
             and sg_entity_type in self._field_schema[project_id]
         ):
-            return self._field_schema[project_id][sg_entity_type].keys()
+            return list(self._field_schema[project_id][sg_entity_type].keys())
         else:
             return []
 
