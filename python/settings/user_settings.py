@@ -9,8 +9,8 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
-import urlparse
-import cPickle as pickle
+import six.moves.urllib.parse
+import six.moves.cPickle as pickle
 from sgtk.platform.qt import QtCore
 from sgtk import TankError
 from ..shotgun_model import sanitize_qt
@@ -50,7 +50,9 @@ class UserSettings(object):
         # now organize various keys
 
         # studio level settings - base it on the server host name
-        _, sg_hostname, _, _, _ = urlparse.urlsplit(self.__fw.sgtk.shotgun_url)
+        _, sg_hostname, _, _, _ = six.moves.urllib.parse.urlsplit(
+            self.__fw.sgtk.shotgun_url
+        )
         self.__site_key = sg_hostname
 
         # project level settings

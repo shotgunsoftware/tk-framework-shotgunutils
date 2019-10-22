@@ -7,7 +7,7 @@
 # By accessing, using, copying or modifying this work you indicate your
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
-import cPickle as pickle
+import six.moves.cPickle as pickle
 import tempfile
 import os
 import uuid

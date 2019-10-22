@@ -12,7 +12,7 @@ from __future__ import with_statement
 import errno
 import os
 import datetime
-import cPickle
+import six.moves.cPickle
 import time
 
 # toolkit imports
@@ -138,7 +138,7 @@ class ShotgunDataHandler(object):
         if os.path.exists(self._cache_path):
             try:
                 with open(self._cache_path, "rb") as fh:
-                    pickler = cPickle.Unpickler(fh)
+                    pickler = six.moves.cPickle.Unpickler(fh)
                     file_version = pickler.load()
                     if file_version != self.FORMAT_VERSION:
                         raise ShotgunModelDataError(
@@ -196,7 +196,7 @@ class ShotgunDataHandler(object):
         old_umask = os.umask(0)
         try:
             with open(self._cache_path, "wb") as fh:
-                pickler = cPickle.Pickler(fh, protocol=2)
+                pickler = six.moves.cPickle.Pickler(fh, protocol=2)
                 # speeds up pickling but only works when there
                 # are no cycles in the data set
                 # pickler.fast = 1

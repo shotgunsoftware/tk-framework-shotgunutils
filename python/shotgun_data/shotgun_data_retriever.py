@@ -11,7 +11,7 @@
 import os
 import glob
 import urllib
-import urlparse
+import six.moves.urllib.parse
 import hashlib
 
 import sgtk
@@ -242,7 +242,7 @@ class ShotgunDataRetriever(QtCore.QObject):
 
         :returns: A path to the thumbnail on disk.
         """
-        thumb_source_url = urlparse.urlunparse(
+        thumb_source_url = six.moves.urllib.parse.urlunparse(
             (
                 bundle.shotgun.config.scheme,
                 bundle.shotgun.config.server,
@@ -810,7 +810,7 @@ class ShotgunDataRetriever(QtCore.QObject):
                   possible to match them up.
         """
         # construct the url that refers to the thumbnail's source image
-        thumb_source_url = urlparse.urlunparse(
+        thumb_source_url = six.moves.urllib.parse.urlunparse(
             (
                 self._bundle.shotgun.config.scheme,
                 self._bundle.shotgun.config.server,
@@ -983,7 +983,7 @@ class ShotgunDataRetriever(QtCore.QObject):
             return None
 
         # hash the path portion of the thumbnail url
-        url_obj = urlparse.urlparse(url)
+        url_obj = six.moves.urllib.parse.urlparse(url)
         url_hash = hashlib.md5()
         url_hash.update(str(url_obj.path))
         hash_str = url_hash.hexdigest()

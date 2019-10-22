@@ -9,7 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 import os
 import sys
-import cPickle
+import six.moves.cPickle
 import sgtk
 from . import external_command_utils
 
@@ -161,7 +161,7 @@ class ExternalCommand(object):
         :rtype: :class:`ExternalCommand`
         :raises: :class:`RuntimeError` if data is not valid
         """
-        data = cPickle.loads(data)
+        data = six.moves.cPickle.loads(data)
 
         return ExternalCommand(
             callback_name=data["callback_name"],
@@ -209,7 +209,7 @@ class ExternalCommand(object):
             "sg_supports_multiple_selection": self._sg_supports_multiple_selection,
             "icon": self._icon,
         }
-        return cPickle.dumps(data)
+        return six.moves.cPickle.dumps(data)
 
     @property
     def pipeline_configuration_name(self):
