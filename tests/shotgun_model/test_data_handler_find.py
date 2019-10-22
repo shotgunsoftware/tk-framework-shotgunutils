@@ -53,7 +53,7 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         )
 
         dh.load_cache()
-        self.assertEquals(len(dh.get_entity_ids()), 0)
+        self.assertEqual(len(dh.get_entity_ids()), 0)
 
         # first let the data handler perform its request
         # and make sure it registers it in an expected way
@@ -123,8 +123,8 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         self.assertEqual(asset_data.parent, prop_data)
         self.assertEqual(asset_data.is_leaf(), True)
 
-        self.assertEquals(dh.get_data_item_from_uid(1234), asset_data)
-        self.assertEquals(dh.get_data_item_from_uid("/Prop"), prop_data)
+        self.assertEqual(dh.get_data_item_from_uid(1234), asset_data)
+        self.assertEqual(dh.get_data_item_from_uid("/Prop"), prop_data)
 
         # now apply an update
         sg_data = [
@@ -153,9 +153,9 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         )
 
         # test the data
-        self.assertEquals(dh.get_entity_ids(), [1234])
-        self.assertEquals(dh.get_uid_from_entity_id(1234), 1234)
-        self.assertEquals(dh.get_uid_from_entity_id(12345), None)
+        self.assertEqual(dh.get_entity_ids(), [1234])
+        self.assertEqual(dh.get_uid_from_entity_id(1234), 1234)
+        self.assertEqual(dh.get_uid_from_entity_id(12345), None)
 
         # update a complex update
         sg_data = [
@@ -188,9 +188,9 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         self.assertFalse(dh.is_cache_loaded())
         dh.load_cache()
 
-        self.assertEquals(dh.get_data_item_from_uid(3333), diff[1]["data"])
-        self.assertEquals(dh.get_data_item_from_uid("/Character"), diff[0]["data"])
-        self.assertEquals(dh.get_data_item_from_uid("/Prop"), None)
+        self.assertEqual(dh.get_data_item_from_uid(3333), diff[1]["data"])
+        self.assertEqual(dh.get_data_item_from_uid("/Character"), diff[0]["data"])
+        self.assertEqual(dh.get_data_item_from_uid("/Prop"), None)
 
     def test_generate_child_nodes(self):
         """
