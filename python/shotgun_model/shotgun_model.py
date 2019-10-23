@@ -735,9 +735,9 @@ class ShotgunModel(ShotgunQueryModel):
         # now hash up the rest of the parameters and make that the filename
         params_hash = hashlib.md5()
 
-        # FIXME: Python 2 and Python 3 order values differently in a dictionary
-        # which means that the hash of these keys are going to differ between
-        # Python versions
+        # FIXME: Python 2 and Python 3 order values differently in a dictionary,
+        # which means that their string representation are going to differ
+        # between Python versions
         #
         # As users are going to be drifting between Python 2 and Python 3 for a
         # while, a fully deterministic way of generating the cache name should
