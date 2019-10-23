@@ -233,7 +233,10 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
             call(None, dh.get_data_item_from_uid("/Prop")),
         ]
 
-        callback.assert_has_calls(calls)
+        # Python 2 and 3 have different ordering internally
+        # for their keys, so we can't expect the items
+        # be generated in the same order.
+        callback.assert_has_calls(calls, any_order=True)
 
         # and check children
         callback = Mock()
@@ -243,7 +246,10 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
             call(None, dh.get_data_item_from_uid(5)),
             call(None, dh.get_data_item_from_uid(6)),
         ]
-        callback.assert_has_calls(calls)
+        # Python 2 and 3 have different ordering internally
+        # for their keys, so we can't expect the items
+        # be generated in the same order.
+        callback.assert_has_calls(calls, any_order=True)
 
         callback = Mock()
         dh.generate_child_nodes("/Prop", None, callback)
@@ -252,4 +258,7 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
             call(None, dh.get_data_item_from_uid(2)),
             call(None, dh.get_data_item_from_uid(3)),
         ]
-        callback.assert_has_calls(calls)
+        # Python 2 and 3 have different ordering internally
+        # for their keys, so we can't expect the items
+        # be generated in the same order.
+        callback.assert_has_calls(calls, any_order=True)

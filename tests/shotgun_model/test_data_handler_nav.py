@@ -181,7 +181,10 @@ class TestShotgunNavDataHandler(TestShotgunUtilsFramework):
             call(None, dh.get_data_item_from_uid("/baz")),
         ]
 
-        callback.assert_has_calls(calls)
+        # Python 2 and 3 have different ordering internally
+        # for their keys, so we can't expect the items
+        # be generated in the same order.
+        callback.assert_has_calls(calls, any_order=True)
 
         # and check children
         callback = Mock()
@@ -191,4 +194,7 @@ class TestShotgunNavDataHandler(TestShotgunUtilsFramework):
             call(None, dh.get_data_item_from_uid("/foo/brown")),
             call(None, dh.get_data_item_from_uid("/foo/jones")),
         ]
-        callback.assert_has_calls(calls)
+        # Python 2 and 3 have different ordering internally
+        # for their keys, so we can't expect the items
+        # be generated in the same order.
+        callback.assert_has_calls(calls, any_order=True)
