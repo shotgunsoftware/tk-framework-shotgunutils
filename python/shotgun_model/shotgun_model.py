@@ -21,6 +21,7 @@ from .shotgun_standard_item import ShotgunStandardItem
 from .shotgun_query_model import ShotgunQueryModel
 from .data_handler_find import ShotgunFindDataHandler
 from .util import get_sanitized_data, get_sg_data, sanitize_for_qt_model
+from six.moves import range
 
 
 class ShotgunModel(ShotgunQueryModel):
@@ -201,7 +202,7 @@ class ShotgunModel(ShotgunQueryModel):
         if self.canFetchMore(index):
             self.fetchMore(index)
 
-        for child_index in xrange(self.rowCount(index)):
+        for child_index in range(self.rowCount(index)):
             child_model_index = self.index(child_index, 0, parent=index)
             self.ensure_data_is_loaded(child_model_index)
 

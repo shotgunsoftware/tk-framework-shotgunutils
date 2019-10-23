@@ -13,6 +13,7 @@ from tank.platform.qt import QtCore, QtGui
 
 import six.moves.urllib.parse
 import six
+from six.moves import range
 
 # precalculated for performance
 HAS_QVARIANT = hasattr(QtCore, "QVariant")
@@ -182,7 +183,7 @@ def compare_shotgun_data(a, b):
         # input is a list
         if isinstance(a, list) and isinstance(b, list) and len(a) == len(b):
             # lists are symmetrical. Compare items recursively.
-            for idx in xrange(len(a)):
+            for idx in range(len(a)):
                 if not compare_shotgun_data(a[idx], b[idx]):
                     return False
         else:
