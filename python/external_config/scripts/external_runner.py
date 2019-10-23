@@ -17,7 +17,7 @@ import errno
 import six.moves.cPickle
 import inspect
 import traceback
-import six
+from tank_vendor.shotgun_api3.lib import six
 
 # handle imports
 path_to_sgtk = sys.argv[1]

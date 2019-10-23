@@ -12,8 +12,8 @@ import tank
 from tank.platform.qt import QtCore, QtGui
 
 import six.moves.urllib.parse
-import six
-from six.moves import range
+from tank_vendor.shotgun_api3.lib import six
+from tank_vendor.shotgun_api3.lib.six.moves import range
 
 # precalculated for performance
 HAS_QVARIANT = hasattr(QtCore, "QVariant")

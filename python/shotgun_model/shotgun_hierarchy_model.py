@@ -22,7 +22,7 @@ from .shotgun_hierarchy_item import ShotgunHierarchyItem
 from .shotgun_query_model import ShotgunQueryModel
 from .data_handler_nav import ShotgunNavDataHandler
 from .util import sanitize_for_qt_model
-import six
+from tank_vendor.shotgun_api3.lib import six
 
 logger = sgtk.platform.get_logger(__name__)
 

@@ -12,7 +12,7 @@ from __future__ import with_statement
 import errno
 import os
 import datetime
-import six.moves.cPickle
+from tank_vendor.shotgun_api3.lib import six
 import time
 
 # toolkit imports

@@ -19,7 +19,7 @@ from sgtk import TankError
 from .background_task import BackgroundTask
 from .worker_thread import WorkerThread
 from .results_poller import ResultsDispatcher
-import six
+from tank_vendor.shotgun_api3.lib import six
 
 # Set to True to enable extensive debug logging.
 # Useful for debugging concurrency issues.

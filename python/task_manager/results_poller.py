@@ -12,7 +12,7 @@
 Results dispatcher for the background task manager.
 """
 
-import six.moves.queue
+from tank_vendor.shotgun_api3.lib import six
 from sgtk.platform.qt import QtCore
 import sgtk
 

@@ -11,7 +11,7 @@
 import os
 import glob
 import urllib
-import six.moves.urllib.parse
+from tank_vendor.shotgun_api3.lib import six
 import hashlib
 
 import sgtk

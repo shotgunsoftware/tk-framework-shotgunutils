@@ -9,7 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 import os
 import sys
-import six.moves.cPickle
+from tank_vendor.shotgun_api3.lib import six
 import sgtk
 from . import external_command_utils
 

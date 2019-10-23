@@ -14,7 +14,7 @@ from __future__ import with_statement
 import os
 import sgtk
 from sgtk.platform.qt import QtCore, QtGui
-import six.moves.cPickle as pickle
+from tank_vendor.shotgun_api3.lib.six.moves import cPickle as pickle
 
 
 class CachedShotgunSchema(QtCore.QObject):

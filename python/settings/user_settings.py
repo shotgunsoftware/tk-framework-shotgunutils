@@ -9,8 +9,8 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
-import six.moves.urllib.parse
-import six.moves.cPickle as pickle
+from tank_vendor.shotgun_api3.lib import six
+from tank_vendor.shotgun_api3.lib.six.moves import cPickle as pickle
 from sgtk.platform.qt import QtCore
 from sgtk import TankError
 from ..shotgun_model import sanitize_qt

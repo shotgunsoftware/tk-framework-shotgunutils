@@ -10,7 +10,7 @@
 
 
 from .util import compare_shotgun_data
-import six
+from tank_vendor.shotgun_api3.lib import six
 
 
 class ShotgunDataHandlerCache(object):

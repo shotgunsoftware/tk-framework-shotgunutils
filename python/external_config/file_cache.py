@@ -8,10 +8,10 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 import os
-import six.moves.cPickle as pickle
+import tank_vendor.shotgun_api3.lib.six.moves.cPickle as pickle
 import hashlib
 import sgtk
-import six
+from tank_vendor.shotgun_api3.lib import six
 
 logger = sgtk.platform.get_logger(__name__)
 
