@@ -181,24 +181,27 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         # we are getting a diff of two added nodes back.
         self.assertEqual(len(diff), 4)
 
+        # Items will be sorted as /Character, /Prop, 1234 and 3333.
+        diff = sorted(diff, key=lambda x: str(x["data"].unique_id))
+
         self.assertEqual(diff[0]["mode"], dh.ADDED)
-        self.assertEqual(diff[1]["mode"], dh.ADDED)
+        self.assertEqual(diff[1]["mode"], dh.DELETED)
         self.assertEqual(diff[2]["mode"], dh.DELETED)
-        self.assertEqual(diff[3]["mode"], dh.DELETED)
+        self.assertEqual(diff[3]["mode"], dh.ADDED)
 
         # the deleted records are our old data
+        self.assertEqual(diff[1]["data"], prop_data)
         self.assertEqual(diff[2]["data"], asset_data)
-        self.assertEqual(diff[3]["data"], prop_data)
 
         self.assertEqual(diff[0]["data"].unique_id, "/Character")
-        self.assertEqual(diff[1]["data"].unique_id, 3333)
+        self.assertEqual(diff[3]["data"].unique_id, 3333)
 
         dh.save_cache()
         dh.unload_cache()
         self.assertFalse(dh.is_cache_loaded())
         dh.load_cache()
 
-        self.assertEqual(dh.get_data_item_from_uid(3333), diff[1]["data"])
+        self.assertEqual(dh.get_data_item_from_uid(3333), diff[3]["data"])
         self.assertEqual(dh.get_data_item_from_uid("/Character"), diff[0]["data"])
         self.assertEqual(dh.get_data_item_from_uid("/Prop"), None)
 
