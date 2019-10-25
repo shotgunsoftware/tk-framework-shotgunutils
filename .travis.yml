@@ -6,7 +6,7 @@ python:
 # Ideally we would be pip installing tk-core, but we need the testing framework from core,
 # so we will clone the repo install to a known location and run the tests there.
 install:
-    - git clone https://github.com/shotgunsoftware/tk-core /tmp/tk-core
+    - git clone --branch SG-13264-python-3-compat --depth 1 https://github.com/shotgunsoftware/tk-core /tmp/tk-core
     - pushd /tmp/tk-core
     - git checkout master
     - popd
