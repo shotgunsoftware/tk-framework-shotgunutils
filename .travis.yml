@@ -14,4 +14,4 @@ install:
     - python ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/pyside_postinstall.py -install
 
 # command to run tests
-script: /tmp/tk-core/tests/run_tests.sh --test-root tests
+script: python /tmp/tk-core/tests/run_tests.py --test-root tests
