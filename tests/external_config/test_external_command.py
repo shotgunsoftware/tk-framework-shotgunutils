@@ -104,7 +104,8 @@ class TestExternalCommand(ExternalConfigBase):
 
     def test_serialize_deserialize(self):
         """
-        Make sure that serializing and deserialize an ExternalCommand instance produce a similar object.
+        Make sure that serializing and deserialize an ExternalCommand instance produce
+        a similar object.
         """
         # Serialize our test base object
         a_pickle = self.ec.serialize()
@@ -113,8 +114,8 @@ class TestExternalCommand(ExternalConfigBase):
         ec2 = self.external_config.ExternalCommand.deserialize(a_pickle)
 
         # Test that new object similarity with original one
-        # Unfortunately the ExternalCommand object is not implementing a custom equal method
-        # we have to check properties one by one.
+        # Unfortunately the ExternalCommand object is not implementing a custom equal
+        # method  we have to check properties one by one.
         self.assertNotEqual(self.ec, ec2)
         self.assertEqual(
             self.ec.pipeline_configuration_name, ec2.pipeline_configuration_name

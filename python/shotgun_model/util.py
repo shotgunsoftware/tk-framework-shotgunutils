@@ -8,8 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import tank
-from tank.platform.qt import QtCore, QtGui
+from tank.platform.qt import QtCore
 
 import six.moves.urllib.parse
 from tank_vendor.shotgun_api3.lib import six

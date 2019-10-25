@@ -13,7 +13,7 @@ from __future__ import with_statement
 
 import os
 import sgtk
-from sgtk.platform.qt import QtCore, QtGui
+from sgtk.platform.qt import QtCore
 from tank_vendor.shotgun_api3.lib.six.moves import cPickle as pickle
 
 
@@ -259,9 +259,9 @@ class CachedShotgunSchema(QtCore.QObject):
             self._sg_schema_query_ids.values()
         ):
             # schema is not requested and not loaded.
-            # If a schema was requested for a project that isn't the current project, then
-            # let's check to see if we can get it from disk before we resort to going to
-            # Shotgun.
+            # If a schema was requested for a project that isn't the current project,
+            # then let's check to see if we can get it from disk before we resort to
+            # going to Shotgun.
             if project_id != current_project_id:
                 if self._load_cached_schema(project_id=project_id):
                     # If we were able to load the cached schema from disk then we don't
@@ -297,9 +297,9 @@ class CachedShotgunSchema(QtCore.QObject):
         if not self._is_status_loaded(project_id) and project_id not in list(
             self._sg_status_query_ids.values()
         ):
-            # If statuses were requested for a project that isn't the current project, then
-            # let's check to see if we can get it from disk before we resort to going to
-            # Shotgun.
+            # If statuses were requested for a project that isn't the current project,
+            # then  let's check to see if we can get it from disk before we resort
+            # to going to Shotgun.
             if project_id != current_project_id:
                 if self._load_cached_status(project_id=project_id):
                     # If we were able to load the cached schema from disk then we don't
