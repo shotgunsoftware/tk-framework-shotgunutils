@@ -124,7 +124,7 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
         Remove old data files cached by this bundle in the given cache locations.
 
         :param int grace_period: Time period, in days, a file without
-                                     modification should be kept around.
+                                 modification should be kept around.
         :param cache_locations: A list of cache locations to clean up.
         :raises: ValueError if the grace period is smaller than one day.
         """
@@ -135,13 +135,12 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
         delta = datetime.timedelta(days=grace_period)
         # Datetime total_seconds was introduced in Python 2.7, so compute the
         # value ourself.
-        # This is documented in Python 2.7 as the following:
+        # This is documented at
+        # https://docs.python.org/2/library/datetime.html#datetime.timedelta.total_seconds
+        # in Python 2.7 as the following:
         grace_in_seconds = (
             delta.microseconds + (delta.seconds + delta.days * 24 * 3600) * 10 ** 6
         ) / 10 ** 6
-        # See https://docs.python.org/2/library/datetime.html#datetime.timedelta.total_seconds
-        # Note that the top of this file includes true division, which is mandatory as
-        # per the comment in the documentation.
 
         # Please note that we can't log any message from this background thread
         # without the risk of causing deadlocks.
@@ -175,6 +174,6 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
                     try:
                         if not os.listdir(dir_path):
                             filesystem.safe_delete_folder(dir_path)
-                    except Exception as e:
+                    except Exception:
                         # Silently ignore the error
                         pass

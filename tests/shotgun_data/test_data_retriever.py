@@ -163,12 +163,13 @@ class TestDataRetriever(TestShotgunUtilsFramework):
 
         # Datetime total_seconds was introduced in Python 2.7, so compute the
         # value ourself.
-        # This is documented in Python 2.7 as the following:
+        # This is documented
+        # (https://docs.python.org/2/library/datetime.html#datetime.timedelta.total_seconds)
+        # in Python 2.7 as the following:
         one_day_in_seconds = (
             one_day_delta.microseconds
             + (one_day_delta.seconds + one_day_delta.days * 24 * 3600) * 10 ** 6
         ) / 10 ** 6
-        # See https://docs.python.org/2/library/datetime.html#datetime.timedelta.total_seconds
         # Note that the top of this file includes true division, which is mandatory as
         # per the comment in the documentation.
 
