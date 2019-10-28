@@ -60,6 +60,10 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         # Stop all threads now to avoid some QThread: Destroyed while thread is still running
         # errors on exit.
         retriever.stop()
+        import time
+
+        time.sleep(4)
+        # retriever._task_manager._results_dispatcher.
         # We run tasks which usually run on a background task manager directly
         # here for the ease of testing.
         result = retriever._task_download_thumbnail(
