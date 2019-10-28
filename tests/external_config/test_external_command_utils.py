@@ -8,6 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+from . import ExternalConfigBase
 from tank_test.tank_test_base import setUpModule  # noqa
 
 
@@ -24,5 +25,11 @@ class TestExternalCommandUtils(ExternalConfigBase):
         self.assertFalse(
             self.external_config.external_command_utils.enabled_on_current_os(
                 {"deny_platforms": ["Windows", "Linux", "Mac"]}
+            )
+        )
+
+        self.assertTrue(
+            self.external_config.external_command_utils.enabled_on_current_os(
+                {"deny_platforms": []}
             )
         )
