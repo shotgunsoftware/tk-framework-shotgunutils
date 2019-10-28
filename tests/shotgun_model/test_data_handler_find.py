@@ -65,13 +65,13 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         # The test invokes the method with a list, but it filters items with a
         # set first which has an impact on ordering, so reproduce that logic here.
         self.assertEqual(mock_data_retriever.execute_find.call_count, 1)
-        self.assertEqual(mock_data_retriever.execute_find.call_args.args[0], "Asset")
-        self.assertEqual(mock_data_retriever.execute_find.call_args.args[1], [])
+        parameters = mock_data_retriever.execute_find.call_args.call_list()[0][0]
+        self.assertEqual(parameters[0], "Asset")
+        self.assertEqual(parameters[1], [])
         self.assertEqual(
-            sorted(mock_data_retriever.execute_find.call_args.args[2]),
-            sorted(["code", "image", "sg_asset_type"]),
+            sorted(parameters[2]), sorted(["code", "image", "sg_asset_type"])
         )
-        self.assertEqual(mock_data_retriever.execute_find.call_args.args[3], None)
+        self.assertEqual(parameters[3], None)
         self.assertEqual(
             mock_data_retriever.execute_find.call_args.kwargs, {"limit": None}
         )
