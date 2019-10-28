@@ -784,7 +784,7 @@ class ShotgunModel(ShotgunQueryModel):
             "%s.%s" % (filter_hash.hexdigest(), ShotgunFindDataHandler.FORMAT_VERSION),
         )
 
-        if sys.platform == "win32" and len(data_cache_path) > 250:
+        if sgtk.util.is_windows() and len(data_cache_path) > 250:
             self._log_warning(
                 "Shotgun model data cache file path may be affected by windows "
                 "windows MAX_PATH limitation."

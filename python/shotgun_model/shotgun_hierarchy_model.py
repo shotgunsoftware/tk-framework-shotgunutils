@@ -653,7 +653,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         )
 
         # warn if the path is longer than the windows max path limitation
-        if sys.platform == "win32" and len(data_cache_path) > 250:
+        if sgtk.util.is_windows() and len(data_cache_path) > 250:
             self._log_warning(
                 "Shotgun hierarchy data cache file path may be affected by "
                 "windows MAX_PATH limitation."
