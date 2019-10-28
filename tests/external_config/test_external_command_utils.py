@@ -8,10 +8,6 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import sys
-
-from sgtk.bootstrap import ToolkitManager
-from . import ExternalConfigBase, _MockedSignal
 from tank_test.tank_test_base import setUpModule  # noqa
 
 
@@ -22,7 +18,7 @@ class TestExternalCommandUtils(ExternalConfigBase):
 
     def test_enabled_on_current_os(self):
         """
-        Make sure we properly report a failed config retrieval.
+        Make sure each platform see themselves as not executable
         """
         # Should be denied on all platforms.
         self.assertFalse(
