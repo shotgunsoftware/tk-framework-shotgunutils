@@ -8,6 +8,8 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+from __future__ import division
+
 import sgtk
 from sgtk.util import filesystem
 
@@ -133,9 +135,13 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
         delta = datetime.timedelta(days=grace_period)
         # Datetime total_seconds was introduced in Python 2.7, so compute the
         # value ourself.
+        # This is documented in Python 2.7 as the following:
         grace_in_seconds = (
             delta.microseconds + (delta.seconds + delta.days * 24 * 3600) * 10 ** 6
         ) / 10 ** 6
+        # See https://docs.python.org/2/library/datetime.html#datetime.timedelta.total_seconds
+        # Note that the top of this file includes true division, which is mandatory as
+        # per the comment in the documentation.
 
         # Please note that we can't log any message from this background thread
         # without the risk of causing deadlocks.

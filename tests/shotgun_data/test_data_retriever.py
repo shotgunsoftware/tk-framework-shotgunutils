@@ -5,6 +5,8 @@
 # this software in either electronic or hard copy form.
 #
 
+from __future__ import division
+
 import sys
 import os
 import time
@@ -158,9 +160,18 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         # Change the modification time for a file and clean it up
         dummy_file = dummy_files.pop()
         one_day_delta = datetime.timedelta(days=1)
-        # The file needs to be older than a day to be cleaned up, so make it a day
-        # and a second.
-        one_day_in_seconds = 24 * 3600 + 1
+
+        # Datetime total_seconds was introduced in Python 2.7, so compute the
+        # value ourself.
+        # This is documented in Python 2.7 as the following:
+        one_day_in_seconds = (
+            one_day_delta.microseconds
+            + (one_day_delta.seconds + one_day_delta.days * 24 * 3600) * 10 ** 6
+        ) / 10 ** 6
+        # See https://docs.python.org/2/library/datetime.html#datetime.timedelta.total_seconds
+        # Note that the top of this file includes true division, which is mandatory as
+        # per the comment in the documentation.
+
         day_before_timestamp = time.time() - one_day_in_seconds
         os.utime(dummy_file, (day_before_timestamp, day_before_timestamp))
         bundle._remove_old_cached_data(1, *top_cleanup_folders)
