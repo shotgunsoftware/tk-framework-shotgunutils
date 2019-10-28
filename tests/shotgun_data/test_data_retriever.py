@@ -10,13 +10,10 @@ from __future__ import division
 import sys
 import os
 import time
-import datetime
 import shutil
 
-import sgtk
-
 from mock import patch
-from tank_test.tank_test_base import *
+from tank_test.tank_test_base import setUpModule  # noqa
 
 # import the test base class
 test_python_path = os.path.abspath(
@@ -123,7 +120,6 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         """
         bundle = self.framework
         # Create dummy cached data
-        cache_folder = bundle.site_cache_location
         top_cleanup_folders = []
         for folder in bundle._CLEANUP_FOLDERS:
             top_cleanup_folders.append(os.path.join(bundle.site_cache_location, folder))
@@ -159,21 +155,11 @@ class TestDataRetriever(TestShotgunUtilsFramework):
             self.assertTrue(os.path.exists(dummy_file))
         # Change the modification time for a file and clean it up
         dummy_file = dummy_files.pop()
-        one_day_delta = datetime.timedelta(days=1)
 
-        # Datetime total_seconds was introduced in Python 2.7, so compute the
-        # value ourself.
-        # This is documented
-        # https://docs.python.org/2/library/datetime.html#datetime.timedelta.total_seconds # noqa
-        # in Python 2.7 as the following:
-        one_day_in_seconds = (
-            one_day_delta.microseconds
-            + (one_day_delta.seconds + one_day_delta.days * 24 * 3600) * 10 ** 6
-        ) / 10 ** 6
-        # Note that the top of this file includes true division, which is mandatory as
-        # per the comment in the documentation.
+        # Go back a full day and a second to trigger deletion.
+        offset = (24 * 3600) + 1
 
-        day_before_timestamp = time.time() - one_day_in_seconds
+        day_before_timestamp = time.time() - offset
         os.utime(dummy_file, (day_before_timestamp, day_before_timestamp))
         bundle._remove_old_cached_data(1, *top_cleanup_folders)
         # It should be gone, but all the others kept

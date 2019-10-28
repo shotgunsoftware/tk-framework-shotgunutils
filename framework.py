@@ -132,16 +132,7 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
             raise ValueError(
                 "Invalid grace period value %d, it must be a least 1" % grace_period
             )
-        delta = datetime.timedelta(days=grace_period)
-        # Datetime total_seconds was introduced in Python 2.7, so compute the
-        # value ourself.
-        # This is documented at
-        # https://docs.python.org/2/library/datetime.html#datetime.timedelta.total_seconds # noqa
-        # in Python 2.7 as the following:
-        grace_in_seconds = (
-            delta.microseconds + (delta.seconds + delta.days * 24 * 3600) * 10 ** 6
-        ) / 10 ** 6
-
+        grace_in_seconds = 24 * 3600 * grace_period
         # Please note that we can't log any message from this background thread
         # without the risk of causing deadlocks.
         now_timestamp = time.time()
@@ -161,7 +152,7 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
                         # Is it old enough to be removed?
                         if now_timestamp - file_stats.st_mtime > grace_in_seconds:
                             filesystem.safe_delete_file(file_path)
-                    except Exception as e:
+                    except Exception:
                         # Silently ignore the error
                         pass
 
