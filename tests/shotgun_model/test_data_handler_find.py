@@ -62,8 +62,10 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
 
         request_id = dh.generate_data_request(mock_data_retriever)
 
-        # The test invokes the method with a list, but it filters items with a
-        # set first which has an impact on ordering, so reproduce that logic here.
+        # The test invokes the method with a list, but internally it temporarily
+        # stores them inside a set which in Python 3 has no guaranteed order
+        # of iteration, so we have to tests each parameter manually instead of
+        # using assert_called_once_with.
         self.assertEqual(mock_data_retriever.execute_find.call_count, 1)
         parameters = mock_data_retriever.execute_find.call_args.call_list()[0][0]
         self.assertEqual(parameters[0], "Asset")
