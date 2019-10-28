@@ -136,7 +136,7 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
         # Datetime total_seconds was introduced in Python 2.7, so compute the
         # value ourself.
         # This is documented at
-        # https://docs.python.org/2/library/datetime.html#datetime.timedelta.total_seconds
+        # https://docs.python.org/2/library/datetime.html#datetime.timedelta.total_seconds # noqa
         # in Python 2.7 as the following:
         grace_in_seconds = (
             delta.microseconds + (delta.seconds + delta.days * 24 * 3600) * 10 ** 6
