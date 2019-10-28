@@ -17,14 +17,21 @@ resources:
       ref: refs/heads/run_tests
       endpoint: shotgunsoftware
 
-# Configures CI to be triggered by changes to any branches and on tag creation.
+# We want builds to trigger for 3 reasons:
+# - The master branch sees new commits
+# - Each PR should get rebuilt when commits are added to it.
+# - When we tag something
 trigger:
   branches:
     include:
-    - '*'
+    - master
   tags:
     include:
     - v*
+pr:
+  branches:
+    include:
+    - "*"
 
 # This pulls in a variable group from Azure. Variables can be encrypted or not.
 variables:
