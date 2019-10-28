@@ -72,6 +72,7 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         for i in range(5):
             if task_manager._results_dispatcher.isRunning() is False:
                 break
+            time.sleep(1)
         else:
             raise RuntimeError("Thread did not finalize in time.")
 
