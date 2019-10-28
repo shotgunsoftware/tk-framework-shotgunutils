@@ -158,12 +158,9 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         # Change the modification time for a file and clean it up
         dummy_file = dummy_files.pop()
         one_day_delta = datetime.timedelta(days=1)
-        # Datetime total_seconds was introduced in Python 2.7, so compute the
-        # value ourself
-        one_day_in_seconds = (
-            one_day_delta.microseconds
-            + (one_day_delta.seconds + one_day_delta.days * 24 * 3600) * 10 ** 6
-        ) / 10 ** 6
+        # The file needs to be older than a day to be cleaned up, so make it a day
+        # and a second.
+        one_day_in_seconds = 24 * 3600 + 1
         day_before_timestamp = time.time() - one_day_in_seconds
         os.utime(dummy_file, (day_before_timestamp, day_before_timestamp))
         bundle._remove_old_cached_data(1, *top_cleanup_folders)
