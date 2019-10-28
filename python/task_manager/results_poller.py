@@ -108,7 +108,7 @@ class ResultsDispatcher(QtCore.QThread):
         # Add an event in the queue that will tell the thread to terminate.
         self._results.put(self._ShutdownHint())
         self._log("Sent _ShutdownHint to consumer thread.")
-        # Do not wait for the thread here!!! The backgroud thread is invoking
+        # Do not wait for the thread here!!! The background thread is invoking
         # the main thread synchronously. Waiting here would introduce
         # a deadlock because the main thread would be waiting for the dispatcher
         # to end and the dispatcher would be waiting for his events to

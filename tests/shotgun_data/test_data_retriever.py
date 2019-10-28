@@ -57,13 +57,24 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         patched.side_effect = _download_url
 
         retriever = self.shotgun_data.ShotgunDataRetriever()
-        # Stop all threads now to avoid some QThread: Destroyed while thread is still running
-        # errors on exit.
-        retriever.stop()
-        import time
 
-        time.sleep(4)
-        # retriever._task_manager._results_dispatcher.
+        # Stop all threads now to avoid some QThread: Destroyed while thread
+        # is still running errors on exit.
+        #
+        # As documented inside the ResultsDispatcher thread, the manager
+        # does not actually wait for the thread to avoid a deadlock. In a real
+        # software it doesn't matter because there's always a QApplication,
+        # but here it will sometime get destroyed before a thread may end,
+        # which will cause a crash. So we'll wait for the thread to finish
+        # before going on with the test.
+        task_manager = retriever._task_manager
+        retriever.stop()
+        for i in range(5):
+            if task_manager._results_dispatcher.isRunning() == False:
+                break
+        else:
+            raise RuntimeError("Thread did not finalize in time.")
+
         # We run tasks which usually run on a background task manager directly
         # here for the ease of testing.
         result = retriever._task_download_thumbnail(
