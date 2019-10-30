@@ -39,4 +39,5 @@ variables:
 
 jobs:
 - template: build-pipeline.yml@templates
-  tk_toolchain_ref: docs_validation
+  parameters:
+    tk_toolchain_ref: docs_validation
