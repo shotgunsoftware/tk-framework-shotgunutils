@@ -120,8 +120,8 @@ def sanitize_qt(val):
     if val is None:
         return None
 
-    elif isinstance(val, unicode):
-        return val.encode("UTF-8")
+    elif isinstance(val, six.text_type):
+        return val.encode("utf-8")
 
     elif HAS_QSTRING and isinstance(val, QtCore.QString):
         # convert any QStrings to utf-8 encoded strings
@@ -153,7 +153,8 @@ def sanitize_qt(val):
     # QT Version: 5.9.5
     # PySide Version: 5.9.0a1
     # The value should be `int` but it is `long`.
-    elif isinstance(val, long):
+    # longs do not exist in Python 3, so we need to cast those.
+    elif six.PY2 and isinstance(val, long):
         val = int(val)
         return val
     else:
