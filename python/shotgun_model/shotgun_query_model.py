@@ -874,7 +874,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         # delete the child leaves
         for index in range(node.rowCount(), 0, -1):
-            # notes about xrange syntax:
+            # notes about range syntax:
             # index will count from rowCount down to 1
             # to get zero based indices, subtract 1
             node.removeRow(index - 1)
