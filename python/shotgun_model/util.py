@@ -120,7 +120,7 @@ def sanitize_qt(val):
     if val is None:
         return None
 
-    elif isinstance(val, unicode):
+    elif six.PY2 and isinstance(val, unicode):
         return val.encode("UTF-8")
 
     elif HAS_QSTRING and isinstance(val, QtCore.QString):

@@ -1,0 +1,86 @@
+# Copyright (c) 2019 Shotgun Software Inc.
+#
+# CONFIDENTIAL AND PROPRIETARY
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
+# Source Code License included in this distribution package. See LICENSE.
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
+# not expressly granted therein are reserved by Shotgun Software Inc.
+
+import sys
+import os
+
+import sgtk
+from mock import patch, Mock, call
+from tank_test.tank_test_base import setUpModule  # noqa
+from base_test import TestShotgunUtilsFramework
+from tank_vendor.shotgun_api3.lib import six
+
+
+class TestShotgunModelUtil(TestShotgunUtilsFramework):
+    """
+    Tests the Shotgun Model utilities
+    """
+
+    def setUp(self):
+        """
+        Fixtures setup
+        """
+        super(TestShotgunModelUtil, self).setUp()
+        self.shotgun_model = self.framework.import_module("shotgun_model")
+        self.has_qstring = hasattr(sgtk.platform.qt.QtCore, "QString")
+        self.has_qbytearray = hasattr(sgtk.platform.qt.QtCore, "QByteArray")
+        self.has_qvariant = hasattr(sgtk.platform.qt.QtCore, "QVariant")
+
+    def _test_sanitize_qt(self, parameter, expected):
+        result = self.shotgun_model.util.sanitize_qt(parameter)
+        assert type(result) == type(expected)
+        assert result == expected
+
+    def test_sanitize_qt(self):
+
+        self._test_sanitize_qt(None, None)
+        self._test_sanitize_qt(True, True)
+        self._test_sanitize_qt(1, 1)
+        self._test_sanitize_qt(1.5, 1.5)
+        self._test_sanitize_qt(b"Bytes", b"Bytes")
+        self._test_sanitize_qt("Allo", "Allo")
+        self._test_sanitize_qt(["one", 2, 3.0], ["one", 2, 3.0])
+        self._test_sanitize_qt(
+            {"key": "value", "another_key": 1, "third_key": 3.0},
+            {"key": "value", "another_key": 1, "third_key": 3.0},
+        )
+        # In Python 2 we have extra data types to worry about, like unicode and long
+        if six.PY2:
+            self._test_sanitize_qt(unicode("Something"), "Something")
+            self._test_sanitize_qt(long(1), int(1))
+            self._test_sanitize_qt([unicode("one"), 2, 3.0], [unicode("one"), 2, 3.0])
+            self._test_sanitize_qt(
+                {
+                    unicode("key"): unicode("value"),
+                    unicode("another_key"): 1,
+                    unicode("third_key"): 3.0,
+                },
+                {"key": "value", "another_key": 1, "third_key": 3.0},
+            )
+
+        # PyQt4 exposes types that PySide doesn't, so test those as well.
+        # TODO: This hasn't been tested with PyQt5, as tk-core doesn't support it yet.
+        if self.has_qstring:
+            self._test_sanitize_qt(
+                sgtk.platform.qt.QtCore.QString("Something"), "Something"
+            )
+        if self.has_qbytearray:
+            self._test_sanitize_qt(
+                sgtk.platform.qt.QtCore.QByteArray(b"Something"), b"Something"
+            )
+        if self.has_qvariant:
+            self._test_sanitize_qt(sgtk.platform.qt.QtCore.QVariant(1), 1)
+            self._test_sanitize_qt(sgtk.platform.qt.QtCore.QVariant("str"), "str")
+            self._test_sanitize_qt(sgtk.platform.qt.QtCore.QVariant(3.2), 3.2)
+            if six.PY2:
+                self._test_sanitize_qt(
+                    sgtk.platform.qt.QtCore.QVariant(unicode("str")), "str"
+                )
+                self._test_sanitize_qt(sgtk.platform.qt.QtCore.QVariant(long(1)), 1)
