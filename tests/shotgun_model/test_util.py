@@ -34,12 +34,22 @@ class TestShotgunModelUtil(TestShotgunUtilsFramework):
         self.has_qvariant = hasattr(sgtk.platform.qt.QtCore, "QVariant")
 
     def _test_sanitize_qt(self, input, expected):
+        """
+        Test shotgun_model.util.sanitize_qt
+
+        :param input: Value to sanitize.
+        :param expected: Expected value after sanitization.
+        """
         result = self.shotgun_model.util.sanitize_qt(input)
+        # Test that both types and values are equal, because
+        # in Python 2 "text" == u"text" and 1 == 1L
         assert type(result) == type(expected)
         assert result == expected
 
     def test_sanitize_qt(self):
-
+        """
+        Ensure values received from Qt are sanitized properly.
+        """
         self._test_sanitize_qt(None, None)
         self._test_sanitize_qt(True, True)
         self._test_sanitize_qt(1, 1)
@@ -93,12 +103,21 @@ class TestShotgunModelUtil(TestShotgunUtilsFramework):
                 self._test_sanitize_qt(sgtk.platform.qt.QtCore.QVariant(long(1)), 1)
 
     def _test_sanitize_for_qt_model(self, input, expected):
+        """
+        Test shotgun_model.util.sanitize_for_qt_model
+
+        :param input: Value to sanitize.
+        :param expected: Expected value after sanitization.
+        """
         result = self.shotgun_model.util.sanitize_for_qt_model(input)
         assert type(result) == type(expected)
         assert result == expected
 
     def test_sanitize_for_qt_model(self):
-
+        """
+        Ensure values about to be stored into a Qt model will be
+        sanitized properly.
+        """
         if six.PY2:
             self._test_sanitize_for_qt_model(unicode("text"), unicode("text"))
             self._test_sanitize_for_qt_model("text", unicode("text"))
@@ -116,6 +135,7 @@ class TestShotgunModelUtil(TestShotgunUtilsFramework):
             self._test_sanitize_for_qt_model({"text": "text2"}, {"text": "text2"})
             self._test_sanitize_for_qt_model(["text", "text2"], ["text", "text2"])
 
+        self._test_sanitize_for_qt_model(None, None)
         self._test_sanitize_for_qt_model(1, 1)
         self._test_sanitize_for_qt_model(3.1, 3.1)
         self._test_sanitize_for_qt_model(True, True)
