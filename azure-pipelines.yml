@@ -14,7 +14,7 @@ resources:
     - repository: templates
       type: github
       name: shotgunsoftware/tk-ci-tools
-      ref: refs/heads/run_tests
+      ref: refs/heads/master
       endpoint: shotgunsoftware
 
 # We want builds to trigger for 3 reasons:
@@ -39,5 +39,3 @@ variables:
 
 jobs:
 - template: build-pipeline.yml@templates
-  parameters:
-    tk_toolchain_ref: docs_validation
