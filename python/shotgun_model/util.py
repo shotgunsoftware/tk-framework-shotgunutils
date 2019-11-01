@@ -98,7 +98,7 @@ def sanitize_for_qt_model(val):
             new_val[k] = sanitize_for_qt_model(v)
         return new_val
 
-    elif isinstance(val, str):
+    elif six.PY2 and isinstance(val, str):
         return val.decode("UTF-8")
 
     # for everything else, just pass through

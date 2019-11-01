@@ -33,8 +33,8 @@ class TestShotgunModelUtil(TestShotgunUtilsFramework):
         self.has_qbytearray = hasattr(sgtk.platform.qt.QtCore, "QByteArray")
         self.has_qvariant = hasattr(sgtk.platform.qt.QtCore, "QVariant")
 
-    def _test_sanitize_qt(self, parameter, expected):
-        result = self.shotgun_model.util.sanitize_qt(parameter)
+    def _test_sanitize_qt(self, input, expected):
+        result = self.shotgun_model.util.sanitize_qt(input)
         assert type(result) == type(expected)
         assert result == expected
 
@@ -65,22 +65,57 @@ class TestShotgunModelUtil(TestShotgunUtilsFramework):
                 {"key": "value", "another_key": 1, "third_key": 3.0},
             )
 
-        # PyQt4 exposes types that PySide doesn't, so test those as well.
         # TODO: This hasn't been tested with PyQt5, as tk-core doesn't support it yet.
+        # Maybe there will be some issues, as QString is only available on PyQtn
         if self.has_qstring:
             self._test_sanitize_qt(
                 sgtk.platform.qt.QtCore.QString("Something"), "Something"
             )
         if self.has_qbytearray:
-            self._test_sanitize_qt(
-                sgtk.platform.qt.QtCore.QByteArray(b"Something"), b"Something"
-            )
+            if six.PY2:
+                self._test_sanitize_qt(
+                    sgtk.platform.qt.QtCore.QByteArray(b"Something"), "Something"
+                )
+            else:
+                # FIXME: Under Python 3, PySide2's QByteArray doesn't have any way on
+                # extracting a str out of a QByteArray. The __str__ method is actually
+                # broken.
+                pass
+
         if self.has_qvariant:
             self._test_sanitize_qt(sgtk.platform.qt.QtCore.QVariant(1), 1)
-            self._test_sanitize_qt(sgtk.platform.qt.QtCore.QVariant("str"), "str")
+            self._test_sanitize_qt(sgtk.platform.qt.QtCore.QVariant("text"), "text")
             self._test_sanitize_qt(sgtk.platform.qt.QtCore.QVariant(3.2), 3.2)
             if six.PY2:
                 self._test_sanitize_qt(
-                    sgtk.platform.qt.QtCore.QVariant(unicode("str")), "str"
+                    sgtk.platform.qt.QtCore.QVariant(unicode("text")), "text"
                 )
                 self._test_sanitize_qt(sgtk.platform.qt.QtCore.QVariant(long(1)), 1)
+
+    def _test_sanitize_for_qt_model(self, input, expected):
+        result = self.shotgun_model.util.sanitize_for_qt_model(input)
+        assert type(result) == type(expected)
+        assert result == expected
+
+    def test_sanitize_for_qt_model(self):
+
+        if six.PY2:
+            self._test_sanitize_for_qt_model(unicode("text"), unicode("text"))
+            self._test_sanitize_for_qt_model("text", unicode("text"))
+            self._test_sanitize_for_qt_model(
+                {unicode("text"): unicode("text2")}, {unicode("text"): unicode("text2")}
+            )
+            self._test_sanitize_for_qt_model(
+                {"text": "text2"}, {unicode("text"): unicode("text2")}
+            )
+            self._test_sanitize_for_qt_model(
+                ["text", unicode("text2")], [unicode("text"), unicode("text2")]
+            )
+        else:
+            self._test_sanitize_for_qt_model("text", "text")
+            self._test_sanitize_for_qt_model({"text": "text2"}, {"text": "text2"})
+            self._test_sanitize_for_qt_model(["text", "text2"], ["text", "text2"])
+
+        self._test_sanitize_for_qt_model(1, 1)
+        self._test_sanitize_for_qt_model(3.1, 3.1)
+        self._test_sanitize_for_qt_model(True, True)
