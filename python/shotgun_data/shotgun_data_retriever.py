@@ -1433,7 +1433,6 @@ class ShotgunDataRetriever(QtCore.QObject):
             return
 
         action = result.get("action")
-        print(action)
         if action in [
             "find",
             "find_one",
@@ -1452,7 +1451,6 @@ class ShotgunDataRetriever(QtCore.QObject):
                 {"fields": result["fields"], "types": result["types"]},
             )
         elif action == "method":
-            print("calling method!!", type(task_id))
             self.work_completed.emit(
                 str(task_id), "method", {"return_value": result["result"]}
             )

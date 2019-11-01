@@ -8,14 +8,11 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import sys
-import os
-
 import sgtk
-from mock import patch, Mock, call
+from tank_vendor.shotgun_api3.lib import six
+
 from tank_test.tank_test_base import setUpModule  # noqa
 from base_test import TestShotgunUtilsFramework
-from tank_vendor.shotgun_api3.lib import six
 
 
 class TestShotgunModelUtil(TestShotgunUtilsFramework):
