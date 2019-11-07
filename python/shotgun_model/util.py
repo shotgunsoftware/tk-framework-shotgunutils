@@ -10,7 +10,6 @@
 
 from tank.platform.qt import QtCore
 
-import six.moves.urllib.parse
 from tank_vendor.shotgun_api3.lib import six
 from tank_vendor.shotgun_api3.lib.six.moves import range
 
