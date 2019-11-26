@@ -307,6 +307,23 @@ class ExternalCommand(object):
         """
         return self._tooltip
 
+    @property
+    def interpreter(self):
+        """
+        The Python interpreter path to use when executing the command.
+        """
+        return self._interpreter
+
+    @interpreter.setter
+    def interpreter(self, interpreter):
+        """
+        Set the command's Python interpreter path.
+
+        :param str interpreter: The new interpreter path to use when executing the
+            command.
+        """
+        self._interpreter = interpreter
+
     def execute(self, pre_cache=False):
         """
         Executes the external command in a separate process.
