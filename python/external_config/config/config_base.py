@@ -134,6 +134,15 @@ class ExternalConfiguration(QtCore.QObject):
         """
         return self._interpreter
 
+    @interpreter.setter
+    def interpreter(self, interpreter):
+        """
+        Sets the configuration's Python interpreter.
+
+        :param str interpreter: The Python interpreter path.
+        """
+        self._interpreter = interpreter
+
     @property
     def software_hash(self):
         """
