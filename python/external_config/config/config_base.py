@@ -134,6 +134,15 @@ class ExternalConfiguration(QtCore.QObject):
         """
         return self._interpreter
 
+    @interpreter.setter
+    def interpreter(self, interpreter):
+        """
+        Sets the configuration's Python interpreter.
+
+        :param str interpreter: The Python interpreter path.
+        """
+        self._interpreter = interpreter
+
     @property
     def software_hash(self):
         """
@@ -306,7 +315,11 @@ class ExternalConfiguration(QtCore.QObject):
         else:
             cached_data = file_cache.load_cache(cache_hash)
 
-        if cached_data is None or not ExternalCommand.is_compatible(cached_data):
+        if (
+            cached_data is None
+            or not ExternalCommand.is_compatible(cached_data)
+            or not ExternalCommand.is_valid_data(cached_data)
+        ):
             logger.debug("Begin caching commands")
 
             # if entity_id is None, we need to figure out an actual entity id

@@ -42,6 +42,32 @@ class ExternalCommand(object):
             return False
 
     @classmethod
+    def is_valid_data(cls, data):
+        """
+        Tests whether key components of the data contained in the cache are still
+        valid. This helps protect against file paths that might have been cached
+        that no longer exist.
+
+        :param dict data: Serialized data
+        :returns: True if the given data passes validation, False if not.
+        """
+        # We're only testing icon paths here just because that's the problem we
+        # have right now in SG Create, but it's entirely possible (and maybe
+        # advisable) to check other things that are file/directory paths on
+        # disk that might no longer exist.
+        icon_passes = True
+
+        for command in data.get("commands", []):
+            icon = command.get("icon")
+            if icon and not os.path.exists(icon):
+                logger.debug("Icon path in cached data is invalid: %s", icon)
+                logger.debug("External commands will be recached.")
+                icon_passes = False
+                break
+
+        return icon_passes
+
+    @classmethod
     def create(cls, external_configuration, data, entity_id):
         """
         Creates a new :class:`ExternalCommand` instance based on the
@@ -138,7 +164,23 @@ class ExternalCommand(object):
         self._pipeline_config_name = pipeline_config_name
         self._sg_deny_permissions = sg_deny_permissions
         self._sg_supports_multiple_selection = sg_supports_multiple_selection
-        self._icon = icon
+
+        # We need to check the validity of the icon path provided and
+        # not keep it if it doesn't exist. This will prevent an infinite
+        # re-cache loop when commands are requested from an external config
+        # object. That object's routine is to validate the contents of
+        # cached data before using it, and if an icon referenced in the
+        # cache doesn't exist (but is not None) then the cache is dumped.
+        if icon and os.path.exists(icon):
+            # Good icon path provided.
+            self._icon = icon
+        elif icon:
+            # Non-existent icon provided, which we will not record.
+            logger.warning("Icon provided does not exist and will not be used: %s", icon)
+            self._icon = None
+        else:
+            # No icon provided.
+            self._icon = None
 
     def __repr__(self):
         """
@@ -306,6 +348,23 @@ class ExternalCommand(object):
         Associated help text tooltip.
         """
         return self._tooltip
+
+    @property
+    def interpreter(self):
+        """
+        The Python interpreter path to use when executing the command.
+        """
+        return self._interpreter
+
+    @interpreter.setter
+    def interpreter(self, interpreter):
+        """
+        Set the command's Python interpreter path.
+
+        :param str interpreter: The new interpreter path to use when executing the
+            command.
+        """
+        self._interpreter = interpreter
 
     def execute(self, pre_cache=False):
         """
