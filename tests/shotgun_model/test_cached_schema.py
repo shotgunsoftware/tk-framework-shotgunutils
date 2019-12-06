@@ -103,6 +103,24 @@ class TestCachedSchema(TestShotgunUtilsFramework):
         assert self._cached_schema._field_schema, self.mockgun.schema_read()
         assert self._cached_schema._type_schema, self.mockgun.schema_entity_read()
 
+        if six.PY2:
+            self._assert_no_unicode(self._cached_schema._field_schema)
+            self._assert_no_unicode(self._cached_schema._type_schema)
+
+    def _assert_no_unicode(self, value):
+        """
+        Asserts that a value is not a Python 2 ``unicode`` object.
+        """
+        if isinstance(value, dict):
+            for k, v in value.items():
+                self._assert_no_unicode(k)
+                self._assert_no_unicode(v)
+        elif isinstance(value, list):
+            for v in value:
+                self._assert_no_unicode(v)
+        else:
+            assert isinstance(value, unicode) is False
+
     def _trigger_cache_load(self):
         """
         Trigger a cache reload and wait until it is completed.

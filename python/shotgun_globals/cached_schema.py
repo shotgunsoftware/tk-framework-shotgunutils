@@ -14,6 +14,10 @@ from __future__ import with_statement
 import os
 import sgtk
 from sgtk.platform.qt import QtCore
+
+# sgjson is used so we can load unicode strings as utf-8 encoded ``str``
+# objects instead of ``unicode`` objects in Python 2
+from sgtk.util import json as sgjson
 import json
 
 
@@ -190,7 +194,7 @@ class CachedShotgunSchema(QtCore.QObject):
                     "Loading cached status from '%s'" % status_cache_path
                 )
                 with open(status_cache_path, "rt") as fh:
-                    status_data = json.load(fh)
+                    status_data = sgjson.load(fh)
                     # Check to make sure the structure of the data
                     # is what we expect. If it isn't then we don't
                     # accept the data which will force it to be
@@ -225,7 +229,7 @@ class CachedShotgunSchema(QtCore.QObject):
                     "Loading cached schema from '%s'" % schema_cache_path
                 )
                 with open(schema_cache_path, "rt") as fh:
-                    data = json.load(fh)
+                    data = sgjson.load(fh)
                     self._field_schema[project_id] = data["field_schema"]
                     self._type_schema[project_id] = data["type_schema"]
             except Exception as e:
