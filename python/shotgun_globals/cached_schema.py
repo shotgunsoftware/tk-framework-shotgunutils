@@ -14,7 +14,7 @@ from __future__ import with_statement
 import os
 import sgtk
 from sgtk.platform.qt import QtCore
-from tank_vendor.shotgun_api3.lib.six.moves import cPickle as pickle
+import json
 
 
 class CachedShotgunSchema(QtCore.QObject):
@@ -158,7 +158,7 @@ class CachedShotgunSchema(QtCore.QObject):
 
         :returns:           str
         """
-        return os.path.join(self._get_cache_root_path(project_id), "sg_schema.pickle")
+        return os.path.join(self._get_cache_root_path(project_id), "sg_schema.json")
 
     def _get_status_cache_path(self, project_id=None):
         """
@@ -171,7 +171,7 @@ class CachedShotgunSchema(QtCore.QObject):
 
         :returns:           str
         """
-        return os.path.join(self._get_cache_root_path(project_id), "sg_status.pickle")
+        return os.path.join(self._get_cache_root_path(project_id), "sg_status.json")
 
     def _load_cached_status(self, project_id=None):
         """
@@ -189,8 +189,8 @@ class CachedShotgunSchema(QtCore.QObject):
                 self._bundle.log_debug(
                     "Loading cached status from '%s'" % status_cache_path
                 )
-                with open(status_cache_path, "rb") as fh:
-                    status_data = pickle.load(fh)
+                with open(status_cache_path, "rt") as fh:
+                    status_data = json.load(fh)
                     # Check to make sure the structure of the data
                     # is what we expect. If it isn't then we don't
                     # accept the data which will force it to be
@@ -224,8 +224,8 @@ class CachedShotgunSchema(QtCore.QObject):
                 self._bundle.log_debug(
                     "Loading cached schema from '%s'" % schema_cache_path
                 )
-                with open(schema_cache_path, "rb") as fh:
-                    data = pickle.load(fh)
+                with open(schema_cache_path, "rt") as fh:
+                    data = json.load(fh)
                     self._field_schema[project_id] = data["field_schema"]
                     self._type_schema[project_id] = data["type_schema"]
             except Exception as e:
@@ -366,14 +366,15 @@ class CachedShotgunSchema(QtCore.QObject):
                 "Saving schema to '%s'..." % self._get_schema_cache_path(project_id)
             )
             try:
-                with open(self._get_schema_cache_path(project_id), "wb") as fh:
+                with open(self._get_schema_cache_path(project_id), "wt") as fh:
                     data = dict(
                         field_schema=self._field_schema[project_id],
                         type_schema=self._type_schema[project_id],
                     )
-                    pickle.dump(data, fh)
+                    json.dump(data, fh)
                     self._bundle.log_debug("...done")
             except Exception as e:
+                raise
                 self._bundle.log_warning(
                     "Could not write schema "
                     "file '%s': %s" % (self._get_schema_cache_path(project_id), e)
@@ -398,10 +399,11 @@ class CachedShotgunSchema(QtCore.QObject):
                 "Saving status to '%s'..." % self._get_status_cache_path(project_id)
             )
             try:
-                with open(self._get_status_cache_path(project_id), "wb") as fh:
-                    pickle.dump(self._status_data[project_id], fh)
+                with open(self._get_status_cache_path(project_id), "wt") as fh:
+                    json.dump(self._status_data[project_id], fh)
                     self._bundle.log_debug("...done")
             except Exception as e:
+                raise
                 self._bundle.log_warning(
                     "Could not write status "
                     "file '%s': %s" % (self._get_status_cache_path(project_id), e)
