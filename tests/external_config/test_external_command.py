@@ -8,6 +8,9 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+import os
+import contextlib
+
 from mock import patch
 
 from sgtk.util import process  # noqa
@@ -27,6 +30,10 @@ class TestExternalCommand(ExternalConfigBase):
         """
         super(TestExternalCommand, self).setUp()
 
+        self._icon_path = (
+            "/Applications/Autodesk/maya2017/Maya.app/Contents/icons/mayaico.png"
+        )
+
         # example taken from a working 'Shotgun Create / tk-desktop2' setup
         self._data = {
             "sg_supports_multiple_selection": None,
@@ -39,7 +46,7 @@ class TestExternalCommand(ExternalConfigBase):
             "group": "Maya",
             "type": None,
             "group_default": False,
-            "icon": "/Applications/Autodesk/maya2017/Maya.app/Contents/icons/mayaico.png",
+            "icon": self._icon_path,
         }
 
         # The ExternalCommand create method expects the following field which I couldn't figure out origin
@@ -55,10 +62,30 @@ class TestExternalCommand(ExternalConfigBase):
         self.external_config_loader.pipeline_configuration_id = None
         self.external_config_loader.pipeline_configuration_name = None
 
-        # Creating the external command object
-        self._external_command = self.external_config.ExternalCommand.create(
-            self.external_config_loader, self.ec_data, "Task"
-        )
+        # Creating a command can invalidate the icon if it's missing. We don't want
+        # that here.
+        with self._pretend_icon_exists():
+            # Creating the external command object
+            self._external_command = self.external_config.ExternalCommand.create(
+                self.external_config_loader, self.ec_data, "Task"
+            )
+
+    @contextlib.contextmanager
+    def _pretend_icon_exists(self):
+        """
+        Mocks the os.path.exists method so that the icon is found
+        on disk during the test even tough it doesn't actually exist.
+        """
+        original_os_path_exists = os.path.exists
+
+        def ico_exists(path):
+            if path == self._icon_path:
+                return True
+            else:
+                return original_os_path_exists(path)
+
+        with patch("os.path.exists", side_effect=ico_exists):
+            yield
 
     @property
     def ec_data(self):
@@ -110,8 +137,11 @@ class TestExternalCommand(ExternalConfigBase):
         # Serialize our test base object
         a_pickle = self.ec.serialize()
 
-        # Create a new object from the serialize data
-        ec2 = self.external_config.ExternalCommand.deserialize(a_pickle)
+        # Unserializing a command creates it, which may invalidate the icon
+        # if missing. We don't want that here.
+        with self._pretend_icon_exists():
+            # Create a new object from the serialize data
+            ec2 = self.external_config.ExternalCommand.deserialize(a_pickle)
 
         # Test that new object similarity with original one
         # Unfortunately the ExternalCommand object is not implementing a custom equal
@@ -135,6 +165,15 @@ class TestExternalCommand(ExternalConfigBase):
         )
         self.assertEqual(self.ec.tooltip, ec2.tooltip)
         self.assertEqual(repr(self.ec), repr(ec2))
+
+    def test_detect_missing_icon(self):
+        """
+        Ensure a missing icon is detected and wiped from the command.
+        """
+        self._external_command = self.external_config.ExternalCommand.create(
+            self.external_config_loader, self.ec_data, "Task"
+        )
+        self.assertIsNone(self.ec.icon)
 
     @patch("sgtk.util.process.subprocess_check_output")
     @patch("sgtk.util.filesystem.safe_delete_file")
