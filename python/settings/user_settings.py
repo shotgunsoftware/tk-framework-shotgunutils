@@ -141,7 +141,7 @@ class UserSettings(object):
             #         b"binary value"
             #     )
             #
-            # Running this script one with Python 3 will write to QSettings and running
+            # Running this script once with Python 3 will write to QSettings and running
             # it with Python 2 will read it and raise a pickler error, even tough we
             # never used the pickler in our code in the first place.
             #

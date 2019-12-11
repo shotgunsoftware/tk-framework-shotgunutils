@@ -15,10 +15,7 @@ import os
 import sgtk
 from sgtk.platform.qt import QtCore
 
-# sgjson is used so we can load unicode strings as utf-8 encoded ``str``
-# objects instead of ``unicode`` objects in Python 2
-from sgtk.util import json as sgjson
-import json
+from six.moves import cPickle as pickle
 
 
 class CachedShotgunSchema(QtCore.QObject):
@@ -375,10 +372,9 @@ class CachedShotgunSchema(QtCore.QObject):
                         field_schema=self._field_schema[project_id],
                         type_schema=self._type_schema[project_id],
                     )
-                    json.dump(data, fh)
+                    pickle.dump(data, fh, protocol=0)
                     self._bundle.log_debug("...done")
             except Exception as e:
-                raise
                 self._bundle.log_warning(
                     "Could not write schema "
                     "file '%s': %s" % (self._get_schema_cache_path(project_id), e)
@@ -404,7 +400,7 @@ class CachedShotgunSchema(QtCore.QObject):
             )
             try:
                 with open(self._get_status_cache_path(project_id), "wt") as fh:
-                    json.dump(self._status_data[project_id], fh)
+                    pickle.dump(self._status_data[project_id], fh, protocol=0)
                     self._bundle.log_debug("...done")
             except Exception as e:
                 raise
