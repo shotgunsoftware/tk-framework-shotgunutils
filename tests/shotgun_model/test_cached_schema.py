@@ -62,10 +62,13 @@ class TestCachedSchema(TestShotgunUtilsFramework):
         patcher = mock.patch.object(
             self.mockgun, method, return_value=getattr(self.mockgun, method)()
         )
-        mock_object = patcher.start()
+        patcher.start()
         self.addCleanup(patcher.stop)
 
     def test_serialize_unserialize_schema(self):
+        """
+        Test serialization and unserialization of a schema.
+        """
 
         assert self._cached_schema._is_schema_loaded() is False
         assert self._cached_schema._is_status_loaded() is False
@@ -92,8 +95,8 @@ class TestCachedSchema(TestShotgunUtilsFramework):
         assert self.mockgun.schema_entity_read.called is False
 
         # Peak behind the curtain to reload the cache.
-        self._cached_schema._load_cached_schema()
-        self._cached_schema._load_cached_status()
+        assert self._cached_schema._load_cached_schema()
+        assert self._cached_schema._load_cached_status()
 
         # Mockgun should not have been called.
         assert self.mockgun.schema_read.called is False
