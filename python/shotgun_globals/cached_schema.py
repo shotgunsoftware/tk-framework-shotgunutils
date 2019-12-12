@@ -15,8 +15,6 @@ import os
 import sgtk
 from sgtk.platform.qt import QtCore
 
-from six.moves import cPickle as pickle
-
 
 class CachedShotgunSchema(QtCore.QObject):
     """
@@ -191,7 +189,7 @@ class CachedShotgunSchema(QtCore.QObject):
                     "Loading cached status from '%s'" % status_cache_path
                 )
                 with open(status_cache_path, "rt") as fh:
-                    status_data = pickle.load(fh)
+                    status_data = sgtk.util.pickle.load(fh)
                     # Check to make sure the structure of the data
                     # is what we expect. If it isn't then we don't
                     # accept the data which will force it to be
@@ -226,7 +224,7 @@ class CachedShotgunSchema(QtCore.QObject):
                     "Loading cached schema from '%s'" % schema_cache_path
                 )
                 with open(schema_cache_path, "rt") as fh:
-                    data = pickle.load(fh)
+                    data = sgtk.util.pickle.load(fh)
                     self._field_schema[project_id] = data["field_schema"]
                     self._type_schema[project_id] = data["type_schema"]
             except Exception as e:
@@ -367,12 +365,12 @@ class CachedShotgunSchema(QtCore.QObject):
                 "Saving schema to '%s'..." % self._get_schema_cache_path(project_id)
             )
             try:
-                with open(self._get_schema_cache_path(project_id), "wt") as fh:
+                with open(self._get_schema_cache_path(project_id), "wb") as fh:
                     data = dict(
                         field_schema=self._field_schema[project_id],
                         type_schema=self._type_schema[project_id],
                     )
-                    pickle.dump(data, fh, protocol=0)
+                    sgtk.util.pickle.dump(data, fh)
                     self._bundle.log_debug("...done")
             except Exception as e:
                 self._bundle.log_warning(
@@ -399,8 +397,8 @@ class CachedShotgunSchema(QtCore.QObject):
                 "Saving status to '%s'..." % self._get_status_cache_path(project_id)
             )
             try:
-                with open(self._get_status_cache_path(project_id), "wt") as fh:
-                    pickle.dump(self._status_data[project_id], fh, protocol=0)
+                with open(self._get_status_cache_path(project_id), "wb") as fh:
+                    sgtk.util.pickle.dump(self._status_data[project_id], fh)
                     self._bundle.log_debug("...done")
             except Exception as e:
                 raise

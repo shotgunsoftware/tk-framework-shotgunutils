@@ -11,7 +11,6 @@
 import sgtk
 from tank_vendor.shotgun_api3.lib import six
 import json
-import pickle
 from sgtk.platform.qt import QtCore
 from sgtk import TankError
 from ..shotgun_model import sanitize_qt
@@ -145,10 +144,9 @@ class UserSettings(object):
             # it with Python 2 will read it and raise a pickler error, even tough we
             # never used the pickler in our code in the first place.
             #
-            # To get around this, we need to write a string inside the QSettings.
-            # And since protocol 1 and 2 are binary in Python 2, we have to drop to 0
-            # to make sure six.ensure_str works.
-            value_str = pickle.dumps(sanitize_qt(value), protocol=0)
+            # To get around this, we need to write a string inside the QSettings, so
+            # use sgtk.util.pickle
+            value_str = sgtk.util.pickle.dumps(sanitize_qt(value))
             self.__settings.setValue(full_name, six.ensure_str(value_str))
         except Exception as e:
             self.__fw.log_warning(
@@ -174,7 +172,7 @@ class UserSettings(object):
             if raw_value is None:
                 resolved_val = default
             else:
-                resolved_val = pickle.loads(six.ensure_binary(raw_value))
+                resolved_val = sgtk.util.pickle.loads(six.ensure_binary(raw_value))
                 resolved_val = sanitize_qt(resolved_val)
         except Exception as e:
             self.__fw.log_warning(

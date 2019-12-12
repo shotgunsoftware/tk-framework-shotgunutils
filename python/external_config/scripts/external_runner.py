@@ -14,7 +14,6 @@ import re
 import imp
 import sys
 import errno
-import six.moves.cPickle
 import inspect
 import traceback
 from tank_vendor.shotgun_api3.lib import six
@@ -184,7 +183,7 @@ def _write_cache_file(path, data):
         # now write the file to disk
         try:
             with open(path, "wb") as fh:
-                six.moves.cPickle.dump(data, fh)
+                sgtk.util.pickle.dump(data, fh)
             # and ensure the cache file has got open permissions
             os.chmod(path, 0o666)
         except Exception as e:
@@ -340,7 +339,7 @@ def main():
     # unpack file with arguments payload
     arg_data_file = sys.argv[2]
     with open(arg_data_file, "rb") as fh:
-        arg_data = six.moves.cPickle.load(fh)
+        arg_data = sgtk.util.pickle.load(fh)
 
     # Set the PYTHONPATH if requested. This is an important step, as our parent
     # process might have polluted PYTHONPATH with data required for this

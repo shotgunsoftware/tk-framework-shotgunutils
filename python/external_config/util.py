@@ -7,7 +7,7 @@
 # By accessing, using, copying or modifying this work you indicate your
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
-from tank_vendor.shotgun_api3.lib.six.moves import cPickle as pickle
+
 import tempfile
 import os
 import uuid
@@ -28,7 +28,7 @@ def create_parameter_file(data):
     param_file = os.path.join(tempfile.gettempdir(), "sgtk_%s.cmd" % uuid.uuid4().hex)
 
     with open(param_file, "wb") as fh:
-        pickle.dump(data, fh, pickle.HIGHEST_PROTOCOL)
+        sgtk.util.pickle.dump(data, fh)
 
     logger.debug(
         "Created parameter file '%s' with the following data: %s"

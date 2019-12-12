@@ -8,7 +8,6 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 import os
-import tank_vendor.shotgun_api3.lib.six.moves.cPickle as pickle
 import hashlib
 import sgtk
 from tank_vendor.shotgun_api3.lib import six
@@ -51,7 +50,7 @@ def load_cache_file(cache_path):
     if os.path.exists(cache_path):
         try:
             with open(cache_path, "rb") as fh:
-                content = pickle.load(fh)
+                content = sgtk.util.pickle.load(fh)
         except Exception as e:
             logger.debug(
                 "Cache '%s' not valid - ignoring. Details: %s" % (cache_path, e),
@@ -108,7 +107,7 @@ def write_cache_file(path, data):
 
     try:
         with open(path, "wb") as fh:
-            pickle.dump(data, fh)
+            sgtk.util.pickle.dump(data, fh)
 
         # and ensure the cache file has got open permissions
         os.chmod(path, 0o666)
