@@ -12,7 +12,6 @@ import time
 
 import mock
 
-import sgtk
 from tank_vendor.shotgun_api3.lib import six
 
 from tank_test.tank_test_base import setUpModule  # noqa
