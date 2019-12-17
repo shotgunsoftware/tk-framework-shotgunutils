@@ -188,7 +188,7 @@ class CachedShotgunSchema(QtCore.QObject):
                 self._bundle.log_debug(
                     "Loading cached status from '%s'" % status_cache_path
                 )
-                with open(status_cache_path, "rt") as fh:
+                with open(status_cache_path, "rb") as fh:
                     status_data = sgtk.util.pickle.load(fh)
                     # Check to make sure the structure of the data
                     # is what we expect. If it isn't then we don't
@@ -223,11 +223,14 @@ class CachedShotgunSchema(QtCore.QObject):
                 self._bundle.log_debug(
                     "Loading cached schema from '%s'" % schema_cache_path
                 )
-                with open(schema_cache_path, "rt") as fh:
+                with open(schema_cache_path, "rb") as fh:
                     data = sgtk.util.pickle.load(fh)
                     self._field_schema[project_id] = data["field_schema"]
                     self._type_schema[project_id] = data["type_schema"]
             except Exception as e:
+                import pdb
+
+                pdb.set_trace()
                 self._bundle.log_warning(
                     "Could not open cached schema "
                     "file '%s': %s" % (schema_cache_path, e)
