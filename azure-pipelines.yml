@@ -39,3 +39,4 @@ variables:
 
 jobs:
 - template: build-pipeline.yml@templates
+  tk_core_ref: SG-13264-python-3-compat-pickling-2
