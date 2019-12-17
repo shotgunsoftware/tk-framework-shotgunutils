@@ -228,9 +228,6 @@ class CachedShotgunSchema(QtCore.QObject):
                     self._field_schema[project_id] = data["field_schema"]
                     self._type_schema[project_id] = data["type_schema"]
             except Exception as e:
-                import pdb
-
-                pdb.set_trace()
                 self._bundle.log_warning(
                     "Could not open cached schema "
                     "file '%s': %s" % (schema_cache_path, e)
