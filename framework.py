@@ -52,7 +52,7 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
         # thread which should be fine in Python with the GIL protecting its access.
         self._stop_cleanup = True
         if self._bg_cleanup_thread:
-            if self._bg_cleanup_thread.isAlive():
+            if self._bg_cleanup_thread.is_alive():
                 # If the clean up is not completed yet, log why we are waiting.
                 self.log_info("Waiting for old data clean up to complete...")
             self._bg_cleanup_thread.join()
