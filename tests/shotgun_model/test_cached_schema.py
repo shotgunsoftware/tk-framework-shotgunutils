@@ -29,9 +29,6 @@ class TestCachedSchema(TestShotgunUtilsFramework):
         Fixtures setup
         """
         super(TestCachedSchema, self).setUp()
-        self._qapp = sgtk.platform.qt.QtGui.QApplication.instance()
-        if not self._qapp:
-            self._qapp = sgtk.platform.qt.QtGui.QApplication([])
 
         self._patch_mockgun("schema_read")
         self._patch_mockgun("schema_entity_read")
