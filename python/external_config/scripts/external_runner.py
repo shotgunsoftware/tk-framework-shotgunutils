@@ -16,7 +16,6 @@ import sys
 import errno
 import inspect
 import traceback
-from tank_vendor.shotgun_api3.lib import six
 
 # handle imports
 path_to_sgtk = sys.argv[1]

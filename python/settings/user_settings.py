@@ -10,7 +10,6 @@
 
 import sgtk
 from tank_vendor.shotgun_api3.lib import six
-import json
 from sgtk.platform.qt import QtCore
 from sgtk import TankError
 from ..shotgun_model import sanitize_qt
