@@ -14,7 +14,7 @@ import fnmatch
 import hashlib
 from .config_base import ExternalConfiguration
 from .. import file_cache
-from tank_vendor.shotgun_api3.lib import six
+from tank_vendor import six
 
 
 logger = sgtk.platform.get_logger(__name__)

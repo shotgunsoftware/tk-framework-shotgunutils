@@ -9,7 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
-from tank_vendor.shotgun_api3.lib import six
+from tank_vendor import six
 
 from tank_test.tank_test_base import setUpModule  # noqa
 from base_test import TestShotgunUtilsFramework

@@ -10,7 +10,7 @@
 import os
 import hashlib
 import sgtk
-from tank_vendor.shotgun_api3.lib import six
+from tank_vendor import six
 
 logger = sgtk.platform.get_logger(__name__)
 
