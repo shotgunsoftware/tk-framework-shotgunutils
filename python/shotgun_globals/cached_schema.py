@@ -13,8 +13,7 @@ from __future__ import with_statement
 
 import os
 import sgtk
-from sgtk.platform.qt import QtCore, QtGui
-import cPickle as pickle
+from sgtk.platform.qt import QtCore
 
 
 class CachedShotgunSchema(QtCore.QObject):
@@ -190,7 +189,7 @@ class CachedShotgunSchema(QtCore.QObject):
                     "Loading cached status from '%s'" % status_cache_path
                 )
                 with open(status_cache_path, "rb") as fh:
-                    status_data = pickle.load(fh)
+                    status_data = sgtk.util.pickle.load(fh)
                     # Check to make sure the structure of the data
                     # is what we expect. If it isn't then we don't
                     # accept the data which will force it to be
@@ -225,7 +224,7 @@ class CachedShotgunSchema(QtCore.QObject):
                     "Loading cached schema from '%s'" % schema_cache_path
                 )
                 with open(schema_cache_path, "rb") as fh:
-                    data = pickle.load(fh)
+                    data = sgtk.util.pickle.load(fh)
                     self._field_schema[project_id] = data["field_schema"]
                     self._type_schema[project_id] = data["type_schema"]
             except Exception as e:
@@ -260,9 +259,9 @@ class CachedShotgunSchema(QtCore.QObject):
             and project_id not in self._sg_schema_query_ids.values()
         ):
             # schema is not requested and not loaded.
-            # If a schema was requested for a project that isn't the current project, then
-            # let's check to see if we can get it from disk before we resort to going to
-            # Shotgun.
+            # If a schema was requested for a project that isn't the current project,
+            # then let's check to see if we can get it from disk before we resort to
+            # going to Shotgun.
             if project_id != current_project_id:
                 if self._load_cached_schema(project_id=project_id):
                     # If we were able to load the cached schema from disk then we don't
@@ -299,9 +298,9 @@ class CachedShotgunSchema(QtCore.QObject):
             not self._is_status_loaded(project_id)
             and project_id not in self._sg_status_query_ids.values()
         ):
-            # If statuses were requested for a project that isn't the current project, then
-            # let's check to see if we can get it from disk before we resort to going to
-            # Shotgun.
+            # If statuses were requested for a project that isn't the current project,
+            # then  let's check to see if we can get it from disk before we resort
+            # to going to Shotgun.
             if project_id != current_project_id:
                 if self._load_cached_status(project_id=project_id):
                     # If we were able to load the cached schema from disk then we don't
@@ -373,7 +372,7 @@ class CachedShotgunSchema(QtCore.QObject):
                         field_schema=self._field_schema[project_id],
                         type_schema=self._type_schema[project_id],
                     )
-                    pickle.dump(data, fh)
+                    sgtk.util.pickle.dump(data, fh)
                     self._bundle.log_debug("...done")
             except Exception as e:
                 self._bundle.log_warning(
@@ -401,9 +400,10 @@ class CachedShotgunSchema(QtCore.QObject):
             )
             try:
                 with open(self._get_status_cache_path(project_id), "wb") as fh:
-                    pickle.dump(self._status_data[project_id], fh)
+                    sgtk.util.pickle.dump(self._status_data[project_id], fh)
                     self._bundle.log_debug("...done")
             except Exception as e:
+                raise
                 self._bundle.log_warning(
                     "Could not write status "
                     "file '%s': %s" % (self._get_status_cache_path(project_id), e)
@@ -518,7 +518,7 @@ class CachedShotgunSchema(QtCore.QObject):
             project_id in self._field_schema
             and sg_entity_type in self._field_schema[project_id]
         ):
-            return self._field_schema[project_id][sg_entity_type].keys()
+            return list(self._field_schema[project_id][sg_entity_type].keys())
         else:
             return []
 

@@ -107,7 +107,7 @@ class TestShotgunNavDataHandler(TestShotgunUtilsFramework):
         self.assertEqual(foo.parent, None)
         self.assertEqual(foo.is_leaf(), False)
 
-        self.assertEquals(dh.get_data_item_from_uid("/foo"), foo)
+        self.assertEqual(dh.get_data_item_from_uid("/foo"), foo)
 
         # now apply an update
         sg_data = {
@@ -129,8 +129,8 @@ class TestShotgunNavDataHandler(TestShotgunUtilsFramework):
         self.assertFalse(dh.is_cache_loaded())
         dh.load_cache()
 
-        self.assertEquals(dh.get_data_item_from_uid("/foo2"), diff[0]["data"])
-        self.assertEquals(dh.get_data_item_from_uid("/Prop"), None)
+        self.assertEqual(dh.get_data_item_from_uid("/foo2"), diff[0]["data"])
+        self.assertEqual(dh.get_data_item_from_uid("/Prop"), None)
 
     def test_generate_child_nodes(self):
         """
@@ -181,7 +181,10 @@ class TestShotgunNavDataHandler(TestShotgunUtilsFramework):
             call(None, dh.get_data_item_from_uid("/baz")),
         ]
 
-        callback.assert_has_calls(calls)
+        # Python 2 and 3 have different ordering internally
+        # for their keys, so we can't expect the items
+        # be generated in the same order.
+        callback.assert_has_calls(calls, any_order=True)
 
         # and check children
         callback = Mock()
@@ -191,4 +194,7 @@ class TestShotgunNavDataHandler(TestShotgunUtilsFramework):
             call(None, dh.get_data_item_from_uid("/foo/brown")),
             call(None, dh.get_data_item_from_uid("/foo/jones")),
         ]
-        callback.assert_has_calls(calls)
+        # Python 2 and 3 have different ordering internally
+        # for their keys, so we can't expect the items
+        # be generated in the same order.
+        callback.assert_has_calls(calls, any_order=True)

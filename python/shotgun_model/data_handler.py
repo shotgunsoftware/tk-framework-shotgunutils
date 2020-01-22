@@ -12,7 +12,6 @@ from __future__ import with_statement
 import errno
 import os
 import datetime
-import cPickle
 import time
 
 # toolkit imports
@@ -138,14 +137,13 @@ class ShotgunDataHandler(object):
         if os.path.exists(self._cache_path):
             try:
                 with open(self._cache_path, "rb") as fh:
-                    pickler = cPickle.Unpickler(fh)
-                    file_version = pickler.load()
+                    file_version = sgtk.util.pickle.load(fh)
                     if file_version != self.FORMAT_VERSION:
                         raise ShotgunModelDataError(
                             "Cache file has version %s - version %s is required"
                             % (file_version, self.FORMAT_VERSION)
                         )
-                    raw_cache_data = pickler.load()
+                    raw_cache_data = sgtk.util.pickle.load(fh)
                     self._cache = ShotgunDataHandlerCache(raw_cache_data)
             except Exception as e:
                 self._log_debug(
@@ -196,7 +194,6 @@ class ShotgunDataHandler(object):
         old_umask = os.umask(0)
         try:
             with open(self._cache_path, "wb") as fh:
-                pickler = cPickle.Pickler(fh, protocol=2)
                 # speeds up pickling but only works when there
                 # are no cycles in the data set
                 # pickler.fast = 1
@@ -205,14 +202,14 @@ class ShotgunDataHandler(object):
                 # for performance and cache size. By removing this, we could turn
                 # on the fast mode and this would speed things up further.
 
-                pickler.dump(self.FORMAT_VERSION)
+                sgtk.util.pickle.dump(self.FORMAT_VERSION, fh)
                 if self._cache is None:
                     # dump an empty cache
                     empty_cache = ShotgunDataHandlerCache()
-                    pickler.dump(empty_cache.raw_data)
+                    sgtk.util.pickle.dump(empty_cache.raw_data, fh)
 
                 else:
-                    pickler.dump(self._cache.raw_data)
+                    sgtk.util.pickle.dump(self._cache.raw_data, fh)
 
             # and ensure the cache file has got open permissions
             os.chmod(self._cache_path, 0o666)

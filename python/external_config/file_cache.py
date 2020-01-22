@@ -8,9 +8,9 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 import os
-import cPickle as pickle
 import hashlib
 import sgtk
+from tank_vendor import six
 
 logger = sgtk.platform.get_logger(__name__)
 
@@ -50,7 +50,7 @@ def load_cache_file(cache_path):
     if os.path.exists(cache_path):
         try:
             with open(cache_path, "rb") as fh:
-                content = pickle.load(fh)
+                content = sgtk.util.pickle.load(fh)
         except Exception as e:
             logger.debug(
                 "Cache '%s' not valid - ignoring. Details: %s" % (cache_path, e),
@@ -107,7 +107,7 @@ def write_cache_file(path, data):
 
     try:
         with open(path, "wb") as fh:
-            pickle.dump(data, fh)
+            sgtk.util.pickle.dump(data, fh)
 
         # and ensure the cache file has got open permissions
         os.chmod(path, 0o666)
@@ -136,14 +136,14 @@ def get_cache_path(identifier_dict):
     :retuns: path on disk, relative to the current bundle's cache location.
     """
     params_hash = hashlib.md5()
-    for (k, v) in identifier_dict.iteritems():
-        params_hash.update(str(k))
-        params_hash.update(str(v))
+    for (k, v) in identifier_dict.items():
+        params_hash.update(six.ensure_binary(str(k)))
+        params_hash.update(six.ensure_binary(str(v)))
 
     # add current user to hash
     user = sgtk.get_authenticated_user()
     if user and user.login:
-        params_hash.update(user.login)
+        params_hash.update(six.ensure_binary(user.login))
 
     cache_location = sgtk.platform.current_bundle().cache_location
 

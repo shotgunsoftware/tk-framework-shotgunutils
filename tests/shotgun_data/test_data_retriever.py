@@ -8,13 +8,10 @@
 import sys
 import os
 import time
-import datetime
 import shutil
 
-import sgtk
-
 from mock import patch
-from tank_test.tank_test_base import *
+from tank_test.tank_test_base import setUpModule  # noqa
 
 # import the test base class
 test_python_path = os.path.abspath(
@@ -58,9 +55,25 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         patched.side_effect = _download_url
 
         retriever = self.shotgun_data.ShotgunDataRetriever()
-        # Stop all threads now to avoid some QThread: Destroyed while thread is still running
-        # errors on exit.
+
+        # Stop all threads now to avoid some QThread: Destroyed while thread
+        # is still running errors on exit.
+        #
+        # As documented inside the ResultsDispatcher thread, the manager
+        # does not actually wait for the thread to avoid a deadlock. In a real
+        # software it doesn't matter because there's always a QApplication,
+        # but here it will sometime get destroyed before a thread may end,
+        # which will cause a crash. So we'll wait for the thread to finish
+        # before going on with the test.
+        task_manager = retriever._task_manager
         retriever.stop()
+        for i in range(5):
+            if task_manager._results_dispatcher.isRunning() is False:
+                break
+            time.sleep(1)
+        else:
+            raise RuntimeError("Thread did not finalize in time.")
+
         # We run tasks which usually run on a background task manager directly
         # here for the ease of testing.
         result = retriever._task_download_thumbnail(
@@ -121,7 +134,6 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         """
         bundle = self.framework
         # Create dummy cached data
-        cache_folder = bundle.site_cache_location
         top_cleanup_folders = []
         for folder in bundle._CLEANUP_FOLDERS:
             top_cleanup_folders.append(os.path.join(bundle.site_cache_location, folder))
@@ -149,7 +161,7 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         for dummy_file in dummy_files + preserved_files:
             self.create_file(dummy_file)
         # Test we can't use bad values
-        with self.assertRaisesRegexp(ValueError, "Invalid grace period value"):
+        with self.assertRaisesRegex(ValueError, "Invalid grace period value"):
             bundle._remove_old_cached_data(-1, *top_cleanup_folders)
         # One day grace period clean up shouldn't delete anything
         bundle._remove_old_cached_data(1, *top_cleanup_folders)
@@ -157,14 +169,11 @@ class TestDataRetriever(TestShotgunUtilsFramework):
             self.assertTrue(os.path.exists(dummy_file))
         # Change the modification time for a file and clean it up
         dummy_file = dummy_files.pop()
-        one_day_delta = datetime.timedelta(days=1)
-        # Datetime total_seconds was introduced in Python 2.7, so compute the
-        # value ourself
-        one_day_in_seconds = (
-            one_day_delta.microseconds
-            + (one_day_delta.seconds + one_day_delta.days * 24 * 3600) * 10 ** 6
-        ) / 10 ** 6
-        day_before_timestamp = time.time() - one_day_in_seconds
+
+        # Go back a full day and a second to trigger deletion.
+        offset = (24 * 3600) + 1
+
+        day_before_timestamp = time.time() - offset
         os.utime(dummy_file, (day_before_timestamp, day_before_timestamp))
         bundle._remove_old_cached_data(1, *top_cleanup_folders)
         # It should be gone, but all the others kept

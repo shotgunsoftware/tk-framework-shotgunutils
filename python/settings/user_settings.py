@@ -9,8 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
-import urlparse
-import cPickle as pickle
+from tank_vendor import six
 from sgtk.platform.qt import QtCore
 from sgtk import TankError
 from ..shotgun_model import sanitize_qt
@@ -50,7 +49,9 @@ class UserSettings(object):
         # now organize various keys
 
         # studio level settings - base it on the server host name
-        _, sg_hostname, _, _, _ = urlparse.urlsplit(self.__fw.sgtk.shotgun_url)
+        _, sg_hostname, _, _, _ = six.moves.urllib.parse.urlsplit(
+            self.__fw.sgtk.shotgun_url
+        )
         self.__site_key = sg_hostname
 
         # project level settings
@@ -113,8 +114,39 @@ class UserSettings(object):
         full_name = self.__resolve_settings_name(name, scope)
         self.__fw.log_debug("User Settings Manager: Storing %s" % full_name)
         try:
-            value_str = pickle.dumps(sanitize_qt(value))
-            self.__settings.setValue(full_name, value_str)
+            # Weird behaviour incoming:
+            # When QSettings sees a value that it deems to complicated for Qt,
+            # it pickles it!
+            # Pickling a class for example would force QSetting to pickle the value
+            # first. But so does passing in a bytes object!
+            # If you are running Python 3, then the protocol used will be 3, which
+            # becomes an issue if you're switching to Python 2 to read the same setting
+            # since QSetting will first try to unpickle the value and protocol 3
+            # didn't exist in Python 2.
+            #
+            # This very small scripts reproduces that weird behavior:
+            #
+            # from PySide2 import QtCore
+            # import sys
+            #
+            # settings = QtCore.QSettings("test")
+            #
+            # if sys.version_info[0] == 2:
+            #     print(settings.value("test_value"))
+            # else:
+            #     settings.setValue(
+            #         "test_value",
+            #         b"binary value"
+            #     )
+            #
+            # Running this script once with Python 3 will write to QSettings and running
+            # it with Python 2 will read it and raise a pickler error, even tough we
+            # never used the pickler in our code in the first place.
+            #
+            # To get around this, we need to write a string inside the QSettings, so
+            # use sgtk.util.pickle
+            value_str = sgtk.util.pickle.dumps(sanitize_qt(value))
+            self.__settings.setValue(full_name, six.ensure_str(value_str))
         except Exception as e:
             self.__fw.log_warning(
                 "Error storing user setting '%s'. Error details: %s" % (full_name, e)
@@ -134,12 +166,13 @@ class UserSettings(object):
         self.__fw.log_debug("User Settings Manager: Retrieving %s" % full_name)
 
         try:
-            raw_value = sanitize_qt(self.__settings.value(full_name))
+            raw_value = self.__settings.value(full_name)
 
             if raw_value is None:
                 resolved_val = default
             else:
-                resolved_val = pickle.loads(raw_value)
+                resolved_val = sgtk.util.pickle.loads(six.ensure_binary(raw_value))
+                resolved_val = sanitize_qt(resolved_val)
         except Exception as e:
             self.__fw.log_warning(
                 "Error retrieving value for stored user setting '%s' - reverting to "

@@ -8,10 +8,10 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import tank
-from tank.platform.qt import QtCore, QtGui
+from tank.platform.qt import QtCore
 
-import urlparse
+from tank_vendor import six
+from tank_vendor.six.moves import range
 
 # precalculated for performance
 HAS_QVARIANT = hasattr(QtCore, "QVariant")
@@ -92,12 +92,12 @@ def sanitize_for_qt_model(val):
 
     elif isinstance(val, dict):
         new_val = {}
-        for (k, v) in val.iteritems():
+        for (k, v) in six.iteritems(val):
             # go through dictionary and convert each value separately
             new_val[k] = sanitize_for_qt_model(v)
         return new_val
 
-    elif isinstance(val, str):
+    elif six.PY2 and isinstance(val, str):
         return val.decode("UTF-8")
 
     # for everything else, just pass through
@@ -119,7 +119,7 @@ def sanitize_qt(val):
     if val is None:
         return None
 
-    elif isinstance(val, unicode):
+    elif six.PY2 and isinstance(val, unicode):
         return val.encode("UTF-8")
 
     elif HAS_QSTRING and isinstance(val, QtCore.QString):
@@ -142,7 +142,7 @@ def sanitize_qt(val):
 
     elif isinstance(val, dict):
         new_val = {}
-        for (k, v) in val.iteritems():
+        for (k, v) in six.iteritems(val):
             # both keys and values can be bad
             safe_key = sanitize_qt(k)
             safe_val = sanitize_qt(v)
@@ -152,7 +152,8 @@ def sanitize_qt(val):
     # QT Version: 5.9.5
     # PySide Version: 5.9.0a1
     # The value should be `int` but it is `long`.
-    elif isinstance(val, long):
+    # longs do not exist in Python 3, so we need to cast those.
+    elif six.PY2 and isinstance(val, long):
         val = int(val)
         return val
     else:
@@ -181,7 +182,7 @@ def compare_shotgun_data(a, b):
         # input is a list
         if isinstance(a, list) and isinstance(b, list) and len(a) == len(b):
             # lists are symmetrical. Compare items recursively.
-            for idx in xrange(len(a)):
+            for idx in range(len(a)):
                 if not compare_shotgun_data(a[idx], b[idx]):
                     return False
         else:
@@ -205,8 +206,8 @@ def compare_shotgun_data(a, b):
     ):
         # attempt to parse values are urls and eliminate the querystring
         # compare hostname + path only
-        url_obj_a = urlparse.urlparse(a)
-        url_obj_b = urlparse.urlparse(b)
+        url_obj_a = six.moves.urllib.parse.urlparse(a)
+        url_obj_b = six.moves.urllib.parse.urlparse(b)
         compare_str_a = "%s/%s" % (url_obj_a.netloc, url_obj_a.path)
         compare_str_b = "%s/%s" % (url_obj_b.netloc, url_obj_b.path)
         if compare_str_a != compare_str_b:

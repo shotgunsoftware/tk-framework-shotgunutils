@@ -12,7 +12,7 @@
 Results dispatcher for the background task manager.
 """
 
-import Queue
+from tank_vendor import six
 from sgtk.platform.qt import QtCore
 import sgtk
 
@@ -92,7 +92,7 @@ class ResultsDispatcher(QtCore.QThread):
         QtCore.QThread.__init__(self, parent)
         # Results that will need to be dispatched to the background task
         # manager.
-        self._results = Queue.Queue()
+        self._results = six.moves.queue.Queue()
         self._bundle = sgtk.platform.current_bundle()
 
     def _log(self, msg):
@@ -108,7 +108,7 @@ class ResultsDispatcher(QtCore.QThread):
         # Add an event in the queue that will tell the thread to terminate.
         self._results.put(self._ShutdownHint())
         self._log("Sent _ShutdownHint to consumer thread.")
-        # Do not wait for the thread here!!! The backgroud thread is invoking
+        # Do not wait for the thread here!!! The background thread is invoking
         # the main thread synchronously. Waiting here would introduce
         # a deadlock because the main thread would be waiting for the dispatcher
         # to end and the dispatcher would be waiting for his events to

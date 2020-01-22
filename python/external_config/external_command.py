@@ -9,7 +9,6 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 import os
 import sys
-import cPickle
 import sgtk
 from . import external_command_utils
 
@@ -176,7 +175,9 @@ class ExternalCommand(object):
             self._icon = icon
         elif icon:
             # Non-existent icon provided, which we will not record.
-            logger.warning("Icon provided does not exist and will not be used: %s", icon)
+            logger.warning(
+                "Icon provided does not exist and will not be used: %s", icon
+            )
             self._icon = None
         else:
             # No icon provided.
@@ -203,7 +204,7 @@ class ExternalCommand(object):
         :rtype: :class:`ExternalCommand`
         :raises: :class:`RuntimeError` if data is not valid
         """
-        data = cPickle.loads(data)
+        data = sgtk.util.pickle.loads(data)
 
         return ExternalCommand(
             callback_name=data["callback_name"],
@@ -251,7 +252,7 @@ class ExternalCommand(object):
             "sg_supports_multiple_selection": self._sg_supports_multiple_selection,
             "icon": self._icon,
         }
-        return cPickle.dumps(data)
+        return sgtk.util.pickle.dumps(data)
 
     @property
     def pipeline_configuration_name(self):

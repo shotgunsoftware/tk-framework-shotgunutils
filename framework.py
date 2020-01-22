@@ -52,7 +52,7 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
         # thread which should be fine in Python with the GIL protecting its access.
         self._stop_cleanup = True
         if self._bg_cleanup_thread:
-            if self._bg_cleanup_thread.isAlive():
+            if self._bg_cleanup_thread.is_alive():
                 # If the clean up is not completed yet, log why we are waiting.
                 self.log_info("Waiting for old data clean up to complete...")
             self._bg_cleanup_thread.join()
@@ -122,7 +122,7 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
         Remove old data files cached by this bundle in the given cache locations.
 
         :param int grace_period: Time period, in days, a file without
-                                     modification should be kept around.
+                                 modification should be kept around.
         :param cache_locations: A list of cache locations to clean up.
         :raises: ValueError if the grace period is smaller than one day.
         """
@@ -130,13 +130,7 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
             raise ValueError(
                 "Invalid grace period value %d, it must be a least 1" % grace_period
             )
-        delta = datetime.timedelta(days=grace_period)
-        # Datetime total_seconds was introduced in Python 2.7, so compute the
-        # value ourself.
-        grace_in_seconds = (
-            delta.microseconds + (delta.seconds + delta.days * 24 * 3600) * 10 ** 6
-        ) / 10 ** 6
-
+        grace_in_seconds = 24 * 3600 * grace_period
         # Please note that we can't log any message from this background thread
         # without the risk of causing deadlocks.
         now_timestamp = time.time()
@@ -156,7 +150,7 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
                         # Is it old enough to be removed?
                         if now_timestamp - file_stats.st_mtime > grace_in_seconds:
                             filesystem.safe_delete_file(file_path)
-                    except Exception as e:
+                    except Exception:
                         # Silently ignore the error
                         pass
 
@@ -169,6 +163,6 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
                     try:
                         if not os.listdir(dir_path):
                             filesystem.safe_delete_folder(dir_path)
-                    except Exception as e:
+                    except Exception:
                         # Silently ignore the error
                         pass

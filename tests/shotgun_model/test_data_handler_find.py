@@ -53,7 +53,7 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         )
 
         dh.load_cache()
-        self.assertEquals(len(dh.get_entity_ids()), 0)
+        self.assertEqual(len(dh.get_entity_ids()), 0)
 
         # first let the data handler perform its request
         # and make sure it registers it in an expected way
@@ -62,8 +62,20 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
 
         request_id = dh.generate_data_request(mock_data_retriever)
 
-        mock_data_retriever.execute_find.assert_called_once_with(
-            "Asset", [], ["code", "image", "sg_asset_type"], None, limit=None
+        # The test invokes the method with a list, but internally it temporarily
+        # stores them inside a set which in Python 3 has no guaranteed order
+        # of iteration, so we have to tests each parameter manually instead of
+        # using assert_called_once_with.
+        self.assertEqual(mock_data_retriever.execute_find.call_count, 1)
+        parameters = mock_data_retriever.execute_find.call_args.call_list()[0][0]
+        self.assertEqual(parameters[0], "Asset")
+        self.assertEqual(parameters[1], [])
+        self.assertEqual(
+            sorted(parameters[2]), sorted(["code", "image", "sg_asset_type"])
+        )
+        self.assertEqual(parameters[3], None)
+        self.assertEqual(
+            mock_data_retriever.execute_find.call_args.kwargs, {"limit": None}
         )
 
         self.assertEqual(request_id, 1234)
@@ -123,8 +135,8 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         self.assertEqual(asset_data.parent, prop_data)
         self.assertEqual(asset_data.is_leaf(), True)
 
-        self.assertEquals(dh.get_data_item_from_uid(1234), asset_data)
-        self.assertEquals(dh.get_data_item_from_uid("/Prop"), prop_data)
+        self.assertEqual(dh.get_data_item_from_uid(1234), asset_data)
+        self.assertEqual(dh.get_data_item_from_uid("/Prop"), prop_data)
 
         # now apply an update
         sg_data = [
@@ -153,9 +165,9 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         )
 
         # test the data
-        self.assertEquals(dh.get_entity_ids(), [1234])
-        self.assertEquals(dh.get_uid_from_entity_id(1234), 1234)
-        self.assertEquals(dh.get_uid_from_entity_id(12345), None)
+        self.assertEqual(dh.get_entity_ids(), [1234])
+        self.assertEqual(dh.get_uid_from_entity_id(1234), 1234)
+        self.assertEqual(dh.get_uid_from_entity_id(12345), None)
 
         # update a complex update
         sg_data = [
@@ -171,26 +183,29 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         # we are getting a diff of two added nodes back.
         self.assertEqual(len(diff), 4)
 
+        # Items will be sorted as /Character, /Prop, 1234 and 3333.
+        diff = sorted(diff, key=lambda x: str(x["data"].unique_id))
+
         self.assertEqual(diff[0]["mode"], dh.ADDED)
-        self.assertEqual(diff[1]["mode"], dh.ADDED)
+        self.assertEqual(diff[1]["mode"], dh.DELETED)
         self.assertEqual(diff[2]["mode"], dh.DELETED)
-        self.assertEqual(diff[3]["mode"], dh.DELETED)
+        self.assertEqual(diff[3]["mode"], dh.ADDED)
 
         # the deleted records are our old data
+        self.assertEqual(diff[1]["data"], prop_data)
         self.assertEqual(diff[2]["data"], asset_data)
-        self.assertEqual(diff[3]["data"], prop_data)
 
         self.assertEqual(diff[0]["data"].unique_id, "/Character")
-        self.assertEqual(diff[1]["data"].unique_id, 3333)
+        self.assertEqual(diff[3]["data"].unique_id, 3333)
 
         dh.save_cache()
         dh.unload_cache()
         self.assertFalse(dh.is_cache_loaded())
         dh.load_cache()
 
-        self.assertEquals(dh.get_data_item_from_uid(3333), diff[1]["data"])
-        self.assertEquals(dh.get_data_item_from_uid("/Character"), diff[0]["data"])
-        self.assertEquals(dh.get_data_item_from_uid("/Prop"), None)
+        self.assertEqual(dh.get_data_item_from_uid(3333), diff[3]["data"])
+        self.assertEqual(dh.get_data_item_from_uid("/Character"), diff[0]["data"])
+        self.assertEqual(dh.get_data_item_from_uid("/Prop"), None)
 
     def test_generate_child_nodes(self):
         """
@@ -233,7 +248,10 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
             call(None, dh.get_data_item_from_uid("/Prop")),
         ]
 
-        callback.assert_has_calls(calls)
+        # Python 2 and 3 have different ordering internally
+        # for their keys, so we can't expect the items
+        # be generated in the same order.
+        callback.assert_has_calls(calls, any_order=True)
 
         # and check children
         callback = Mock()
@@ -243,7 +261,10 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
             call(None, dh.get_data_item_from_uid(5)),
             call(None, dh.get_data_item_from_uid(6)),
         ]
-        callback.assert_has_calls(calls)
+        # Python 2 and 3 have different ordering internally
+        # for their keys, so we can't expect the items
+        # be generated in the same order.
+        callback.assert_has_calls(calls, any_order=True)
 
         callback = Mock()
         dh.generate_child_nodes("/Prop", None, callback)
@@ -252,4 +273,7 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
             call(None, dh.get_data_item_from_uid(2)),
             call(None, dh.get_data_item_from_uid(3)),
         ]
-        callback.assert_has_calls(calls)
+        # Python 2 and 3 have different ordering internally
+        # for their keys, so we can't expect the items
+        # be generated in the same order.
+        callback.assert_has_calls(calls, any_order=True)

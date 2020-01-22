@@ -8,6 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 import sys
+import sgtk
 
 FORMAT_GENERATION = 5
 
@@ -57,8 +58,13 @@ def enabled_on_current_os(properties):
     :returns: True if enabled, False if not.
     """
     if "deny_platforms" in properties:
-        # setting can be Linux, Windows or Mac
-        curr_os = {"linux2": "Linux", "darwin": "Mac", "win32": "Windows"}[sys.platform]
+        curr_os = (
+            "Linux"
+            if sgtk.util.is_linux()
+            else "Mac"
+            if sgtk.util.is_macos()
+            else "Windows"
+        )
         if curr_os in properties["deny_platforms"]:
             # not enabled on this platform
             return False

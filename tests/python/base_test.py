@@ -37,6 +37,7 @@ class TestShotgunUtilsFramework(TankTestBase):
         Fixtures setup
         """
         super(TestShotgunUtilsFramework, self).setUp()
+
         self.setup_fixtures()
 
         # set up an environment variable that points to the root of the
@@ -58,18 +59,13 @@ class TestShotgunUtilsFramework(TankTestBase):
 
         # and start the engine
         self.engine = sgtk.platform.start_engine("test_engine", self.tk, context)
+        # This ensures that the engine will always be destroyed.
+        self.addCleanup(self.engine.destroy)
+
+        # Ensure a QApplication instance for the tests.
+        self._qapp = sgtk.platform.qt.QtGui.QApplication.instance()
+        if not self._qapp:
+            self._qapp = sgtk.platform.qt.QtGui.QApplication([])
 
         self.app = self.engine.apps["test_app"]
         self.framework = self.app.frameworks["tk-framework-shotgunutils"]
-
-    def tearDown(self):
-        """
-        Fixtures teardown
-        """
-        # engine is held as global, so must be destroyed.
-        cur_engine = sgtk.platform.current_engine()
-        if cur_engine:
-            cur_engine.destroy()
-
-        # important to call base class so it can clean up memory
-        super(TestShotgunUtilsFramework, self).tearDown()

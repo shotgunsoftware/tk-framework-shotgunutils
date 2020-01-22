@@ -464,12 +464,12 @@ class BackgroundTaskManager(QtCore.QObject):
         self._running_tasks[task_to_process.uid] = (task_to_process, thread)
 
         num_tasks_left = 0
-        for pending_tasks in self._pending_tasks_by_priority.itervalues():
+        for pending_tasks in self._pending_tasks_by_priority.values():
             num_tasks_left += len(pending_tasks)
 
         self._low_level_debug_log(
             " > Currently running tasks: '%s' - %d left in queue"
-            % (self._running_tasks.keys(), num_tasks_left)
+            % (list(self._running_tasks.keys()), num_tasks_left)
         )
 
         # and run the task

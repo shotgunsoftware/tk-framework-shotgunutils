@@ -11,6 +11,7 @@
 import sgtk
 import weakref
 import datetime
+from tank_vendor.six.moves import range
 
 # NOTE: This is a dummy call to work around a known bug in datetime
 # whereby there is code imported at call time that is done so in a
@@ -867,13 +868,13 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         :param node: :class:`~PySide.QtGui.QStandardItem` tree node
         """
         # depth first traversal
-        for index in xrange(node.rowCount()):
+        for index in range(node.rowCount()):
             child_node = node.child(index)
             self.__do_depth_first_tree_deletion(child_node)
 
         # delete the child leaves
-        for index in xrange(node.rowCount(), 0, -1):
-            # notes about xrange syntax:
+        for index in range(node.rowCount(), 0, -1):
+            # notes about range syntax:
             # index will count from rowCount down to 1
             # to get zero based indices, subtract 1
             node.removeRow(index - 1)
@@ -887,7 +888,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         :param :class:`~PySide.QtGui.QStandardItem` item: Model item to process
         """
         # process children
-        for row_index in xrange(item.rowCount()):
+        for row_index in range(item.rowCount()):
             child_item = item.child(row_index)
             self.__remove_unique_id_r(child_item)
 

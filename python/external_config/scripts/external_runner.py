@@ -14,7 +14,6 @@ import re
 import imp
 import sys
 import errno
-import cPickle
 import inspect
 import traceback
 
@@ -183,7 +182,7 @@ def _write_cache_file(path, data):
         # now write the file to disk
         try:
             with open(path, "wb") as fh:
-                cPickle.dump(data, fh)
+                sgtk.util.pickle.dump(data, fh)
             # and ensure the cache file has got open permissions
             os.chmod(path, 0o666)
         except Exception as e:
@@ -315,7 +314,7 @@ def cache_commands(engine, entity_type, entity_id, cache_path):
 
     else:
         logger.debug("Processing engine commands...")
-        for cmd_name, data in engine.commands.iteritems():
+        for cmd_name, data in engine.commands.items():
             logger.debug("Processing command: %s" % cmd_name)
 
             # note: we are baking the current operating system into the cache,
@@ -339,7 +338,7 @@ def main():
     # unpack file with arguments payload
     arg_data_file = sys.argv[2]
     with open(arg_data_file, "rb") as fh:
-        arg_data = cPickle.load(fh)
+        arg_data = sgtk.util.pickle.load(fh)
 
     # Set the PYTHONPATH if requested. This is an important step, as our parent
     # process might have polluted PYTHONPATH with data required for this

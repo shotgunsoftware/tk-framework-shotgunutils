@@ -2,7 +2,7 @@ engines:
 
     test_engine:
 
-        location: {'type': 'dev', 'path': '{CONFIG_FOLDER}/bundles/test_engine'}
+        location: {'type': 'dev', 'path': '$SHOTGUN_TEST_ENGINE'}
         debug_logging: false
 
         apps:

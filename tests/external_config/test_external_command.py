@@ -105,33 +105,34 @@ class TestExternalCommand(ExternalConfigBase):
         """
         Make sure public properties can be accessed without exception
         """
-        self.assertEquals(
+        self.assertEqual(
             self.ec.pipeline_configuration_name, self._pipeline_configuration_id
         )
         # Yes, the prop. name and dict key are different
-        self.assertEquals(self.ec.system_name, self.ec_data["callback_name"])
-        self.assertEquals(self.ec.engine_name, self.ec_data["engine_name"])
-        self.assertEquals(self.ec.display_name, self.ec_data["display_name"])
-        self.assertEquals(self.ec.group, self.ec_data["group"])
-        self.assertEquals(self.ec.icon, self.ec_data["icon"])
-        self.assertEquals(self.ec.is_group_default, self.ec_data["group_default"])
+        self.assertEqual(self.ec.system_name, self.ec_data["callback_name"])
+        self.assertEqual(self.ec.engine_name, self.ec_data["engine_name"])
+        self.assertEqual(self.ec.display_name, self.ec_data["display_name"])
+        self.assertEqual(self.ec.group, self.ec_data["group"])
+        self.assertEqual(self.ec.icon, self.ec_data["icon"])
+        self.assertEqual(self.ec.is_group_default, self.ec_data["group_default"])
         if self.ec_data["sg_deny_permissions"]:
-            self.assertEquals(
+            self.assertEqual(
                 self.ec.excluded_permission_groups_hint,
                 self.ec_data["sg_deny_permissions"],
             )
         else:
-            self.assertEquals(self.ec.excluded_permission_groups_hint, [])
-        self.assertEquals(
+            self.assertEqual(self.ec.excluded_permission_groups_hint, [])
+        self.assertEqual(
             self.ec.support_shotgun_multiple_selection,
             self.ec_data["sg_supports_multiple_selection"],
         )
-        self.assertEquals(self.ec.tooltip, self.ec_data["tooltip"])
+        self.assertEqual(self.ec.tooltip, self.ec_data["tooltip"])
         self.assertTrue(len(repr(self.ec)) > 0)
 
     def test_serialize_deserialize(self):
         """
-        Make sure that serializing and deserialize an ExternalCommand instance produce a similar object.
+        Make sure that serializing and deserialize an ExternalCommand instance produce
+        a similar object.
         """
         # Serialize our test base object
         a_pickle = self.ec.serialize()
@@ -143,27 +144,27 @@ class TestExternalCommand(ExternalConfigBase):
             ec2 = self.external_config.ExternalCommand.deserialize(a_pickle)
 
         # Test that new object similarity with original one
-        # Unfortunately the ExternalCommand object is not implementing a custom equal method
-        # we have to check properties one by one.
-        self.assertNotEquals(self.ec, ec2)
-        self.assertEquals(
+        # Unfortunately the ExternalCommand object is not implementing a custom equal
+        # method  we have to check properties one by one.
+        self.assertNotEqual(self.ec, ec2)
+        self.assertEqual(
             self.ec.pipeline_configuration_name, ec2.pipeline_configuration_name
         )
-        self.assertEquals(self.ec.system_name, ec2.system_name)
-        self.assertEquals(self.ec.engine_name, ec2.engine_name)
-        self.assertEquals(self.ec.display_name, ec2.display_name)
-        self.assertEquals(self.ec.group, ec2.group)
-        self.assertEquals(self.ec.icon, ec2.icon)
-        self.assertEquals(self.ec.is_group_default, ec2.is_group_default)
-        self.assertEquals(
+        self.assertEqual(self.ec.system_name, ec2.system_name)
+        self.assertEqual(self.ec.engine_name, ec2.engine_name)
+        self.assertEqual(self.ec.display_name, ec2.display_name)
+        self.assertEqual(self.ec.group, ec2.group)
+        self.assertEqual(self.ec.icon, ec2.icon)
+        self.assertEqual(self.ec.is_group_default, ec2.is_group_default)
+        self.assertEqual(
             self.ec.excluded_permission_groups_hint, ec2.excluded_permission_groups_hint
         )
-        self.assertEquals(
+        self.assertEqual(
             self.ec.support_shotgun_multiple_selection,
             ec2.support_shotgun_multiple_selection,
         )
-        self.assertEquals(self.ec.tooltip, ec2.tooltip)
-        self.assertEquals(repr(self.ec), repr(ec2))
+        self.assertEqual(self.ec.tooltip, ec2.tooltip)
+        self.assertEqual(repr(self.ec), repr(ec2))
 
     def test_detect_missing_icon(self):
         """

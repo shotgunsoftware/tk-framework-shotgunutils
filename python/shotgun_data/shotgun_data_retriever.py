@@ -10,8 +10,7 @@
 
 import os
 import glob
-import urllib
-import urlparse
+from tank_vendor import six
 import hashlib
 
 import sgtk
@@ -242,12 +241,15 @@ class ShotgunDataRetriever(QtCore.QObject):
 
         :returns: A path to the thumbnail on disk.
         """
-        thumb_source_url = urlparse.urlunparse(
+        thumb_source_url = six.moves.urllib.parse.urlunparse(
             (
                 bundle.shotgun.config.scheme,
                 bundle.shotgun.config.server,
                 "/thumbnail/full/%s/%s"
-                % (urllib.quote(str(entity_type)), urllib.quote(str(entity_id))),
+                % (
+                    six.moves.urllib.parse.quote(str(entity_type)),
+                    six.moves.urllib.parse.quote(str(entity_id)),
+                ),
                 None,
                 None,
                 None,
@@ -810,12 +812,15 @@ class ShotgunDataRetriever(QtCore.QObject):
                   possible to match them up.
         """
         # construct the url that refers to the thumbnail's source image
-        thumb_source_url = urlparse.urlunparse(
+        thumb_source_url = six.moves.urllib.parse.urlunparse(
             (
                 self._bundle.shotgun.config.scheme,
                 self._bundle.shotgun.config.server,
                 "/thumbnail/full/%s/%s"
-                % (urllib.quote(str(entity_type)), urllib.quote(str(entity_id))),
+                % (
+                    six.moves.urllib.parse.quote(str(entity_type)),
+                    six.moves.urllib.parse.quote(str(entity_id)),
+                ),
                 None,
                 None,
                 None,
@@ -983,9 +988,9 @@ class ShotgunDataRetriever(QtCore.QObject):
             return None
 
         # hash the path portion of the thumbnail url
-        url_obj = urlparse.urlparse(url)
+        url_obj = six.moves.urllib.parse.urlparse(url)
         url_hash = hashlib.md5()
-        url_hash.update(str(url_obj.path))
+        url_hash.update(six.ensure_binary(str(url_obj.path)))
         hash_str = url_hash.hexdigest()
 
         # Now turn this hash into a tree structure. For a discussion about sensible
@@ -1378,6 +1383,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         # download the actual thumbnail. Because of S3, the url
         # may have expired - in that case fall back, get a fresh url
         # from shotgun and try again
+        print(url, self._bundle)
         thumb_path, thumb_exists = self._get_thumbnail_path(url, self._bundle)
 
         # If we have no path, then there's no thumbnail that exists.
