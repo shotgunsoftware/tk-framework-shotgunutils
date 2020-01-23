@@ -1383,7 +1383,6 @@ class ShotgunDataRetriever(QtCore.QObject):
         # download the actual thumbnail. Because of S3, the url
         # may have expired - in that case fall back, get a fresh url
         # from shotgun and try again
-        print(url, self._bundle)
         thumb_path, thumb_exists = self._get_thumbnail_path(url, self._bundle)
 
         # If we have no path, then there's no thumbnail that exists.
