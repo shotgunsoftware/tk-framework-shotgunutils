@@ -210,7 +210,9 @@ class BackgroundTaskManager(QtCore.QObject):
         new_task = BackgroundTask(task_id, cbl, group, priority, task_args, task_kwargs)
 
         # add the task to the pending queue:
-        self._pending_tasks_by_priority.setdefault(priority, []).append(new_task)
+        # If priority is None, then use 0 so when we sort we're only comparing integers.
+        # Python 3 raises an error when comparing int with NoneType.
+        self._pending_tasks_by_priority.setdefault(priority or 0, []).append(new_task)
 
         # add tasks to various look-ups:
         self._tasks_by_id[new_task.uid] = new_task
@@ -421,7 +423,7 @@ class BackgroundTaskManager(QtCore.QObject):
 
         # figure out next task to start from the priority queue:
         task_to_process = None
-        priorities = sorted(self._pending_tasks_by_priority.keys(), reverse=True)
+        priorities = sorted(self._pending_tasks_by_priority, reverse=True)
         for priority in priorities:
             # iterate through the tasks and make sure we aren't waiting on the
             # completion of any upstream tasks:
