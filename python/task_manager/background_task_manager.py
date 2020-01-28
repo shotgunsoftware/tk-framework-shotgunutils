@@ -23,7 +23,7 @@ from .results_poller import ResultsDispatcher
 # Set to True to enable extensive debug logging.
 # Useful for debugging concurrency issues.
 # Do not release with this setting set to True!
-ENABLE_DETAILED_DEBUG = True
+ENABLE_DETAILED_DEBUG = False
 
 
 class BackgroundTaskManager(QtCore.QObject):
