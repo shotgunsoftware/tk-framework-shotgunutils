@@ -44,7 +44,7 @@ class TestBackgroundTaskManager(TestShotgunUtilsFramework):
             task_ids.append(task_id)
 
         # Add a task that will shut down the background task manager.
-        # Note that since the manager will be shutdown by the manager, it means
+        # Note that since the manager will be shutdown by the callback, it means
         # no task completed callback will be invoked.
         self._manager.add_task(
             self._stop_background_task_manager, upstream_task_ids=task_ids
@@ -53,16 +53,14 @@ class TestBackgroundTaskManager(TestShotgunUtilsFramework):
         self._manager.start_processing()
         self._qapp.exec_()
 
-        # We're done here. All tasks should have completed.
-        # It only gets called 4 times even tough there are 5 tasks
-        # because stop background task manager clears everything.
+        # If we end up here, than all tasks should have popped themselves of
+        # the list in order and we should have an empty one.
         assert self._expected_priorities == []
 
     def _stop_background_task_manager(self):
         """
         Shuts down the background task manager
         """
-
         self._manager.shut_down()
         # Processes events until the dispatcher thread is done.
         while self._manager._results_dispatcher.isFinished() is False:
@@ -74,5 +72,5 @@ class TestBackgroundTaskManager(TestShotgunUtilsFramework):
         """
         Ensure the task that has just finished had the expected priority.
         """
-
-        assert priority_result == self._expected_priorities.pop()
+        assert priority_result == self._expected_priorities[-1]
+        self._expected_priorities.pop()
