@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.6.1 documentation</title>
+  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.7.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.6.1 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.7.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -119,7 +119,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.6.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.7.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -197,6 +197,7 @@
 <span class="kn">from</span> <span class="nn">.shotgun_query_model</span> <span class="kn">import</span> <span class="n">ShotgunQueryModel</span>
 <span class="kn">from</span> <span class="nn">.data_handler_nav</span> <span class="kn">import</span> <span class="n">ShotgunNavDataHandler</span>
 <span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">sanitize_for_qt_model</span>
+<span class="kn">from</span> <span class="nn">tank_vendor</span> <span class="kn">import</span> <span class="n">six</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -238,7 +239,9 @@
 
     <span class="n">async_item_retrieval_completed</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">include_root</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">include_root</span><span class="o">=</span><span class="bp">None</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the Hierarcy model.</span>
 
@@ -270,14 +273,14 @@
 <span class="sd">            If ``include_root`` is `None`, no root item will be added.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ShotgunHierarchyModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">parent</span><span class="p">,</span>
-            <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-            <span class="n">bg_task_manager</span><span class="o">=</span><span class="n">bg_task_manager</span>
+            <span class="n">parent</span><span class="p">,</span> <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="n">bg_task_manager</span>
         <span class="p">)</span>
 
         <span class="c1"># check for hierarchy support</span>
-        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy_is_supported</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy_not_supported_reason</span><span class="p">)</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy_is_supported</span><span class="p">()</span>
+        <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy_is_supported</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy_not_supported_reason</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy_is_supported</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy_is_supported</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log_warning</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy_not_supported_reason</span><span class="p">)</span>
@@ -290,10 +293,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_schema_generation</span> <span class="o">=</span> <span class="n">schema_generation</span>
 
         <span class="c1"># keep these icons around so they&#39;re not constantly being created</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_folder_icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span>
-            <span class="s2">&quot;:tk-framework-shotgunutils/icon_Folder.png&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_none_icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span>
-            <span class="s2">&quot;:tk-framework-shotgunutils/icon_None_dark.png&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_folder_icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:tk-framework-shotgunutils/icon_Folder.png&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_none_icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:tk-framework-shotgunutils/icon_None_dark.png&quot;</span><span class="p">)</span>
 
         <span class="c1"># Define the foreground color of &quot;empty&quot; items.</span>
         <span class="c1"># These special items are used as placeholders in the tree where the</span>
@@ -312,6 +313,7 @@
 
         <span class="c1"># local import to avoid doc generation issues</span>
         <span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">color_mix</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_empty_item_color</span> <span class="o">=</span> <span class="n">color_mix</span><span class="p">(</span><span class="n">text_color</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">base_color</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -319,7 +321,10 @@
 <span class="sd">        String representation of this instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2"> path:</span><span class="si">%s</span><span class="s2"> seed:</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seed_entity_field</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_seed_entity_field</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="c1">############################################################################</span>
     <span class="c1"># public methods</span>
@@ -362,9 +367,7 @@
 
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Fetching more on </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">path_to_refresh</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="c1"># Fetch data from this path&#39;s parent.</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">fetchMore</span><span class="p">(</span>
-                <span class="n">model</span><span class="o">.</span><span class="n">item_from_path</span><span class="p">(</span><span class="n">path_to_refresh</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">index</span><span class="p">()</span>
-            <span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">fetchMore</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">item_from_path</span><span class="p">(</span><span class="n">path_to_refresh</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">index</span><span class="p">())</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_path_to_refresh</span> <span class="o">=</span> <span class="n">path_to_refresh</span>
 
@@ -375,7 +378,9 @@
 <span class="sd">            :param item: The ShotgunHierarchyItem that was loaded.</span>
 <span class="sd">            &quot;&quot;&quot;</span>
             <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">_SG_ITEM_UNIQUE_ID</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path_to_refresh</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Skipping node </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">_SG_ITEM_UNIQUE_ID</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="s2">&quot;Skipping node </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">_SG_ITEM_UNIQUE_ID</span><span class="p">)</span>
+                <span class="p">)</span>
                 <span class="k">return</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
                 <span class="s2">&quot;Model item refreshed: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">_SG_ITEM_UNIQUE_ID</span><span class="p">)</span>
@@ -416,7 +421,9 @@
             <span class="c1"># We&#39;ve written a workaround for it in the ShotgunDataRetriever, which we will be</span>
             <span class="c1"># using here.</span>
 
-            <span class="n">sg_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_data_retriever</span><span class="o">.</span><span class="n">_task_execute_nav_search_entity</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">entity</span><span class="p">)[</span><span class="s2">&quot;sg_result&quot;</span><span class="p">]</span>
+            <span class="n">sg_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_data_retriever</span><span class="o">.</span><span class="n">_task_execute_nav_search_entity</span><span class="p">(</span>
+                <span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">entity</span>
+            <span class="p">)[</span><span class="s2">&quot;sg_result&quot;</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sg_result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Entity </span><span class="si">%s</span><span class="s2"> not found. Picking /.&quot;</span><span class="p">,</span> <span class="n">entity</span><span class="p">)</span>
@@ -427,7 +434,9 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sg_result</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                         <span class="s2">&quot;Entity </span><span class="si">%s</span><span class="s2"> found </span><span class="si">%d</span><span class="s2"> times with nav_search_entity endpoint. Picking </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span>
-                        <span class="n">entity</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sg_result</span><span class="p">),</span> <span class="n">pprint</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span><span class="n">sg_data</span><span class="p">)</span>
+                        <span class="n">entity</span><span class="p">,</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="n">sg_result</span><span class="p">),</span>
+                        <span class="n">pprint</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span><span class="n">sg_data</span><span class="p">),</span>
                     <span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Other choices were </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sg_result</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
 
@@ -464,8 +473,8 @@
             <span class="c1"># This time around this node will already have been refreshed</span>
             <span class="c1"># and the code will dig deeper. At some point the last entry</span>
             <span class="c1"># in the list will be reached and we will emit the item.</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Refreshing paths: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">paths</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_NodeRefresher</span><span class="p">(</span><span class="n">paths</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:],</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Refreshing paths: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">paths</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_NodeRefresher</span><span class="p">(</span><span class="n">paths</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:],</span> <span class="bp">self</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Deep load has been completed for </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">paths</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -537,11 +546,7 @@
             <span class="n">item</span><span class="o">.</span><span class="n">setForeground</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_empty_item_color</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunHierarchyModel._load_data"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel._load_data">[docs]</a>    <span class="k">def</span> <span class="nf">_load_data</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">seed_entity_field</span><span class="p">,</span>
-        <span class="n">root</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">entity_fields</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">cache_seed</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">seed_entity_field</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">entity_fields</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cache_seed</span><span class="o">=</span><span class="bp">None</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is the main method to use to configure the hierarchy model. You</span>
@@ -630,7 +635,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_seed_entity_field</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_entity_fields</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__compute_cache_path</span><span class="p">(</span><span class="n">cache_seed</span><span class="p">),</span>
-            <span class="n">include_root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_include_root</span>
+            <span class="n">include_root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_include_root</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># load up from disk</span>
@@ -642,18 +647,14 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;External data population done.&quot;</span><span class="p">)</span>
 
         <span class="c1"># only one column. give it a default value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setHorizontalHeaderLabels</span><span class="p">(</span>
-            <span class="p">[</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> Hierarchy&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seed_entity_field</span><span class="p">,)]</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setHorizontalHeaderLabels</span><span class="p">([</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> Hierarchy&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seed_entity_field</span><span class="p">,)])</span>
 
         <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">()</span>
 
         <span class="c1"># construct the top level nodes</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Creating model nodes for top level of data tree...&quot;</span><span class="p">)</span>
         <span class="n">nodes_generated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">generate_child_nodes</span><span class="p">(</span>
-            <span class="bp">None</span><span class="p">,</span>
-            <span class="n">root</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_create_item</span>
+            <span class="bp">None</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_item</span>
         <span class="p">)</span>
 
         <span class="c1"># if we got some data, emit cache load signal</span>
@@ -779,30 +780,31 @@
         <span class="c1"># even though the navigation path provides a nice organizational</span>
         <span class="c1"># structure for caching, it can get long. to avoid MAX_PATH issues on</span>
         <span class="c1"># windows, just hash it</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">)))</span>
 
         <span class="c1"># include the schema generation number for clients</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema_generation</span><span class="p">))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema_generation</span><span class="p">)))</span>
 
         <span class="c1"># If this value changes over time (like between Qt4 and Qt5), we need to</span>
         <span class="c1"># assume our previous user roles are invalid since Qt might have taken</span>
         <span class="c1"># it over. If role&#39;s value is 32, don&#39;t add it to the hash so we don&#39;t</span>
         <span class="c1"># invalidate PySide/PyQt4 caches.</span>
         <span class="k">if</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span> <span class="o">!=</span> <span class="mi">32</span><span class="p">:</span>
-            <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span><span class="p">))</span>
+            <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)))</span>
 
         <span class="c1"># include the cache_seed for additional user control over external state</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cache_seed</span><span class="p">))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cache_seed</span><span class="p">)))</span>
 
         <span class="c1"># iterate through the sorted entity fields to ensure consistent order</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">fields</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entity_fields</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()):</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">fields</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entity_fields</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
             <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
-                <span class="n">entity_field_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+                <span class="n">entity_field_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+                <span class="p">)</span>
 
         <span class="c1"># convert the seed entity field into a path segment.</span>
         <span class="c1"># example: Version.entity =&gt; Version/entity</span>
-        <span class="n">seed_entity_field_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_seed_entity_field</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
+        <span class="n">seed_entity_field_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_seed_entity_field</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
 
         <span class="c1"># Organize files on disk based on the seed_entity field path segment and</span>
         <span class="c1"># then param and entity field hashes</span>
@@ -821,11 +823,12 @@
             <span class="s2">&quot;sg_nav&quot;</span><span class="p">,</span>
             <span class="n">seed_entity_field_path</span><span class="p">,</span>
             <span class="n">params_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span>
-            <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">entity_field_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span> <span class="n">ShotgunNavDataHandler</span><span class="o">.</span><span class="n">FORMAT_VERSION</span><span class="p">)</span>
+            <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span>
+            <span class="o">%</span> <span class="p">(</span><span class="n">entity_field_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span> <span class="n">ShotgunNavDataHandler</span><span class="o">.</span><span class="n">FORMAT_VERSION</span><span class="p">),</span>
         <span class="p">)</span>
 
         <span class="c1"># warn if the path is longer than the windows max path limitation</span>
-        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;win32&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_cache_path</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">250</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">is_windows</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_cache_path</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">250</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log_warning</span><span class="p">(</span>
                 <span class="s2">&quot;Shotgun hierarchy data cache file path may be affected by &quot;</span>
                 <span class="s2">&quot;windows MAX_PATH limitation.&quot;</span>
@@ -850,14 +853,22 @@
         <span class="n">server_caps</span> <span class="o">=</span> <span class="n">sg_connection</span><span class="o">.</span><span class="n">server_caps</span>
 
         <span class="c1"># make sure we&#39;re greater than or equal to SG v7.0.2</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">sg_connection</span><span class="p">,</span> <span class="s2">&quot;server_caps&quot;</span><span class="p">)</span> <span class="ow">and</span>
-                <span class="n">server_caps</span><span class="o">.</span><span class="n">version</span> <span class="ow">and</span>
-                <span class="n">server_caps</span><span class="o">.</span><span class="n">version</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)):</span>
-            <span class="k">return</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;The version of SG being used does not support querying for the project &quot;</span>
-                    <span class="s2">&quot;hierarchy. v7.0.2 is required.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="nb">hasattr</span><span class="p">(</span><span class="n">sg_connection</span><span class="p">,</span> <span class="s2">&quot;server_caps&quot;</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="n">server_caps</span><span class="o">.</span><span class="n">version</span>
+            <span class="ow">and</span> <span class="n">server_caps</span><span class="o">.</span><span class="n">version</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">False</span><span class="p">,</span>
+                <span class="s2">&quot;The version of SG being used does not support querying for the project &quot;</span>
+                <span class="s2">&quot;hierarchy. v7.0.2 is required.&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sg_connection</span><span class="p">,</span> <span class="s2">&quot;nav_expand&quot;</span><span class="p">):</span>
-            <span class="k">return</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;The version of the python-api being used does not support querying for &quot;</span>
-                    <span class="s2">&quot;the project hierarchy.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">False</span><span class="p">,</span>
+                <span class="s2">&quot;The version of the python-api being used does not support querying for &quot;</span>
+                <span class="s2">&quot;the project hierarchy.&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span></div>
 </pre></div>
@@ -871,7 +882,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Autodesk.
+        &copy; Copyright 2020, Autodesk.
 
     </p>
   </div> 
@@ -892,7 +903,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.6.1',
+            VERSION:'v5.7.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

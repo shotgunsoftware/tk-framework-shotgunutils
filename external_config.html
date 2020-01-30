@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>External Configuration Management &mdash; tk-framework-shotgunutils v5.6.1 documentation</title>
+  <title>External Configuration Management &mdash; tk-framework-shotgunutils v5.7.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.6.1 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.7.1 documentation" href="index.html"/>
         <link rel="prev" title="Shotgun Globals Access" href="shotgun_globals.html"/> 
 
   
@@ -125,7 +125,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.6.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.7.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -546,6 +546,24 @@ supports multiple selection.</li>
 </dd></dl>
 
 <dl class="classmethod">
+<dt id="external_config.ExternalCommand.is_valid_data">
+<em class="property">classmethod </em><code class="descname">is_valid_data</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/external_config/external_command.html#ExternalCommand.is_valid_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#external_config.ExternalCommand.is_valid_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests whether key components of the data contained in the cache are still
+valid. This helps protect against file paths that might have been cached
+that no longer exist.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; Serialized data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the given data passes validation, False if not.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
 <dt id="external_config.ExternalCommand.deserialize">
 <em class="property">classmethod </em><code class="descname">deserialize</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/external_config/external_command.html#ExternalCommand.deserialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#external_config.ExternalCommand.deserialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a <a class="reference internal" href="#external_config.ExternalCommand" title="external_config.ExternalCommand"><code class="xref py py-class docutils literal"><span class="pre">ExternalCommand</span></code></a> instance given some serialized data.</p>
@@ -663,6 +681,12 @@ entity ids to operate on rather than a single item.</p>
 <dd><p>Associated help text tooltip.</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="external_config.ExternalCommand.interpreter">
+<code class="descname">interpreter</code><a class="headerlink" href="#external_config.ExternalCommand.interpreter" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Python interpreter path to use when executing the command.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="external_config.ExternalCommand.execute">
 <code class="descname">execute</code><span class="sig-paren">(</span><em>pre_cache=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/external_config/external_command.html#ExternalCommand.execute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#external_config.ExternalCommand.execute" title="Permalink to this definition">¶</a></dt>
@@ -766,7 +790,7 @@ entity id associated with this command.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Autodesk.
+        &copy; Copyright 2020, Autodesk.
 
     </p>
   </div> 
@@ -787,7 +811,7 @@ entity id associated with this command.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v5.6.1',
+            VERSION:'v5.7.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

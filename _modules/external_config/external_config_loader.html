@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>external_config.external_config_loader &mdash; tk-framework-shotgunutils v5.6.1 documentation</title>
+  <title>external_config.external_config_loader &mdash; tk-framework-shotgunutils v5.7.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.6.1 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.7.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -119,7 +119,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.6.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.7.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -224,7 +224,9 @@
     <span class="c1"># grouping used by the background task manager</span>
     <span class="n">TASK_GROUP</span> <span class="o">=</span> <span class="s2">&quot;tk-framework-shotgunutils.external_config.ExternalConfigurationLoader&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">,</span> <span class="n">engine_name</span><span class="p">,</span> <span class="n">plugin_id</span><span class="p">,</span> <span class="n">base_config</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">,</span> <span class="n">engine_name</span><span class="p">,</span> <span class="n">plugin_id</span><span class="p">,</span> <span class="n">base_config</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="p">,</span> <span class="n">parent</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the class with the following parameters:</span>
 
@@ -342,7 +344,8 @@
         <span class="k">for</span> <span class="n">task_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span> <span class="o">==</span> <span class="n">project_id</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                    <span class="s2">&quot;Discarding existing request_configurations request for project </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">project_id</span>
+                    <span class="s2">&quot;Discarding existing request_configurations request for project </span><span class="si">%s</span><span class="s2">&quot;</span>
+                    <span class="o">%</span> <span class="n">project_id</span>
                 <span class="p">)</span>
                 <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span>
 
@@ -352,7 +355,7 @@
             <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span><span class="p">,</span>
             <span class="s2">&quot;engine&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span><span class="p">,</span>
             <span class="s2">&quot;base_config&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_config_uri</span><span class="p">,</span>
-            <span class="s2">&quot;state_hash&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_state</span><span class="o">.</span><span class="n">get_configuration_hash</span><span class="p">()</span>
+            <span class="s2">&quot;state_hash&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_state</span><span class="o">.</span><span class="n">get_configuration_hash</span><span class="p">(),</span>
         <span class="p">}</span>
 
         <span class="n">config_data</span> <span class="o">=</span> <span class="n">file_cache</span><span class="o">.</span><span class="n">load_cache</span><span class="p">(</span><span class="n">config_cache_key</span><span class="p">)</span>
@@ -378,7 +381,9 @@
                 <span class="c1"># Shotgun have been fixed in the interim since the cache was built.</span>
                 <span class="k">if</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">config_objects</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">c</span><span class="o">.</span><span class="n">is_valid</span><span class="p">]:</span>
                     <span class="n">file_cache</span><span class="o">.</span><span class="n">delete_cache</span><span class="p">(</span><span class="n">config_cache_key</span><span class="p">)</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Detected an invalid config in the cache. Recaching from scratch...&quot;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                        <span class="s2">&quot;Detected an invalid config in the cache. Recaching from scratch...&quot;</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">configurations_loaded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">config_objects</span><span class="p">)</span>
                     <span class="n">config_data_emitted</span> <span class="o">=</span> <span class="bp">True</span>
@@ -391,8 +396,8 @@
                 <span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">TASK_GROUP</span><span class="p">,</span>
                 <span class="n">task_kwargs</span><span class="o">=</span><span class="p">{</span>
                     <span class="s2">&quot;project_id&quot;</span><span class="p">:</span> <span class="n">project_id</span><span class="p">,</span>
-                    <span class="s2">&quot;state_hash&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_state</span><span class="o">.</span><span class="n">get_configuration_hash</span><span class="p">()</span>
-                <span class="p">}</span>
+                    <span class="s2">&quot;state_hash&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_state</span><span class="o">.</span><span class="n">get_configuration_hash</span><span class="p">(),</span>
+                <span class="p">},</span>
             <span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">[</span><span class="n">unique_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">project_id</span></div>
@@ -415,9 +420,7 @@
         <span class="c1"># get list of configurations</span>
         <span class="n">mgr</span> <span class="o">=</span> <span class="n">toolkit_manager</span> <span class="ow">or</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">bootstrap</span><span class="o">.</span><span class="n">ToolkitManager</span><span class="p">()</span>
         <span class="n">mgr</span><span class="o">.</span><span class="n">plugin_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span>
-        <span class="n">configs</span> <span class="o">=</span> <span class="n">mgr</span><span class="o">.</span><span class="n">get_pipeline_configurations</span><span class="p">(</span>
-            <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Project&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">project_id</span><span class="p">}</span>
-        <span class="p">)</span>
+        <span class="n">configs</span> <span class="o">=</span> <span class="n">mgr</span><span class="o">.</span><span class="n">get_pipeline_configurations</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Project&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">project_id</span><span class="p">})</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">state_hash</span><span class="p">,</span> <span class="n">configs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_task_completed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique_id</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
@@ -443,12 +446,14 @@
                 <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bg_task_manager</span><span class="p">,</span>
                 <span class="n">config_loader</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
-                <span class="n">configuration_data</span><span class="o">=</span><span class="n">config_dict</span>
+                <span class="n">configuration_data</span><span class="o">=</span><span class="n">config_dict</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">config_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config_object</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">config_object</span><span class="o">.</span><span class="n">is_valid</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Configuration (</span><span class="si">%r</span><span class="s2">) was found, but is invalid.&quot;</span><span class="p">,</span> <span class="n">config_object</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="s2">&quot;Configuration (</span><span class="si">%r</span><span class="s2">) was found, but is invalid.&quot;</span><span class="p">,</span> <span class="n">config_object</span>
+                <span class="p">)</span>
 
         <span class="c1"># if no custom pipeline configs were found, we use the base config</span>
         <span class="c1"># note: because the base config can change over time, we make sure</span>
@@ -458,11 +463,7 @@
                 <span class="s2">&quot;No configurations were found. Using the fallback configuration.&quot;</span>
             <span class="p">)</span>
             <span class="n">config_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">config</span><span class="o">.</span><span class="n">create_fallback_configuration</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_bg_task_manager</span><span class="p">,</span>
-                    <span class="bp">self</span>
-                <span class="p">)</span>
+                <span class="n">config</span><span class="o">.</span><span class="n">create_fallback_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bg_task_manager</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
             <span class="p">)</span>
 
         <span class="c1"># create a dictionary we can serialize</span>
@@ -470,9 +471,7 @@
             <span class="s2">&quot;project_id&quot;</span><span class="p">:</span> <span class="n">project_id</span><span class="p">,</span>
             <span class="s2">&quot;plugin_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span><span class="p">,</span>
             <span class="s2">&quot;global_state_hash&quot;</span><span class="p">:</span> <span class="n">state_hash</span><span class="p">,</span>
-            <span class="s2">&quot;configurations&quot;</span><span class="p">:</span> <span class="p">[</span>
-                <span class="n">config</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">cfg_obj</span><span class="p">)</span> <span class="k">for</span> <span class="n">cfg_obj</span> <span class="ow">in</span> <span class="n">config_objects</span>
-            <span class="p">]</span>
+            <span class="s2">&quot;configurations&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">config</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">cfg_obj</span><span class="p">)</span> <span class="k">for</span> <span class="n">cfg_obj</span> <span class="ow">in</span> <span class="n">config_objects</span><span class="p">],</span>
         <span class="p">}</span>
 
         <span class="c1"># save cache</span>
@@ -482,13 +481,14 @@
                 <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span><span class="p">,</span>
                 <span class="s2">&quot;engine&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span><span class="p">,</span>
                 <span class="s2">&quot;base_config&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_config_uri</span><span class="p">,</span>
-                <span class="s2">&quot;state_hash&quot;</span><span class="p">:</span> <span class="n">state_hash</span>
+                <span class="s2">&quot;state_hash&quot;</span><span class="p">:</span> <span class="n">state_hash</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="n">data</span>
+            <span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-            <span class="s2">&quot;Got configuration objects for project </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">config_objects</span><span class="p">)</span>
+            <span class="s2">&quot;Got configuration objects for project </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span>
+            <span class="o">%</span> <span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">config_objects</span><span class="p">)</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">configurations_loaded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">config_objects</span><span class="p">)</span>
@@ -523,7 +523,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Autodesk.
+        &copy; Copyright 2020, Autodesk.
 
     </p>
   </div> 
@@ -544,7 +544,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.6.1',
+            VERSION:'v5.7.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

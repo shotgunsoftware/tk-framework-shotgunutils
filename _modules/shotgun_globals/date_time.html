@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_globals.date_time &mdash; tk-framework-shotgunutils v5.6.1 documentation</title>
+  <title>shotgun_globals.date_time &mdash; tk-framework-shotgunutils v5.7.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.6.1 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.7.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -119,7 +119,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.6.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.7.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -174,16 +174,17 @@
             
   <h1>Source code for shotgun_globals.date_time</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright (c) 2016 Shotgun Software Inc.</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1"># CONFIDENTIAL AND PROPRIETARY</span>
-<span class="c1"># </span>
-<span class="c1"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit </span>
+<span class="c1">#</span>
+<span class="c1"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit</span>
 <span class="c1"># Source Code License included in this distribution package. See LICENSE.</span>
-<span class="c1"># By accessing, using, copying or modifying this work you indicate your </span>
-<span class="c1"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights </span>
+<span class="c1"># By accessing, using, copying or modifying this work you indicate your</span>
+<span class="c1"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights</span>
 <span class="c1"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
 
 <span class="kn">import</span> <span class="nn">datetime</span>
+
 
 <div class="viewcode-block" id="create_human_readable_date"><a class="viewcode-back" href="../../shotgun_globals.html#shotgun_globals.create_human_readable_date">[docs]</a><span class="k">def</span> <span class="nf">create_human_readable_date</span><span class="p">(</span><span class="n">dt</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -213,6 +214,7 @@
 
     <span class="k">return</span> <span class="n">date_str</span></div>
 
+
 <span class="k">def</span> <span class="nf">create_human_readable_timestamp</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">postfix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the time represented by the argument as a string where the date portion is</span>
@@ -239,7 +241,6 @@
     <span class="n">time_format</span> <span class="o">=</span> <span class="n">date_str</span> <span class="o">+</span> <span class="n">postfix</span>
 
     <span class="k">return</span> <span class="n">dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">time_format</span><span class="p">)</span>
-
 </pre></div>
 
            </div>
@@ -251,7 +252,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Autodesk.
+        &copy; Copyright 2020, Autodesk.
 
     </p>
   </div> 
@@ -272,7 +273,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.6.1',
+            VERSION:'v5.7.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

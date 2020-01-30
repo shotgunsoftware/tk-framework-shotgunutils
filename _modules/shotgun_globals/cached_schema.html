@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_globals.cached_schema &mdash; tk-framework-shotgunutils v5.6.1 documentation</title>
+  <title>shotgun_globals.cached_schema &mdash; tk-framework-shotgunutils v5.7.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.6.1 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.7.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -119,7 +119,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.6.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.7.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -174,13 +174,13 @@
             
   <h1>Source code for shotgun_globals.cached_schema</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright (c) 2015 Shotgun Software Inc.</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1"># CONFIDENTIAL AND PROPRIETARY</span>
-<span class="c1"># </span>
-<span class="c1"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit </span>
+<span class="c1">#</span>
+<span class="c1"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit</span>
 <span class="c1"># Source Code License included in this distribution package. See LICENSE.</span>
-<span class="c1"># By accessing, using, copying or modifying this work you indicate your </span>
-<span class="c1"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights </span>
+<span class="c1"># By accessing, using, copying or modifying this work you indicate your</span>
+<span class="c1"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights</span>
 <span class="c1"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
 
 <span class="c1"># make sure that py25 has access to with statement</span>
@@ -188,28 +188,29 @@
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sgtk</span>
-<span class="kn">from</span> <span class="nn">sgtk.platform.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
-<span class="kn">import</span> <span class="nn">cPickle</span> <span class="kn">as</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">sgtk.platform.qt</span> <span class="kn">import</span> <span class="n">QtCore</span>
+
 
 <span class="k">class</span> <span class="nc">CachedShotgunSchema</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wraps around the shotgun schema and caches it for fast lookups.</span>
 
 <span class="sd">    Singleton-style setup, so all access method happen via class methods:</span>
-<span class="sd">    </span>
+
 <span class="sd">    - get_type_display_name     - Display name for entity type</span>
 <span class="sd">    - get_field_display_name    - Display name for field</span>
 <span class="sd">    - get_empty_phrase          - String to denote &#39;no value&#39; for item</span>
 <span class="sd">    - get_status_display_name   - Display name for status code</span>
-<span class="sd">    </span>
-<span class="sd">    This caches the shotgun schema to disk *once* and doesn&#39;t check for </span>
-<span class="sd">    further updates. If the cache fails to find a value, the technical </span>
+
+<span class="sd">    This caches the shotgun schema to disk *once* and doesn&#39;t check for</span>
+<span class="sd">    further updates. If the cache fails to find a value, the technical</span>
 <span class="sd">    name rather than the display name is returned, so there is graceful</span>
 <span class="sd">    fallback.</span>
 
 <span class="sd">    :signal schema_loaded: Fires when the schema has been loaded</span>
 <span class="sd">    :signal status_loaded: Fires when the status list has been loaded</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">__instance</span> <span class="o">=</span> <span class="bp">None</span>
 
     <span class="c1"># Both will be sent along with the project id.</span>
@@ -224,18 +225,18 @@
         <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__instance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">__instance</span> <span class="o">=</span> <span class="n">CachedShotgunSchema</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__instance</span>
-    
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_bundle</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span> <span class="o">=</span> <span class="p">[]</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_sg_schema_query_ids</span> <span class="o">=</span> <span class="p">{}</span>
@@ -257,7 +258,7 @@
 <span class="sd">        :returns:           bool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span>
 
     <span class="k">def</span> <span class="nf">_is_status_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -271,7 +272,7 @@
 <span class="sd">        :returns:           bool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span>
 
     <span class="k">def</span> <span class="nf">_get_current_project_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -331,10 +332,7 @@
 
 <span class="sd">        :returns:           str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_cache_root_path</span><span class="p">(</span><span class="n">project_id</span><span class="p">),</span>
-            <span class="s2">&quot;sg_schema.pickle&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_cache_root_path</span><span class="p">(</span><span class="n">project_id</span><span class="p">),</span> <span class="s2">&quot;sg_schema.pickle&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_status_cache_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -347,11 +345,8 @@
 
 <span class="sd">        :returns:           str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_cache_root_path</span><span class="p">(</span><span class="n">project_id</span><span class="p">),</span>
-            <span class="s2">&quot;sg_status.pickle&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
-        
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_cache_root_path</span><span class="p">(</span><span class="n">project_id</span><span class="p">),</span> <span class="s2">&quot;sg_status.pickle&quot;</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">_load_cached_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load cached status from disk if it exists.</span>
@@ -365,24 +360,28 @@
 
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">status_cache_path</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Loading cached status from &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">status_cache_path</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span>
+                    <span class="s2">&quot;Loading cached status from &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">status_cache_path</span>
+                <span class="p">)</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">status_cache_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
-                    <span class="n">status_data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+                    <span class="n">status_data</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
                     <span class="c1"># Check to make sure the structure of the data</span>
                     <span class="c1"># is what we expect. If it isn&#39;t then we don&#39;t</span>
                     <span class="c1"># accept the data which will force it to be</span>
                     <span class="c1"># recached.</span>
                     <span class="k">if</span> <span class="s2">&quot;statuses&quot;</span> <span class="ow">in</span> <span class="n">status_data</span> <span class="ow">and</span> <span class="s2">&quot;status_order&quot;</span> <span class="ow">in</span> <span class="n">status_data</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">status_data</span>
-            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span><span class="s2">&quot;Could not open cached status &quot;</span>
-                                         <span class="s2">&quot;file &#39;</span><span class="si">%s</span><span class="s2">&#39;: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">status_cache_path</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span>
+                    <span class="s2">&quot;Could not open cached status &quot;</span>
+                    <span class="s2">&quot;file &#39;</span><span class="si">%s</span><span class="s2">&#39;: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">status_cache_path</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">status_loaded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
                 <span class="k">return</span> <span class="bp">True</span>
 
         <span class="k">return</span> <span class="bp">False</span>
-        
+
     <span class="k">def</span> <span class="nf">_load_cached_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load cached metaschema from disk if it exists.</span>
@@ -396,24 +395,28 @@
 
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">schema_cache_path</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Loading cached schema from &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">schema_cache_path</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span>
+                    <span class="s2">&quot;Loading cached schema from &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">schema_cache_path</span>
+                <span class="p">)</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">schema_cache_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
-                    <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;field_schema&quot;</span><span class="p">]</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;type_schema&quot;</span><span class="p">]</span>
-            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span><span class="s2">&quot;Could not open cached schema &quot;</span>
-                                         <span class="s2">&quot;file &#39;</span><span class="si">%s</span><span class="s2">&#39;: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">schema_cache_path</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span>
+                    <span class="s2">&quot;Could not open cached schema &quot;</span>
+                    <span class="s2">&quot;file &#39;</span><span class="si">%s</span><span class="s2">&#39;: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">schema_cache_path</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">schema_loaded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
                 <span class="k">return</span> <span class="bp">True</span>
 
         <span class="k">return</span> <span class="bp">False</span>
-            
+
     <span class="k">def</span> <span class="nf">_check_schema_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">field_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check and potentially trigger a cache refresh.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param str entity_type: Shotgun entity type</span>
 <span class="sd">        :param str field_name: Shotgun field name</span>
 <span class="sd">        :param int project_id: The project Entity id. If None, the current</span>
@@ -423,14 +426,17 @@
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="n">current_project_id</span>
 
         <span class="c1"># TODO: currently, this only checks if there is a full cache in memory</span>
-        <span class="c1"># or not. Later on, when we have the ability to check the current </span>
-        <span class="c1"># metaschema generation via the shotgun API, this can be handled in a </span>
+        <span class="c1"># or not. Later on, when we have the ability to check the current</span>
+        <span class="c1"># metaschema generation via the shotgun API, this can be handled in a</span>
         <span class="c1"># more graceful fashion.</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_schema_loaded</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span> <span class="ow">and</span> <span class="n">project_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_schema_query_ids</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_schema_loaded</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="n">project_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_schema_query_ids</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">):</span>
             <span class="c1"># schema is not requested and not loaded.</span>
-            <span class="c1"># If a schema was requested for a project that isn&#39;t the current project, then</span>
-            <span class="c1"># let&#39;s check to see if we can get it from disk before we resort to going to</span>
-            <span class="c1"># Shotgun.</span>
+            <span class="c1"># If a schema was requested for a project that isn&#39;t the current project,</span>
+            <span class="c1"># then let&#39;s check to see if we can get it from disk before we resort to</span>
+            <span class="c1"># going to Shotgun.</span>
             <span class="k">if</span> <span class="n">project_id</span> <span class="o">!=</span> <span class="n">current_project_id</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_cached_schema</span><span class="p">(</span><span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">):</span>
                     <span class="c1"># If we were able to load the cached schema from disk then we don&#39;t</span>
@@ -438,11 +444,15 @@
                     <span class="k">return</span>
 
             <span class="c1"># so download it from shotgun!</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Starting to download new metaschema from Shotgun...&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span>
+                <span class="s2">&quot;Starting to download new metaschema from Shotgun...&quot;</span>
+            <span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">:</span>
                 <span class="n">data_retriever</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;data_retriever&quot;</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_sg_schema_query_ids</span><span class="p">[</span><span class="n">data_retriever</span><span class="o">.</span><span class="n">get_schema</span><span class="p">(</span><span class="n">project_id</span><span class="p">)]</span> <span class="o">=</span> <span class="n">project_id</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sg_schema_query_ids</span><span class="p">[</span>
+                    <span class="n">data_retriever</span><span class="o">.</span><span class="n">get_schema</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">project_id</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span>
                     <span class="s2">&quot;No data retrievers registered with this schema manager. &quot;</span>
@@ -459,10 +469,13 @@
         <span class="n">current_project_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="n">current_project_id</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_status_loaded</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span> <span class="ow">and</span> <span class="n">project_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_status_query_ids</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="c1"># If statuses were requested for a project that isn&#39;t the current project, then</span>
-            <span class="c1"># let&#39;s check to see if we can get it from disk before we resort to going to</span>
-            <span class="c1"># Shotgun.</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_status_loaded</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="n">project_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_status_query_ids</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">):</span>
+            <span class="c1"># If statuses were requested for a project that isn&#39;t the current project,</span>
+            <span class="c1"># then  let&#39;s check to see if we can get it from disk before we resort</span>
+            <span class="c1"># to going to Shotgun.</span>
             <span class="k">if</span> <span class="n">project_id</span> <span class="o">!=</span> <span class="n">current_project_id</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_cached_status</span><span class="p">(</span><span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">):</span>
                     <span class="c1"># If we were able to load the cached schema from disk then we don&#39;t</span>
@@ -471,43 +484,45 @@
 
             <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;bg_color&quot;</span><span class="p">,</span> <span class="s2">&quot;code&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Starting to download status list from Shotgun...&quot;</span><span class="p">)</span>
-            
+
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">:</span>
                 <span class="c1"># pick the first one</span>
                 <span class="n">data_retriever</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;data_retriever&quot;</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_sg_status_query_ids</span><span class="p">[</span><span class="n">data_retriever</span><span class="o">.</span><span class="n">execute_find</span><span class="p">(</span><span class="s2">&quot;Status&quot;</span><span class="p">,</span> <span class="p">[],</span> <span class="n">fields</span><span class="p">)]</span> <span class="o">=</span> <span class="n">project_id</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sg_status_query_ids</span><span class="p">[</span>
+                    <span class="n">data_retriever</span><span class="o">.</span><span class="n">execute_find</span><span class="p">(</span><span class="s2">&quot;Status&quot;</span><span class="p">,</span> <span class="p">[],</span> <span class="n">fields</span><span class="p">)</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">project_id</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span>
                     <span class="s2">&quot;No data retrievers registered with this schema manager. &quot;</span>
                     <span class="s2">&quot;Cannot load Shotgun statuses.&quot;</span>
                 <span class="p">)</span>
-        
+
     <span class="k">def</span> <span class="nf">_on_worker_failure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Asynchronous callback - the worker thread errored.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="n">shotgun_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;shotgun_model&quot;</span><span class="p">)</span>
-        
+
         <span class="k">if</span> <span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_schema_query_ids</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="n">shotgun_model</span><span class="o">.</span><span class="n">sanitize_qt</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="c1"># qstring on pyqt, str on pyside</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">shotgun_model</span><span class="o">.</span><span class="n">sanitize_qt</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>  <span class="c1"># qstring on pyqt, str on pyside</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span><span class="s2">&quot;Could not load sg schema: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_schema_query_ids</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span>
         <span class="k">elif</span> <span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_status_query_ids</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="n">shotgun_model</span><span class="o">.</span><span class="n">sanitize_qt</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="c1"># qstring on pyqt, str on pyside</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">shotgun_model</span><span class="o">.</span><span class="n">sanitize_qt</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>  <span class="c1"># qstring on pyqt, str on pyside</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span><span class="s2">&quot;Could not load sg status: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_status_query_ids</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span>
-        
+
     <span class="k">def</span> <span class="nf">_on_worker_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">request_type</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Signaled whenever the worker completes something.</span>
 <span class="sd">        This method will dispatch the work to different methods</span>
 <span class="sd">        depending on what async task has completed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="n">shotgun_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;shotgun_model&quot;</span><span class="p">)</span>
-        
-        <span class="n">uid</span> <span class="o">=</span> <span class="n">shotgun_model</span><span class="o">.</span><span class="n">sanitize_qt</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span> <span class="c1"># qstring on pyqt, str on pyside</span>
+
+        <span class="n">uid</span> <span class="o">=</span> <span class="n">shotgun_model</span><span class="o">.</span><span class="n">sanitize_qt</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span>  <span class="c1"># qstring on pyqt, str on pyside</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">shotgun_model</span><span class="o">.</span><span class="n">sanitize_qt</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_schema_query_ids</span><span class="p">:</span>
@@ -529,26 +544,23 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_schema_cache_path</span><span class="p">(</span><span class="n">project_id</span><span class="p">),</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
                     <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-                        <span class="n">field_schema</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">],</span> 
+                        <span class="n">field_schema</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">],</span>
                         <span class="n">type_schema</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">],</span>
                     <span class="p">)</span>
-                    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fh</span><span class="p">)</span>
+                    <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fh</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;...done&quot;</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span>
                     <span class="s2">&quot;Could not write schema &quot;</span>
                     <span class="s2">&quot;file &#39;</span><span class="si">%s</span><span class="s2">&#39;: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_schema_cache_path</span><span class="p">(</span><span class="n">project_id</span><span class="p">),</span> <span class="n">e</span><span class="p">)</span>
-                <span class="p">)</span>            
-        
+                <span class="p">)</span>
+
         <span class="k">elif</span> <span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_status_query_ids</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Status list arrived from Shotgun...&quot;</span><span class="p">)</span>
             <span class="n">project_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_status_query_ids</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span>
 
             <span class="c1"># store status in memory</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-                <span class="n">status_order</span><span class="o">=</span><span class="p">[],</span>
-                <span class="n">statuses</span><span class="o">=</span><span class="p">{},</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">status_order</span><span class="o">=</span><span class="p">[],</span> <span class="n">statuses</span><span class="o">=</span><span class="p">{})</span>
             <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sg&quot;</span><span class="p">]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="s2">&quot;statuses&quot;</span><span class="p">][</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">x</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="s2">&quot;status_order&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">])</span>
@@ -563,55 +575,60 @@
             <span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_status_cache_path</span><span class="p">(</span><span class="n">project_id</span><span class="p">),</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
-                    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">],</span> <span class="n">fh</span><span class="p">)</span>
+                    <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">],</span> <span class="n">fh</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;...done&quot;</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span>
                     <span class="s2">&quot;Could not write status &quot;</span>
                     <span class="s2">&quot;file &#39;</span><span class="si">%s</span><span class="s2">&#39;: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_status_cache_path</span><span class="p">(</span><span class="n">project_id</span><span class="p">),</span> <span class="n">e</span><span class="p">)</span>
-                <span class="p">)</span>            
+                <span class="p">)</span>
 
     <span class="c1">##########################################################################################</span>
     <span class="c1"># public methods</span>
-    
+
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register_bg_task_manager</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">task_manager</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Register a background task manager with the singleton.</span>
-<span class="sd">        Once a background task manager has been registered, the schema </span>
+<span class="sd">        Once a background task manager has been registered, the schema</span>
 <span class="sd">        singleton can refresh its cache.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param task_manager: Background task manager to use</span>
-<span class="sd">        :type task_manager: :class:`~tk-framework-shotgunutils:task_manager.BackgroundTaskManager` </span>
+<span class="sd">        :type task_manager: :class:`~tk-framework-shotgunutils:task_manager.BackgroundTaskManager`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
-        
+
         <span class="c1"># create a data retriever</span>
         <span class="n">shotgun_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;shotgun_data&quot;</span><span class="p">)</span>
-        <span class="n">data_retriever</span> <span class="o">=</span> <span class="n">shotgun_data</span><span class="o">.</span><span class="n">ShotgunDataRetriever</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="n">task_manager</span><span class="p">)</span>        
+        <span class="n">data_retriever</span> <span class="o">=</span> <span class="n">shotgun_data</span><span class="o">.</span><span class="n">ShotgunDataRetriever</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="n">task_manager</span>
+        <span class="p">)</span>
         <span class="n">data_retriever</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
         <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_signal</span><span class="p">)</span>
         <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_failure</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_failure</span><span class="p">)</span>
-        
-        <span class="n">dr</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data_retriever&quot;</span><span class="p">:</span> <span class="n">data_retriever</span><span class="p">,</span> <span class="s2">&quot;task_manager&quot;</span><span class="p">:</span> <span class="n">task_manager</span><span class="p">}</span>        
+
+        <span class="n">dr</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data_retriever&quot;</span><span class="p">:</span> <span class="n">data_retriever</span><span class="p">,</span> <span class="s2">&quot;task_manager&quot;</span><span class="p">:</span> <span class="n">task_manager</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dr</span><span class="p">)</span>
-        
+
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">unregister_bg_task_manager</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">task_manager</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Unregister a previously registered data retriever with the singleton.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param task_manager: Background task manager to use</span>
-<span class="sd">        :type task_manager: :class:`~tk-framework-shotgunutils:task_manager.BackgroundTaskManager` </span>
-<span class="sd">        &quot;&quot;&quot;</span>     
+<span class="sd">        :type task_manager: :class:`~tk-framework-shotgunutils:task_manager.BackgroundTaskManager`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
-        
+
         <span class="n">culled_retrievers</span> <span class="o">=</span> <span class="p">[]</span>
-        
+
         <span class="k">for</span> <span class="n">dr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span><span class="p">:</span>
-            
+
             <span class="k">if</span> <span class="n">dr</span><span class="p">[</span><span class="s2">&quot;task_manager&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">task_manager</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Unregistering </span><span class="si">%r</span><span class="s2"> from schema manager&quot;</span> <span class="o">%</span> <span class="n">task_manager</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span>
+                    <span class="s2">&quot;Unregistering </span><span class="si">%r</span><span class="s2"> from schema manager&quot;</span> <span class="o">%</span> <span class="n">task_manager</span>
+                <span class="p">)</span>
                 <span class="n">data_retriever</span> <span class="o">=</span> <span class="n">dr</span><span class="p">[</span><span class="s2">&quot;data_retriever&quot;</span><span class="p">]</span>
                 <span class="n">data_retriever</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 
@@ -619,7 +636,7 @@
                 <span class="c1"># signals were never connected or somehow disconnected externally</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_signal</span><span class="p">)</span>
-                <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">),</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># was never connected</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># was never connected</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span>
                         <span class="s2">&quot;Could not disconnect &#39;_on_worker_signal&#39; slot from &quot;</span>
                         <span class="s2">&quot;the task manager&#39;s &#39;work_completed&#39; signal: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="p">,)</span>
@@ -627,7 +644,7 @@
 
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">data_retriever</span><span class="o">.</span><span class="n">work_failure</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_failure</span><span class="p">)</span>
-                <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">),</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># was never connected</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># was never connected</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span>
                         <span class="s2">&quot;Could not disconnect &#39;_on_worker_failure&#39; slot from &quot;</span>
                         <span class="s2">&quot;the task manager&#39;s &#39;work_failure&#39; signal: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="p">,)</span>
@@ -635,7 +652,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">culled_retrievers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dr</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span> <span class="o">=</span> <span class="n">culled_retrievers</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sg_data_retrievers</span> <span class="o">=</span> <span class="n">culled_retrievers</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">run_on_schema_loaded</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -672,8 +689,11 @@
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span> <span class="ow">and</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span>
+            <span class="ow">and</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
 
@@ -682,13 +702,13 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the display name for a Shotgun entity type.</span>
 <span class="sd">        If no display name is known for this object, the system</span>
-<span class="sd">        name is returned, e.g. the same that&#39;s being passed in </span>
-<span class="sd">        via the sg_entity_type parameter. </span>
-<span class="sd">        </span>
+<span class="sd">        name is returned, e.g. the same that&#39;s being passed in</span>
+<span class="sd">        via the sg_entity_type parameter.</span>
+
 <span class="sd">        If the data is not present locally, a cache reload</span>
 <span class="sd">        will be triggered, meaning that subsequent cache requests may</span>
 <span class="sd">        return valid data.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param sg_entity_type:  Shotgun entity type</span>
 <span class="sd">        :param project_id:      The id of the project entity to get a name from.</span>
 <span class="sd">                                If None, the current context&#39;s project will be used.</span>
@@ -698,52 +718,55 @@
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
-        
-        <span class="k">if</span> <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="ow">and</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]:</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span>
+            <span class="ow">and</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]</span>
+        <span class="p">):</span>
             <span class="c1"># cache contains our item</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">]</span>
             <span class="n">display_name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">display_name</span> <span class="o">=</span> <span class="n">sg_entity_type</span>
-        
+
         <span class="k">return</span> <span class="n">display_name</span>
-        
+
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_field_display_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the display name for a given Shotgun field. If the field</span>
-<span class="sd">        cannot be found or the value is not yet cached, the system name </span>
+<span class="sd">        cannot be found or the value is not yet cached, the system name</span>
 <span class="sd">        for the field is returned.</span>
-<span class="sd">        </span>
+
 <span class="sd">        If the data is not present locally, a cache reload</span>
 <span class="sd">        will be triggered, meaning that subsequent cache requests may</span>
 <span class="sd">        return valid data.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param sg_entity_type:  Shotgun entity type</span>
 <span class="sd">        :param field_name:      Shotgun field name</span>
 <span class="sd">        :param project_id:      The id of the project entity to get a name from.</span>
 <span class="sd">                                If None, the current context&#39;s project will be used.</span>
 
-<span class="sd">        :returns: Field display name        </span>
+<span class="sd">        :returns: Field display name</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
 
         <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">_account_for_bubble_fields</span><span class="p">(</span>
-            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span>
+        <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span>
-            <span class="n">sg_entity_type</span><span class="p">,</span>
-            <span class="n">field_name</span><span class="p">,</span>
-            <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">,</span>
-        <span class="p">)</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">field_name</span> <span class="o">==</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span>
             <span class="c1"># type doesn&#39;t seem to exist in the schema</span>
             <span class="c1"># so treat as a special case</span>
             <span class="k">return</span> <span class="s2">&quot;Type&quot;</span>
-        <span class="k">elif</span> <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="ow">and</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]:</span>
+        <span class="k">elif</span> <span class="p">(</span>
+            <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span>
+            <span class="ow">and</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]</span>
+        <span class="p">):</span>
             <span class="k">if</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">]:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span>
                 <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
@@ -753,8 +776,8 @@
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_empty_phrase</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get an appropriate phrase to describe the fact that </span>
-<span class="sd">        a given Shotgun field is empty. The phrase will differ depending on </span>
+<span class="sd">        Get an appropriate phrase to describe the fact that</span>
+<span class="sd">        a given Shotgun field is empty. The phrase will differ depending on</span>
 <span class="sd">        the data type of the field.</span>
 
 <span class="sd">        :param sg_entity_type:  Shotgun entity type</span>
@@ -762,26 +785,21 @@
 <span class="sd">        :param project_id:      The id of the project entity to get a phrase from.</span>
 <span class="sd">                                If None, the current context&#39;s project will be used.</span>
 
-<span class="sd">        :returns: Empty phrase string        </span>
+<span class="sd">        :returns: Empty phrase string</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
 
         <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">_account_for_bubble_fields</span><span class="p">(</span>
-            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span>
-            <span class="n">sg_entity_type</span><span class="p">,</span>
-            <span class="n">field_name</span><span class="p">,</span>
-            <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">,</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span>
         <span class="p">)</span>
-        
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
+
         <span class="n">empty_value</span> <span class="o">=</span> <span class="s2">&quot;Not set&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">data_type</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_data_type</span><span class="p">(</span>
-                <span class="n">sg_entity_type</span><span class="p">,</span>
-                <span class="n">field_name</span><span class="p">,</span>
-                <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">,</span>
+                <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span>
             <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;Entity&quot;</span><span class="p">:</span>
@@ -810,21 +828,22 @@
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
 
         <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">_account_for_bubble_fields</span><span class="p">(</span>
-            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span>
-            <span class="n">sg_entity_type</span><span class="p">,</span>
-            <span class="n">field_name</span><span class="p">,</span>
-            <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">,</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="ow">and</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span>
+            <span class="ow">and</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]</span>
+        <span class="p">):</span>
             <span class="k">if</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">]:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span>
                 <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
 
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">source_field_name</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">source_field_name</span><span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_valid_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -845,31 +864,32 @@
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
 
         <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">_account_for_bubble_fields</span><span class="p">(</span>
-            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span>
-            <span class="n">sg_entity_type</span><span class="p">,</span>
-            <span class="n">field_name</span><span class="p">,</span>
-            <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">,</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="ow">and</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span>
+            <span class="ow">and</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]</span>
+        <span class="p">):</span>
             <span class="k">if</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">]:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span>
-                <span class="n">valid_types</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;properties&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;valid_types&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+                <span class="n">valid_types</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;properties&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;valid_types&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">valid_types</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;The data type for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> does not have valid types&quot;</span> <span class="o">%</span> <span class="p">(</span>
-                            <span class="n">sg_entity_type</span><span class="p">,</span>
-                            <span class="n">source_field_name</span>
-                        <span class="p">)</span>
+                        <span class="s2">&quot;The data type for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> does not have valid types&quot;</span>
+                        <span class="o">%</span> <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">source_field_name</span><span class="p">)</span>
                     <span class="p">)</span>
 
                 <span class="k">return</span> <span class="n">valid_types</span>
 
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">source_field_name</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">source_field_name</span><span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_valid_values</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -892,31 +912,29 @@
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
 
         <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">_account_for_bubble_fields</span><span class="p">(</span>
-            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span>
-            <span class="n">sg_entity_type</span><span class="p">,</span>
-            <span class="n">field_name</span><span class="p">,</span>
-            <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">,</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span>
         <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="ow">and</span> <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">]:</span>
                     <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span>
-                    <span class="n">valid_values</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;properties&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;valid_values&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+                    <span class="n">valid_values</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;properties&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;valid_values&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+                    <span class="p">)</span>
 
                     <span class="k">if</span> <span class="n">valid_values</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                            <span class="s2">&quot;The data type for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> does not have valid values&quot;</span> <span class="o">%</span> <span class="p">(</span>
-                                <span class="n">sg_entity_type</span><span class="p">,</span>
-                                <span class="n">source_field_name</span>
-                            <span class="p">)</span>
+                            <span class="s2">&quot;The data type for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> does not have valid values&quot;</span>
+                            <span class="o">%</span> <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">source_field_name</span><span class="p">)</span>
                         <span class="p">)</span>
 
                     <span class="k">return</span> <span class="n">valid_values</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">source_field_name</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">source_field_name</span><span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_status_display_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">status_code</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -924,16 +942,16 @@
 <span class="sd">        Returns the display name for a given status code.</span>
 <span class="sd">        If the status code cannot be found or haven&#39;t been loaded,</span>
 <span class="sd">        the status code is returned back.</span>
-<span class="sd">        </span>
+
 <span class="sd">        If the data is not present locally, a cache reload</span>
 <span class="sd">        will be triggered, meaning that subsequent cache requests may</span>
 <span class="sd">        return valid data.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param status_code: Status short code (e.g &#39;ip&#39;)</span>
 <span class="sd">        :param project_id:  The id of the project entity to get a name from.</span>
 <span class="sd">                            If None, the current context&#39;s project will be used.</span>
 
-<span class="sd">        :returns: string with descriptive status name </span>
+<span class="sd">        :returns: string with descriptive status name</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
@@ -941,7 +959,10 @@
 
         <span class="n">display_name</span> <span class="o">=</span> <span class="n">status_code</span>
 
-        <span class="k">if</span> <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span> <span class="ow">and</span> <span class="n">status_code</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="s2">&quot;statuses&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span>
+            <span class="ow">and</span> <span class="n">status_code</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="s2">&quot;statuses&quot;</span><span class="p">]</span>
+        <span class="p">):</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="s2">&quot;statuses&quot;</span><span class="p">][</span><span class="n">status_code</span><span class="p">]</span>
             <span class="n">display_name</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">status_code</span>
 
@@ -953,11 +974,11 @@
 <span class="sd">        Returns the color for a given status code.</span>
 <span class="sd">        If the status code cannot be found or haven&#39;t been loaded,</span>
 <span class="sd">        None is returned.</span>
-<span class="sd">        </span>
+
 <span class="sd">        If the data is not present locally, a cache reload</span>
 <span class="sd">        will be triggered, meaning that subsequent cache requests may</span>
-<span class="sd">        return valid data.        </span>
-<span class="sd">        </span>
+<span class="sd">        return valid data.</span>
+
 <span class="sd">        :param status_code: Status short code (e.g &#39;ip&#39;)</span>
 <span class="sd">        :param project_id:  The id of the project entity to get a color from.</span>
 <span class="sd">                            If None, the current context&#39;s project will be used.</span>
@@ -967,14 +988,17 @@
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
         <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_status_refresh</span><span class="p">(</span><span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
-        
+
         <span class="n">status_color</span> <span class="o">=</span> <span class="bp">None</span>
 
-        <span class="k">if</span> <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span> <span class="ow">and</span> <span class="n">status_code</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="s2">&quot;statuses&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span>
+            <span class="ow">and</span> <span class="n">status_code</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="s2">&quot;statuses&quot;</span><span class="p">]</span>
+        <span class="p">):</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="s2">&quot;statuses&quot;</span><span class="p">][</span><span class="n">status_code</span><span class="p">]</span>
             <span class="c1"># color is in the form of &quot;123,255,10&quot;</span>
             <span class="n">status_color</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;bg_color&quot;</span><span class="p">)</span>
-        
+
         <span class="k">return</span> <span class="n">status_color</span>
 
     <span class="nd">@classmethod</span>
@@ -1005,15 +1029,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
 
         <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">_account_for_bubble_fields</span><span class="p">(</span>
-            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span>
+        <span class="p">)</span>
 
         <span class="c1"># make sure the project id is found in each of the type and file schemas</span>
         <span class="c1"># and that the entity type and field name are found in their respective</span>
         <span class="c1"># project caches</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="ow">and</span>
-            <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span> <span class="ow">and</span>
-            <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]</span> <span class="ow">and</span>
-            <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span>
+            <span class="ow">and</span> <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span>
+            <span class="ow">and</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]</span>
+            <span class="ow">and</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">]</span>
+        <span class="p">):</span>
 
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span>
             <span class="k">try</span><span class="p">:</span>
@@ -1021,8 +1048,9 @@
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not determine editability from the schema.&quot;</span><span class="p">)</span>
 
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">source_field_name</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">source_field_name</span><span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">field_is_visible</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -1052,15 +1080,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
 
         <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">_account_for_bubble_fields</span><span class="p">(</span>
-            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
+            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span>
+        <span class="p">)</span>
 
         <span class="c1"># make sure the project id is found in each of the type and file schemas</span>
         <span class="c1"># and that the entity type and field name are found in their respective</span>
         <span class="c1"># project caches</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span> <span class="ow">and</span>
-            <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span> <span class="ow">and</span>
-            <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]</span> <span class="ow">and</span>
-            <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span>
+            <span class="ow">and</span> <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span>
+            <span class="ow">and</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]</span>
+            <span class="ow">and</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">]</span>
+        <span class="p">):</span>
 
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="n">sg_entity_type</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span>
             <span class="k">try</span><span class="p">:</span>
@@ -1068,8 +1099,9 @@
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not determine visibility from the schema.&quot;</span><span class="p">)</span>
 
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">source_field_name</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Could not find the schema for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">source_field_name</span><span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_ordered_status_list</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">display_names</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -1094,12 +1126,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_status_refresh</span><span class="p">(</span><span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">project_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not find the statuses for project </span><span class="si">%i</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">project_id</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Could not find the statuses for project </span><span class="si">%i</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
+            <span class="p">)</span>
 
         <span class="n">statuses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="s2">&quot;statuses&quot;</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">display_names</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="n">get_status_display_name</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="s2">&quot;status_order&quot;</span><span class="p">]]</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">get_status_display_name</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="s2">&quot;status_order&quot;</span><span class="p">]</span>
+            <span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span><span class="p">[</span><span class="n">project_id</span><span class="p">][</span><span class="s2">&quot;status_order&quot;</span><span class="p">]</span>
 
@@ -1123,10 +1160,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Removing schema cache file : </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">schema_cache</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">schema_cache</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_error</span><span class="p">(</span>
-                    <span class="s2">&quot;Caught error attempting to remove schema cache file [</span><span class="si">%s</span><span class="s2">] :</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
-                    <span class="p">(</span><span class="n">schema_cache</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                    <span class="s2">&quot;Caught error attempting to remove schema cache file [</span><span class="si">%s</span><span class="s2">] :</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span>
+                    <span class="o">%</span> <span class="p">(</span><span class="n">schema_cache</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
                 <span class="p">)</span>
                 <span class="k">raise</span>
 
@@ -1135,10 +1172,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Removing status cache file : </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">status_cache</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">status_cache</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_error</span><span class="p">(</span>
-                    <span class="s2">&quot;Caught error attempting to remove status cache file [</span><span class="si">%s</span><span class="s2">] :</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
-                    <span class="p">(</span><span class="n">status_cache</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                    <span class="s2">&quot;Caught error attempting to remove status cache file [</span><span class="si">%s</span><span class="s2">] :</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span>
+                    <span class="o">%</span> <span class="p">(</span><span class="n">status_cache</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
                 <span class="p">)</span>
                 <span class="k">raise</span>
 
@@ -1179,7 +1216,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Autodesk.
+        &copy; Copyright 2020, Autodesk.
 
     </p>
   </div> 
@@ -1200,7 +1237,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.6.1',
+            VERSION:'v5.7.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

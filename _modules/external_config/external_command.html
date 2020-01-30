@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>external_config.external_command &mdash; tk-framework-shotgunutils v5.6.1 documentation</title>
+  <title>external_config.external_command &mdash; tk-framework-shotgunutils v5.7.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.6.1 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.7.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -119,7 +119,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.6.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.7.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -184,7 +184,6 @@
 <span class="c1"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">cPickle</span>
 <span class="kn">import</span> <span class="nn">sgtk</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">external_command_utils</span>
 
@@ -215,6 +214,32 @@
             <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;generation&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">external_command_utils</span><span class="o">.</span><span class="n">FORMAT_GENERATION</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">False</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ExternalCommand.is_valid_data"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.is_valid_data">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Tests whether key components of the data contained in the cache are still</span>
+<span class="sd">        valid. This helps protect against file paths that might have been cached</span>
+<span class="sd">        that no longer exist.</span>
+
+<span class="sd">        :param dict data: Serialized data</span>
+<span class="sd">        :returns: True if the given data passes validation, False if not.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># We&#39;re only testing icon paths here just because that&#39;s the problem we</span>
+        <span class="c1"># have right now in SG Create, but it&#39;s entirely possible (and maybe</span>
+        <span class="c1"># advisable) to check other things that are file/directory paths on</span>
+        <span class="c1"># disk that might no longer exist.</span>
+        <span class="n">icon_passes</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;commands&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+            <span class="n">icon</span> <span class="o">=</span> <span class="n">command</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;icon&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">icon</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">icon</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Icon path in cached data is invalid: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">icon</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;External commands will be recached.&quot;</span><span class="p">)</span>
+                <span class="n">icon_passes</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">break</span>
+
+        <span class="k">return</span> <span class="n">icon_passes</span></div>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">external_configuration</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">):</span>
@@ -248,27 +273,27 @@
             <span class="n">pipeline_config_name</span><span class="o">=</span><span class="n">external_configuration</span><span class="o">.</span><span class="n">pipeline_configuration_name</span><span class="p">,</span>
             <span class="n">sg_deny_permissions</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;sg_deny_permissions&quot;</span><span class="p">],</span>
             <span class="n">sg_supports_multiple_selection</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;sg_supports_multiple_selection&quot;</span><span class="p">],</span>
-            <span class="n">icon</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;icon&quot;</span><span class="p">]</span>
+            <span class="n">icon</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;icon&quot;</span><span class="p">],</span>
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">callback_name</span><span class="p">,</span>
-            <span class="n">display_name</span><span class="p">,</span>
-            <span class="n">tooltip</span><span class="p">,</span>
-            <span class="n">group</span><span class="p">,</span>
-            <span class="n">is_group_default</span><span class="p">,</span>
-            <span class="n">plugin_id</span><span class="p">,</span>
-            <span class="n">interpreter</span><span class="p">,</span>
-            <span class="n">engine_name</span><span class="p">,</span>
-            <span class="n">descriptor_uri</span><span class="p">,</span>
-            <span class="n">pipeline_config_id</span><span class="p">,</span>
-            <span class="n">entity_type</span><span class="p">,</span>
-            <span class="n">entity_id</span><span class="p">,</span>
-            <span class="n">pipeline_config_name</span><span class="p">,</span>
-            <span class="n">sg_deny_permissions</span><span class="p">,</span>
-            <span class="n">sg_supports_multiple_selection</span><span class="p">,</span>
-            <span class="n">icon</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">callback_name</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="p">,</span>
+        <span class="n">tooltip</span><span class="p">,</span>
+        <span class="n">group</span><span class="p">,</span>
+        <span class="n">is_group_default</span><span class="p">,</span>
+        <span class="n">plugin_id</span><span class="p">,</span>
+        <span class="n">interpreter</span><span class="p">,</span>
+        <span class="n">engine_name</span><span class="p">,</span>
+        <span class="n">descriptor_uri</span><span class="p">,</span>
+        <span class="n">pipeline_config_id</span><span class="p">,</span>
+        <span class="n">entity_type</span><span class="p">,</span>
+        <span class="n">entity_id</span><span class="p">,</span>
+        <span class="n">pipeline_config_name</span><span class="p">,</span>
+        <span class="n">sg_deny_permissions</span><span class="p">,</span>
+        <span class="n">sg_supports_multiple_selection</span><span class="p">,</span>
+        <span class="n">icon</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.</span>
@@ -313,7 +338,25 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_config_name</span> <span class="o">=</span> <span class="n">pipeline_config_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sg_deny_permissions</span> <span class="o">=</span> <span class="n">sg_deny_permissions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sg_supports_multiple_selection</span> <span class="o">=</span> <span class="n">sg_supports_multiple_selection</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_icon</span> <span class="o">=</span> <span class="n">icon</span>
+
+        <span class="c1"># We need to check the validity of the icon path provided and</span>
+        <span class="c1"># not keep it if it doesn&#39;t exist. This will prevent an infinite</span>
+        <span class="c1"># re-cache loop when commands are requested from an external config</span>
+        <span class="c1"># object. That object&#39;s routine is to validate the contents of</span>
+        <span class="c1"># cached data before using it, and if an icon referenced in the</span>
+        <span class="c1"># cache doesn&#39;t exist (but is not None) then the cache is dumped.</span>
+        <span class="k">if</span> <span class="n">icon</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">icon</span><span class="p">):</span>
+            <span class="c1"># Good icon path provided.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_icon</span> <span class="o">=</span> <span class="n">icon</span>
+        <span class="k">elif</span> <span class="n">icon</span><span class="p">:</span>
+            <span class="c1"># Non-existent icon provided, which we will not record.</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Icon provided does not exist and will not be used: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">icon</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_icon</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># No icon provided.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_icon</span> <span class="o">=</span> <span class="bp">None</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -323,7 +366,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_display_name</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_entity_type</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_entity_id</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_entity_id</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="nd">@classmethod</span>
@@ -336,7 +379,7 @@
 <span class="sd">        :rtype: :class:`ExternalCommand`</span>
 <span class="sd">        :raises: :class:`RuntimeError` if data is not valid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">cPickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ExternalCommand</span><span class="p">(</span>
             <span class="n">callback_name</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;callback_name&quot;</span><span class="p">],</span>
@@ -354,7 +397,7 @@
             <span class="n">pipeline_config_name</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;pipeline_config_name&quot;</span><span class="p">],</span>
             <span class="n">sg_deny_permissions</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;sg_deny_permissions&quot;</span><span class="p">],</span>
             <span class="n">sg_supports_multiple_selection</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;sg_supports_multiple_selection&quot;</span><span class="p">],</span>
-            <span class="n">icon</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;icon&quot;</span><span class="p">]</span>
+            <span class="n">icon</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;icon&quot;</span><span class="p">],</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ExternalCommand.serialize"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.serialize">[docs]</a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -382,9 +425,9 @@
             <span class="s2">&quot;pipeline_config_name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_config_name</span><span class="p">,</span>
             <span class="s2">&quot;sg_deny_permissions&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_deny_permissions</span><span class="p">,</span>
             <span class="s2">&quot;sg_supports_multiple_selection&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_supports_multiple_selection</span><span class="p">,</span>
-            <span class="s2">&quot;icon&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_icon</span>
+            <span class="s2">&quot;icon&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_icon</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="k">return</span> <span class="n">cPickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">pipeline_configuration_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -482,6 +525,23 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tooltip</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The Python interpreter path to use when executing the command.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span>
+
+    <span class="nd">@interpreter.setter</span>
+    <span class="k">def</span> <span class="nf">interpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the command&#39;s Python interpreter path.</span>
+
+<span class="sd">        :param str interpreter: The new interpreter path to use when executing the</span>
+<span class="sd">            command.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span> <span class="o">=</span> <span class="n">interpreter</span>
+
 <div class="viewcode-block" id="ExternalCommand.execute"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Executes the external command in a separate process.</span>
@@ -569,11 +629,7 @@
         <span class="c1"># prepare execution of the command in an external process</span>
         <span class="c1"># this will bootstrap Toolkit and execute the command.</span>
         <span class="n">script</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span>
-                <span class="s2">&quot;scripts&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;external_runner.py&quot;</span>
-            <span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;scripts&quot;</span><span class="p">,</span> <span class="s2">&quot;external_runner.py&quot;</span><span class="p">)</span>
         <span class="p">)</span>
 
         <span class="c1"># We might have paths in sys.path that aren&#39;t in PYTHONPATH. We&#39;ll make</span>
@@ -611,7 +667,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span><span class="p">,</span>
             <span class="n">script</span><span class="p">,</span>
             <span class="n">sgtk</span><span class="o">.</span><span class="n">bootstrap</span><span class="o">.</span><span class="n">ToolkitManager</span><span class="o">.</span><span class="n">get_core_python_path</span><span class="p">(),</span>
-            <span class="n">args_file</span>
+            <span class="n">args_file</span><span class="p">,</span>
         <span class="p">]</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Command arguments: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
 
@@ -624,11 +680,15 @@
             <span class="c1"># some very bad behavior where it looked like PYTHONPATH was inherited from</span>
             <span class="c1"># this top-level environment rather than what is being set in external_runner</span>
             <span class="c1"># prior to launch.</span>
-            <span class="n">output</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">subprocess_check_output</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">subprocess_check_output</span><span class="p">(</span>
+                <span class="n">args</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;External execution complete. Output: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">output</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">SubprocessCalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="c1"># caching failed!</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Error executing remote command </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">output</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;Error executing remote command </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+            <span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="c1"># Leave PYTHONPATH the way we found it.</span>
             <span class="k">if</span> <span class="n">current_pypath</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -640,7 +700,6 @@
             <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">filesystem</span><span class="o">.</span><span class="n">safe_delete_file</span><span class="p">(</span><span class="n">args_file</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">output</span></div>
-
 </pre></div>
 
            </div>
@@ -652,7 +711,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Autodesk.
+        &copy; Copyright 2020, Autodesk.
 
     </p>
   </div> 
@@ -673,7 +732,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.6.1',
+            VERSION:'v5.7.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

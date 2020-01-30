@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Globals Access &mdash; tk-framework-shotgunutils v5.6.1 documentation</title>
+  <title>Shotgun Globals Access &mdash; tk-framework-shotgunutils v5.7.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.6.1 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.7.1 documentation" href="index.html"/>
         <link rel="next" title="External Configuration Management" href="external_config.html"/>
         <link rel="prev" title="Shotgun Toolkit Qt Settings Wrapper" href="settings.html"/> 
 
@@ -120,7 +120,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.6.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.7.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -185,31 +185,31 @@ When you shut down your app or tool, make sure you unregister the data retriever
 <span class="c1"># typically, in your UI or app constructor, create a</span>
 <span class="c1"># task manager</span>
 <span class="n">task_manager</span> <span class="o">=</span> <span class="n">task_manager</span><span class="o">.</span><span class="n">BackgroundTaskManager</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-<span class="n">task_manager</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">task_manager</span><span class="o">.</span><span class="n">start_processing</span><span class="p">()</span>
 
 <span class="c1"># register it with the globals module so that it can</span>
 <span class="c1"># use it to fetch data</span>
 <span class="n">shotgun_globals</span><span class="o">.</span><span class="n">register_bg_task_manager</span><span class="p">(</span><span class="n">task_manager</span><span class="p">)</span>
 
 <span class="c1"># at runtime, access things</span>
-<span class="n">get_type_display_name</span><span class="p">(</span><span class="s2">&quot;CustomEntity01&quot;</span><span class="p">)</span>
+<span class="n">shotgun_globals</span><span class="o">.</span><span class="n">get_type_display_name</span><span class="p">(</span><span class="s2">&quot;CustomEntity01&quot;</span><span class="p">)</span>
 
 <span class="c1"># at shutdown time, unregister</span>
 <span class="n">shotgun_globals</span><span class="o">.</span><span class="n">unregister_bg_task_manager</span><span class="p">(</span><span class="n">task_manager</span><span class="p">)</span>
-<span class="n">task_manager</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+<span class="n">task_manager</span><span class="o">.</span><span class="n">shut_down</span><span class="p">()</span>
 </pre></div>
 </div>
 <dl class="function">
 <dt id="shotgun_globals.register_bg_task_manager">
 <code class="descclassname">shotgun_globals.</code><code class="descname">register_bg_task_manager</code><span class="sig-paren">(</span><em>cls</em>, <em>task_manager</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.register_bg_task_manager" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a background task manager with the singleton.
-Once a background task manager has been registered, the schema 
+Once a background task manager has been registered, the schema
 singleton can refresh its cache.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_manager</strong> (<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-shotgunutils/task_manager.html#task_manager.BackgroundTaskManager" title="(in tk-framework-shotgunutils vv5.5.0)"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a>) &#8211; Background task manager to use</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_manager</strong> (<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-shotgunutils/task_manager.html#task_manager.BackgroundTaskManager" title="(in tk-framework-shotgunutils vv5.6.1)"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a>) &#8211; Background task manager to use</td>
 </tr>
 </tbody>
 </table>
@@ -223,7 +223,7 @@ singleton can refresh its cache.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_manager</strong> (<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-shotgunutils/task_manager.html#task_manager.BackgroundTaskManager" title="(in tk-framework-shotgunutils vv5.5.0)"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a>) &#8211; Background task manager to use</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_manager</strong> (<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-shotgunutils/task_manager.html#task_manager.BackgroundTaskManager" title="(in tk-framework-shotgunutils vv5.6.1)"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a>) &#8211; Background task manager to use</td>
 </tr>
 </tbody>
 </table>
@@ -234,7 +234,7 @@ singleton can refresh its cache.</p>
 <code class="descclassname">shotgun_globals.</code><code class="descname">get_type_display_name</code><span class="sig-paren">(</span><em>cls</em>, <em>sg_entity_type</em>, <em>project_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.get_type_display_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the display name for a Shotgun entity type.
 If no display name is known for this object, the system
-name is returned, e.g. the same that&#8217;s being passed in 
+name is returned, e.g. the same that&#8217;s being passed in
 via the sg_entity_type parameter.</p>
 <p>If the data is not present locally, a cache reload
 will be triggered, meaning that subsequent cache requests may
@@ -261,7 +261,7 @@ If None, the current context&#8217;s project will be used.</li>
 <dt id="shotgun_globals.get_field_display_name">
 <code class="descclassname">shotgun_globals.</code><code class="descname">get_field_display_name</code><span class="sig-paren">(</span><em>cls</em>, <em>sg_entity_type</em>, <em>field_name</em>, <em>project_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.get_field_display_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the display name for a given Shotgun field. If the field
-cannot be found or the value is not yet cached, the system name 
+cannot be found or the value is not yet cached, the system name
 for the field is returned.</p>
 <p>If the data is not present locally, a cache reload
 will be triggered, meaning that subsequent cache requests may
@@ -288,8 +288,8 @@ If None, the current context&#8217;s project will be used.</li>
 <dl class="function">
 <dt id="shotgun_globals.get_empty_phrase">
 <code class="descclassname">shotgun_globals.</code><code class="descname">get_empty_phrase</code><span class="sig-paren">(</span><em>cls</em>, <em>sg_entity_type</em>, <em>field_name</em>, <em>project_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.get_empty_phrase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get an appropriate phrase to describe the fact that 
-a given Shotgun field is empty. The phrase will differ depending on 
+<dd><p>Get an appropriate phrase to describe the fact that
+a given Shotgun field is empty. The phrase will differ depending on
 the data type of the field.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -533,7 +533,7 @@ dates as &#8220;Yesterday&#8221;, &#8220;Today&#8221;, or &#8220;Tomorrow&#8221;
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Autodesk.
+        &copy; Copyright 2020, Autodesk.
 
     </p>
   </div> 
@@ -554,7 +554,7 @@ dates as &#8220;Yesterday&#8221;, &#8220;Today&#8221;, or &#8220;Tomorrow&#8221;
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v5.6.1',
+            VERSION:'v5.7.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

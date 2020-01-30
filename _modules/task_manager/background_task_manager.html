@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>task_manager.background_task_manager &mdash; tk-framework-shotgunutils v5.6.1 documentation</title>
+  <title>task_manager.background_task_manager &mdash; tk-framework-shotgunutils v5.7.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.6.1 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.7.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -119,7 +119,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.6.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.7.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -226,11 +226,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># signal emitted when a task has been completed</span>
-    <span class="n">task_completed</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="nb">object</span><span class="p">)</span><span class="c1"># uid, group, result</span>
+    <span class="n">task_completed</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="nb">object</span><span class="p">)</span>  <span class="c1"># uid, group, result</span>
     <span class="c1"># signal emitted when a task fails for some reason</span>
-    <span class="n">task_failed</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span><span class="c1"># uid, group, msg, traceback</span>
+    <span class="n">task_failed</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>  <span class="c1"># uid, group, msg, traceback</span>
     <span class="c1"># signal emitted when all tasks in a group have finished</span>
-    <span class="n">task_group_finished</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span><span class="c1"># group</span>
+    <span class="n">task_group_finished</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>  <span class="c1"># group</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">start_processing</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">max_threads</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -268,7 +268,9 @@
 
         <span class="c1"># Create the results dispatcher</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_results_dispatcher</span> <span class="o">=</span> <span class="n">ResultsDispatcher</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results_dispatcher</span><span class="o">.</span><span class="n">task_completed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_thread_task_completed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results_dispatcher</span><span class="o">.</span><span class="n">task_completed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_thread_task_completed</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_results_dispatcher</span><span class="o">.</span><span class="n">task_failed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_thread_task_failed</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_results_dispatcher</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
@@ -331,7 +333,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">stop_all_tasks</span><span class="p">()</span>
 
         <span class="c1"># shut down all worker threads:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_debug_log</span><span class="p">(</span><span class="s2">&quot;Waiting for </span><span class="si">%d</span><span class="s2"> background threads to stop...&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_all_threads</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug_log</span><span class="p">(</span>
+            <span class="s2">&quot;Waiting for </span><span class="si">%d</span><span class="s2"> background threads to stop...&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_all_threads</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="k">for</span> <span class="n">thread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_threads</span><span class="p">:</span>
             <span class="n">thread</span><span class="o">.</span><span class="n">shut_down</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_available_threads</span> <span class="o">=</span> <span class="p">[]</span>
@@ -341,7 +345,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_results_dispatcher</span><span class="o">.</span><span class="n">shut_down</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_debug_log</span><span class="p">(</span><span class="s2">&quot;Shut down successfully!&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BackgroundTaskManager.add_task"><a class="viewcode-back" href="../../task_manager.html#task_manager.BackgroundTaskManager.add_task">[docs]</a>    <span class="k">def</span> <span class="nf">add_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cbl</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">upstream_task_ids</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">task_args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">task_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="BackgroundTaskManager.add_task"><a class="viewcode-back" href="../../task_manager.html#task_manager.BackgroundTaskManager.add_task">[docs]</a>    <span class="k">def</span> <span class="nf">add_task</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">cbl</span><span class="p">,</span>
+        <span class="n">priority</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">group</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">upstream_task_ids</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">task_args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">task_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a new task to the queue.  A task is a callable method/class together with any arguments that</span>
 <span class="sd">        should be passed to the callable when it is called.</span>
@@ -361,7 +373,9 @@
 <span class="sd">        :returns:                   A unique id representing the task.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">cbl</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">TankError</span><span class="p">(</span><span class="s2">&quot;The task function, method or object &#39;</span><span class="si">%s</span><span class="s2">&#39; must be callable!&quot;</span> <span class="o">%</span> <span class="n">cbl</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">TankError</span><span class="p">(</span>
+                <span class="s2">&quot;The task function, method or object &#39;</span><span class="si">%s</span><span class="s2">&#39; must be callable!&quot;</span> <span class="o">%</span> <span class="n">cbl</span>
+            <span class="p">)</span>
 
         <span class="n">upstream_task_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">upstream_task_ids</span> <span class="ow">or</span> <span class="p">[])</span>
 
@@ -389,7 +403,9 @@
 
         <span class="k">return</span> <span class="n">new_task</span><span class="o">.</span><span class="n">uid</span></div>
 
-<div class="viewcode-block" id="BackgroundTaskManager.add_pass_through_task"><a class="viewcode-back" href="../../task_manager.html#task_manager.BackgroundTaskManager.add_pass_through_task">[docs]</a>    <span class="k">def</span> <span class="nf">add_pass_through_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">upstream_task_ids</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">task_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="BackgroundTaskManager.add_pass_through_task"><a class="viewcode-back" href="../../task_manager.html#task_manager.BackgroundTaskManager.add_pass_through_task">[docs]</a>    <span class="k">def</span> <span class="nf">add_pass_through_task</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">upstream_task_ids</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">task_kwargs</span><span class="o">=</span><span class="bp">None</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a pass-through task to the queue.  A pass-through task doesn&#39;t perform any work but can be useful</span>
 <span class="sd">        when synchronising other tasks (e.g. pulling the results from multiple upstream tasks into a single task)</span>
@@ -407,7 +423,13 @@
 <span class="sd">        :returns:                   A unique id representing the task.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_pass_through</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">upstream_task_ids</span><span class="p">,</span> <span class="n">task_kwargs</span><span class="o">=</span><span class="n">task_kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_task_pass_through</span><span class="p">,</span>
+            <span class="n">priority</span><span class="p">,</span>
+            <span class="n">group</span><span class="p">,</span>
+            <span class="n">upstream_task_ids</span><span class="p">,</span>
+            <span class="n">task_kwargs</span><span class="o">=</span><span class="n">task_kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="BackgroundTaskManager.stop_task"><a class="viewcode-back" href="../../task_manager.html#task_manager.BackgroundTaskManager.stop_task">[docs]</a>    <span class="k">def</span> <span class="nf">stop_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">stop_upstream</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">stop_downstream</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -536,7 +558,9 @@
             <span class="c1"># for some reason (probably memory corruption somewhere else) I&#39;ve occasionally seen the above</span>
             <span class="c1"># creation of a worker thread return another arbitrary object!  Added this in here so the code</span>
             <span class="c1"># will at least continue correctly and not do unexpected things!</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_error</span><span class="p">(</span><span class="s2">&quot;Failed to create background worker thread for task Manager!&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_error</span><span class="p">(</span>
+                <span class="s2">&quot;Failed to create background worker thread for task Manager!&quot;</span>
+            <span class="p">)</span>
             <span class="k">return</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_all_threads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thread</span><span class="p">)</span>
 
@@ -544,7 +568,10 @@
         <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
         <span class="c1"># log some debug:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_debug_log</span><span class="p">(</span><span class="s2">&quot;Started new background worker thread (num threads=</span><span class="si">%d</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_all_threads</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug_log</span><span class="p">(</span>
+            <span class="s2">&quot;Started new background worker thread (num threads=</span><span class="si">%d</span><span class="s2">)&quot;</span>
+            <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_all_threads</span><span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">thread</span>
 
@@ -612,11 +639,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_running_tasks</span><span class="p">[</span><span class="n">task_to_process</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">task_to_process</span><span class="p">,</span> <span class="n">thread</span><span class="p">)</span>
 
         <span class="n">num_tasks_left</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">pending_tasks</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_tasks_by_priority</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">pending_tasks</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_tasks_by_priority</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">num_tasks_left</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pending_tasks</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_low_level_debug_log</span><span class="p">(</span>
-            <span class="s2">&quot; &gt; Currently running tasks: &#39;</span><span class="si">%s</span><span class="s2">&#39; - </span><span class="si">%d</span><span class="s2"> left in queue&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_running_tasks</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">num_tasks_left</span><span class="p">)</span>
+            <span class="s2">&quot; &gt; Currently running tasks: &#39;</span><span class="si">%s</span><span class="s2">&#39; - </span><span class="si">%d</span><span class="s2"> left in queue&quot;</span>
+            <span class="o">%</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_running_tasks</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">num_tasks_left</span><span class="p">)</span>
         <span class="p">)</span>
 
         <span class="c1"># and run the task</span>
@@ -688,7 +716,9 @@
                     <span class="n">failed_task</span> <span class="o">=</span> <span class="n">failed_tasks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
                     <span class="c1"># find any downstream tasks:</span>
-                    <span class="k">for</span> <span class="n">ds_task_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_downstream_task_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">failed_task</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]:</span>
+                    <span class="k">for</span> <span class="n">ds_task_id</span> <span class="ow">in</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_downstream_task_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">failed_task</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+                    <span class="p">):</span>
                         <span class="n">ds_task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tasks_by_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ds_task_id</span><span class="p">)</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">ds_task</span> <span class="ow">or</span> <span class="n">ds_task</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="n">failed_task_ids</span><span class="p">:</span>
                             <span class="c1"># no task or already found</span>
@@ -735,8 +765,10 @@
                 <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_tasks_by_priority</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">priority</span><span class="p">]</span>
 
         <span class="c1"># remove this task from all other maps:</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group_task_map</span> <span class="ow">and</span>
-                <span class="n">task</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group_task_map</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">group</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group_task_map</span>
+            <span class="ow">and</span> <span class="n">task</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group_task_map</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">group</span><span class="p">]</span>
+        <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_group_task_map</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group_task_map</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">group</span><span class="p">]:</span>
                 <span class="n">group_completed</span> <span class="o">=</span> <span class="bp">True</span>
@@ -769,7 +801,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Autodesk.
+        &copy; Copyright 2020, Autodesk.
 
     </p>
   </div> 
@@ -790,7 +822,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.6.1',
+            VERSION:'v5.7.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

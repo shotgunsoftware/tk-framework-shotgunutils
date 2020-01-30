@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_model &mdash; tk-framework-shotgunutils v5.6.1 documentation</title>
+  <title>shotgun_model.shotgun_model &mdash; tk-framework-shotgunutils v5.7.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.6.1 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.7.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -119,7 +119,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.6.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.7.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -196,6 +196,9 @@
 <span class="kn">from</span> <span class="nn">.shotgun_query_model</span> <span class="kn">import</span> <span class="n">ShotgunQueryModel</span>
 <span class="kn">from</span> <span class="nn">.data_handler_find</span> <span class="kn">import</span> <span class="n">ShotgunFindDataHandler</span>
 <span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">get_sanitized_data</span><span class="p">,</span> <span class="n">get_sg_data</span><span class="p">,</span> <span class="n">sanitize_for_qt_model</span>
+<span class="kn">from</span> <span class="nn">tank_vendor.six.moves</span> <span class="kn">import</span> <span class="nb">range</span>
+<span class="kn">from</span> <span class="nn">tank_vendor</span> <span class="kn">import</span> <span class="n">six</span>
+
 
 <div class="viewcode-block" id="ShotgunModel"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel">[docs]</a><span class="k">class</span> <span class="nc">ShotgunModel</span><span class="p">(</span><span class="n">ShotgunQueryModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -219,7 +222,14 @@
     <span class="c1"># header value for the first column</span>
     <span class="n">FIRST_COLUMN_HEADER</span> <span class="o">=</span> <span class="s2">&quot;Name&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">download_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent</span><span class="p">,</span>
+        <span class="n">download_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param parent: Parent object.</span>
 <span class="sd">        :type parent: :class:`~PySide.QtGui.QWidget`</span>
@@ -252,8 +262,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        String representation of this instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2"> entity_type:</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2"> entity_type:</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">)</span>
 
     <span class="c1">########################################################################################</span>
     <span class="c1"># public methods</span>
@@ -276,7 +285,9 @@
 <span class="sd">        :param entity_id: Shotgun entity id to look for</span>
 <span class="sd">        :returns: :class:`~PySide.QtGui.QStandardItem` or None if not found</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Resolving model item for entity </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span>
+            <span class="s2">&quot;Resolving model item for entity </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">entity_type</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;...entity type is not part of this model!&quot;</span><span class="p">)</span>
@@ -367,7 +378,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">canFetchMore</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fetchMore</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">child_index</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rowCount</span><span class="p">(</span><span class="n">index</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">child_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rowCount</span><span class="p">(</span><span class="n">index</span><span class="p">)):</span>
             <span class="n">child_model_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">child_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ensure_data_is_loaded</span><span class="p">(</span><span class="n">child_model_index</span><span class="p">)</span></div>
 
@@ -388,14 +399,26 @@
 <span class="sd">            &quot;column_idx&quot;: the column number in the model associated with the additional field</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># column is one greater than the index because of the default initial column</span>
-        <span class="k">return</span> <span class="p">[{</span><span class="s2">&quot;column_idx&quot;</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">}</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span><span class="p">)]</span></div>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s2">&quot;column_idx&quot;</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">}</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span><span class="p">)</span>
+        <span class="p">]</span></div>
 
     <span class="c1">########################################################################################</span>
     <span class="c1"># protected methods</span>
 
 <div class="viewcode-block" id="ShotgunModel._load_data"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._load_data">[docs]</a>    <span class="k">def</span> <span class="nf">_load_data</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">hierarchy</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">columns</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">additional_filter_presets</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">editable_columns</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">entity_type</span><span class="p">,</span>
+        <span class="n">filters</span><span class="p">,</span>
+        <span class="n">hierarchy</span><span class="p">,</span>
+        <span class="n">fields</span><span class="p">,</span>
+        <span class="n">order</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">limit</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">columns</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">additional_filter_presets</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">editable_columns</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is the main method to use to configure the model. You basically</span>
@@ -490,8 +513,7 @@
         <span class="c1"># make sure `editable_fields` is a subset of `column_fields`</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__editable_fields</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">TankError</span><span class="p">(</span>
-                <span class="s2">&quot;The `editable_fields` argument is not a subset of &quot;</span>
-                <span class="s2">&quot;`column_fields`.&quot;</span>
+                <span class="s2">&quot;The `editable_fields` argument is not a subset of &quot;</span> <span class="s2">&quot;`column_fields`.&quot;</span>
             <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
@@ -515,7 +537,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">__download_thumbs</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__limit</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__additional_filter_presets</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__compute_cache_path</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__compute_cache_path</span><span class="p">(</span><span class="n">seed</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="c1"># load up from disk</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Loading data from cache file into memory...&quot;</span><span class="p">)</span>
@@ -527,8 +549,7 @@
 
         <span class="c1"># set our headers</span>
         <span class="n">headers</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">FIRST_COLUMN_HEADER</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_additional_column_headers</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setHorizontalHeaderLabels</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
 
@@ -537,9 +558,7 @@
         <span class="c1"># construct the top level nodes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Creating model nodes for top level of data tree...&quot;</span><span class="p">)</span>
         <span class="n">nodes_generated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">generate_child_nodes</span><span class="p">(</span>
-            <span class="bp">None</span><span class="p">,</span>
-            <span class="n">root</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_create_item</span>
+            <span class="bp">None</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_item</span>
         <span class="p">)</span>
 
         <span class="c1"># if we got some data, emit cache load signal</span>
@@ -606,7 +625,7 @@
                             <span class="n">field</span><span class="p">,</span>
                             <span class="n">sg_data</span><span class="p">[</span><span class="n">field</span><span class="p">],</span>
                             <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">),</span>
-                            <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+                            <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">),</span>
                         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._set_tooltip"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._set_tooltip">[docs]</a>    <span class="k">def</span> <span class="nf">_set_tooltip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">sg_item</span><span class="p">):</span>
@@ -652,27 +671,32 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sg_item</span><span class="p">[</span><span class="n">field</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">sg_item</span><span class="p">[</span><span class="n">field</span><span class="p">]:</span>
             <span class="c1"># This is scenario 1 described above.</span>
             <span class="n">item</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span>
-                <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span>
+                <span class="o">%</span> <span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_globals</span><span class="o">.</span><span class="n">get_type_display_name</span><span class="p">(</span><span class="n">sg_item</span><span class="p">[</span><span class="n">field</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]),</span>
-                    <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+                    <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">field</span><span class="p">:</span>
             <span class="c1"># This is scenario 2 described above. We only want to get the last entity and field.</span>
             <span class="n">_</span><span class="p">,</span> <span class="n">sub_entity_type</span><span class="p">,</span> <span class="n">sub_entity_field_name</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
             <span class="n">item</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span>
-                <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span>
+                <span class="o">%</span> <span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_globals</span><span class="o">.</span><span class="n">get_type_display_name</span><span class="p">(</span><span class="n">sub_entity_type</span><span class="p">),</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_globals</span><span class="o">.</span><span class="n">get_field_display_name</span><span class="p">(</span><span class="n">sub_entity_type</span><span class="p">,</span> <span class="n">sub_entity_field_name</span><span class="p">),</span>
-                    <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_globals</span><span class="o">.</span><span class="n">get_field_display_name</span><span class="p">(</span>
+                        <span class="n">sub_entity_type</span><span class="p">,</span> <span class="n">sub_entity_field_name</span>
+                    <span class="p">),</span>
+                    <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># This is scenario 3 described above.</span>
             <span class="n">item</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span>
-                <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span>
+                <span class="o">%</span> <span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_globals</span><span class="o">.</span><span class="n">get_type_display_name</span><span class="p">(</span><span class="n">sg_item</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]),</span>
-                    <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+                    <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span>
                 <span class="p">)</span>
             <span class="p">)</span></div>
 
@@ -717,7 +741,9 @@
 
                 <span class="c1"># set associated field role to be the column value itself</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
-                <span class="n">column_item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">sanitize_for_qt_model</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">SG_ASSOCIATED_FIELD_ROLE</span><span class="p">)</span>
+                <span class="n">column_item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span>
+                    <span class="n">sanitize_for_qt_model</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">SG_ASSOCIATED_FIELD_ROLE</span>
+                <span class="p">)</span>
 
                 <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">column_item</span><span class="p">)</span>
 
@@ -733,7 +759,10 @@
 <span class="sd">        :returns: list of strings to use as the headers</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># default implementation will set the headers to the display names for the fields</span>
-        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_globals</span><span class="o">.</span><span class="n">get_field_display_name</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_globals</span><span class="o">.</span><span class="n">get_field_display_name</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">columns</span>
+        <span class="p">]</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._get_columns"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._get_columns">[docs]</a>    <span class="k">def</span> <span class="nf">_get_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">is_leaf</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -786,7 +815,9 @@
 <span class="sd">        :param :class:`ShotgunItemData` data_item: Data to update item with</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">field_display_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__generate_display_name</span><span class="p">(</span><span class="n">data_item</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="n">data_item</span><span class="o">.</span><span class="n">shotgun_data</span><span class="p">)</span>
+        <span class="n">field_display_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__generate_display_name</span><span class="p">(</span>
+            <span class="n">data_item</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="n">data_item</span><span class="o">.</span><span class="n">shotgun_data</span>
+        <span class="p">)</span>
         <span class="n">item</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">field_display_name</span><span class="p">)</span>
 
         <span class="c1"># keep tabs of which items we are creating</span>
@@ -802,7 +833,7 @@
         <span class="c1"># store the actual value we have</span>
         <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span>
             <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">data_item</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">data_item</span><span class="o">.</span><span class="n">shotgun_data</span><span class="p">[</span><span class="n">data_item</span><span class="o">.</span><span class="n">field</span><span class="p">]},</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">SG_ASSOCIATED_FIELD_ROLE</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SG_ASSOCIATED_FIELD_ROLE</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">data_item</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">():</span>
@@ -811,7 +842,9 @@
             <span class="c1"># note: Qt automatically changes everything to be unicode</span>
             <span class="c1"># according to strange rules of its own, so force convert</span>
             <span class="c1"># all shotgun values to be proper unicode prior to setData</span>
-            <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">sanitize_for_qt_model</span><span class="p">(</span><span class="n">data_item</span><span class="o">.</span><span class="n">shotgun_data</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">SG_DATA_ROLE</span><span class="p">)</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span>
+                <span class="n">sanitize_for_qt_model</span><span class="p">(</span><span class="n">data_item</span><span class="o">.</span><span class="n">shotgun_data</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">SG_DATA_ROLE</span>
+            <span class="p">)</span>
 
         <span class="c1"># Now we got the object set up. Now start calling custom methods:</span>
 
@@ -877,24 +910,35 @@
         <span class="c1">#</span>
         <span class="c1"># now hash up the rest of the parameters and make that the filename</span>
         <span class="n">params_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__schema_generation</span><span class="p">))</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fields</span><span class="p">))</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__order</span><span class="p">))</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy</span><span class="p">))</span>
+
+        <span class="c1"># FIXME: Python 2 and Python 3 order values differently in a dictionary,</span>
+        <span class="c1"># which means that their string representation are going to differ</span>
+        <span class="c1"># between Python versions</span>
+        <span class="c1">#</span>
+        <span class="c1"># As users are going to be drifting between Python 2 and Python 3 for a</span>
+        <span class="c1"># while, a fully deterministic way of generating the cache name should</span>
+        <span class="c1"># be implemented.</span>
+        <span class="c1">#</span>
+        <span class="c1"># A simple approach would be to encode the data in a JSON structured</span>
+        <span class="c1"># with ordered keys and then having the text representation of that data.</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__schema_generation</span><span class="p">)))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fields</span><span class="p">)))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__order</span><span class="p">)))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy</span><span class="p">)))</span>
         <span class="c1"># If this value changes over time (like between Qt4 and Qt5), we need to</span>
         <span class="c1"># assume our previous user roles are invalid since Qt might have taken over</span>
         <span class="c1"># it. If role&#39;s value is 32, don&#39;t add it to the hash so we don&#39;t</span>
         <span class="c1"># invalidate PySide/PyQt4 caches.</span>
         <span class="k">if</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span> <span class="o">!=</span> <span class="mi">32</span><span class="p">:</span>
-            <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span><span class="p">))</span>
+            <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)))</span>
 
         <span class="c1"># now hash up the filter parameters and the seed - these are dynamic</span>
         <span class="c1"># values that tend to change and be data driven, so they are handled</span>
         <span class="c1"># on a different level in the path</span>
         <span class="n">filter_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
-        <span class="n">filter_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__filters</span><span class="p">))</span>
-        <span class="n">filter_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__additional_filter_presets</span><span class="p">))</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cache_seed</span><span class="p">))</span>
+        <span class="n">filter_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__filters</span><span class="p">)))</span>
+        <span class="n">filter_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__additional_filter_presets</span><span class="p">)))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cache_seed</span><span class="p">)))</span>
 
         <span class="c1"># Organize files on disk based on entity type and then filter hash</span>
         <span class="c1"># keep extension names etc short in order to stay away from MAX_PATH</span>
@@ -912,10 +956,10 @@
             <span class="s2">&quot;sg&quot;</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">,</span>
             <span class="n">params_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span>
-            <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filter_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span> <span class="n">ShotgunFindDataHandler</span><span class="o">.</span><span class="n">FORMAT_VERSION</span><span class="p">)</span>
+            <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filter_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span> <span class="n">ShotgunFindDataHandler</span><span class="o">.</span><span class="n">FORMAT_VERSION</span><span class="p">),</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;win32&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_cache_path</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">250</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">is_windows</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_cache_path</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">250</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log_warning</span><span class="p">(</span>
                 <span class="s2">&quot;Shotgun model data cache file path may be affected by windows &quot;</span>
                 <span class="s2">&quot;windows MAX_PATH limitation.&quot;</span>
@@ -975,7 +1019,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Autodesk.
+        &copy; Copyright 2020, Autodesk.
 
     </p>
   </div> 
@@ -996,7 +1040,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.6.1',
+            VERSION:'v5.7.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

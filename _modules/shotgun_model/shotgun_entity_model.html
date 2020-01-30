@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_entity_model &mdash; tk-framework-shotgunutils v5.6.1 documentation</title>
+  <title>shotgun_model.shotgun_entity_model &mdash; tk-framework-shotgunutils v5.7.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.6.1 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.7.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -119,7 +119,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.6.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.7.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -174,13 +174,13 @@
             
   <h1>Source code for shotgun_model.shotgun_entity_model</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright (c) 2013 Shotgun Software Inc.</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1"># CONFIDENTIAL AND PROPRIETARY</span>
-<span class="c1"># </span>
-<span class="c1"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit </span>
+<span class="c1">#</span>
+<span class="c1"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit</span>
 <span class="c1"># Source Code License included in this distribution package. See LICENSE.</span>
-<span class="c1"># By accessing, using, copying or modifying this work you indicate your </span>
-<span class="c1"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights </span>
+<span class="c1"># By accessing, using, copying or modifying this work you indicate your</span>
+<span class="c1"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights</span>
 <span class="c1"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
 
 <span class="kn">import</span> <span class="nn">sgtk</span>
@@ -188,6 +188,7 @@
 
 <span class="kn">from</span> <span class="nn">.shotgun_model</span> <span class="kn">import</span> <span class="n">ShotgunModel</span>
 <span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">get_sg_data</span><span class="p">,</span> <span class="n">get_sanitized_data</span>
+
 
 <div class="viewcode-block" id="ShotgunEntityModel"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel">[docs]</a><span class="k">class</span> <span class="nc">ShotgunEntityModel</span><span class="p">(</span><span class="n">ShotgunModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -200,15 +201,24 @@
     <span class="c1"># global cache of step colours - avoids querying from Shotgun multiple times!</span>
     <span class="n">_SG_STEP_COLOURS</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">hierarchy</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span>
-                 <span class="n">download_thumbs</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                 <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">entity_type</span><span class="p">,</span>
+        <span class="n">filters</span><span class="p">,</span>
+        <span class="n">hierarchy</span><span class="p">,</span>
+        <span class="n">fields</span><span class="p">,</span>
+        <span class="n">parent</span><span class="p">,</span>
+        <span class="n">download_thumbs</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param entity_type:         The type of the entities that should be loaded into this model.</span>
-<span class="sd">        :param filters:             A list of filters to be applied to entities in the model - these </span>
-<span class="sd">                                    will be passed to the Shotgun API find() call when populating the </span>
+<span class="sd">        :param filters:             A list of filters to be applied to entities in the model - these</span>
+<span class="sd">                                    will be passed to the Shotgun API find() call when populating the</span>
 <span class="sd">                                    model</span>
-<span class="sd">        :param hierarchy:           List of Shotgun fields that will be used to define the structure </span>
+<span class="sd">        :param hierarchy:           List of Shotgun fields that will be used to define the structure</span>
 <span class="sd">                                    of the items in the model.</span>
 <span class="sd">        :param fields:              List of Shotgun fields to populate the items in the model with.</span>
 <span class="sd">                                    These will be passed to the Shotgun API find() call when populating</span>
@@ -232,14 +242,18 @@
         <span class="n">fields</span> <span class="o">=</span> <span class="n">fields</span> <span class="ow">or</span> <span class="p">[]</span>
 
         <span class="c1"># default icon</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_default_icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="s2">&quot;:/tk-framework-shotgunutils/icon_Folder_dark.png&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_default_icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="s2">&quot;:/tk-framework-shotgunutils/icon_Folder_dark.png&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
 
-        <span class="n">ShotgunModel</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
-                              <span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span><span class="p">,</span>
-                              <span class="n">download_thumbs</span> <span class="o">=</span> <span class="n">download_thumbs</span><span class="p">,</span>
-                              <span class="n">schema_generation</span> <span class="o">=</span> <span class="n">schema_generation</span><span class="p">,</span>
-                              <span class="n">bg_load_thumbs</span> <span class="o">=</span> <span class="n">bg_load_thumbs</span><span class="p">,</span>
-                              <span class="n">bg_task_manager</span> <span class="o">=</span> <span class="n">bg_task_manager</span><span class="p">)</span>
+        <span class="n">ShotgunModel</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span>
+            <span class="n">download_thumbs</span><span class="o">=</span><span class="n">download_thumbs</span><span class="p">,</span>
+            <span class="n">schema_generation</span><span class="o">=</span><span class="n">schema_generation</span><span class="p">,</span>
+            <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="n">bg_load_thumbs</span><span class="p">,</span>
+            <span class="n">bg_task_manager</span><span class="o">=</span><span class="n">bg_task_manager</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># load the data from the cache:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">hierarchy</span><span class="p">,</span> <span class="n">fields</span><span class="p">)</span>
@@ -265,14 +279,14 @@
 
 <div class="viewcode-block" id="ShotgunEntityModel.get_entities"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel.get_entities">[docs]</a>    <span class="k">def</span> <span class="nf">get_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get entities for the current item by traversing up the tree and pulling entity information </span>
+<span class="sd">        Get entities for the current item by traversing up the tree and pulling entity information</span>
 <span class="sd">        from each item if possible</span>
 
 <span class="sd">        :param item:    The item to find entities for.</span>
 <span class="sd">        :type  item:    :class:`~PySide.QtGui.QStandardItem`</span>
 <span class="sd">        :returns:       A list of Shotgun entity dictionaries in the order they were found starting from</span>
 <span class="sd">                        the specified item.  Each dictionary will contain all the entity information stored</span>
-<span class="sd">                        by the model which is usually determined by the list of fields passed during </span>
+<span class="sd">                        by the model which is usually determined by the list of fields passed during</span>
 <span class="sd">                        construction plus name/code, type and id.</span>
 
 <span class="sd">                        For non-leaf items that represent Shotgun entities, the dictionary will typically</span>
@@ -294,8 +308,8 @@
 
 <span class="sd">        :param item:    The item to retrieve the entity details for.</span>
 <span class="sd">        :type  item:    :class:`~PySide.QtGui.QStandardItem`</span>
-<span class="sd">        :returns:       A Shotgun entity dictionary for the item if it represents an entity, otherwise </span>
-<span class="sd">                        None.  The dictionary will contain all the entity information stored by the model </span>
+<span class="sd">        :returns:       A Shotgun entity dictionary for the item if it represents an entity, otherwise</span>
+<span class="sd">                        None.  The dictionary will contain all the entity information stored by the model</span>
 <span class="sd">                        which is usually determined by the list of fields passed during construction plus</span>
 <span class="sd">                        name/code, type and id.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -307,10 +321,12 @@
         <span class="c1"># item doesn&#39;t represent an entity directly so look for an entity in the field data instead:</span>
         <span class="n">field_data</span> <span class="o">=</span> <span class="n">get_sanitized_data</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SG_ASSOCIATED_FIELD_ROLE</span><span class="p">)</span>
         <span class="n">field_value</span> <span class="o">=</span> <span class="n">field_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">field_value</span> 
-            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> 
-            <span class="ow">and</span> <span class="s2">&quot;id&quot;</span> <span class="ow">in</span> <span class="n">field_value</span> 
-            <span class="ow">and</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">field_value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">field_value</span>
+            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="s2">&quot;id&quot;</span> <span class="ow">in</span> <span class="n">field_value</span>
+            <span class="ow">and</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">field_value</span>
+        <span class="p">):</span>
             <span class="k">return</span> <span class="n">field_value</span>
 
         <span class="k">return</span> <span class="bp">None</span></div>
@@ -343,7 +359,11 @@
         <span class="n">field_value</span> <span class="o">=</span> <span class="n">field_data</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
 
         <span class="n">entity_icon</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">field_value</span> <span class="ow">and</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">field_value</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">field_value</span>
+            <span class="ow">and</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">field_value</span>
+        <span class="p">):</span>
             <span class="c1"># this is an intermediate node which is an entity type link</span>
             <span class="n">entity_icon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_default_thumbnail</span><span class="p">(</span><span class="n">field_value</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">sg_data</span><span class="p">:</span>
@@ -359,8 +379,8 @@
 
 <span class="sd">        :param sg_entity:   A Shotgun entity dictionary for the entity to get the</span>
 <span class="sd">                            icon for.</span>
-<span class="sd">        :returns:           A QIcon for the entity if available.  For Step entities, a swatch </span>
-<span class="sd">                            representing the step colour is returned.  If no icon is available </span>
+<span class="sd">        :returns:           A QIcon for the entity if available.  For Step entities, a swatch</span>
+<span class="sd">                            representing the step colour is returned.  If no icon is available</span>
 <span class="sd">                            for the entity type then the default icon is returned</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">sg_entity</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;Step&quot;</span><span class="p">:</span>
@@ -377,10 +397,12 @@
                         <span class="k">for</span> <span class="n">sg_step</span> <span class="ow">in</span> <span class="n">sg_steps</span><span class="p">:</span>
                             <span class="n">colour</span> <span class="o">=</span> <span class="bp">None</span>
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="n">colour</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">sg_step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)])</span>
+                                <span class="n">colour</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                                    <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">sg_step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>
+                                <span class="p">)</span>
                             <span class="k">except</span><span class="p">:</span>
                                 <span class="k">pass</span>
-                            <span class="n">ShotgunEntityModel</span><span class="o">.</span><span class="n">_SG_STEP_COLOURS</span><span class="p">[</span><span class="n">sg_step</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">colour</span>  
+                            <span class="n">ShotgunEntityModel</span><span class="o">.</span><span class="n">_SG_STEP_COLOURS</span><span class="p">[</span><span class="n">sg_step</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">colour</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="k">pass</span>
                 <span class="n">colour</span> <span class="o">=</span> <span class="n">ShotgunEntityModel</span><span class="o">.</span><span class="n">_SG_STEP_COLOURS</span><span class="p">[</span><span class="n">step_id</span><span class="p">]</span>
@@ -406,7 +428,6 @@
 
         <span class="c1"># just return the entity icon or the default icon if there is no entity icon:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_entity_icon</span><span class="p">(</span><span class="n">sg_entity</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">))</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_icon</span></div>
-
 </pre></div>
 
            </div>
@@ -418,7 +439,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Autodesk.
+        &copy; Copyright 2020, Autodesk.
 
     </p>
   </div> 
@@ -439,7 +460,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.6.1',
+            VERSION:'v5.7.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

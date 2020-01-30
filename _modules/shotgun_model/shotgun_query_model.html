@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_query_model &mdash; tk-framework-shotgunutils v5.6.1 documentation</title>
+  <title>shotgun_model.shotgun_query_model &mdash; tk-framework-shotgunutils v5.7.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.6.1 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.7.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -119,7 +119,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.6.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.7.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -186,6 +186,7 @@
 <span class="kn">import</span> <span class="nn">sgtk</span>
 <span class="kn">import</span> <span class="nn">weakref</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">tank_vendor.six.moves</span> <span class="kn">import</span> <span class="nb">range</span>
 
 <span class="c1"># NOTE: This is a dummy call to work around a known bug in datetime</span>
 <span class="c1"># whereby there is code imported at call time that is done so in a</span>
@@ -194,7 +195,7 @@
 <span class="c1"># the way later on when it might be used from a thread.</span>
 <span class="c1">#</span>
 <span class="c1"># https://stackoverflow.com/questions/16309650/python-importerror-for-strptime-in-spyder-for-windows-7</span>
-<span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;2012-01-01&#39;</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s2">&quot;2012-01-01&quot;</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">sgtk.platform.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
 
@@ -281,7 +282,6 @@
     <span class="n">_SG_ITEM_HAS_CHILDREN</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span> <span class="o">+</span> <span class="mi">4</span>
     <span class="n">_SG_ITEM_UNIQUE_ID</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span> <span class="o">+</span> <span class="mi">5</span>
 
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">bg_load_thumbs</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes the model and provides some default convenience members.</span>
@@ -335,11 +335,14 @@
 
         <span class="c1"># set up data retriever and start work:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sg_data_retriever</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_data</span><span class="o">.</span><span class="n">ShotgunDataRetriever</span><span class="p">(</span>
-            <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
-            <span class="n">bg_task_manager</span><span class="o">=</span><span class="n">bg_task_manager</span>
+            <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="n">bg_task_manager</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_sg_data_retriever</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_data_retriever_work_completed</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_sg_data_retriever</span><span class="o">.</span><span class="n">work_failure</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_data_retriever_work_failure</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sg_data_retriever</span><span class="o">.</span><span class="n">work_completed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__on_data_retriever_work_completed</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sg_data_retriever</span><span class="o">.</span><span class="n">work_failure</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__on_data_retriever_work_failure</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sg_data_retriever</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
     <span class="c1">############################################################################</span>
@@ -577,7 +580,6 @@
         <span class="c1"># has children.</span>
         <span class="k">return</span> <span class="n">current_child_item_count</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">data_has_children</span>
 
-
     <span class="c1">############################################################################</span>
     <span class="c1"># abstract, protected methods. these methods should be implemented by</span>
     <span class="c1"># subclasses to provide a consistent developer experience.</span>
@@ -612,7 +614,6 @@
             <span class="s2">&quot;The &#39;_update_item&#39; method has not been &quot;</span>
             <span class="s2">&quot;implemented for this ShotgunQueryModel subclass.&quot;</span>
         <span class="p">)</span>
-
 
     <span class="c1">############################################################################</span>
     <span class="c1"># These methods provide the developer experience for shotgun query models.</span>
@@ -864,9 +865,7 @@
 
         <span class="c1"># request the data asynchronously from the data handler</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__current_work_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">generate_data_request</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_sg_data_retriever</span><span class="p">,</span>
-            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sg_data_retriever</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__current_work_id</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -904,20 +903,13 @@
             <span class="k">raise</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">ShotgunModelError</span><span class="p">(</span><span class="s2">&quot;Data retriever is not available!&quot;</span><span class="p">)</span>
 
         <span class="n">uid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_data_retriever</span><span class="o">.</span><span class="n">request_thumbnail</span><span class="p">(</span>
-            <span class="n">url</span><span class="p">,</span>
-            <span class="n">entity_type</span><span class="p">,</span>
-            <span class="n">entity_id</span><span class="p">,</span>
-            <span class="n">field</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__bg_load_thumbs</span>
+            <span class="n">url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bg_load_thumbs</span>
         <span class="p">)</span>
 
         <span class="c1"># keep tabs of this and call out later - note that we use a weakref to allow</span>
         <span class="c1"># the model item to be gc&#39;d if it&#39;s removed from the model before the thumb</span>
         <span class="c1"># request completes.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__thumb_map</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;item_ref&quot;</span><span class="p">:</span> <span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="n">item</span><span class="p">),</span>
-            <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="n">field</span>
-        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__thumb_map</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;item_ref&quot;</span><span class="p">:</span> <span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="n">item</span><span class="p">),</span> <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_ensure_item_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -942,7 +934,9 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
 
             <span class="c1"># item was not part of the model. Attempt to load its parents until it is visible.</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Item </span><span class="si">%s</span><span class="s2"> does not exist in the tree - will expand tree.&quot;</span> <span class="o">%</span> <span class="n">data_item</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span>
+                <span class="s2">&quot;Item </span><span class="si">%s</span><span class="s2"> does not exist in the tree - will expand tree.&quot;</span> <span class="o">%</span> <span class="n">data_item</span>
+            <span class="p">)</span>
 
             <span class="c1"># now get a list of all parents and recurse back down towards</span>
             <span class="c1"># the node we want to load. If at any level, the data has not</span>
@@ -963,14 +957,17 @@
                 <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_item_by_unique_id</span><span class="p">(</span><span class="n">data_item</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span>
-                        <span class="s2">&quot;Data item </span><span class="si">%s</span><span class="s2"> does not exist in model - fetching parent&#39;s children...&quot;</span> <span class="o">%</span> <span class="n">data_item</span>
+                        <span class="s2">&quot;Data item </span><span class="si">%s</span><span class="s2"> does not exist in model - fetching parent&#39;s children...&quot;</span>
+                        <span class="o">%</span> <span class="n">data_item</span>
                     <span class="p">)</span>
                     <span class="c1"># this parent does not yet exist in the tree</span>
                     <span class="c1"># find the parent and kick it to expand it</span>
 
                     <span class="c1"># assume that the top level is always loaded in tree</span>
                     <span class="c1"># so that it&#39;s always safe to do data_item.parent.uid here</span>
-                    <span class="n">parent_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_item_by_unique_id</span><span class="p">(</span><span class="n">data_item</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span>
+                    <span class="n">parent_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_item_by_unique_id</span><span class="p">(</span>
+                        <span class="n">data_item</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">unique_id</span>
+                    <span class="p">)</span>
                     <span class="c1"># get model index</span>
                     <span class="n">parent_model_index</span> <span class="o">=</span> <span class="n">parent_item</span><span class="o">.</span><span class="n">index</span><span class="p">()</span>
                     <span class="c1"># kick it</span>
@@ -1046,13 +1043,13 @@
 <span class="sd">        :param node: :class:`~PySide.QtGui.QStandardItem` tree node</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># depth first traversal</span>
-        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
             <span class="n">child_node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__do_depth_first_tree_deletion</span><span class="p">(</span><span class="n">child_node</span><span class="p">)</span>
 
         <span class="c1"># delete the child leaves</span>
-        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">rowCount</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="c1"># notes about xrange syntax:</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">rowCount</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="c1"># notes about range syntax:</span>
             <span class="c1"># index will count from rowCount down to 1</span>
             <span class="c1"># to get zero based indices, subtract 1</span>
             <span class="n">node</span><span class="o">.</span><span class="n">removeRow</span><span class="p">(</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
@@ -1066,7 +1063,7 @@
 <span class="sd">        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to process</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># process children</span>
-        <span class="k">for</span> <span class="n">row_index</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
+        <span class="k">for</span> <span class="n">row_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
             <span class="n">child_item</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">row_index</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__remove_unique_id_r</span><span class="p">(</span><span class="n">child_item</span><span class="p">)</span>
 
@@ -1082,7 +1079,7 @@
 <span class="sd">        :param uid: The unique id of the work that failed</span>
 <span class="sd">        :param msg: The error message returned for the failure</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">uid</span> <span class="o">=</span> <span class="n">sanitize_qt</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span> <span class="c1"># qstring on pyqt, str on pyside</span>
+        <span class="n">uid</span> <span class="o">=</span> <span class="n">sanitize_qt</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span>  <span class="c1"># qstring on pyqt, str on pyside</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="n">sanitize_qt</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__current_work_id</span> <span class="o">!=</span> <span class="n">uid</span><span class="p">:</span>
@@ -1137,7 +1134,9 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bg_load_thumbs</span><span class="p">:</span>
                     <span class="c1"># worker thread already loaded the thumbnail in as a QImage.</span>
                     <span class="c1"># call a separate method.</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_populate_thumbnail_image</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">sg_field</span><span class="p">,</span> <span class="n">thumbnail</span><span class="p">,</span> <span class="n">thumbnail_path</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_populate_thumbnail_image</span><span class="p">(</span>
+                        <span class="n">item</span><span class="p">,</span> <span class="n">sg_field</span><span class="p">,</span> <span class="n">thumbnail</span><span class="p">,</span> <span class="n">thumbnail_path</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># worker thread only ensured that the image exists</span>
                     <span class="c1"># call method to populate it</span>
@@ -1205,7 +1204,9 @@
                     <span class="k">else</span><span class="p">:</span>
                         <span class="c1"># this item has a well defined parent</span>
                         <span class="c1"># see if this exists in the tree</span>
-                        <span class="n">parent_model_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_item_by_unique_id</span><span class="p">(</span><span class="n">parent_data_item</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span>
+                        <span class="n">parent_model_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_item_by_unique_id</span><span class="p">(</span>
+                            <span class="n">parent_data_item</span><span class="o">.</span><span class="n">unique_id</span>
+                        <span class="p">)</span>
 
                     <span class="k">if</span> <span class="n">parent_model_item</span><span class="p">:</span>
                         <span class="c1"># The parent exists in the view. It might not because of</span>
@@ -1214,7 +1215,9 @@
                         <span class="c1"># the new ones now. If not, we let fetchMore does its job</span>
                         <span class="c1"># later in lazy loading mode.</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">canFetchMore</span><span class="p">(</span><span class="n">parent_model_item</span><span class="o">.</span><span class="n">index</span><span class="p">()):</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Creating new model item for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">data_item</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span>
+                                <span class="s2">&quot;Creating new model item for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">data_item</span>
+                            <span class="p">)</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">_create_item</span><span class="p">(</span><span class="n">parent_model_item</span><span class="p">,</span> <span class="n">data_item</span><span class="p">)</span>
 
                 <span class="k">elif</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">DELETED</span><span class="p">:</span>
@@ -1250,7 +1253,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Autodesk.
+        &copy; Copyright 2020, Autodesk.
 
     </p>
   </div> 
@@ -1271,7 +1274,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.6.1',
+            VERSION:'v5.7.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

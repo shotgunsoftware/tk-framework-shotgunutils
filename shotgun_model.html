@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Model &mdash; tk-framework-shotgunutils v5.6.1 documentation</title>
+  <title>Shotgun Model &mdash; tk-framework-shotgunutils v5.7.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.6.1 documentation" href="index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.7.1 documentation" href="index.html"/>
         <link rel="next" title="Shotgun Hierarchy Model" href="shotgun_hierarchy_model.html"/>
         <link rel="prev" title="The Shotgun Utilities Framework" href="index.html"/> 
 
@@ -133,7 +133,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.6.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.7.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -265,13 +265,13 @@ things.</li>
 search criteria, use a Proxy Model (typically <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QSortFilterProxyModel.html#PySide.QtGui.QSortFilterProxyModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QSortFilterProxyModel</span></code></a>).</li>
 <li>If you want to control the way items are displayed in the view, consider using the Shotgun delegates
 module which is part of the Qt widgets framework. For more information, see
-<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/views.html#views.WidgetDelegate" title="(in tk-framework-qtwidgets vv2.8.3)"><code class="xref py py-class docutils literal"><span class="pre">WidgetDelegate</span></code></a></li>
+<a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/views.html#views.WidgetDelegate" title="(in tk-framework-qtwidgets vv2.8.6)"><code class="xref py py-class docutils literal"><span class="pre">WidgetDelegate</span></code></a></li>
 </ul>
 </div>
 <div class="section" id="progress-spinner">
 <h3>Progress Spinner<a class="headerlink" href="#progress-spinner" title="Permalink to this headline">¶</a></h3>
 <p>The model emits several signals at various points in its refresh cycle. If you want a spinner
-to pop up to indicate that data is being loaded, simply add a <a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/overlay_widget.html#overlay_widget.ShotgunModelOverlayWidget" title="(in tk-framework-qtwidgets vv2.8.3)"><code class="xref py py-class docutils literal"><span class="pre">ShotgunModelOverlayWidget</span></code></a>
+to pop up to indicate that data is being loaded, simply add a <a class="reference external" href="http://developer.shotgunsoftware.com/tk-framework-qtwidgets/overlay_widget.html#overlay_widget.ShotgunModelOverlayWidget" title="(in tk-framework-qtwidgets vv2.8.6)"><code class="xref py py-class docutils literal"><span class="pre">ShotgunModelOverlayWidget</span></code></a>
 between your view and model, like this:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">overlay_widget</span> <span class="o">=</span> <span class="n">tank</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s2">&quot;tk-framework-qtwidgets&quot;</span><span class="p">,</span> <span class="s2">&quot;overlay_widget&quot;</span><span class="p">)</span>
 
@@ -321,13 +321,13 @@ normal ShotgunModel can also be subclassed from this class.</p>
 <em class="property">class </em><code class="descclassname">shotgun_model.</code><code class="descname">SimpleShotgunModel</code><span class="sig-paren">(</span><em>parent</em>, <em>bg_task_manager=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/simple_shotgun_model.html#SimpleShotgunModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.SimpleShotgunModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">shotgun_model.shotgun_model.ShotgunModel</span></code></p>
 <p>Convenience wrapper around the Shotgun model for quick and easy access.</p>
-<p>Use this when you want to prototype data modeling or if your are looking 
-for a simple flat data set reflecting a shotgun query. All you need to do 
-is to instantiate the class (typically once, in your constructor) and then 
-call <a class="reference internal" href="#shotgun_model.SimpleShotgunModel.load_data" title="shotgun_model.SimpleShotgunModel.load_data"><code class="xref py py-meth docutils literal"><span class="pre">load_data()</span></code></a> to specify which shotgun query to load up in the model. 
-Subsequently call <a class="reference internal" href="#shotgun_model.SimpleShotgunModel.load_data" title="shotgun_model.SimpleShotgunModel.load_data"><code class="xref py py-meth docutils literal"><span class="pre">load_data()</span></code></a> whenever you wish to change the Shotgun 
+<p>Use this when you want to prototype data modeling or if your are looking
+for a simple flat data set reflecting a shotgun query. All you need to do
+is to instantiate the class (typically once, in your constructor) and then
+call <a class="reference internal" href="#shotgun_model.SimpleShotgunModel.load_data" title="shotgun_model.SimpleShotgunModel.load_data"><code class="xref py py-meth docutils literal"><span class="pre">load_data()</span></code></a> to specify which shotgun query to load up in the model.
+Subsequently call <a class="reference internal" href="#shotgun_model.SimpleShotgunModel.load_data" title="shotgun_model.SimpleShotgunModel.load_data"><code class="xref py py-meth docutils literal"><span class="pre">load_data()</span></code></a> whenever you wish to change the Shotgun
 query associated with the model.</p>
-<p>This class derives from <a class="reference internal" href="#shotgun_model.ShotgunModel" title="shotgun_model.ShotgunModel"><code class="xref py py-class docutils literal"><span class="pre">ShotgunModel</span></code></a> so all the customization methods 
+<p>This class derives from <a class="reference internal" href="#shotgun_model.ShotgunModel" title="shotgun_model.ShotgunModel"><code class="xref py py-class docutils literal"><span class="pre">ShotgunModel</span></code></a> so all the customization methods
 available in the normal <a class="reference internal" href="#shotgun_model.ShotgunModel" title="shotgun_model.ShotgunModel"><code class="xref py py-class docutils literal"><span class="pre">ShotgunModel</span></code></a> can also be subclassed from this class.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -403,10 +403,10 @@ to the icon for the entity type if available.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>entity_type</strong> &#8211; The type of the entities that should be loaded into this model.</li>
-<li><strong>filters</strong> &#8211; A list of filters to be applied to entities in the model - these 
-will be passed to the Shotgun API find() call when populating the 
+<li><strong>filters</strong> &#8211; A list of filters to be applied to entities in the model - these
+will be passed to the Shotgun API find() call when populating the
 model</li>
-<li><strong>hierarchy</strong> &#8211; List of Shotgun fields that will be used to define the structure 
+<li><strong>hierarchy</strong> &#8211; List of Shotgun fields that will be used to define the structure
 of the items in the model.</li>
 <li><strong>fields</strong> &#8211; List of Shotgun fields to populate the items in the model with.
 These will be passed to the Shotgun API find() call when populating
@@ -446,7 +446,7 @@ type, otherwise None.</td>
 <dl class="method">
 <dt id="shotgun_model.ShotgunEntityModel.get_entities">
 <code class="descname">get_entities</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_entity_model.html#ShotgunEntityModel.get_entities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunEntityModel.get_entities" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get entities for the current item by traversing up the tree and pulling entity information 
+<dd><p>Get entities for the current item by traversing up the tree and pulling entity information
 from each item if possible</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -456,7 +456,7 @@ from each item if possible</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list of Shotgun entity dictionaries in the order they were found starting from
 the specified item.  Each dictionary will contain all the entity information stored
-by the model which is usually determined by the list of fields passed during 
+by the model which is usually determined by the list of fields passed during
 construction plus name/code, type and id.<p>For non-leaf items that represent Shotgun entities, the dictionary will typically
 just contain name, type and id.</p>
 </td>
@@ -475,8 +475,8 @@ just contain name, type and id.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> (<a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QStandardItem</span></code></a>) &#8211; The item to retrieve the entity details for.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A Shotgun entity dictionary for the item if it represents an entity, otherwise 
-None.  The dictionary will contain all the entity information stored by the model 
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A Shotgun entity dictionary for the item if it represents an entity, otherwise
+None.  The dictionary will contain all the entity information stored by the model
 which is usually determined by the list of fields passed during construction plus
 name/code, type and id.</td>
 </tr>
@@ -1213,7 +1213,7 @@ level tree node, it may return:</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Autodesk.
+        &copy; Copyright 2020, Autodesk.
 
     </p>
   </div> 
@@ -1234,7 +1234,7 @@ level tree node, it may return:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v5.6.1',
+            VERSION:'v5.7.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
