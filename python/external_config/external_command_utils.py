@@ -10,6 +10,13 @@
 import sys
 import sgtk
 
+#############################################################################
+# WARNING!!!! Any code in this file will be used by the current config
+# and the config for which we'll run external commands. That config may have
+# a much older Toolkit core and as such may be missing features. So try to be
+# conservative when making changes and do not use post 0.18 features from
+# Toolkit, such as sgtk.util.is_*, used for OS detection.
+
 FORMAT_GENERATION = 5
 
 
@@ -58,13 +65,12 @@ def enabled_on_current_os(properties):
     :returns: True if enabled, False if not.
     """
     if "deny_platforms" in properties:
-        curr_os = (
-            "Linux"
-            if sgtk.util.is_linux()
-            else "Mac"
-            if sgtk.util.is_macos()
-            else "Windows"
-        )
+        if sys.platform.startswith("linux"):
+            curr_os = "Linux"
+        elif sys.platform == "win32":
+            curr_os = "Windows"
+        else:
+            curr_os = "Mac"
         if curr_os in properties["deny_platforms"]:
             # not enabled on this platform
             return False
