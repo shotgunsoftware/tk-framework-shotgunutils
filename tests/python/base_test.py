@@ -10,7 +10,7 @@
 
 import os
 
-from tank_test.tank_test_base import *
+from tank_test.tank_test_base import TankTestBase
 import sgtk
 
 

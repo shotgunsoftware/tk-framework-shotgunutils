@@ -52,8 +52,8 @@ class WorkerThread(QtCore.QThread):
         """
         Shut down the thread and wait for it to exit before returning
         """
-        self._results_dispatcher = None
         with self._mutex:
+            self._results_dispatcher = None
             self._process_tasks = False
             self._wait_condition.notifyAll()
         self.wait()
