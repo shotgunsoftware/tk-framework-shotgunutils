@@ -350,6 +350,12 @@ def main():
         else:
             os.environ["PYTHONPATH"] = arg_data["pythonpath"]
 
+    # The Python interpreter is now loaded and we don't want to pollute the
+    # processes spawned from this script and let the embedded interpreter set (or not!)
+    # his own home.
+    if "PYTHONHOME" in os.environ:
+        del os.environ["PYTHONHOME"]
+
     # Add application icon
     qt_application.setWindowIcon(qt_importer.QtGui.QIcon(arg_data["icon_path"]))
 
