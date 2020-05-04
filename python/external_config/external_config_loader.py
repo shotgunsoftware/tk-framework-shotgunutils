@@ -166,7 +166,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
         # in rapid succession.
         #
         # note: not using a generator since we are deleting in the loop
-        for task_id in self._task_ids.keys():
+        for task_id in list(self._task_ids.keys()):
             if self._task_ids[task_id] == project_id:
                 logger.debug(
                     "Discarding existing request_configurations request for project %s"
