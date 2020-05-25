@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>external_config.external_command &mdash; tk-framework-shotgunutils v5.7.3 documentation</title>
+  <title>external_config.external_command &mdash; tk-framework-shotgunutils v5.7.4 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.7.3 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.7.4 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -119,7 +119,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.7.3.<br>
+    <b>tk-framework-shotgunutils</b> v5.7.4.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -213,7 +213,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;generation&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">external_command_utils</span><span class="o">.</span><span class="n">FORMAT_GENERATION</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">False</span></div>
+            <span class="k">return</span> <span class="kc">False</span></div>
 
     <span class="nd">@classmethod</span>
 <div class="viewcode-block" id="ExternalCommand.is_valid_data"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.is_valid_data">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
@@ -229,14 +229,14 @@
         <span class="c1"># have right now in SG Create, but it&#39;s entirely possible (and maybe</span>
         <span class="c1"># advisable) to check other things that are file/directory paths on</span>
         <span class="c1"># disk that might no longer exist.</span>
-        <span class="n">icon_passes</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">icon_passes</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;commands&quot;</span><span class="p">,</span> <span class="p">[]):</span>
             <span class="n">icon</span> <span class="o">=</span> <span class="n">command</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;icon&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">icon</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">icon</span><span class="p">):</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Icon path in cached data is invalid: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">icon</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;External commands will be recached.&quot;</span><span class="p">)</span>
-                <span class="n">icon_passes</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="n">icon_passes</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">break</span>
 
         <span class="k">return</span> <span class="n">icon_passes</span></div>
@@ -353,10 +353,10 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="s2">&quot;Icon provided does not exist and will not be used: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">icon</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_icon</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_icon</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># No icon provided.</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_icon</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_icon</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -532,7 +532,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span>
 
-    <span class="nd">@interpreter.setter</span>
+    <span class="nd">@interpreter</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">interpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the command&#39;s Python interpreter path.</span>
@@ -542,7 +542,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span> <span class="o">=</span> <span class="n">interpreter</span>
 
-<div class="viewcode-block" id="ExternalCommand.execute"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ExternalCommand.execute"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Executes the external command in a separate process.</span>
 
@@ -573,7 +573,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execute</span><span class="p">(</span><span class="n">pre_cache</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ExternalCommand.execute_on_multiple_entities"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.execute_on_multiple_entities">[docs]</a>    <span class="k">def</span> <span class="nf">execute_on_multiple_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">entity_ids</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ExternalCommand.execute_on_multiple_entities"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.execute_on_multiple_entities">[docs]</a>    <span class="k">def</span> <span class="nf">execute_on_multiple_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">entity_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Executes the external command in a separate process. This method</span>
 <span class="sd">        provides support for executing commands that support being run on</span>
@@ -599,7 +599,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execute</span><span class="p">(</span><span class="n">pre_cache</span><span class="p">,</span> <span class="n">entity_ids</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">entity_ids</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">entity_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Executes the external command in a separate process.</span>
 
@@ -691,7 +691,7 @@
             <span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="c1"># Leave PYTHONPATH the way we found it.</span>
-            <span class="k">if</span> <span class="n">current_pypath</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">current_pypath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">del</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PYTHONPATH&quot;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PYTHONPATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_pypath</span>
@@ -732,7 +732,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.7.3',
+            VERSION:'v5.7.4',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

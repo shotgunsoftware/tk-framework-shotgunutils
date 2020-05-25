@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>external_config.config.config_base &mdash; tk-framework-shotgunutils v5.7.3 documentation</title>
+  <title>external_config.config.config_base &mdash; tk-framework-shotgunutils v5.7.4 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.7.3 documentation" href="../../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.7.4 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -119,7 +119,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.7.3.<br>
+    <b>tk-framework-shotgunutils</b> v5.7.4.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -277,7 +277,7 @@
         <span class="c1"># boolean to track if commands have been requested for this instance</span>
         <span class="c1"># this is related to how configs tracking remote latest versions</span>
         <span class="c1"># have their list of commands memoized for performance reasons.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_commands_evaluated_once</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_commands_evaluated_once</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -309,7 +309,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span>
 
-    <span class="nd">@interpreter.setter</span>
+    <span class="nd">@interpreter</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">interpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets the configuration&#39;s Python interpreter.</span>
@@ -331,13 +331,13 @@
 <span class="sd">        Returns ``True`` if this is the primary configuration, ``False`` if not.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">pipeline_configuration_name</span> <span class="ow">is</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pipeline_configuration_name</span> <span class="ow">is</span> <span class="kc">None</span>
             <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline_configuration_name</span> <span class="o">==</span> <span class="s2">&quot;Primary&quot;</span>
         <span class="p">):</span>
             <span class="c1"># all fallback configs are primary</span>
-            <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">return</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">return</span> <span class="kc">False</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -346,7 +346,7 @@
 <span class="sd">        used in the current environment, and ``False`` if the configuration is</span>
 <span class="sd">        inaccessible for some reason.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -362,7 +362,7 @@
 <span class="sd">        The associated pipeline configuration id or ``None`` if not defined.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># note: subclassed implementations will override this return value</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">pipeline_configuration_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -370,7 +370,7 @@
 <span class="sd">        The name of the associated pipeline configuration or ``None`` if not defined.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># note: subclassed implementations will override this return value</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">descriptor_uri</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -397,10 +397,10 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># note: subclassed implementations will override this return value</span>
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="ExternalConfiguration.request_commands"><a class="viewcode-back" href="../../../external_config.html#external_config.ExternalConfiguration.request_commands">[docs]</a>    <span class="k">def</span> <span class="nf">request_commands</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">link_entity_type</span><span class="p">,</span> <span class="n">engine_fallback</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">link_entity_type</span><span class="p">,</span> <span class="n">engine_fallback</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Request commands for the given shotgun entity.</span>
@@ -454,7 +454,7 @@
         <span class="c1"># This needs to be implemented by subclasses.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;_compute_config_hash_keys is not implemented.&quot;</span><span class="p">)</span>
 
-    <span class="nd">@sgtk.LogManager.log_timing</span>
+    <span class="nd">@sgtk</span><span class="o">.</span><span class="n">LogManager</span><span class="o">.</span><span class="n">log_timing</span>
     <span class="k">def</span> <span class="nf">_request_commands</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">link_entity_type</span><span class="p">,</span> <span class="n">engine_fallback</span>
     <span class="p">):</span>
@@ -472,7 +472,7 @@
 <span class="sd">            entity id and project, request generate commands for the fallback engine</span>
 <span class="sd">            specified. This can be useful in backwards compatibility scenarios.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_commands_evaluated_once</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_commands_evaluated_once</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1"># figure out if we have a suitable config for this on disk already</span>
         <span class="n">cache_hash</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_config_hash_keys</span><span class="p">(</span>
@@ -486,12 +486,12 @@
             <span class="c1"># reasons, we memoize it, and only evaluate the list of</span>
             <span class="c1"># commands once per external config instance, tracked</span>
             <span class="c1"># via the _commands_evaluated_once boolean.</span>
-            <span class="n">cached_data</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">cached_data</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">cached_data</span> <span class="o">=</span> <span class="n">file_cache</span><span class="o">.</span><span class="n">load_cache</span><span class="p">(</span><span class="n">cache_hash</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="p">(</span>
-            <span class="n">cached_data</span> <span class="ow">is</span> <span class="bp">None</span>
+            <span class="n">cached_data</span> <span class="ow">is</span> <span class="kc">None</span>
             <span class="ow">or</span> <span class="ow">not</span> <span class="n">ExternalCommand</span><span class="o">.</span><span class="n">is_compatible</span><span class="p">(</span><span class="n">cached_data</span><span class="p">)</span>
             <span class="ow">or</span> <span class="ow">not</span> <span class="n">ExternalCommand</span><span class="o">.</span><span class="n">is_valid_data</span><span class="p">(</span><span class="n">cached_data</span><span class="p">)</span>
         <span class="p">):</span>
@@ -500,7 +500,7 @@
             <span class="c1"># if entity_id is None, we need to figure out an actual entity id</span>
             <span class="c1"># go get items for. This is done by choosing the most recently</span>
             <span class="c1"># updated item for the project</span>
-            <span class="k">if</span> <span class="n">entity_id</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">entity_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
                     <span class="s2">&quot;No entity id specified. Resolving most most recent </span><span class="si">%s</span><span class="s2"> &quot;</span>
                     <span class="s2">&quot;id for project.&quot;</span> <span class="o">%</span> <span class="n">entity_type</span>
@@ -513,7 +513,7 @@
                     <span class="n">order</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;field_name&quot;</span><span class="p">:</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;direction&quot;</span><span class="p">:</span> <span class="s2">&quot;desc&quot;</span><span class="p">}],</span>
                 <span class="p">)</span>
 
-                <span class="k">if</span> <span class="n">most_recent_id</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">most_recent_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                         <span class="s2">&quot;There are no </span><span class="si">%s</span><span class="s2"> objects for project </span><span class="si">%s</span><span class="s2">.&quot;</span>
                         <span class="o">%</span> <span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">project_id</span><span class="p">)</span>
@@ -532,7 +532,7 @@
                 <span class="c1"># we don&#39;t have all of the engines cached on disk yet, this will cause</span>
                 <span class="c1"># them to be cached prior to us getting a list of commands.</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_run_external_process</span><span class="p">(</span>
-                    <span class="n">cache_path</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine_name</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="bp">True</span>
+                    <span class="n">cache_path</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine_name</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="kc">True</span>
                 <span class="p">)</span>
 
             <span class="k">except</span> <span class="n">SubprocessCalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -549,7 +549,7 @@
                             <span class="n">entity_type</span><span class="p">,</span>
                             <span class="n">entity_id</span><span class="p">,</span>
                             <span class="n">engine_fallback</span><span class="p">,</span>
-                            <span class="n">pre_cache</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                            <span class="n">pre_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="p">)</span>
                     <span class="k">except</span> <span class="n">SubprocessCalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Error retrieving actions: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
@@ -560,14 +560,14 @@
             <span class="c1"># now try again</span>
             <span class="n">cached_data</span> <span class="o">=</span> <span class="n">file_cache</span><span class="o">.</span><span class="n">load_cache</span><span class="p">(</span><span class="n">cache_hash</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">cached_data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cached_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Could not locate cached commands for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">cached_data</span>
 
-    <span class="nd">@sgtk.LogManager.log_timing</span>
+    <span class="nd">@sgtk</span><span class="o">.</span><span class="n">LogManager</span><span class="o">.</span><span class="n">log_timing</span>
     <span class="k">def</span> <span class="nf">_run_external_process</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">cache_path</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">engine_name</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="bp">False</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">cache_path</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">engine_name</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Helper method. Executes the external caching process.</span>
@@ -639,7 +639,7 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;External caching complete. Output: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">output</span><span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="c1"># Leave PYTHONPATH the way we found it.</span>
-            <span class="k">if</span> <span class="n">current_pypath</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">current_pypath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">del</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PYTHONPATH&quot;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PYTHONPATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_pypath</span>
@@ -743,7 +743,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'v5.7.3',
+            VERSION:'v5.7.4',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.7.3 documentation</title>
+  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.7.4 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.7.3 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.7.4 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -119,7 +119,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.7.3.<br>
+    <b>tk-framework-shotgunutils</b> v5.7.4.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -240,7 +240,7 @@
     <span class="n">async_item_retrieval_completed</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">include_root</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include_root</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the Hierarcy model.</span>
@@ -273,7 +273,7 @@
 <span class="sd">            If ``include_root`` is `None`, no root item will be added.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ShotgunHierarchyModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">parent</span><span class="p">,</span> <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="n">bg_task_manager</span>
+            <span class="n">parent</span><span class="p">,</span> <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="n">bg_task_manager</span>
         <span class="p">)</span>
 
         <span class="c1"># check for hierarchy support</span>
@@ -285,9 +285,9 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy_is_supported</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log_warning</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy_not_supported_reason</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_seed_entity_field</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_fields</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seed_entity_field</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_fields</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_include_root</span> <span class="o">=</span> <span class="n">include_root</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_schema_generation</span> <span class="o">=</span> <span class="n">schema_generation</span>
@@ -546,7 +546,7 @@
             <span class="n">item</span><span class="o">.</span><span class="n">setForeground</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_empty_item_color</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunHierarchyModel._load_data"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel._load_data">[docs]</a>    <span class="k">def</span> <span class="nf">_load_data</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">seed_entity_field</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">entity_fields</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cache_seed</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">seed_entity_field</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entity_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache_seed</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is the main method to use to configure the hierarchy model. You</span>
@@ -603,12 +603,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
             <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">()</span>
             <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="s2">&quot;WARNING: Hierarchy not supported&quot;</span><span class="p">)</span>
-            <span class="n">item</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">root</span><span class="o">.</span><span class="n">appendRow</span><span class="p">([</span><span class="n">item</span><span class="p">])</span>
             <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="s2">&quot;- </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy_not_supported_reason</span><span class="p">,))</span>
-            <span class="n">item</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">root</span><span class="o">.</span><span class="n">appendRow</span><span class="p">([</span><span class="n">item</span><span class="p">])</span>
-            <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">return</span> <span class="kc">False</span>
 
         <span class="c1"># we are changing the query</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">query_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
@@ -617,7 +617,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_entity_paths</span><span class="p">(</span><span class="n">root</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="n">root</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">!=</span> <span class="s2">&quot;/&quot;</span> <span class="k">else</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="n">root</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">!=</span> <span class="s2">&quot;/&quot;</span> <span class="k">else</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_seed_entity_field</span> <span class="o">=</span> <span class="n">seed_entity_field</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_entity_fields</span> <span class="o">=</span> <span class="n">entity_fields</span> <span class="ow">or</span> <span class="p">{}</span>
@@ -654,7 +654,7 @@
         <span class="c1"># construct the top level nodes</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Creating model nodes for top level of data tree...&quot;</span><span class="p">)</span>
         <span class="n">nodes_generated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">generate_child_nodes</span><span class="p">(</span>
-            <span class="bp">None</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_item</span>
+            <span class="kc">None</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_item</span>
         <span class="p">)</span>
 
         <span class="c1"># if we got some data, emit cache load signal</span>
@@ -675,7 +675,7 @@
 <span class="sd">        :param item: The :class:`~PySide.QtGui.QStandardItem` item to set the</span>
 <span class="sd">            icon for.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">icon</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">icon</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">item_kind</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">kind</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">item_kind</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;entity&quot;</span><span class="p">,</span> <span class="s2">&quot;entity_type&quot;</span><span class="p">]:</span>
@@ -706,13 +706,13 @@
         <span class="n">item</span> <span class="o">=</span> <span class="n">ShotgunHierarchyItem</span><span class="p">()</span>
 
         <span class="c1"># set construction flags</span>
-        <span class="n">item</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># keep tabs of which items we are creating</span>
-        <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">IS_SG_MODEL_ROLE</span><span class="p">)</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">IS_SG_MODEL_ROLE</span><span class="p">)</span>
 
         <span class="c1"># we have not fetched more data for this item yet</span>
-        <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SG_ITEM_FETCHED_MORE</span><span class="p">)</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SG_ITEM_FETCHED_MORE</span><span class="p">)</span>
 
         <span class="c1"># update values</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_item</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">data_item</span><span class="p">)</span>
@@ -763,7 +763,7 @@
     <span class="c1">############################################################################</span>
     <span class="c1"># private methods</span>
 
-    <span class="k">def</span> <span class="nf">__compute_cache_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache_seed</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__compute_cache_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache_seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates and returns a cache path to use for this instance&#39;s query.</span>
 
@@ -859,18 +859,18 @@
             <span class="ow">and</span> <span class="n">server_caps</span><span class="o">.</span><span class="n">version</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="p">):</span>
             <span class="k">return</span> <span class="p">(</span>
-                <span class="bp">False</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">,</span>
                 <span class="s2">&quot;The version of SG being used does not support querying for the project &quot;</span>
                 <span class="s2">&quot;hierarchy. v7.0.2 is required.&quot;</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sg_connection</span><span class="p">,</span> <span class="s2">&quot;nav_expand&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">(</span>
-                <span class="bp">False</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">,</span>
                 <span class="s2">&quot;The version of the python-api being used does not support querying for &quot;</span>
                 <span class="s2">&quot;the project hierarchy.&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
@@ -903,7 +903,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.7.3',
+            VERSION:'v5.7.4',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

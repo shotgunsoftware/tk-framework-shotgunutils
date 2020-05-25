@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_model &mdash; tk-framework-shotgunutils v5.7.3 documentation</title>
+  <title>shotgun_model.shotgun_model &mdash; tk-framework-shotgunutils v5.7.4 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.7.3 documentation" href="../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.7.4 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -119,7 +119,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.7.3.<br>
+    <b>tk-framework-shotgunutils</b> v5.7.4.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -225,10 +225,10 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parent</span><span class="p">,</span>
-        <span class="n">download_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">download_thumbs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-        <span class="n">bg_task_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">bg_task_manager</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param parent: Parent object.</span>
@@ -251,7 +251,7 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">ShotgunModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">bg_load_thumbs</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="p">)</span>
 
         <span class="c1"># default value so that __repr__ can be used before load_data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__schema_generation</span> <span class="o">=</span> <span class="n">schema_generation</span>
 
@@ -291,14 +291,14 @@
 
         <span class="k">if</span> <span class="n">entity_type</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;...entity type is not part of this model!&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
         <span class="n">uid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">get_uid_from_entity_id</span><span class="p">(</span><span class="n">entity_id</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">uid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">uid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># no match in data store</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;...entity id is not part of the data set&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_item_loaded</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span></div>
 
@@ -313,7 +313,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">item_from_entity</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunModel.get_filters"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.get_filters">[docs]</a>    <span class="k">def</span> <span class="nf">get_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
@@ -352,7 +352,7 @@
             <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">filters</span></div>
 
-<div class="viewcode-block" id="ShotgunModel.ensure_data_is_loaded"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.ensure_data_is_loaded">[docs]</a>    <span class="k">def</span> <span class="nf">ensure_data_is_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ShotgunModel.ensure_data_is_loaded"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.ensure_data_is_loaded">[docs]</a>    <span class="k">def</span> <span class="nf">ensure_data_is_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Recursively processes the model and ensures that all data</span>
 <span class="sd">        has been loaded into the model.</span>
@@ -371,7 +371,7 @@
 <span class="sd">                      If set to None, the entire tree will be loaded.</span>
 <span class="sd">        :type index: :class:`~PySide.QtCore.QModelIndex`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># load everything</span>
             <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">()</span>
 
@@ -413,12 +413,12 @@
         <span class="n">filters</span><span class="p">,</span>
         <span class="n">hierarchy</span><span class="p">,</span>
         <span class="n">fields</span><span class="p">,</span>
-        <span class="n">order</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">seed</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">limit</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">columns</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">additional_filter_presets</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">editable_columns</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">additional_filter_presets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">editable_columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is the main method to use to configure the model. You basically</span>
@@ -558,7 +558,7 @@
         <span class="c1"># construct the top level nodes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Creating model nodes for top level of data tree...&quot;</span><span class="p">)</span>
         <span class="n">nodes_generated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">generate_child_nodes</span><span class="p">(</span>
-            <span class="bp">None</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_item</span>
+            <span class="kc">None</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_item</span>
         <span class="p">)</span>
 
         <span class="c1"># if we got some data, emit cache load signal</span>
@@ -616,7 +616,7 @@
                     <span class="c1"># note: we check for all fields containing &quot;image&quot;</span>
                     <span class="c1"># so that we&#39;ll catch a field such as &#39;sg_sequence.Sequence.image&#39;</span>
                     <span class="c1"># as well as a straight &#39;image&#39; field</span>
-                    <span class="k">if</span> <span class="s2">&quot;image&quot;</span> <span class="ow">in</span> <span class="n">field</span> <span class="ow">and</span> <span class="n">sg_data</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s2">&quot;image&quot;</span> <span class="ow">in</span> <span class="n">field</span> <span class="ow">and</span> <span class="n">sg_data</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="c1"># we have a thumb we are supposed to download!</span>
                         <span class="c1"># get the thumbnail - store the unique id we get back from</span>
                         <span class="c1"># the data retrieve in a dict for fast lookup later</span>
@@ -821,7 +821,7 @@
         <span class="n">item</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">field_display_name</span><span class="p">)</span>
 
         <span class="c1"># keep tabs of which items we are creating</span>
-        <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">IS_SG_MODEL_ROLE</span><span class="p">)</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">IS_SG_MODEL_ROLE</span><span class="p">)</span>
 
         <span class="c1"># flag if item has children, for the fetchMore functionality</span>
         <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="ow">not</span> <span class="n">data_item</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SG_ITEM_HAS_CHILDREN</span><span class="p">)</span>
@@ -860,14 +860,14 @@
         <span class="k">if</span> <span class="n">data_item</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_populate_item</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">data_item</span><span class="o">.</span><span class="n">shotgun_data</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_populate_item</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_populate_item</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_tooltip</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">data_item</span><span class="o">.</span><span class="n">shotgun_data</span><span class="p">)</span>
 
     <span class="c1">########################################################################################</span>
     <span class="c1"># private methods</span>
 
-    <span class="k">def</span> <span class="nf">__compute_cache_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache_seed</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__compute_cache_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache_seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates and returns a cache path to use for this instance&#39;s query.</span>
 
@@ -981,7 +981,7 @@
         <span class="n">value</span> <span class="o">=</span> <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">value</span> <span class="ow">and</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="s2">&quot;Unnamed&quot;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">value</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
@@ -1002,7 +1002,7 @@
 
             <span class="k">return</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">formatted_values</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;Unnamed&quot;</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -1040,7 +1040,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'v5.7.3',
+            VERSION:'v5.7.4',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
