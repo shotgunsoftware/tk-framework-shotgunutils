@@ -432,6 +432,9 @@ class ExternalConfiguration(QtCore.QObject):
                 icon_path=self._bundle.engine.icon_256,
                 pre_cache=pre_cache,
                 pythonpath=current_pypath,
+                user=sgtk.authentication.serialize_user(
+                    sgtk.get_authenticated_user(), use_json=True
+                ),
             )
         )
 

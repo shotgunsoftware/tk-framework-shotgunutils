@@ -485,6 +485,9 @@ class ExternalCommand(object):
                 supports_multiple_selection=self._sg_supports_multiple_selection,
                 pre_cache=pre_cache,
                 pythonpath=current_pypath,
+                user=sgtk.authentication.serialize_user(
+                    sgtk.get_authenticated_user(), use_json=True
+                ),
             )
         )
         # compose the command we want to run

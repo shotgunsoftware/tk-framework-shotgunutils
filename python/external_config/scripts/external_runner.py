@@ -215,6 +215,7 @@ def _import_py_file(python_path, name):
 
 
 def start_engine(
+    user,
     configuration_uri,
     pipeline_config_id,
     plugin_id,
@@ -227,6 +228,7 @@ def start_engine(
     """
     Bootstraps into an engine.
 
+    :param ShotgunUser user: The user that have to be used while bootstraping the engine.
     :param str configuration_uri: URI to bootstrap (for when pipeline config id is unknown).
     :param int pipeline_config_id: Associated pipeline config id
     :param str plugin_id: Plugin id to use for bootstrap
@@ -245,7 +247,7 @@ def start_engine(
     logger.debug("Preparing ToolkitManager for command cache bootstrap.")
 
     # Setup the bootstrap manager.
-    manager = sgtk.bootstrap.ToolkitManager()
+    manager = sgtk.bootstrap.ToolkitManager(user)
     manager.plugin_id = plugin_id
     manager.bundle_cache_fallback_paths = bundle_cache_fallback_paths
 
@@ -354,11 +356,13 @@ def main():
     qt_application.setWindowIcon(qt_importer.QtGui.QIcon(arg_data["icon_path"]))
 
     action = arg_data["action"]
+    user = sgtk.authentication.deserialize_user(arg_data["user"])
     engine = None
 
     if action == "cache_actions":
         try:
             engine = start_engine(
+                user,
                 arg_data["configuration_uri"],
                 arg_data["pipeline_config_id"],
                 arg_data["plugin_id"],
@@ -403,6 +407,7 @@ def main():
 
     elif action == "execute_command":
         engine = start_engine(
+            user,
             arg_data["configuration_uri"],
             arg_data["pipeline_config_id"],
             arg_data["plugin_id"],
