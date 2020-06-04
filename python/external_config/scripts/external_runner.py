@@ -359,6 +359,10 @@ def main():
     user = sgtk.authentication.deserialize_user(arg_data["user"])
     engine = None
 
+    user = None
+    if arg_data.get("user", None):
+        user = sgtk.authentication.deserialize_user(arg_data["user"])
+
     if action == "cache_actions":
         try:
             engine = start_engine(
