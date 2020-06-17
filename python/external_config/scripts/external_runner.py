@@ -489,7 +489,7 @@ if __name__ == "__main__":
 
             info = AppKit.NSBundle.mainBundle().infoDictionary()
             info["LSBackgroundOnly"] = "1"
-        except:
+        except Exception:
             # If you don't have AppKit available, it's fine,
             # nothing critical will happen.
             pass
