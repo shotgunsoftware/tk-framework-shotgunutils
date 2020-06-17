@@ -458,6 +458,12 @@ if __name__ == "__main__":
     """
     Main script entry point
     """
+
+    # unpack file with arguments payload
+    arg_data_file = sys.argv[2]
+    with open(arg_data_file, "rb") as fh:
+        arg_data = sgtk.util.pickle.load(fh)
+
     task_runner = QtTaskRunner(main)
 
     # For qt5, we may get this error:
@@ -474,6 +480,19 @@ if __name__ == "__main__":
     # any previous environment
     if "TANK_CURRENT_PC" in os.environ:
         del os.environ["TANK_CURRENT_PC"]
+
+    if arg_data["background"]:
+        # Done in a try block because it will only work On MacOS
+        # if the Python interpreter have the pyobjc package installed.
+        try:
+            import AppKit
+
+            info = AppKit.NSBundle.mainBundle().infoDictionary()
+            info["LSBackgroundOnly"] = "1"
+        except:
+            # If you don't have AppKit available, it's fine,
+            # nothing critical will happen.
+            pass
 
     # start up our QApp now
     qt_application = qt_importer.QtGui.QApplication([])

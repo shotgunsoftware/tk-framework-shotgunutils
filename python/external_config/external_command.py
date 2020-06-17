@@ -478,6 +478,7 @@ class ExternalCommand(object):
         args_file = create_parameter_file(
             dict(
                 action="execute_command",
+                background=False,
                 callback_name=self._callback_name,
                 configuration_uri=self._descriptor_uri,
                 pipeline_config_id=self._pipeline_config_id,
