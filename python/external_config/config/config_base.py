@@ -426,6 +426,7 @@ class ExternalConfiguration(QtCore.QObject):
         args_file = create_parameter_file(
             dict(
                 action="cache_actions",
+                background=True,
                 cache_path=cache_path,
                 configuration_uri=self.descriptor_uri,
                 pipeline_config_id=self.pipeline_configuration_id,
