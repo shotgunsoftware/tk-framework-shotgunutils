@@ -457,17 +457,6 @@ class ExternalCommand(object):
             os.path.join(os.path.dirname(__file__), "scripts", "external_runner.py")
         )
 
-        # We might have paths in sys.path that aren't in PYTHONPATH. We'll make
-        # sure that we prepend our current pathing to that prior to spawning any
-        # subprocesses.
-        #
-        # One additional step that we'll take is to send the original PYTHONPATH
-        # to the external_runner we spawn, and ask it to set PYTHONPATH to that
-        # value before it does its work. That means we have everything required
-        # for external_runner when we run it, but we'll keep the environment
-        # clean for any process that it might spawn, like when launching a DCC.
-        current_pypath = os.environ.get("PYTHONPATH")
-
         serialized_user = None
         if sgtk.get_authenticated_user():
             serialized_user = sgtk.authentication.serialize_user(
@@ -491,7 +480,6 @@ class ExternalCommand(object):
                 icon_path=self._bundle.engine.icon_256,
                 supports_multiple_selection=self._sg_supports_multiple_selection,
                 pre_cache=pre_cache,
-                pythonpath=current_pypath,
                 user=serialized_user,
             )
         )
@@ -504,18 +492,13 @@ class ExternalCommand(object):
         ]
         logger.debug("Command arguments: %s", args)
 
-        for path in sys.path:
-            sgtk.util.prepend_path_to_env_var("PYTHONPATH", path)
-
         try:
             # Note: passing a copy of the environment in resolves some odd behavior with
             # the environment of processes spawned from the external_runner. This caused
             # some very bad behavior where it looked like PYTHONPATH was inherited from
             # this top-level environment rather than what is being set in external_runner
             # prior to launch.
-            output = sgtk.util.process.subprocess_check_output(
-                args, env=os.environ.copy()
-            )
+            output = sgtk.util.process.subprocess_check_output(args)
             logger.debug("External execution complete. Output: %s" % output)
         except sgtk.util.process.SubprocessCalledProcessError as e:
             # caching failed!
@@ -523,12 +506,6 @@ class ExternalCommand(object):
                 "Error executing remote command %s: %s" % (self, e.output)
             )
         finally:
-            # Leave PYTHONPATH the way we found it.
-            if current_pypath is None:
-                del os.environ["PYTHONPATH"]
-            else:
-                os.environ["PYTHONPATH"] = current_pypath
-
             # clean up temp file
             sgtk.util.filesystem.safe_delete_file(args_file)
 
