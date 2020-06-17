@@ -417,6 +417,12 @@ class ExternalConfiguration(QtCore.QObject):
         # subprocesses.
         current_pypath = os.environ.get("PYTHONPATH")
 
+        serialized_user = None
+        if sgtk.get_authenticated_user():
+            serialized_user = sgtk.authentication.serialize_user(
+                sgtk.get_authenticated_user(), use_json=True
+            )
+
         args_file = create_parameter_file(
             dict(
                 action="cache_actions",
@@ -432,6 +438,7 @@ class ExternalConfiguration(QtCore.QObject):
                 icon_path=self._bundle.engine.icon_256,
                 pre_cache=pre_cache,
                 pythonpath=current_pypath,
+                user=serialized_user,
             )
         )
 
