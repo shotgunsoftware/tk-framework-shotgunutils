@@ -412,11 +412,6 @@ class ExternalConfiguration(QtCore.QObject):
             )
         )
 
-        # We might have paths in sys.path that aren't in PYTHONPATH. We'll make
-        # sure that we prepend our current pathing to that prior to spawning any
-        # subprocesses.
-        current_pypath = os.environ.get("PYTHONPATH")
-
         serialized_user = None
         if sgtk.get_authenticated_user():
             serialized_user = sgtk.authentication.serialize_user(
@@ -438,7 +433,6 @@ class ExternalConfiguration(QtCore.QObject):
                 # the engine icon becomes the process icon
                 icon_path=self._bundle.engine.icon_256,
                 pre_cache=pre_cache,
-                pythonpath=current_pypath,
                 user=serialized_user,
             )
         )
@@ -457,9 +451,6 @@ class ExternalConfiguration(QtCore.QObject):
         # to prompt the user to re-authenticate.
         sgtk.get_authenticated_user().refresh_credentials()
 
-        for path in sys.path:
-            sgtk.util.prepend_path_to_env_var("PYTHONPATH", path)
-
         try:
             # Note: passing a copy of the environment in resolves some odd behavior with
             # the environment of processes spawned from the external_runner. This caused
@@ -468,15 +459,9 @@ class ExternalConfiguration(QtCore.QObject):
             # prior to launch. This is less critical here when caching configs, because
             # we're unlikely to spawn additional processes from the external_runner, but
             # just to cover our backsides, this is safest.
-            output = subprocess_check_output(args, env=os.environ.copy())
+            output = subprocess_check_output(args)
             logger.debug("External caching complete. Output: %s" % output)
         finally:
-            # Leave PYTHONPATH the way we found it.
-            if current_pypath is None:
-                del os.environ["PYTHONPATH"]
-            else:
-                os.environ["PYTHONPATH"] = current_pypath
-
             # clean up temp file
             sgtk.util.filesystem.safe_delete_file(args_file)
 

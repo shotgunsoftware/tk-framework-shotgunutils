@@ -342,16 +342,6 @@ def main():
     with open(arg_data_file, "rb") as fh:
         arg_data = sgtk.util.pickle.load(fh)
 
-    # Set the PYTHONPATH if requested. This is an important step, as our parent
-    # process might have polluted PYTHONPATH with data required for this
-    # external_runner script to run properly, but that would cause problems
-    # when a process is spawned from this script, like when launching a DCC.
-    if "pythonpath" in arg_data:
-        if arg_data["pythonpath"] is None and "PYTHONPATH" in os.environ:
-            del os.environ["PYTHONPATH"]
-        else:
-            os.environ["PYTHONPATH"] = arg_data["pythonpath"]
-
     # Add application icon
     qt_application.setWindowIcon(qt_importer.QtGui.QIcon(arg_data["icon_path"]))
 
