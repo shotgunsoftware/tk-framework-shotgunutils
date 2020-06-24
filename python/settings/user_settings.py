@@ -148,7 +148,9 @@ class UserSettings(object):
             #
             # To get around this, we need to write a string inside the QSettings, so
             # use pickle.
-            value_str =six.ensure_str(cPickle.dumps(sanitize_qt(value), protocol=0), encoding="latin1")
+            value_str = six.ensure_str(
+                cPickle.dumps(sanitize_qt(value), protocol=0), encoding="latin1"
+            )
             self.__settings.setValue(full_name, value_str)
         except Exception as e:
             self.__fw.log_warning(
