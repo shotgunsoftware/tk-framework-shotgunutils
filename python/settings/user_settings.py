@@ -9,10 +9,12 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
-from tank_vendor import six
 from sgtk.platform.qt import QtCore
 from sgtk import TankError
 from ..shotgun_model import sanitize_qt
+
+from tank_vendor import six
+from tank_vendor.six.moves import cPickle
 
 
 class UserSettings(object):
@@ -111,6 +113,7 @@ class UserSettings(object):
         :param scope: The scope for this settings value, as defined by the constants belonging to this class.
 
         """
+
         full_name = self.__resolve_settings_name(name, scope)
         self.__fw.log_debug("User Settings Manager: Storing %s" % full_name)
         try:
@@ -144,9 +147,9 @@ class UserSettings(object):
             # never used the pickler in our code in the first place.
             #
             # To get around this, we need to write a string inside the QSettings, so
-            # use sgtk.util.pickle
-            value_str = sgtk.util.pickle.dumps(sanitize_qt(value))
-            self.__settings.setValue(full_name, six.ensure_str(value_str))
+            # use pickle.
+            value_str =six.ensure_str(cPickle.dumps(sanitize_qt(value), protocol=0), encoding="latin1")
+            self.__settings.setValue(full_name, value_str)
         except Exception as e:
             self.__fw.log_warning(
                 "Error storing user setting '%s'. Error details: %s" % (full_name, e)
@@ -171,11 +174,11 @@ class UserSettings(object):
             if raw_value is None:
                 resolved_val = default
             else:
-                resolved_val = sgtk.util.pickle.loads(six.ensure_binary(raw_value))
-                resolved_val = sanitize_qt(resolved_val)
+                binary_value = six.ensure_binary(raw_value, encoding="latin1")
+                resolved_val = sanitize_qt(sgtk.util.pickle.loads(binary_value))
         except Exception as e:
             self.__fw.log_warning(
-                "Error retrieving value for stored user setting '%s' - reverting to "
+                "Error retrieving value for stored user setting '%s' - reverting "
                 "to default value. Error details: %s" % (full_name, e)
             )
             resolved_val = default

@@ -69,7 +69,7 @@ def sanitize_for_qt_model(val):
     unicode errors. A safe strategy for storing unicode data inside
     Qt model roles is therefore to ensure everything is converted to
     unicode prior to insertion into the model. This method ensures
-    that. All string values will be coonverted to unicode. UTF-8
+    that. All string values will be converted to unicode. UTF-8
     is assumed for all strings:
 
     in:  {"a":"aaa", "b": 123, "c": {"x":"y", "z":"aa"}, "d": [ {"x":"y", "z":"aa"} ] }
@@ -108,8 +108,8 @@ def sanitize_qt(val):
     """
     Converts a value to a tk friendly and consistent representation.
     - QVariants are converted to native python structures
-    - QStrings are coverted to utf-8 encoded strs
-    - unicode objets are converted to utf-8 encoded strs
+    - QStrings are converted to utf-8 encoded strs
+    - unicode objects are converted to utf-8 encoded strs
 
     :param val: input object
     :returns: cleaned up data
