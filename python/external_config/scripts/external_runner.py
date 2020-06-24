@@ -215,6 +215,7 @@ def _import_py_file(python_path, name):
 
 
 def start_engine(
+    user,
     configuration_uri,
     pipeline_config_id,
     plugin_id,
@@ -227,6 +228,7 @@ def start_engine(
     """
     Bootstraps into an engine.
 
+    :param ShotgunUser user: The user that have to be used while bootstraping the engine.
     :param str configuration_uri: URI to bootstrap (for when pipeline config id is unknown).
     :param int pipeline_config_id: Associated pipeline config id
     :param str plugin_id: Plugin id to use for bootstrap
@@ -245,7 +247,7 @@ def start_engine(
     logger.debug("Preparing ToolkitManager for command cache bootstrap.")
 
     # Setup the bootstrap manager.
-    manager = sgtk.bootstrap.ToolkitManager()
+    manager = sgtk.bootstrap.ToolkitManager(user)
     manager.plugin_id = plugin_id
     manager.bundle_cache_fallback_paths = bundle_cache_fallback_paths
 
@@ -340,25 +342,21 @@ def main():
     with open(arg_data_file, "rb") as fh:
         arg_data = sgtk.util.pickle.load(fh)
 
-    # Set the PYTHONPATH if requested. This is an important step, as our parent
-    # process might have polluted PYTHONPATH with data required for this
-    # external_runner script to run properly, but that would cause problems
-    # when a process is spawned from this script, like when launching a DCC.
-    if "pythonpath" in arg_data:
-        if arg_data["pythonpath"] is None and "PYTHONPATH" in os.environ:
-            del os.environ["PYTHONPATH"]
-        else:
-            os.environ["PYTHONPATH"] = arg_data["pythonpath"]
-
     # Add application icon
     qt_application.setWindowIcon(qt_importer.QtGui.QIcon(arg_data["icon_path"]))
 
     action = arg_data["action"]
+    user = sgtk.authentication.deserialize_user(arg_data["user"])
     engine = None
+
+    user = None
+    if arg_data.get("user", None):
+        user = sgtk.authentication.deserialize_user(arg_data["user"])
 
     if action == "cache_actions":
         try:
             engine = start_engine(
+                user,
                 arg_data["configuration_uri"],
                 arg_data["pipeline_config_id"],
                 arg_data["plugin_id"],
@@ -403,6 +401,7 @@ def main():
 
     elif action == "execute_command":
         engine = start_engine(
+            user,
             arg_data["configuration_uri"],
             arg_data["pipeline_config_id"],
             arg_data["plugin_id"],
@@ -449,6 +448,12 @@ if __name__ == "__main__":
     """
     Main script entry point
     """
+
+    # unpack file with arguments payload
+    arg_data_file = sys.argv[2]
+    with open(arg_data_file, "rb") as fh:
+        arg_data = sgtk.util.pickle.load(fh)
+
     task_runner = QtTaskRunner(main)
 
     # For qt5, we may get this error:
@@ -465,6 +470,19 @@ if __name__ == "__main__":
     # any previous environment
     if "TANK_CURRENT_PC" in os.environ:
         del os.environ["TANK_CURRENT_PC"]
+
+    if arg_data["background"]:
+        # Done in a try block because it will only work On MacOS
+        # if the Python interpreter have the pyobjc package installed.
+        try:
+            import AppKit
+
+            info = AppKit.NSBundle.mainBundle().infoDictionary()
+            info["LSBackgroundOnly"] = "1"
+        except Exception:
+            # If you don't have AppKit available, it's fine,
+            # nothing critical will happen.
+            pass
 
     # start up our QApp now
     qt_application = qt_importer.QtGui.QApplication([])
