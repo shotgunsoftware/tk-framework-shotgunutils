@@ -104,3 +104,22 @@ class TestExternalConfigLoader(ExternalConfigBase):
         self.assertEqual(res_hash, "123")
         self.assertEqual(len(res_pcs), 1)
         self.assertEqual(res_pcs[0]["id"], self._pc["id"])
+
+    def test_request_configurations_twice(self):
+        """
+        Make sure requesting the same configuration twice only register it once.
+        """
+        ec = self.external_config_loader
+
+        ec.configurations_loaded = _MockedSignal()
+        ec.configurations_loaded.emit.assert_not_called()
+        self.bg_task_manager.add_task.reset_mock()
+
+        ec.request_configurations(self._project["id"])
+        self.assertEqual(len(ec._task_ids.items()), 1)
+        self.bg_task_manager.add_task.assert_called_once()
+        self.bg_task_manager.add_task.reset_mock()
+
+        ec.request_configurations(self._project["id"])
+        self.assertEqual(len(ec._task_ids.items()), 1)  # No duplicate of task ids
+        self.bg_task_manager.add_task.assert_called_once()
