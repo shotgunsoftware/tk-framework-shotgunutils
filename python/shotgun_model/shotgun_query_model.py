@@ -650,7 +650,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         """
         # the default implementation sets the icon
         thumb = QtGui.QPixmap.fromImage(image)
-        item.setIcon(thumb)
+        item.setIcon(QtGui.QIcon(thumb))
 
     ############################################################################
     # protected convenience methods. these methods can be used by subclasses
