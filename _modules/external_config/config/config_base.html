@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>external_config.config.config_base &mdash; tk-framework-shotgunutils v5.7.4 documentation</title>
+  <title>external_config.config.config_base &mdash; tk-framework-shotgunutils v5.7.5 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="tk-framework-shotgunutils v5.7.4 documentation" href="../../../index.html"/>
+    <link rel="top" title="tk-framework-shotgunutils v5.7.5 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -119,7 +119,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.7.4.<br>
+    <b>tk-framework-shotgunutils</b> v5.7.5.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -587,14 +587,16 @@
             <span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="c1"># We might have paths in sys.path that aren&#39;t in PYTHONPATH. We&#39;ll make</span>
-        <span class="c1"># sure that we prepend our current pathing to that prior to spawning any</span>
-        <span class="c1"># subprocesses.</span>
-        <span class="n">current_pypath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;PYTHONPATH&quot;</span><span class="p">)</span>
+        <span class="n">serialized_user</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">get_authenticated_user</span><span class="p">():</span>
+            <span class="n">serialized_user</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">authentication</span><span class="o">.</span><span class="n">serialize_user</span><span class="p">(</span>
+                <span class="n">sgtk</span><span class="o">.</span><span class="n">get_authenticated_user</span><span class="p">(),</span> <span class="n">use_json</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
 
         <span class="n">args_file</span> <span class="o">=</span> <span class="n">create_parameter_file</span><span class="p">(</span>
             <span class="nb">dict</span><span class="p">(</span>
                 <span class="n">action</span><span class="o">=</span><span class="s2">&quot;cache_actions&quot;</span><span class="p">,</span>
+                <span class="n">background</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">cache_path</span><span class="o">=</span><span class="n">cache_path</span><span class="p">,</span>
                 <span class="n">configuration_uri</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor_uri</span><span class="p">,</span>
                 <span class="n">pipeline_config_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline_configuration_id</span><span class="p">,</span>
@@ -606,7 +608,7 @@
                 <span class="c1"># the engine icon becomes the process icon</span>
                 <span class="n">icon_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">icon_256</span><span class="p">,</span>
                 <span class="n">pre_cache</span><span class="o">=</span><span class="n">pre_cache</span><span class="p">,</span>
-                <span class="n">pythonpath</span><span class="o">=</span><span class="n">current_pypath</span><span class="p">,</span>
+                <span class="n">user</span><span class="o">=</span><span class="n">serialized_user</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
 
@@ -624,9 +626,6 @@
         <span class="c1"># to prompt the user to re-authenticate.</span>
         <span class="n">sgtk</span><span class="o">.</span><span class="n">get_authenticated_user</span><span class="p">()</span><span class="o">.</span><span class="n">refresh_credentials</span><span class="p">()</span>
 
-        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
-            <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">prepend_path_to_env_var</span><span class="p">(</span><span class="s2">&quot;PYTHONPATH&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
-
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># Note: passing a copy of the environment in resolves some odd behavior with</span>
             <span class="c1"># the environment of processes spawned from the external_runner. This caused</span>
@@ -635,15 +634,9 @@
             <span class="c1"># prior to launch. This is less critical here when caching configs, because</span>
             <span class="c1"># we&#39;re unlikely to spawn additional processes from the external_runner, but</span>
             <span class="c1"># just to cover our backsides, this is safest.</span>
-            <span class="n">output</span> <span class="o">=</span> <span class="n">subprocess_check_output</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">subprocess_check_output</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;External caching complete. Output: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">output</span><span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
-            <span class="c1"># Leave PYTHONPATH the way we found it.</span>
-            <span class="k">if</span> <span class="n">current_pypath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">del</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PYTHONPATH&quot;</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PYTHONPATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_pypath</span>
-
             <span class="c1"># clean up temp file</span>
             <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">filesystem</span><span class="o">.</span><span class="n">safe_delete_file</span><span class="p">(</span><span class="n">args_file</span><span class="p">)</span>
 
@@ -743,7 +736,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'v5.7.4',
+            VERSION:'v5.7.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
