@@ -156,7 +156,7 @@ def _handle_qt_warnings():
     """
     This will suppress the libpng warnings, but allow any
     other warnings or errors from QT to print.
-    We do this because warning by default get printed to stderr
+    We do this because by default warnings get printed to stderr
     and so they get displayed in the browser when running actions.
     """
 
