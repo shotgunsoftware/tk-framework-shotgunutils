@@ -11,11 +11,20 @@
 from __future__ import print_function
 import os
 import re
-import imp
 import sys
 import errno
 import inspect
 import traceback
+
+# Until we remove the use of imp from this code,
+# we must suppress the warning here as it will pop up in the Shotgun browser
+# integration as a message box, when running in Python 3.4 >.
+import warnings
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    import imp
+
 
 # handle imports
 path_to_sgtk = sys.argv[1]
@@ -141,6 +150,44 @@ class QtTaskRunner(qt_importer.QtCore.QObject):
                 # There are windows, but they're all hidden, which means we should
                 # be safe to shut down.
                 self.completed.emit()
+
+
+def _handle_qt_warnings():
+    """
+    This will suppress the libpng warnings, but allow any
+    other warnings or errors from QT to print.
+    We do this because by default warnings get printed to stderr
+    and so they get displayed in the browser when running actions.
+    """
+
+    def handler(*args):
+        # We handle the args this way since Qt 5 passes 3 args, type, context and message,
+        # Where as Qt 4 only passes 2, type, and message.
+        msg_type = args[0]
+        msg_string = args[-1]
+
+        # Suppress this warning.
+        if msg_string == "libpng warning: iCCP: known incorrect sRGB profile":
+            return
+
+        if msg_type in [
+            qt_importer.QtCore.QtMsgType.QtWarningMsg,
+            qt_importer.QtCore.QtMsgType.QtCriticalMsg,
+            qt_importer.QtCore.QtMsgType.QtFatalMsg,
+        ]:
+            # By default Qt would usually print these to stderr so we should do the same.
+            print(msg_string, file=sys.stderr)
+        else:
+            # This is probably a debug or info message so just print these normally.
+            print(msg_string)
+
+    # Add a message handler so we can suppress the warnings about libpng.
+    try:
+        # QT 4
+        qt_importer.QtCore.qInstallMsgHandler(handler)
+    except AttributeError:
+        # QT 5
+        qt_importer.QtCore.qInstallMessageHandler(handler)
 
 
 def _get_core_python_path(engine):
@@ -448,6 +495,9 @@ if __name__ == "__main__":
     """
     Main script entry point
     """
+
+    # Suppress unwanted Qt warnings.
+    _handle_qt_warnings()
 
     # unpack file with arguments payload
     arg_data_file = sys.argv[2]
