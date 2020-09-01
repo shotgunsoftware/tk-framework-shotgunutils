@@ -380,7 +380,7 @@ class BackgroundTaskManager(QtCore.QObject):
         # create a new worker thread - note, there are two different implementations of the WorkerThread class
         # that use two different recipes.  Although WorkerThreadB is arguably more correct it has some issues
         # in PyQt so WorkerThread is currently preferred - see the notes in the class above for further details
-        thread = WorkerThread(self._results_dispatcher, self)
+        thread = WorkerThread(self._results_dispatcher)
         if not isinstance(thread, WorkerThread):
             # for some reason (probably memory corruption somewhere else) I've occasionally seen the above
             # creation of a worker thread return another arbitrary object!  Added this in here so the code
