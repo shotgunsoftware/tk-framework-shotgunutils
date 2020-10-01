@@ -46,11 +46,14 @@ class TestBackgroundTaskManager(TestShotgunUtilsFramework):
             )
             task_ids.append(task_id)
 
+        self._is_stopping = False
+        self._stop_background_task_manager()
+
         # Add a task that will shut down the background task manager.
         # Note that since the manager will be shutdown by the callback, it means
         # no task completed callback will be invoked.
-        self._manager.add_task(
-            self._stop_background_task_manager, upstream_task_ids=task_ids
+        self._stop_background_task_manager_task_id = self._manager.add_task(
+            self._stop_background_task_manager_task, upstream_task_ids=task_ids
         )
         # Start processing tasks and launch the main application loop.
         self._manager.start_processing()
@@ -60,10 +63,24 @@ class TestBackgroundTaskManager(TestShotgunUtilsFramework):
         # the list in order and we should have an empty one.
         assert self._expected_priorities == []
 
-    def _stop_background_task_manager(self):
+    def _stop_background_task_manager_task(self):
         """
         Shuts down the background task manager
         """
+        # Raises a flag that the single shot timer will catch
+        # and close the thread.
+        self._is_stopping = True
+
+    def _stop_background_task_manager(self):
+        """
+        Stops the background task manager.
+        """
+        if not self._is_stopping:
+            sgtk.platform.qt.QtCore.QTimer.singleShot(
+                1000, self._stop_background_task_manager
+            )
+            return
+
         self._manager.shut_down()
         # Processes events until the dispatcher thread is done.
         while self._manager._results_dispatcher.isFinished() is False:
@@ -71,9 +88,11 @@ class TestBackgroundTaskManager(TestShotgunUtilsFramework):
         # Now we can quit the app.
         self._qapp.quit()
 
-    def _assert_priority_expected_cb(self, _, _2, priority_result):
+    def _assert_priority_expected_cb(self, task_id, _, priority_result):
         """
         Ensure the task that has just finished had the expected priority.
         """
+        if task_id == self._stop_background_task_manager_task_id:
+            return
         assert priority_result == self._expected_priorities[-1]
         self._expected_priorities.pop()

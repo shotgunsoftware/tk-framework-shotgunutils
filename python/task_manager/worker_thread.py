@@ -13,24 +13,23 @@ Worker thread for the background manager.
 """
 
 import traceback
-from sgtk.platform.qt import QtCore
-from threading import Lock, Condition
+from threading import Lock, Condition, Thread
 
 
-class WorkerThread(QtCore.QThread):
+class WorkerThread(Thread):
     """
     Asynchronous worker thread that can run tasks in a separate thread.  This implementation
     implements a custom run method that loops over tasks until asked to quit.
     """
 
-    def __init__(self, results_dispatcher, parent=None):
+    def __init__(self, results_dispatcher):
         """
         Construction
 
         :param results_dispatcher: Results dispatcher from the background task manager.
         :param parent:  The parent QObject for this thread
         """
-        QtCore.QThread.__init__(self, parent)
+        super(WorkerThread, self).__init__()
 
         self._task = None
         self._process_tasks = True
@@ -56,7 +55,7 @@ class WorkerThread(QtCore.QThread):
             self._results_dispatcher = None
             self._process_tasks = False
             self._wait_condition.notifyAll()
-        self.wait()
+        self.join()
 
     def run(self):
         """
@@ -99,7 +98,7 @@ class WorkerThread(QtCore.QThread):
                         self._results_dispatcher.emit_failure(
                             self, task_to_process, str(e), tb
                         )
-        except RuntimeError:
+        except RuntimeError as e:
             # We have a situation in Qt5 where it appears that the thread
             # is being garbage collected more quickly than in Qt4. In this
             # case, we can be pretty sure that we're being shut down, and
