@@ -10,6 +10,10 @@
 
 import os
 import sgtk
+import zlib
+
+from tank_vendor.shotgun_api3.lib import six
+
 from sgtk.platform.qt import QtCore, QtGui
 
 logger = sgtk.platform.get_logger(__name__)
@@ -194,7 +198,12 @@ class ConfigStateModel(ShotgunModel):
             # note: there *may* be a bug when deleting items out of a shotgun
             #       model in certain cases, so in order to ensure we
             #       get a correct representation, include entity_ids in the hash.
-            return hash(str(sg_data + self.entity_ids))
+            sg_data_hash = zlib.adler32(six.ensure_binary(str(sg_data))) & 0xFFFFFFFF
+            entity_ids_hash = (
+                zlib.adler32(six.ensure_binary(str(self.entity_ids))) & 0xFFFFFFFF
+            )
+
+            return str(sg_data_hash) + str(entity_ids_hash)
 
     def _get_sg_data(self):
         """
