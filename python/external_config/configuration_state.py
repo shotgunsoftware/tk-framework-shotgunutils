@@ -10,7 +10,9 @@
 
 import os
 import sgtk
-import zlib
+import hashlib
+import json
+import six
 
 from tank_vendor.shotgun_api3.lib import six
 
@@ -198,12 +200,11 @@ class ConfigStateModel(ShotgunModel):
             # note: there *may* be a bug when deleting items out of a shotgun
             #       model in certain cases, so in order to ensure we
             #       get a correct representation, include entity_ids in the hash.
-            sg_data_hash = zlib.adler32(six.ensure_binary(str(sg_data))) & 0xFFFFFFFF
-            entity_ids_hash = (
-                zlib.adler32(six.ensure_binary(str(self.entity_ids))) & 0xFFFFFFFF
-            )
 
-            return str(sg_data_hash) + str(entity_ids_hash)
+            hash_data = {"sg_data": self._get_sg_data(), "entity_ids": self.entity_ids}
+            hash_data_str = json.dumps(hash_data, sort_keys=True)
+
+            return hashlib.md5(six.ensure_binary(hash_data_str)).hexdigest()
 
     def _get_sg_data(self):
         """
