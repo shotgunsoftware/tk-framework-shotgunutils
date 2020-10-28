@@ -12,7 +12,6 @@ import os
 import sgtk
 import hashlib
 import json
-import six
 
 from tank_vendor.shotgun_api3.lib import six
 
