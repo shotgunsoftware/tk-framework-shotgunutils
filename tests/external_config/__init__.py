@@ -80,6 +80,7 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
         )
 
         self.external_config = self.framework.import_module("external_config")
+        self.shotgun_model = self.framework.import_module("shotgun_model")
 
         self.bg_task_manager = Mock()
         self.bg_task_manager.task_completed = _MockedSignal()

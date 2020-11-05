@@ -99,7 +99,7 @@ class ShotgunModel(ShotgunQueryModel):
         """
         # note that all of the ids may not be loaded into the actual model
         # yet so we have to query the data handler for this.
-        return self._data_handler.get_entity_ids()
+        return self._data_handler.get_entity_ids() if self._data_handler else []
 
     def item_from_entity(self, entity_type, entity_id):
         """
