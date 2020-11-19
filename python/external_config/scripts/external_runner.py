@@ -460,7 +460,6 @@ def main():
         )
 
         callback_name = arg_data["callback_name"]
-        supports_multi_select = arg_data["supports_multiple_selection"]
 
         # try to set the process icon to be the tk app icon
         if engine.commands[callback_name]["properties"].get("app"):
@@ -472,14 +471,11 @@ def main():
             )
 
         # Now execute the payload command payload
-        #
-        # multi-select actions use an old execution methodology
-        # and are only used by the tk-shotgun engine, where they
-        # will continue to be supported but not added in other places.
-        if supports_multi_select:
-            # multi select commands are expected to be routed via
-            # a special method using the following interface:
-            # execute_old_style_command(cmd_name, entity_type, entity_ids)
+
+        # tk-shotgun apps are the only ones that supply a value for "supports_multiple_selection"
+        # These apps' commands/callbacks are also the only ones that expect the extra parameters
+        # entity_type and entity_ids to be passed in so we need to use a special method with them
+        if arg_data["supports_multiple_selection"] is not None:
             engine.execute_old_style_command(
                 callback_name, arg_data["entity_type"], arg_data["entity_ids"]
             )
