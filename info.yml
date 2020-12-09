@@ -22,7 +22,7 @@ description: "A Collection of Qt objects and utilities to simplify app developme
 
 # Required minimum versions for this item to run
 requires_shotgun_version:
-requires_core_version: "v0.19.1"
+requires_core_version: "v0.19.18"
 
 # the frameworks required to run this app
 frameworks:
