@@ -326,7 +326,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             "this method will not emit the standard before/after reset "
             "signals. It is possible that this method may be implemented in "
             "later versions of the framework. For more information, please "
-            "contact us at {}".format(sgtk.support_url)
+            "contact us at {}.".format(sgtk.support_url)
         )
 
     def hasChildren(self, index):
