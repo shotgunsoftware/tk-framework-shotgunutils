@@ -475,7 +475,7 @@ def main():
         # tk-shotgun apps are the only ones that supply a value for "supports_multiple_selection"
         # These apps' commands/callbacks are also the only ones that expect the extra parameters
         # entity_type and entity_ids to be passed in so we need to use a special method with them
-        if arg_data["supports_multiple_selection"] is not None:
+        if arg_data["supports_multiple_selection"] is True:
             engine.execute_old_style_command(
                 callback_name, arg_data["entity_type"], arg_data["entity_ids"]
             )
