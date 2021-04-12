@@ -874,10 +874,11 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         # delete the child leaves
         for index in range(node.rowCount(), 0, -1):
-            # notes about range syntax:
-            # index will count from rowCount down to 1
-            # to get zero based indices, subtract 1
-            node.removeRow(index - 1)
+            # Use `takeRow` instead of `removeRow` to prevent model from deleting
+            # the data before we're done using it. takeRow does not free the memory
+            # but we own the objects and do not keep a reference to it, so garbage
+            # collection will take care of freeing up the memory for us.
+            node.takeRow(index - 1)
 
     def __remove_unique_id_r(self, item):
         """
