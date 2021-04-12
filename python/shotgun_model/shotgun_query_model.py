@@ -877,7 +877,15 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             # notes about range syntax:
             # index will count from rowCount down to 1
             # to get zero based indices, subtract 1
-            node.removeRow(index - 1)
+            try:
+                node.removeRow(index - 1)
+
+            except RuntimeError:
+                # RuntimeError will occur due to Internal C++ QStandardItem object already deleted
+                # (e.g. removing a child node can cause the parent node to be deleted, but the
+                # parent may still have more children to delete). Ensure that all child nodes are
+                # deleted by running the depth first deletion process again from the root item.
+                self.__do_depth_first_tree_deletion(self.invisibleRootItem())
 
     def __remove_unique_id_r(self, item):
         """
