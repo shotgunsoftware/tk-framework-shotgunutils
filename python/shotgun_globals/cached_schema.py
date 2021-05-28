@@ -270,7 +270,7 @@ class CachedShotgunSchema(QtCore.QObject):
 
             # so download it from shotgun!
             self._bundle.log_debug(
-                "Starting to download new metaschema from Shotgun..."
+                "Starting to download new metaschema from ShotGrid..."
             )
 
             if self.__sg_data_retrievers:
@@ -308,7 +308,7 @@ class CachedShotgunSchema(QtCore.QObject):
                     return
 
             fields = ["bg_color", "code", "name"]
-            self._bundle.log_debug("Starting to download status list from Shotgun...")
+            self._bundle.log_debug("Starting to download status list from ShotGrid...")
 
             if self.__sg_data_retrievers:
                 # pick the first one
@@ -319,7 +319,7 @@ class CachedShotgunSchema(QtCore.QObject):
             else:
                 self._bundle.log_warning(
                     "No data retrievers registered with this schema manager. "
-                    "Cannot load Shotgun statuses."
+                    "Cannot load ShotGrid statuses."
                 )
 
     def _on_worker_failure(self, uid, msg):
@@ -351,7 +351,7 @@ class CachedShotgunSchema(QtCore.QObject):
         data = shotgun_model.sanitize_qt(data)
 
         if uid in self._sg_schema_query_ids:
-            self._bundle.log_debug("Metaschema arrived from Shotgun...")
+            self._bundle.log_debug("Metaschema arrived from ShotGrid...")
             project_id = self._sg_schema_query_ids[uid]
 
             # store the schema in memory
@@ -381,7 +381,7 @@ class CachedShotgunSchema(QtCore.QObject):
                 )
 
         elif uid in self._sg_status_query_ids:
-            self._bundle.log_debug("Status list arrived from Shotgun...")
+            self._bundle.log_debug("Status list arrived from ShotGrid...")
             project_id = self._sg_status_query_ids[uid]
 
             # store status in memory

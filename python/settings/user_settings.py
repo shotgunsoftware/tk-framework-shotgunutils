@@ -43,7 +43,7 @@ class UserSettings(object):
 
         self.__fw = sgtk.platform.current_bundle()
 
-        self.__settings = QtCore.QSettings("Shotgun Software", bundle.name)
+        self.__settings = QtCore.QSettings("ShotGrid Software", bundle.name)
         self.__fw.log_debug("Initialized settings manager for '%s'" % bundle.name)
 
         # now organize various keys
