@@ -437,7 +437,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         """
         raise NotImplementedError(
             "The '_update_item' method has not been "
-            "implemented for this ShotGridQueryModel subclass."
+            "implemented for this ShotgunQueryModel subclass."
         )
 
     ############################################################################
