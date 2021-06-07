@@ -10,52 +10,52 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_query_model &mdash; tk-framework-shotgunutils v5.7.10 documentation</title>
+  <title>shotgun_model.shotgun_query_model &mdash; tk-framework-shotgunutils v5.8.0 documentation</title>
   
 
   
   
+  
+  
 
   
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-    <link rel="top" title="tk-framework-shotgunutils v5.7.10 documentation" href="../../index.html"/>
-        <link rel="up" title="Module code" href="../index.html"/> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
     <a href='http://developer.shotgunsoftware.com'>
     
         <img style='width: 191px;
-                height: 60px; 
+                height: 60px;
                 margin: 2px;
-                border-radius: 0px; 
-                padding: 0px;' 
+                border-radius: 0px;
+                padding: 0px;'
             src='../../_static/logo@2x.png'/>
     
     </a>
@@ -88,7 +88,10 @@
     
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_model.html">Shotgun Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_hierarchy_model.html">Shotgun Hierarchy Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../shotgun_data.html">Shotgun Asynchronous Data Retriever</a></li>
@@ -106,26 +109,26 @@
     <div style='margin-top: 50px;
                 margin-left: 10px;
                 margin-right: 10px;
-                padding: 10px; 
-                color: #b3b3b3; 
+                padding: 10px;
+                color: #b3b3b3;
                 font-size: 70%;
                 border-radius: 3px;
                 background-color: #444;
                 line-height: 18px;
-                '>    
+                '>
     <style>
-        a.custom_post_menu { display: inline; 
-                             padding: 0px; 
+        a.custom_post_menu { display: inline;
+                             padding: 0px;
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.7.10.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.0.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
     For more information, please visit
     <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
-    The code associated with this documentation can be found 
+    The code associated with this documentation can be found
     <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
 
     </div>
@@ -139,34 +142,52 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../index.html">tk-framework-shotgunutils</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tk-framework-shotgunutils</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
           <li><a href="../index.html">Module code</a> &raquo;</li>
-      
-    <li>shotgun_model.shotgun_query_model</li>
+        
+      <li>shotgun_model.shotgun_query_model</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -1049,10 +1070,11 @@
 
         <span class="c1"># delete the child leaves</span>
         <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">rowCount</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="c1"># notes about range syntax:</span>
-            <span class="c1"># index will count from rowCount down to 1</span>
-            <span class="c1"># to get zero based indices, subtract 1</span>
-            <span class="n">node</span><span class="o">.</span><span class="n">removeRow</span><span class="p">(</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># Use `takeRow` instead of `removeRow` to prevent model from deleting</span>
+            <span class="c1"># the data before we&#39;re done using it. takeRow does not free the memory</span>
+            <span class="c1"># but we own the objects and do not keep a reference to it, so garbage</span>
+            <span class="c1"># collection will take care of freeing up the memory for us.</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">takeRow</span><span class="p">(</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__remove_unique_id_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1088,7 +1110,7 @@
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__current_work_id</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="n">full_msg</span> <span class="o">=</span> <span class="s2">&quot;Error retrieving data from Shotgun: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg</span>
+        <span class="n">full_msg</span> <span class="o">=</span> <span class="s2">&quot;Error retrieving data from ShotGrid: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_refresh_fail</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">full_msg</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_warning</span><span class="p">(</span><span class="n">full_msg</span><span class="p">)</span>
 
@@ -1158,7 +1180,7 @@
 
 <span class="sd">        :param list sg_data: Shotgun data payload.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;--&gt; Shotgun data arrived. (</span><span class="si">%s</span><span class="s2"> records)&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">sg_data</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;--&gt; ShotGrid data arrived. (</span><span class="si">%s</span><span class="s2"> records)&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">sg_data</span><span class="p">))</span>
 
         <span class="c1"># pre-process data</span>
         <span class="n">sg_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_before_data_processing</span><span class="p">(</span><span class="n">sg_data</span><span class="p">)</span>
@@ -1168,7 +1190,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Updating data model with new shotgun data...&quot;</span><span class="p">)</span>
         <span class="n">modified_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">update_data</span><span class="p">(</span><span class="n">sg_data</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Shotgun data contained </span><span class="si">%d</span><span class="s2"> modifications&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">modified_items</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span>
+            <span class="s2">&quot;ShotGrid data contained </span><span class="si">%d</span><span class="s2"> modifications&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">modified_items</span><span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">modified_items</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># save cache changes to disk in the background</span>
@@ -1245,6 +1269,7 @@
 </pre></div>
 
            </div>
+           
           </div>
           <footer>
   
@@ -1253,7 +1278,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2021, Autodesk.
+        &copy; Copyright 2021, Autodesk
 
     </p>
   </div> 
@@ -1269,35 +1294,15 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'v5.7.10',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
   
  
 

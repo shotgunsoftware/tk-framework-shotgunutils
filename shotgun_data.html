@@ -7,56 +7,58 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Asynchronous Data Retriever &mdash; tk-framework-shotgunutils v5.7.10 documentation</title>
+  <title>Shotgun Asynchronous Data Retriever &mdash; tk-framework-shotgunutils v5.8.0 documentation</title>
   
 
   
   
+  
+  
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-    <link rel="top" title="tk-framework-shotgunutils v5.7.10 documentation" href="index.html"/>
-        <link rel="next" title="Background Task Processing" href="task_manager.html"/>
-        <link rel="prev" title="Shotgun Hierarchy Model" href="shotgun_hierarchy_model.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Background Task Processing" href="task_manager.html" />
+    <link rel="prev" title="Shotgun Hierarchy Model" href="shotgun_hierarchy_model.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
     <a href='http://developer.shotgunsoftware.com'>
     
         <img style='width: 191px;
-                height: 60px; 
+                height: 60px;
                 margin: 2px;
-                border-radius: 0px; 
-                padding: 0px;' 
+                border-radius: 0px;
+                padding: 0px;'
             src='_static/logo@2x.png'/>
     
     </a>
@@ -89,7 +91,10 @@
     
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="shotgun_model.html">Shotgun Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="shotgun_hierarchy_model.html">Shotgun Hierarchy Model</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Shotgun Asynchronous Data Retriever</a><ul>
@@ -112,26 +117,26 @@
     <div style='margin-top: 50px;
                 margin-left: 10px;
                 margin-right: 10px;
-                padding: 10px; 
-                color: #b3b3b3; 
+                padding: 10px;
+                color: #b3b3b3;
                 font-size: 70%;
                 border-radius: 3px;
                 background-color: #444;
                 line-height: 18px;
-                '>    
+                '>
     <style>
-        a.custom_post_menu { display: inline; 
-                             padding: 0px; 
+        a.custom_post_menu { display: inline;
+                             padding: 0px;
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.7.10.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.0.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
     For more information, please visit
     <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
-    The code associated with this documentation can be found 
+    The code associated with this documentation can be found
     <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
 
     </div>
@@ -145,54 +150,74 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">tk-framework-shotgunutils</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tk-framework-shotgunutils</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Shotgun Asynchronous Data Retriever</li>
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Shotgun Asynchronous Data Retriever</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="shotgun-asynchronous-data-retriever">
+  <section id="shotgun-asynchronous-data-retriever">
 <h1>Shotgun Asynchronous Data Retriever<a class="headerlink" href="#shotgun-asynchronous-data-retriever" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="introduction">
+<section id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
 <p>The Shotgun data retriever makes it easy to pull in shotgun data and
 thumbnails in a background thread. It also manages caching of thumbnails
-on disk so that they don&#8217;t need to be retrieved over and over again.</p>
+on disk so that they don’t need to be retrieved over and over again.</p>
 <p>You start the worker thread, then you can submit a series of requests which
 will be handled by the data object. Each time data arrives, a signal is emitted with
 the details of the data. Each object will by default have its own Shotgun API connection.
-Requests are prioritized so according to their priority. For example, Shotgun <code class="docutils literal"><span class="pre">find()</span></code> queries will
+Requests are prioritized so according to their priority. For example, Shotgun <code class="docutils literal notranslate"><span class="pre">find()</span></code> queries will
 always take precedence over shotgun thumbnail downloads.</p>
-</div>
-<div class="section" id="sample-code">
+</section>
+<section id="sample-code">
 <h2>Sample Code<a class="headerlink" href="#sample-code" title="Permalink to this headline">¶</a></h2>
 <p>The sample code below shows how you can use the data retriever in your Toolkit App Code:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># import the module - note that this is using the special</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># import the module - note that this is using the special</span>
 <span class="c1"># import_framework code so it won&#39;t work outside an app</span>
 <span class="n">sg_data</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s2">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s2">&quot;shotgun_data&quot;</span><span class="p">)</span>
 
@@ -241,107 +266,96 @@ always take precedence over shotgun thumbnail downloads.</p>
         <span class="nb">print</span> <span class="s2">&quot;Data arrived: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">data</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="class-shotgundataretriever">
+</section>
+<section id="class-shotgundataretriever">
 <h2>Class ShotgunDataRetriever<a class="headerlink" href="#class-shotgundataretriever" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>Import the module into your Toolkit App using the following statement:</p>
-<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="n">shotgun_data</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s2">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s2">&quot;shotgun_data&quot;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">shotgun_data</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s2">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s2">&quot;shotgun_data&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <dl class="class">
 <dt id="shotgun_data.ShotgunDataRetriever">
-<em class="property">class </em><code class="descclassname">shotgun_data.</code><code class="descname">ShotgunDataRetriever</code><span class="sig-paren">(</span><em>parent=None</em>, <em>sg=None</em>, <em>bg_task_manager=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">shotgun_data.</code><code class="sig-name descname">ShotgunDataRetriever</code><span class="sig-paren">(</span><em class="sig-param">parent=None</em>, <em class="sig-param">sg=None</em>, <em class="sig-param">bg_task_manager=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever" title="Permalink to this definition">¶</a></dt>
 <dd><p>Asynchronous data retriever class which can be used to retrieve data and
 thumbnails from Shotgun and from disk thumbnail cache. Uses the
-<a class="reference internal" href="task_manager.html#task_manager.BackgroundTaskManager" title="task_manager.BackgroundTaskManager"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a> to run tasks in background
+<a class="reference internal" href="task_manager.html#task_manager.BackgroundTaskManager" title="task_manager.BackgroundTaskManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">BackgroundTaskManager</span></code></a> to run tasks in background
 threads and emits signals when each query has either completed or failed.
-Requests are queued up using for example the <a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.execute_find" title="shotgun_data.ShotgunDataRetriever.execute_find"><code class="xref py py-meth docutils literal"><span class="pre">execute_find()</span></code></a> and
-<a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.request_thumbnail" title="shotgun_data.ShotgunDataRetriever.request_thumbnail"><code class="xref py py-meth docutils literal"><span class="pre">request_thumbnail()</span></code></a> methods.</p>
+Requests are queued up using for example the <a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.execute_find" title="shotgun_data.ShotgunDataRetriever.execute_find"><code class="xref py py-meth docutils literal notranslate"><span class="pre">execute_find()</span></code></a> and
+<a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.request_thumbnail" title="shotgun_data.ShotgunDataRetriever.request_thumbnail"><code class="xref py py-meth docutils literal notranslate"><span class="pre">request_thumbnail()</span></code></a> methods.</p>
 <p>Requests are executed in the following priority order:</p>
 <ul class="simple">
-<li>First any thumbnails that are already cached on disk are handled.</li>
-<li>Next, shotgun find() queries are handled.</li>
-<li>Lastly thumbnail downloads are handled.</li>
+<li><p>First any thumbnails that are already cached on disk are handled.</p></li>
+<li><p>Next, shotgun find() queries are handled.</p></li>
+<li><p>Lastly thumbnail downloads are handled.</p></li>
 </ul>
 <p>The thread will emit work_completed and work_failure signals when
-tasks are completed (or fail). The <a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.clear" title="shotgun_data.ShotgunDataRetriever.clear"><code class="xref py py-meth docutils literal"><span class="pre">clear()</span></code></a> method will
+tasks are completed (or fail). The <a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.clear" title="shotgun_data.ShotgunDataRetriever.clear"><code class="xref py py-meth docutils literal notranslate"><span class="pre">clear()</span></code></a> method will
 clear the current queue. The currently processing item will finish
 processing and may send out signals even after a clear. Make sure you
-call the <a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.stop" title="shotgun_data.ShotgunDataRetriever.stop"><code class="xref py py-meth docutils literal"><span class="pre">stop()</span></code></a> method prior to destruction in order for the
+call the <a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.stop" title="shotgun_data.ShotgunDataRetriever.stop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">stop()</span></code></a> method prior to destruction in order for the
 system to gracefully shut down.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Signal work_completed(uid, request_type, data_dict):</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">Emitted every time
-a requested task has completed. <code class="docutils literal"><span class="pre">uid</span></code> is a unique id which matches
+<dl class="field-list simple">
+<dt class="field-odd">Signal work_completed(uid, request_type, data_dict)</dt>
+<dd class="field-odd"><p>Emitted every time
+a requested task has completed. <code class="docutils literal notranslate"><span class="pre">uid</span></code> is a unique id which matches
 the unique id returned by the corresponding request call.
-<code class="docutils literal"><span class="pre">request_type</span></code> is a string denoting the type of request this
-event is associated with. <code class="docutils literal"><span class="pre">data_dict</span></code> is a dictionary containing
+<code class="docutils literal notranslate"><span class="pre">request_type</span></code> is a string denoting the type of request this
+event is associated with. <code class="docutils literal notranslate"><span class="pre">data_dict</span></code> is a dictionary containing
 the payload of the request. It will be different depending on what
 type of request it is.</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Signal work_failure(uid, error_message):</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">Emitted every time a requested
-task has failed. <code class="docutils literal"><span class="pre">uid</span></code> is a unique id which matches the unique
+</dd>
+<dt class="field-even">Signal work_failure(uid, error_message)</dt>
+<dd class="field-even"><p>Emitted every time a requested
+task has failed. <code class="docutils literal notranslate"><span class="pre">uid</span></code> is a unique id which matches the unique
 id returned by the corresponding request call.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>parent</strong> (<a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QWidget.html#PySide.QtGui.QWidget" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal"><span class="pre">QWidget</span></code></a>) &#8211; Parent object</li>
-<li><strong>sg</strong> &#8211; Optional Shotgun API Instance</li>
-<li><strong>bg_task_manager</strong> &#8211; Optional Task manager</li>
+</dd>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parent</strong> (<a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QWidget.html#PySide.QtGui.QWidget" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QWidget</span></code></a>) – Parent object</p></li>
+<li><p><strong>sg</strong> – Optional Shotgun API Instance</p></li>
+<li><p><strong>bg_task_manager</strong> – Optional Task manager</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Class bg_task_manager:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last"><a class="reference internal" href="task_manager.html#task_manager.BackgroundTaskManager" title="task_manager.BackgroundTaskManager"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a></p>
-</td>
-</tr>
-</tbody>
-</table>
-<dl class="staticmethod">
+</dd>
+<dt class="field-even">Class bg_task_manager</dt>
+<dd class="field-even"><p><a class="reference internal" href="task_manager.html#task_manager.BackgroundTaskManager" title="task_manager.BackgroundTaskManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">BackgroundTaskManager</span></code></a></p>
+</dd>
+</dl>
+<dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.download_thumbnail">
-<em class="property">static </em><code class="descname">download_thumbnail</code><span class="sig-paren">(</span><em>url</em>, <em>bundle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.download_thumbnail"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.download_thumbnail" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">download_thumbnail</code><span class="sig-paren">(</span><em class="sig-param">url</em>, <em class="sig-param">bundle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.download_thumbnail"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.download_thumbnail" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convenience and compatibility method for quick and easy synchrnous thumbnail download.
 This will retrieve a shotgun thumbnail given a url - if it already exists in the cache,
 a path to it will be returned instantly. If not, it will be downloaded from Shotgun,
 placed in the standard cache location on disk and its path will be returned.</p>
 <p>This method returns the transcoded version of the thumbnail originally uploaded to
 Shotgun. The image returned will always be a fixed-sized jpeg. To retrieve the thumbnail
-file in its original format and resolution, use <a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.download_thumbnail_source" title="shotgun_data.ShotgunDataRetriever.download_thumbnail_source"><code class="xref py py-meth docutils literal"><span class="pre">ShotgunDataRetriever.download_thumbnail_source()</span></code></a>
+file in its original format and resolution, use <a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.download_thumbnail_source" title="shotgun_data.ShotgunDataRetriever.download_thumbnail_source"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ShotgunDataRetriever.download_thumbnail_source()</span></code></a>
 instead.</p>
 <p>This is a helper method meant to make it easy to port over synchronous legacy
 code - for a better solution, we recommend using the thumbnail retrieval
 that runs in a background thread.</p>
 <p>Because Shotgun thumbnail urls have an expiry time, make sure to only
 pass urls to this method that have been very recently retrieved via a Shotgun find call.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>url</strong> &#8211; The thumbnail url string that is associated with this thumbnail. This is
-the field value as returned by a Shotgun query.</li>
-<li><strong>bundle</strong> &#8211; App, Framework or Engine object requesting the download.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> – The thumbnail url string that is associated with this thumbnail. This is
+the field value as returned by a Shotgun query.</p></li>
+<li><p><strong>bundle</strong> – App, Framework or Engine object requesting the download.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A path to the thumbnail on disk.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A path to the thumbnail on disk.</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="staticmethod">
+<dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.download_thumbnail_source">
-<em class="property">static </em><code class="descname">download_thumbnail_source</code><span class="sig-paren">(</span><em>entity_type</em>, <em>entity_id</em>, <em>bundle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.download_thumbnail_source"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.download_thumbnail_source" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">download_thumbnail_source</code><span class="sig-paren">(</span><em class="sig-param">entity_type</em>, <em class="sig-param">entity_id</em>, <em class="sig-param">bundle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.download_thumbnail_source"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.download_thumbnail_source" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convenience and compatibility method for quick and easy synchronous thumbnail download.
 This will retrieve the source file for a thumbnail given a shotgun entity type and id.
 If the resolved thumbnail source file has already been cached, a path to it will be
@@ -349,57 +363,50 @@ returned instantly. Otherwise, it will be downloaded from Shotgun and placed in 
 standard cache location on disk. The full path to cached thumbnail is returned.</p>
 <p>This method returns the thumbnail file in the original format and resolution it was
 uploaded to Shotgun as, which should be considered arbitrary. To retrieve a transcoded
-fixed-size jpeg version of the thumbnail, use <a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.download_thumbnail" title="shotgun_data.ShotgunDataRetriever.download_thumbnail"><code class="xref py py-meth docutils literal"><span class="pre">ShotgunDataRetriever.download_thumbnail()</span></code></a>
+fixed-size jpeg version of the thumbnail, use <a class="reference internal" href="#shotgun_data.ShotgunDataRetriever.download_thumbnail" title="shotgun_data.ShotgunDataRetriever.download_thumbnail"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ShotgunDataRetriever.download_thumbnail()</span></code></a>
 instead.</p>
 <p>This is a helper method meant to make it easy to port over synchronous legacy
 code - for a better solution, we recommend using the thumbnail retrieval
 that runs in a background thread.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Shotgun entity type with which the thumb is associated.</li>
-<li><strong>entity_id</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; Shotgun entity id with which the thumb is associated.</li>
-<li><strong>bundle</strong> &#8211; App, Framework or Engine object requesting the download.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>entity_type</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – Shotgun entity type with which the thumb is associated.</p></li>
+<li><p><strong>entity_id</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – Shotgun entity id with which the thumb is associated.</p></li>
+<li><p><strong>bundle</strong> – App, Framework or Engine object requesting the download.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A path to the thumbnail on disk.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A path to the thumbnail on disk.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.start">
-<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start the retriever thread.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body">TankError if there is no <a class="reference internal" href="task_manager.html#task_manager.BackgroundTaskManager" title="task_manager.BackgroundTaskManager"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a> associated with this instance</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p>TankError if there is no <a class="reference internal" href="task_manager.html#task_manager.BackgroundTaskManager" title="task_manager.BackgroundTaskManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">BackgroundTaskManager</span></code></a> associated with this instance</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.stop">
-<code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.stop" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.stop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gracefully stop the receiver.</p>
 <p>Once stop() has been called, the object needs to be discarded.
 This is a blocking call. It will synchronously wait
 until any potential currently processing item has completed.</p>
-<p>Note that once stopped the data retriever can&#8217;t be restarted as the handle to the
-<a class="reference internal" href="task_manager.html#task_manager.BackgroundTaskManager" title="task_manager.BackgroundTaskManager"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a> instance is released.</p>
+<p>Note that once stopped the data retriever can’t be restarted as the handle to the
+<a class="reference internal" href="task_manager.html#task_manager.BackgroundTaskManager" title="task_manager.BackgroundTaskManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">BackgroundTaskManager</span></code></a> instance is released.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.clear">
-<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.clear" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.clear" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clears the queue.</p>
 <p>Any currently processing item will complete without interruption, and signals will be
 sent out for these items.</p>
@@ -407,343 +414,298 @@ sent out for these items.</p>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.stop_work">
-<code class="descname">stop_work</code><span class="sig-paren">(</span><em>task_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.stop_work"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.stop_work" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">stop_work</code><span class="sig-paren">(</span><em class="sig-param">task_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.stop_work"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.stop_work" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stop the specified task</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_id</strong> &#8211; The task to stop</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task_id</strong> – The task to stop</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.get_schema">
-<code class="descname">get_schema</code><span class="sig-paren">(</span><em>project_id=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.get_schema"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.get_schema" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_schema</code><span class="sig-paren">(</span><em class="sig-param">project_id=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.get_schema"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.get_schema" title="Permalink to this definition">¶</a></dt>
 <dd><p>Execute the schema_read and schema_entity_read methods asynchronously</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>project_id</strong> &#8211; If specified, the schema listing returned will
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>project_id</strong> – If specified, the schema listing returned will
 be constrained by the schema settings for
-the given project.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A unique identifier representing this request. This
+the given project.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A unique identifier representing this request. This
 identifier is also part of the payload sent via the
 work_completed and work_failure signals, making it
-possible to match them up.</td>
-</tr>
-</tbody>
-</table>
+possible to match them up.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.execute_find">
-<code class="descname">execute_find</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_find"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_find" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">execute_find</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_find"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_find" title="Permalink to this definition">¶</a></dt>
 <dd><p>Executes a Shotgun find query asynchronously.</p>
 <p>This method takes the same parameters as the Shotgun find() call.</p>
 <p>The query will be queued up and once processed, either a
 work_completed or work_failure signal will be emitted.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>*args</strong> &#8211; args to be passed to the Shotgun find() call</li>
-<li><strong>**kwargs</strong> &#8211; Named parameters to be passed to the Shotgun find() call</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – args to be passed to the Shotgun find() call</p></li>
+<li><p><strong>**kwargs</strong> – Named parameters to be passed to the Shotgun find() call</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A unique identifier representing this request. This
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A unique identifier representing this request. This
 identifier is also part of the payload sent via the
 work_completed and work_failure signals, making it
 possible to match them up.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.execute_find_one">
-<code class="descname">execute_find_one</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_find_one"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_find_one" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">execute_find_one</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_find_one"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_find_one" title="Permalink to this definition">¶</a></dt>
 <dd><p>Executes a Shotgun find_one query asynchronously.</p>
 <p>This method takes the same parameters as the Shotgun find_one() call.</p>
 <p>The query will be queued up and once processed, either a
 work_completed or work_failure signal will be emitted.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>*args</strong> &#8211; args to be passed to the Shotgun find_one() call</li>
-<li><strong>**kwargs</strong> &#8211; Named parameters to be passed to the Shotgun find_one() call</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – args to be passed to the Shotgun find_one() call</p></li>
+<li><p><strong>**kwargs</strong> – Named parameters to be passed to the Shotgun find_one() call</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A unique identifier representing this request. This
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A unique identifier representing this request. This
 identifier is also part of the payload sent via the
 work_completed and work_failure signals, making it
 possible to match them up.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.execute_update">
-<code class="descname">execute_update</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_update" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">execute_update</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Execute a Shotgun update call asynchronously</p>
 <p>This method takes the same parameters as the Shotgun update() call.</p>
 <p>The query will be queued up and once processed, either a
 work_completed or work_failure signal will be emitted.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>*args</strong> &#8211; args to be passed to the Shotgun update() call</li>
-<li><strong>**kwargs</strong> &#8211; Named parameters to be passed to the Shotgun update() call</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – args to be passed to the Shotgun update() call</p></li>
+<li><p><strong>**kwargs</strong> – Named parameters to be passed to the Shotgun update() call</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A unique identifier representing this request. This
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A unique identifier representing this request. This
 identifier is also part of the payload sent via the
 work_completed and work_failure signals, making it
 possible to match them up.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.execute_create">
-<code class="descname">execute_create</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_create" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">execute_create</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_create" title="Permalink to this definition">¶</a></dt>
 <dd><p>Execute a Shotgun create call asynchronously</p>
 <p>The query will be queued up and once processed, either a
 work_completed or work_failure signal will be emitted.</p>
 <p>This method takes the same parameters as the Shotgun create() call.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>*args</strong> &#8211; args to be passed to the Shotgun create() call</li>
-<li><strong>**kwargs</strong> &#8211; Named parameters to be passed to the Shotgun create() call</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – args to be passed to the Shotgun create() call</p></li>
+<li><p><strong>**kwargs</strong> – Named parameters to be passed to the Shotgun create() call</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A unique identifier representing this request. This
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A unique identifier representing this request. This
 identifier is also part of the payload sent via the
 work_completed and work_failure signals, making it
 possible to match them up.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.execute_delete">
-<code class="descname">execute_delete</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_delete" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">execute_delete</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_delete" title="Permalink to this definition">¶</a></dt>
 <dd><p>Execute a Shotgun delete call asynchronously</p>
 <p>This method takes the same parameters as the Shotgun delete() call.</p>
 <p>The query will be queued up and once processed, either a
 work_completed or work_failure signal will be emitted.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>*args</strong> &#8211; args to be passed to the Shotgun delete() call</li>
-<li><strong>**kwargs</strong> &#8211; Named parameters to be passed to the Shotgun delete() call</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – args to be passed to the Shotgun delete() call</p></li>
+<li><p><strong>**kwargs</strong> – Named parameters to be passed to the Shotgun delete() call</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A unique identifier representing this request. This
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A unique identifier representing this request. This
 identifier is also part of the payload sent via the
 work_completed and work_failure signals, making it
 possible to match them up.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.execute_method">
-<code class="descname">execute_method</code><span class="sig-paren">(</span><em>method</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_method"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_method" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">execute_method</code><span class="sig-paren">(</span><em class="sig-param">method</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_method"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_method" title="Permalink to this definition">¶</a></dt>
 <dd><p>Executes a generic execution of a method asynchronously.  This is pretty much a
-wrapper for executing a task through the <a class="reference internal" href="task_manager.html#task_manager.BackgroundTaskManager" title="task_manager.BackgroundTaskManager"><code class="xref py py-class docutils literal"><span class="pre">BackgroundTaskManager</span></code></a>.</p>
+wrapper for executing a task through the <a class="reference internal" href="task_manager.html#task_manager.BackgroundTaskManager" title="task_manager.BackgroundTaskManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">BackgroundTaskManager</span></code></a>.</p>
 <p>The specified method will be called on the following form:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">method</span><span class="p">(</span><span class="n">sg</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">method</span><span class="p">(</span><span class="n">sg</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Where sg is a shotgun API instance. Data is typically
 a dictionary with specific data that the method needs.
 The query will be queued up and once processed, either a
 work_completed or work_failure signal will be emitted.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>method</strong> &#8211; The method that should be executed.</li>
-<li><strong>*args</strong> &#8211; args to be passed to the method</li>
-<li><strong>**kwargs</strong> &#8211; Named parameters to be passed to the method</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>method</strong> – The method that should be executed.</p></li>
+<li><p><strong>*args</strong> – args to be passed to the method</p></li>
+<li><p><strong>**kwargs</strong> – Named parameters to be passed to the method</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A unique identifier representing this request. This
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A unique identifier representing this request. This
 identifier is also part of the payload sent via the
 work_completed and work_failure signals, making it
 possible to match them up.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.execute_text_search">
-<code class="descname">execute_text_search</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_text_search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_text_search" title="Permalink to this definition">¶</a></dt>
-<dd><p>Executes a Shotgun <code class="docutils literal"><span class="pre">text_search</span></code> query asynchronously.</p>
-<dl class="docutils">
-<dt>See the python api documentation here:</dt>
-<dd><a class="reference external" href="https://github.com/shotgunsoftware/python-api/wiki">https://github.com/shotgunsoftware/python-api/wiki</a></dd>
+<code class="sig-name descname">execute_text_search</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_text_search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_text_search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes a Shotgun <code class="docutils literal notranslate"><span class="pre">text_search</span></code> query asynchronously.</p>
+<dl class="simple">
+<dt>See the python api documentation here:</dt><dd><p><a class="reference external" href="https://github.com/shotgunsoftware/python-api/wiki">https://github.com/shotgunsoftware/python-api/wiki</a></p>
+</dd>
 </dl>
-<p>This method takes the same parameters as the Shotgun <code class="docutils literal"><span class="pre">text_search()</span></code> call.</p>
+<p>This method takes the same parameters as the Shotgun <code class="docutils literal notranslate"><span class="pre">text_search()</span></code> call.</p>
 <p>The query will be queued up and once processed, either a
 work_completed or work_failure signal will be emitted.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>*args</strong> &#8211; args to be passed to the Shotgun <code class="docutils literal"><span class="pre">text_search()</span></code> call</li>
-<li><strong>**kwargs</strong> &#8211; Named parameters to be passed to the Shotgun <code class="docutils literal"><span class="pre">text_search()</span></code> call</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – args to be passed to the Shotgun <code class="docutils literal notranslate"><span class="pre">text_search()</span></code> call</p></li>
+<li><p><strong>**kwargs</strong> – Named parameters to be passed to the Shotgun <code class="docutils literal notranslate"><span class="pre">text_search()</span></code> call</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A unique identifier representing this request. This
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A unique identifier representing this request. This
 identifier is also part of the payload sent via the
 work_completed and work_failure signals, making it
 possible to match them up.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.execute_nav_expand">
-<code class="descname">execute_nav_expand</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_nav_expand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_nav_expand" title="Permalink to this definition">¶</a></dt>
-<dd><p>Executes a Shotgun <code class="docutils literal"><span class="pre">nav_expand</span></code> query asynchronously.</p>
-<dl class="docutils">
-<dt>See the python api documentation here:</dt>
-<dd><a class="reference external" href="https://github.com/shotgunsoftware/python-api/wiki">https://github.com/shotgunsoftware/python-api/wiki</a></dd>
+<code class="sig-name descname">execute_nav_expand</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_nav_expand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_nav_expand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes a Shotgun <code class="docutils literal notranslate"><span class="pre">nav_expand</span></code> query asynchronously.</p>
+<dl class="simple">
+<dt>See the python api documentation here:</dt><dd><p><a class="reference external" href="https://github.com/shotgunsoftware/python-api/wiki">https://github.com/shotgunsoftware/python-api/wiki</a></p>
+</dd>
 </dl>
-<p>This method takes the same parameters as the Shotgun <code class="docutils literal"><span class="pre">nav_expand()</span></code> call.</p>
+<p>This method takes the same parameters as the Shotgun <code class="docutils literal notranslate"><span class="pre">nav_expand()</span></code> call.</p>
 <p>The query will be queued up and once processed, either a
 work_completed or work_failure signal will be emitted.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>*args</strong> &#8211; args to be passed to the Shotgun <code class="docutils literal"><span class="pre">nav_expand()</span></code> call</li>
-<li><strong>**kwargs</strong> &#8211; Named parameters to be passed to the Shotgun <code class="docutils literal"><span class="pre">nav_expand()</span></code> call</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – args to be passed to the Shotgun <code class="docutils literal notranslate"><span class="pre">nav_expand()</span></code> call</p></li>
+<li><p><strong>**kwargs</strong> – Named parameters to be passed to the Shotgun <code class="docutils literal notranslate"><span class="pre">nav_expand()</span></code> call</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A unique identifier representing this request. This
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A unique identifier representing this request. This
 identifier is also part of the payload sent via the
 work_completed and work_failure signals, making it
 possible to match them up.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.execute_nav_search_string">
-<code class="descname">execute_nav_search_string</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_nav_search_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_nav_search_string" title="Permalink to this definition">¶</a></dt>
-<dd><p>Executes a Shotgun <code class="docutils literal"><span class="pre">nav_search_string</span></code> query asynchronously.</p>
-<dl class="docutils">
-<dt>See the python api documentation here:</dt>
-<dd><a class="reference external" href="https://github.com/shotgunsoftware/python-api/wiki">https://github.com/shotgunsoftware/python-api/wiki</a></dd>
+<code class="sig-name descname">execute_nav_search_string</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_nav_search_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_nav_search_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes a Shotgun <code class="docutils literal notranslate"><span class="pre">nav_search_string</span></code> query asynchronously.</p>
+<dl class="simple">
+<dt>See the python api documentation here:</dt><dd><p><a class="reference external" href="https://github.com/shotgunsoftware/python-api/wiki">https://github.com/shotgunsoftware/python-api/wiki</a></p>
+</dd>
 </dl>
-<p>This method takes the same parameters as the Shotgun <code class="docutils literal"><span class="pre">nav_search_string()</span></code> call.</p>
+<p>This method takes the same parameters as the Shotgun <code class="docutils literal notranslate"><span class="pre">nav_search_string()</span></code> call.</p>
 <p>The query will be queued up and once processed, either a
 work_completed or work_failure signal will be emitted.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>*args</strong> &#8211; args to be passed to the Shotgun <code class="docutils literal"><span class="pre">nav_search_string()</span></code> call</li>
-<li><strong>**kwargs</strong> &#8211; Named parameters to be passed to the Shotgun <code class="docutils literal"><span class="pre">nav_search_string()</span></code> call</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – args to be passed to the Shotgun <code class="docutils literal notranslate"><span class="pre">nav_search_string()</span></code> call</p></li>
+<li><p><strong>**kwargs</strong> – Named parameters to be passed to the Shotgun <code class="docutils literal notranslate"><span class="pre">nav_search_string()</span></code> call</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A unique identifier representing this request. This
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A unique identifier representing this request. This
 identifier is also part of the payload sent via the
 work_completed and work_failure signals, making it
 possible to match them up.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.execute_nav_search_entity">
-<code class="descname">execute_nav_search_entity</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_nav_search_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_nav_search_entity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Executes a Shotgun <code class="docutils literal"><span class="pre">nav_search_entity</span></code> query asynchronously.</p>
-<dl class="docutils">
-<dt>See the python api documentation here:</dt>
-<dd><a class="reference external" href="https://github.com/shotgunsoftware/python-api/wiki">https://github.com/shotgunsoftware/python-api/wiki</a></dd>
+<code class="sig-name descname">execute_nav_search_entity</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.execute_nav_search_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.execute_nav_search_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes a Shotgun <code class="docutils literal notranslate"><span class="pre">nav_search_entity</span></code> query asynchronously.</p>
+<dl class="simple">
+<dt>See the python api documentation here:</dt><dd><p><a class="reference external" href="https://github.com/shotgunsoftware/python-api/wiki">https://github.com/shotgunsoftware/python-api/wiki</a></p>
+</dd>
 </dl>
-<p>This method takes the same parameters as the Shotgun <code class="docutils literal"><span class="pre">nav_search_entity()</span></code> call.</p>
+<p>This method takes the same parameters as the Shotgun <code class="docutils literal notranslate"><span class="pre">nav_search_entity()</span></code> call.</p>
 <p>The query will be queued up and once processed, either a
 work_completed or work_failure signal will be emitted.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>*args</strong> &#8211; args to be passed to the Shotgun <code class="docutils literal"><span class="pre">nav_search_entity()</span></code> call</li>
-<li><strong>**kwargs</strong> &#8211; Named parameters to be passed to the Shotgun <code class="docutils literal"><span class="pre">nav_search_entity()</span></code> call</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – args to be passed to the Shotgun <code class="docutils literal notranslate"><span class="pre">nav_search_entity()</span></code> call</p></li>
+<li><p><strong>**kwargs</strong> – Named parameters to be passed to the Shotgun <code class="docutils literal notranslate"><span class="pre">nav_search_entity()</span></code> call</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A unique identifier representing this request. This
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A unique identifier representing this request. This
 identifier is also part of the payload sent via the
 work_completed and work_failure signals, making it
 possible to match them up.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.request_attachment">
-<code class="descname">request_attachment</code><span class="sig-paren">(</span><em>attachment_entity</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.request_attachment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.request_attachment" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">request_attachment</code><span class="sig-paren">(</span><em class="sig-param">attachment_entity</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.request_attachment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.request_attachment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads an attachment from Shotgun asynchronously or returns a cached
 file path if found.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The provided Attachment entity definition must contain, at a
-minimum, the &#8220;this_file&#8221; substructure.</p>
+<p class="admonition-title">Note</p>
+<p>The provided Attachment entity definition must contain, at a
+minimum, the “this_file” substructure.</p>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">597</span><span class="p">,</span>
     <span class="s2">&quot;this_file&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;content_type&quot;</span><span class="p">:</span> <span class="s2">&quot;image/png&quot;</span><span class="p">,</span>
@@ -757,92 +719,301 @@ minimum, the &#8220;this_file&#8221; substructure.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>attachment_entity</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; The Attachment entity to download data from.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A unique identifier representing this request.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>attachment_entity</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – The Attachment entity to download data from.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A unique identifier representing this request.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.request_thumbnail">
-<code class="descname">request_thumbnail</code><span class="sig-paren">(</span><em>url</em>, <em>entity_type</em>, <em>entity_id</em>, <em>field</em>, <em>load_image=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.request_thumbnail"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.request_thumbnail" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">request_thumbnail</code><span class="sig-paren">(</span><em class="sig-param">url</em>, <em class="sig-param">entity_type</em>, <em class="sig-param">entity_id</em>, <em class="sig-param">field</em>, <em class="sig-param">load_image=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.request_thumbnail"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.request_thumbnail" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads a thumbnail from Shotgun asynchronously or returns a cached thumbnail
 if found.  Optionally loads the thumbnail into a QImage.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>url</strong> &#8211; The thumbnail url string that is associated with this thumbnail. This is
-the field value as returned by a Shotgun query.</li>
-<li><strong>entity_type</strong> &#8211; Shotgun entity type with which the thumb is associated.</li>
-<li><strong>entity_id</strong> &#8211; Shotgun entity id with which the thumb is associated.</li>
-<li><strong>field</strong> &#8211; Thumbnail field. Normally &#8216;image&#8217; but could also for example be a deep
-link field such as <code class="docutils literal"><span class="pre">sg_sequence.Sequence.image</span></code></li>
-<li><strong>load_image</strong> &#8211; If set to True, the return data structure will contain a QImage object
-with the image data loaded.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> – The thumbnail url string that is associated with this thumbnail. This is
+the field value as returned by a Shotgun query.</p></li>
+<li><p><strong>entity_type</strong> – Shotgun entity type with which the thumb is associated.</p></li>
+<li><p><strong>entity_id</strong> – Shotgun entity id with which the thumb is associated.</p></li>
+<li><p><strong>field</strong> – Thumbnail field. Normally ‘image’ but could also for example be a deep
+link field such as <code class="docutils literal notranslate"><span class="pre">sg_sequence.Sequence.image</span></code></p></li>
+<li><p><strong>load_image</strong> – If set to True, the return data structure will contain a QImage object
+with the image data loaded.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A unique identifier representing this request. This
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A unique identifier representing this request. This
 identifier is also part of the payload sent via the
 work_completed and work_failure signals, making it
 possible to match them up.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.request_thumbnail_source">
-<code class="descname">request_thumbnail_source</code><span class="sig-paren">(</span><em>entity_type</em>, <em>entity_id</em>, <em>load_image=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.request_thumbnail_source"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.request_thumbnail_source" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">request_thumbnail_source</code><span class="sig-paren">(</span><em class="sig-param">entity_type</em>, <em class="sig-param">entity_id</em>, <em class="sig-param">load_image=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_data/shotgun_data_retriever.html#ShotgunDataRetriever.request_thumbnail_source"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.request_thumbnail_source" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads a thumbnail from Shotgun asynchronously or returns a cached thumbnail
 if found.  Optionally loads the thumbnail into a QImage.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>entity_type</strong> &#8211; Shotgun entity type with which the thumb is associated.</li>
-<li><strong>entity_id</strong> &#8211; Shotgun entity id with which the thumb is associated.</li>
-<li><strong>load_image</strong> &#8211; If set to True, the return data structure will contain a
-QImage object with the image data loaded.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>entity_type</strong> – Shotgun entity type with which the thumb is associated.</p></li>
+<li><p><strong>entity_id</strong> – Shotgun entity id with which the thumb is associated.</p></li>
+<li><p><strong>load_image</strong> – If set to True, the return data structure will contain a
+QImage object with the image data loaded.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A unique identifier representing this request. This
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A unique identifier representing this request. This
 identifier is also part of the payload sent via the
 work_completed and work_failure signals, making it
 possible to match them up.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.blockSignals">
+<code class="sig-name descname">blockSignals</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">b:bool</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.blockSignals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.childEvent">
+<code class="sig-name descname">childEvent</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">event:PySide2.QtCore.QChildEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.childEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.children">
+<code class="sig-name descname">children</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span> &#x2192; typing.List<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.children" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.connect">
+<em class="property">static </em><code class="sig-name descname">connect</code><span class="sig-paren">(</span><em class="sig-param">arg__1:PySide2.QtCore.QObject</em>, <em class="sig-param">arg__2:bytes</em>, <em class="sig-param">arg__3:typing.Callable</em>, <em class="sig-param">type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>connect(self, arg__1:bytes, arg__2:typing.Callable, type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; bool
+connect(self, arg__1:bytes, arg__2:PySide2.QtCore.QObject, arg__3:bytes, type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; bool
+connect(self, sender:PySide2.QtCore.QObject, signal:bytes, member:bytes, type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection
+connect(sender:PySide2.QtCore.QObject, signal:PySide2.QtCore.QMetaMethod, receiver:PySide2.QtCore.QObject, method:PySide2.QtCore.QMetaMethod, type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection
+connect(sender:PySide2.QtCore.QObject, signal:bytes, receiver:PySide2.QtCore.QObject, member:bytes, type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.connectNotify">
+<code class="sig-name descname">connectNotify</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">signal:PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.connectNotify" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.customEvent">
+<code class="sig-name descname">customEvent</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">event:PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.customEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.deleteLater">
+<code class="sig-name descname">deleteLater</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.deleteLater" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.disconnect">
+<em class="property">static </em><code class="sig-name descname">disconnect</code><span class="sig-paren">(</span><em class="sig-param">arg__1:PySide2.QtCore.QMetaObject.Connection</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>disconnect(arg__1:PySide2.QtCore.QObject, arg__2:bytes, arg__3:typing.Callable) -&gt; bool
+disconnect(self, arg__1:bytes, arg__2:typing.Callable) -&gt; bool
+disconnect(self, receiver:PySide2.QtCore.QObject, member:typing.Union[bytes, NoneType]=None) -&gt; bool
+disconnect(self, signal:bytes, receiver:PySide2.QtCore.QObject, member:bytes) -&gt; bool
+disconnect(sender:PySide2.QtCore.QObject, signal:PySide2.QtCore.QMetaMethod, receiver:PySide2.QtCore.QObject, member:PySide2.QtCore.QMetaMethod) -&gt; bool
+disconnect(sender:PySide2.QtCore.QObject, signal:bytes, receiver:PySide2.QtCore.QObject, member:bytes) -&gt; bool</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.disconnectNotify">
+<code class="sig-name descname">disconnectNotify</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">signal:PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.disconnectNotify" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.dumpObjectInfo">
+<code class="sig-name descname">dumpObjectInfo</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.dumpObjectInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.dumpObjectTree">
+<code class="sig-name descname">dumpObjectTree</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.dumpObjectTree" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.dynamicPropertyNames">
+<code class="sig-name descname">dynamicPropertyNames</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span> &#x2192; typing.List<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.dynamicPropertyNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.emit">
+<code class="sig-name descname">emit</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">arg__1:bytes</em>, <em class="sig-param">*args:None</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.emit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.event">
+<code class="sig-name descname">event</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">event:PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.event" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.eventFilter">
+<code class="sig-name descname">eventFilter</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">watched:PySide2.QtCore.QObject</em>, <em class="sig-param">event:PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.eventFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.findChild">
+<code class="sig-name descname">findChild</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">arg__1:type</em>, <em class="sig-param">arg__2:str=''</em><span class="sig-paren">)</span> &#x2192; object<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.findChild" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.findChildren">
+<code class="sig-name descname">findChildren</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">arg__1:type</em>, <em class="sig-param">arg__2:PySide2.QtCore.QRegExp</em><span class="sig-paren">)</span> &#x2192; typing.Iterable<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.findChildren" title="Permalink to this definition">¶</a></dt>
+<dd><p>findChildren(self, arg__1:type, arg__2:PySide2.QtCore.QRegularExpression) -&gt; typing.Iterable
+findChildren(self, arg__1:type, arg__2:str=’’) -&gt; typing.Iterable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.inherits">
+<code class="sig-name descname">inherits</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">classname:bytes</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.inherits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.installEventFilter">
+<code class="sig-name descname">installEventFilter</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">filterObj:PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.installEventFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.isSignalConnected">
+<code class="sig-name descname">isSignalConnected</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">signal:PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.isSignalConnected" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.isWidgetType">
+<code class="sig-name descname">isWidgetType</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.isWidgetType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.isWindowType">
+<code class="sig-name descname">isWindowType</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.isWindowType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.killTimer">
+<code class="sig-name descname">killTimer</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">id:int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.killTimer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.metaObject">
+<code class="sig-name descname">metaObject</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QMetaObject<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.metaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.moveToThread">
+<code class="sig-name descname">moveToThread</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">thread:PySide2.QtCore.QThread</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.moveToThread" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.objectName">
+<code class="sig-name descname">objectName</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.objectName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.parent">
+<code class="sig-name descname">parent</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QObject<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.parent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.property">
+<code class="sig-name descname">property</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">name:bytes</em><span class="sig-paren">)</span> &#x2192; typing.Any<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.property" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.receivers">
+<code class="sig-name descname">receivers</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">signal:bytes</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.receivers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.registerUserData">
+<em class="property">static </em><code class="sig-name descname">registerUserData</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.registerUserData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.removeEventFilter">
+<code class="sig-name descname">removeEventFilter</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">obj:PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.removeEventFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.sender">
+<code class="sig-name descname">sender</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QObject<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.sender" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.senderSignalIndex">
+<code class="sig-name descname">senderSignalIndex</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.senderSignalIndex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.setObjectName">
+<code class="sig-name descname">setObjectName</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">name:str</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.setObjectName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.setParent">
+<code class="sig-name descname">setParent</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">parent:PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.setParent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.setProperty">
+<code class="sig-name descname">setProperty</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">name:bytes</em>, <em class="sig-param">value:typing.Any</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.setProperty" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.signalsBlocked">
+<code class="sig-name descname">signalsBlocked</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.signalsBlocked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.startTimer">
+<code class="sig-name descname">startTimer</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">interval:int</em>, <em class="sig-param">timerType:PySide2.QtCore.Qt.TimerType=PySide2.QtCore.Qt.TimerType.CoarseTimer</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.startTimer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.thread">
+<code class="sig-name descname">thread</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QThread<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.thread" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.timerEvent">
+<code class="sig-name descname">timerEvent</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">event:PySide2.QtCore.QTimerEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.timerEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_data.ShotgunDataRetriever.tr">
+<code class="sig-name descname">tr</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">arg__1:bytes</em>, <em class="sig-param">arg__2:bytes=b''</em>, <em class="sig-param">arg__3:int=-1</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.tr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="task_manager.html" class="btn btn-neutral float-right" title="Background Task Processing" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="task_manager.html" class="btn btn-neutral float-right" title="Background Task Processing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="shotgun_hierarchy_model.html" class="btn btn-neutral" title="Shotgun Hierarchy Model" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="shotgun_hierarchy_model.html" class="btn btn-neutral float-left" title="Shotgun Hierarchy Model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -851,7 +1022,7 @@ possible to match them up.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2021, Autodesk.
+        &copy; Copyright 2021, Autodesk
 
     </p>
   </div> 
@@ -867,35 +1038,15 @@ possible to match them up.</p>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'v5.7.10',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
   
  
 
