@@ -15,6 +15,7 @@ Results dispatcher for the background task manager.
 from tank_vendor import six
 from sgtk.platform.qt import QtCore
 import sgtk
+from threading import Thread
 
 
 class _TaskCompletedEvent(object):
@@ -55,7 +56,7 @@ class _TaskFailedEvent(object):
         self.traceback = traceback
 
 
-class ResultsDispatcher(QtCore.QThread):
+class ResultsDispatcher(Thread):
     """
     Dispatches events synchronously to the thread that owns this object.
 
@@ -78,10 +79,21 @@ class ResultsDispatcher(QtCore.QThread):
         Hint to dispatcher that it should shut down.
         """
 
-    # Emitted when a task is completed.
-    task_completed = QtCore.Signal(object, object, object)
-    # Emitted when a task has failed.
-    task_failed = QtCore.Signal(object, object, object, object)
+    class Signaller(QtCore.QObject):
+
+        # Emitted when a task is completed.
+        task_completed = QtCore.Signal(object, object, object)
+        # Emitted when a task has failed.
+        task_failed = QtCore.Signal(object, object, object, object)
+
+        def __init__(self, parent, dispatcher):
+            super(ResultsDispatcher.Signaller, self).__init__(parent)
+            self._dispatcher = dispatcher
+
+        @QtCore.Slot()
+        def do_invoke(self):
+            self._dispatcher._do_invoke()
+
 
     def __init__(self, parent=None):
         """
@@ -89,11 +101,21 @@ class ResultsDispatcher(QtCore.QThread):
 
         :param parent:  The parent QObject for this thread
         """
-        QtCore.QThread.__init__(self, parent)
+        super(ResultsDispatcher, self).__init__()
+        self._signaller = self.Signaller(parent, self)
+        
         # Results that will need to be dispatched to the background task
         # manager.
         self._results = six.moves.queue.Queue()
         self._bundle = sgtk.platform.current_bundle()
+
+    @property
+    def task_completed(self):
+        return self._signaller.task_completed
+
+    @property
+    def task_failed(self):
+        return self._signaller.task_failed
 
     def _log(self, msg):
         """
@@ -113,6 +135,7 @@ class ResultsDispatcher(QtCore.QThread):
         # a deadlock because the main thread would be waiting for the dispatcher
         # to end and the dispatcher would be waiting for his events to
         # be processed by the main thread.
+        self._signaller = None
 
     def run(self):
         """
@@ -150,10 +173,9 @@ class ResultsDispatcher(QtCore.QThread):
             # be consumed by the background task manager, but it would only add
             # complexity to the design and it wouldn't provide any significant speed gain.
             QtCore.QMetaObject.invokeMethod(
-                self, "_do_invoke", QtCore.Qt.BlockingQueuedConnection
+                self._signaller, "do_invoke", QtCore.Qt.BlockingQueuedConnection
             )
 
-    @QtCore.Slot()
     def _do_invoke(self):
         """
         Executes the event to dispatch.
@@ -162,9 +184,9 @@ class ResultsDispatcher(QtCore.QThread):
             event = self._event
             self._event = None
             if isinstance(event, _TaskCompletedEvent):
-                self.task_completed.emit(event.worker_thread, event.task, event.result)
+                self._signaller.task_completed.emit(event.worker_thread, event.task, event.result)
             elif isinstance(event, _TaskFailedEvent):
-                self.task_failed.emit(
+                self._signaller.task_failed.emit(
                     event.worker_thread, event.task, event.message, event.traceback
                 )
             else:

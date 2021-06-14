@@ -83,7 +83,7 @@ class TestBackgroundTaskManager(TestShotgunUtilsFramework):
 
         self._manager.shut_down()
         # Processes events until the dispatcher thread is done.
-        while self._manager._results_dispatcher.isFinished() is False:
+        while self._manager._results_dispatcher.is_alive():
             sgtk.platform.qt.QtGui.QApplication.processEvents()
         # Now we can quit the app.
         self._qapp.quit()
