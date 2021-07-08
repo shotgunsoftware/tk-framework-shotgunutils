@@ -497,8 +497,13 @@ class ExternalCommand(object):
             # the environment of processes spawned from the external_runner. This caused
             # some very bad behavior where it looked like PYTHONPATH was inherited from
             # this top-level environment rather than what is being set in external_runner
-            # prior to launch.
-            output = sgtk.util.process.subprocess_check_output(args)
+            # prior to launch. Also, the pwd is set to the home directory of the current
+            # so we avoid a situation where the pwd contains conflicting DLLs, like
+            # SG Create's Qt DLLs that might be loaded before another software's Qt DLLs
+            # because of the way DLLs are loaded on Windows... (shorturl.at/nzDJW)
+            output = sgtk.util.process.subprocess_check_output(
+                args, pwd=os.path.expanduser("~")
+            )
             logger.debug("External execution complete. Output: %s" % output)
         except sgtk.util.process.SubprocessCalledProcessError as e:
             # caching failed!
