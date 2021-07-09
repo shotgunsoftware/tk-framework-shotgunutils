@@ -502,7 +502,7 @@ class ExternalCommand(object):
             # SG Create's Qt DLLs that might be loaded before another software's Qt DLLs
             # because of the way DLLs are loaded on Windows... (shorturl.at/nzDJW)
             output = sgtk.util.process.subprocess_check_output(
-                args, pwd=os.path.expanduser("~")
+                args, cwd=os.path.expanduser("~")
             )
             logger.debug("External execution complete. Output: %s" % output)
         except sgtk.util.process.SubprocessCalledProcessError as e:
