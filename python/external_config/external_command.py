@@ -490,20 +490,23 @@ class ExternalCommand(object):
             sgtk.bootstrap.ToolkitManager.get_core_python_path(),
             args_file,
         ]
+        subprocess_cwd = sgtk.utils.sgtk.util.LocalFileStorageManager.get_global_root(
+            sgtk.utils.sgtk.util.LocalFileStorageManager.CACHE
+        )
+
         logger.debug("Command arguments: %s", args)
+        logger.debug("Command cwd: %s", subprocess_cwd)
 
         try:
             # Note: passing a copy of the environment in resolves some odd behavior with
             # the environment of processes spawned from the external_runner. This caused
             # some very bad behavior where it looked like PYTHONPATH was inherited from
             # this top-level environment rather than what is being set in external_runner
-            # prior to launch. Also, the pwd is set to the home directory of the current
-            # so we avoid a situation where the pwd contains conflicting DLLs, like
-            # SG Create's Qt DLLs that might be loaded before another software's Qt DLLs
-            # because of the way DLLs are loaded on Windows... (shorturl.at/nzDJW)
-            output = sgtk.util.process.subprocess_check_output(
-                args, cwd=os.path.expanduser("~")
-            )
+            # prior to launch. Also, the pwd is set a path we own so we avoid a situation
+            # where the pwd contains conflicting DLLs, like SG Create's Qt DLLs that might
+            # be loaded before another software's Qt DLLs because of the way DLLs are loaded...
+            # (shorturl.at/nzDJW)
+            output = sgtk.util.process.subprocess_check_output(args, cwd=subprocess_cwd)
             logger.debug("External execution complete. Output: %s" % output)
         except sgtk.util.process.SubprocessCalledProcessError as e:
             # caching failed!
