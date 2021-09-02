@@ -490,8 +490,8 @@ class ExternalCommand(object):
             sgtk.bootstrap.ToolkitManager.get_core_python_path(),
             args_file,
         ]
-        subprocess_cwd = sgtk.utils.sgtk.util.LocalFileStorageManager.get_global_root(
-            sgtk.utils.sgtk.util.LocalFileStorageManager.CACHE
+        subprocess_cwd = sgtk.util.LocalFileStorageManager.get_global_root(
+            sgtk.util.LocalFileStorageManager.CACHE
         )
 
         logger.debug("Command arguments: %s", args)
