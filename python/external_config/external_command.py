@@ -502,7 +502,7 @@ class ExternalCommand(object):
             # the environment of processes spawned from the external_runner. This caused
             # some very bad behavior where it looked like PYTHONPATH was inherited from
             # this top-level environment rather than what is being set in external_runner
-            # prior to launch. Also, the pwd is set a path we own so we avoid a situation
+            # prior to launch. Also, the cwd is set a path we own so we avoid a situation
             # where the pwd contains conflicting DLLs, like SG Create's Qt DLLs that might
             # be loaded before another software's Qt DLLs because of the way DLLs are loaded...
             # (shorturl.at/nzDJW)
