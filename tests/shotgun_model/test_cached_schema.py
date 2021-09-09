@@ -106,6 +106,20 @@ class TestCachedSchema(TestShotgunUtilsFramework):
             self._assert_no_unicode(self._cached_schema._field_schema)
             self._assert_no_unicode(self._cached_schema._type_schema)
 
+    def test_is_valid_entity_type(self):
+        """
+        Test the function that checks whether not entity types are in the schema.
+        """
+
+        valid_entity_types = self._cached_schema._field_schema
+
+        for entity_type in valid_entity_types:
+            assert self._cached_schema.is_valid_entity_type(entity_type)
+
+        invalid_type = "bad entity"
+        assert invalid_type not in valid_entity_types
+        assert not self._cached_schema.is_valid_entity_type(invalid_type)
+
     def _assert_no_unicode(self, value):
         """
         Asserts that a value is not a Python 2 ``unicode`` object.
