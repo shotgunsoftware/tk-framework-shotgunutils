@@ -502,7 +502,7 @@ class CachedShotgunSchema(QtCore.QObject):
     @classmethod
     def is_valid_entity_type(cls, sg_entity_type, project_id=None):
         """
-        Check that the given `sg_entity_type` is in the schema.
+        Check if the given `sg_entity_type` is in the schema.
 
         :param sg_entity_type:  Shotgun entity type
         :param project_id:      The id of the project entity to get fields from.
