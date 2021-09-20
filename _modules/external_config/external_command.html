@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>external_config.external_command &mdash; tk-framework-shotgunutils v5.8.0 documentation</title>
+  <title>external_config.external_command &mdash; tk-framework-shotgunutils v5.8.1 documentation</title>
   
 
   
@@ -49,7 +49,7 @@
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
           
-    <a href='http://developer.shotgunsoftware.com'>
+    <a href='http://developer.shotgridsoftware.com'>
     
         <img style='width: 191px;
                 height: 60px;
@@ -122,12 +122,12 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.0.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.1.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
     For more information, please visit
-    <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
+    <a class=custom_post_menu href='https://support.shotgridsoftware.com/home'>Shotgun Support</a>.
     The code associated with this documentation can be found
     <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
 
@@ -686,15 +686,23 @@
             <span class="n">sgtk</span><span class="o">.</span><span class="n">bootstrap</span><span class="o">.</span><span class="n">ToolkitManager</span><span class="o">.</span><span class="n">get_core_python_path</span><span class="p">(),</span>
             <span class="n">args_file</span><span class="p">,</span>
         <span class="p">]</span>
+        <span class="n">subprocess_cwd</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">LocalFileStorageManager</span><span class="o">.</span><span class="n">get_global_root</span><span class="p">(</span>
+            <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">LocalFileStorageManager</span><span class="o">.</span><span class="n">CACHE</span>
+        <span class="p">)</span>
+
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Command arguments: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Command cwd: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">subprocess_cwd</span><span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># Note: passing a copy of the environment in resolves some odd behavior with</span>
             <span class="c1"># the environment of processes spawned from the external_runner. This caused</span>
             <span class="c1"># some very bad behavior where it looked like PYTHONPATH was inherited from</span>
             <span class="c1"># this top-level environment rather than what is being set in external_runner</span>
-            <span class="c1"># prior to launch.</span>
-            <span class="n">output</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">subprocess_check_output</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+            <span class="c1"># prior to launch. Also, the cwd is set a path we own so we avoid a situation</span>
+            <span class="c1"># where the pwd contains conflicting DLLs, like SG Create&#39;s Qt DLLs that might</span>
+            <span class="c1"># be loaded before another software&#39;s Qt DLLs because of the way DLLs are loaded...</span>
+            <span class="c1"># (shorturl.at/nzDJW)</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">subprocess_check_output</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">subprocess_cwd</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;External execution complete. Output: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">output</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">SubprocessCalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="c1"># caching failed!</span>
