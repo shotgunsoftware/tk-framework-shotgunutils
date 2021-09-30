@@ -500,6 +500,27 @@ class CachedShotgunSchema(QtCore.QObject):
             self._check_schema_refresh(project_id=project_id)
 
     @classmethod
+    def is_valid_entity_type(cls, sg_entity_type, project_id=None):
+        """
+        Check if the given `sg_entity_type` is in the schema.
+
+        :param sg_entity_type:  Shotgun entity type
+        :param project_id:      The id of the project entity to get fields from.
+                                If None, the current context's project will be used.
+
+        :returns: True if the entity is valid, else False.
+        :rtype: bool
+        """
+        self = cls.__get_instance()
+        project_id = project_id or self._get_current_project_id()
+        self._check_schema_refresh(sg_entity_type, project_id=project_id)
+
+        return (
+            project_id in self._field_schema
+            and sg_entity_type in self._field_schema[project_id]
+        )
+
+    @classmethod
     def get_entity_fields(cls, sg_entity_type, project_id=None):
         """
         Returns the fields for a Shotgun entity type.
