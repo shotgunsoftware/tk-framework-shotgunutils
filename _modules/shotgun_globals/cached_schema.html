@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_globals.cached_schema &mdash; tk-framework-shotgunutils v5.8.1 documentation</title>
+  <title>shotgun_globals.cached_schema &mdash; tk-framework-shotgunutils v5.8.2 documentation</title>
   
 
   
@@ -122,7 +122,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.2.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -694,6 +694,27 @@
 
             <span class="c1"># kick off full schema loading</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">is_valid_entity_type</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if the given `sg_entity_type` is in the schema.</span>
+
+<span class="sd">        :param sg_entity_type:  Shotgun entity type</span>
+<span class="sd">        :param project_id:      The id of the project entity to get fields from.</span>
+<span class="sd">                                If None, the current context&#39;s project will be used.</span>
+
+<span class="sd">        :returns: True if the entity is valid, else False.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__get_instance</span><span class="p">()</span>
+        <span class="n">project_id</span> <span class="o">=</span> <span class="n">project_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_current_project_id</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_schema_refresh</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span>
+            <span class="ow">and</span> <span class="n">sg_entity_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span><span class="p">[</span><span class="n">project_id</span><span class="p">]</span>
+        <span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_entity_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
