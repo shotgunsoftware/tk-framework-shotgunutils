@@ -17,7 +17,7 @@ resources:
       ref: refs/heads/SG-24224_Update_the_CodeCov_uploader_to_the_new_version
       endpoint: shotgunsoftware
 
-# We want builds to trigger for 3 reasons:
+# We want builds to trigger for 3 rea sons:
 # - The master branch sees new commits
 # - Each PR should get rebuilt when commits are added to it.
 # - When we tag something
