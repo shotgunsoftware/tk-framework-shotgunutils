@@ -385,7 +385,8 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         :type index: :class:`~PySide.QtCore.QModelIndex`
         """
         if not index.isValid():
-            return super(ShotgunQueryModel, self).canFetchMore(index)
+            result = super(ShotgunQueryModel, self).canFetchMore(index)
+            return result
 
         # get the item and its stored hierarchy data
         item = self.itemFromIndex(index)
@@ -818,6 +819,29 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             return None
         return self.__items_by_uid[uid]
 
+    # def _delete_item(self, item):
+    #     """
+    #     Remove an item and all its children if it exists.
+    #     Removes the entire row that item belongs to.
+    #
+    #     :param str uid: The unique id for an item in the model.
+    #     """
+    #     # find all items in subtree and remove them
+    #     # from the uid based lookup to avoid issues
+    #     # where the C++ object has been deleted but we
+    #     # still a pyside reference.
+    #     self.__remove_unique_id_r(item)
+    #
+    #     # remove it
+    #     parent_model_item = item.parent()
+    #
+    #     if parent_model_item:
+    #         # remove entire row that item belongs to.
+    #         # we are the owner of the data so we just do a `takeRow` and not a
+    #         # `removeRow` to prevent the model to delete the data. Because we
+    #         # don't keep any reference to the item, it will be garbage collected
+    #         # if not already done.
+    #         parent_model_item.takeRow(item.row())
     def _delete_item(self, item):
         """
         Remove an item and all its children if it exists.

@@ -241,7 +241,7 @@ class ShotgunDataHandler(object):
 
         return self._cache.get_entry_by_uid(unique_id)
 
-    @sgtk.LogManager.log_timing
+    # @sgtk.LogManager.log_timing
     def generate_child_nodes(self, unique_id, parent_object, factory_fn):
         """
         Generate nodes recursively from the data set

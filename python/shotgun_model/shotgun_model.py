@@ -200,7 +200,8 @@ class ShotgunModel(ShotgunQueryModel):
             # load everything
             index = self.invisibleRootItem().index()
 
-        if self.canFetchMore(index):
+        can_fetch_more = self.canFetchMore(index)
+        if can_fetch_more:
             self.fetchMore(index)
 
         for child_index in range(self.rowCount(index)):
