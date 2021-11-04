@@ -210,20 +210,18 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
 
                 on_leaf_level = self.__hierarchy[-1] == field_name
 
-                if not on_leaf_level:
-                    # generate path for this item
-                    unique_field_value = self.__generate_unique_key(
-                        parent_uid, field_name, sg_item
-                    )
-                else:
-                    # on the leaf level, use the entity id as the unique key
-                    unique_field_value = sg_item["id"]
+                # generate path for this item
+                unique_field_value = self.__generate_unique_key(
+                    parent_uid, field_name, sg_item
+                )
+                print(unique_field_value)
 
-                # two distinct cases for leaves and non-leaves
-                if on_leaf_level:
-                    # this is an actual entity - insert into our new tree
+                # not on leaf level yet
+                if not new_cache.item_exists(unique_field_value):
+                    # item is not yet inserted in our new tree so add it
+                    # because these are parent items like project nodes
                     new_cache.add_item(
-                        parent_uid, sg_item, field_name, True, unique_field_value
+                        parent_uid, sg_item, field_name, on_leaf_level, unique_field_value
                     )
 
                     # now check with prev data structure to see if it has changed
@@ -231,18 +229,29 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                         # this is a new node that wasn't there before
                         diff_list.append(
                             {
-                                "data": new_cache.get_entry_by_uid(unique_field_value),
+                                "data": new_cache.get_entry_by_uid(
+                                    unique_field_value
+                                ),
                                 "mode": self.ADDED,
                             }
                         )
                         num_adds += 1
                     else:
                         # record already existed in prev dataset. Check if value has changed
-                        old_record = self._cache.get_shotgun_data(unique_field_value)
-                        if not compare_shotgun_data(old_record, sg_item):
+                        current_record = self._cache.get_shotgun_data(
+                            unique_field_value
+                        )
+                        # don't compare the whole record but just the part that relates to this
+                        # intermediate node value. For example, we may be looking at a project node
+                        # in the hierarchy but the full sg record contains all the data for a shot.
+                        # in this case, just run the comparison on the project subset of the full
+                        # shot data dict.
+                        if not compare_shotgun_data(
+                            current_record.get(field_name), sg_item.get(field_name)
+                        ):
                             diff_list.append(
                                 {
-                                    "data": new_cache.get_entry_by_uid(
+                                    "data": self._cache.get_entry_by_uid(
                                         unique_field_value
                                     ),
                                     "mode": self.UPDATED,
@@ -250,52 +259,8 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                             )
                             num_modifications += 1
 
-                else:
-                    # not on leaf level yet
-                    if not new_cache.item_exists(unique_field_value):
-                        # item is not yet inserted in our new tree so add it
-                        # because these are parent items like project nodes
-                        new_cache.add_item(
-                            parent_uid, sg_item, field_name, False, unique_field_value
-                        )
-
-                        # now check with prev data structure to see if it has changed
-                        if not self._cache.item_exists(unique_field_value):
-                            # this is a new node that wasn't there before
-                            diff_list.append(
-                                {
-                                    "data": new_cache.get_entry_by_uid(
-                                        unique_field_value
-                                    ),
-                                    "mode": self.ADDED,
-                                }
-                            )
-                            num_adds += 1
-                        else:
-                            # record already existed in prev dataset. Check if value has changed
-                            current_record = self._cache.get_shotgun_data(
-                                unique_field_value
-                            )
-                            # don't compare the whole record but just the part that relates to this
-                            # intermediate node value. For example, we may be looking at a project node
-                            # in the hierarchy but the full sg record contains all the data for a shot.
-                            # in this case, just run the comparison on the project subset of the full
-                            # shot data dict.
-                            if not compare_shotgun_data(
-                                current_record.get(field_name), sg_item.get(field_name)
-                            ):
-                                diff_list.append(
-                                    {
-                                        "data": self._cache.get_entry_by_uid(
-                                            unique_field_value
-                                        ),
-                                        "mode": self.UPDATED,
-                                    }
-                                )
-                                num_modifications += 1
-
-                    # recurse down to the next level
-                    parent_uid = unique_field_value
+                # recurse down to the next level
+                parent_uid = unique_field_value
 
         # now figure out if anything has been removed
         self._log_debug("Diffing new tree against old tree...")
