@@ -51,7 +51,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
     via the :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`
     python-api method. The structure of items in the hierarchy mimics what is
     found in Shotgun as configured in each project's
-    `Tracking Settings <https://help.autodesk.com/view/SGSUB/ENU/?guid=SG_Administrator_ar_display_options_ar_project_tracking_settings_html>`_.
+    `Tracking Settings <https://help.autodesk.com/view/SGSUB/ENU/?guid=SG_Administrator_ar_display_options_ar_project_tracking_settings_html>`__.
 
     :signal: async_item_retrieval_completed (:class:`ShotgunHierarchyModel`): Emitted when a query to
         :meth:`ShotgunHierarchyModel.async_item_from_entity` or
