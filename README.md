@@ -10,7 +10,7 @@ This repository is a part of the ShotGrid Pipeline Toolkit.
 
 - For more information about this app and for release notes, *see the wiki section*.
 - For API Reference, see https://developer.shotgridsoftware.com/tk-framework-shotgunutils
-- For general information and documentation, click here: https://support.shotgunsoftware.com/entries/95441257
+- For general information and documentation, click here: https://developer.shotgridsoftware.com/e95205a8/?title=An+Overview+of+Toolkit
 - For information about ShotGrid in general, click here: http://www.shotgunsoftware.com/toolkit
 
 ## Have a Question?
