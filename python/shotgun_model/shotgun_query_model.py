@@ -828,19 +828,26 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         # find all items in subtree and remove them
         # from the uid based lookup to avoid issues
         # where the C++ object has been deleted but we
-        # still a pyside reference.
+        # still have a pyside reference.
         self.__remove_unique_id_r(item)
 
         # remove it
         parent_model_item = item.parent()
 
+        item_index = None
+        if parent_model_item is None:
+            item_index = item.index()
+
         if parent_model_item:
             # remove entire row that item belongs to.
             # we are the owner of the data so we just do a `takeRow` and not a
             # `removeRow` to prevent the model to delete the data. Because we
-            # don't keep any reference to the item, it will be garbage collected
-            # if not already done.
+            # don't keep any reference to the item, it will be garbage
+            # collected if not already done.
             parent_model_item.takeRow(item.row())
+
+        if item_index and item_index.isValid():
+            item_index.model().takeRow(item_index.row())
 
     def _log_debug(self, msg):
         """
