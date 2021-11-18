@@ -823,7 +823,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         Remove an item and all its children if it exists.
         Removes the entire row that item belongs to.
 
-        :param str uid: The unique id for an item in the model.
+        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to delete
         """
         # find all items in subtree and remove them
         # from the uid based lookup to avoid issues
