@@ -834,10 +834,6 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         # remove it
         parent_model_item = item.parent()
 
-        item_index = None
-        if parent_model_item is None:
-            item_index = item.index()
-
         if parent_model_item:
             # remove entire row that item belongs to.
             # we are the owner of the data so we just do a `takeRow` and not a
@@ -845,9 +841,12 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             # don't keep any reference to the item, it will be garbage
             # collected if not already done.
             parent_model_item.takeRow(item.row())
-
-        if item_index and item_index.isValid():
-            item_index.model().takeRow(item_index.row())
+        else:
+            # If we don't have a parent (directly under the model root)
+            # remove our row from the model.
+            index = item.index()
+            if index and index.isValid():
+                index.model().takeRow(index.row())
 
     def _log_debug(self, msg):
         """
