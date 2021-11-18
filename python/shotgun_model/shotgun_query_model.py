@@ -991,9 +991,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         :param list sg_data: Shotgun data payload.
         """
-        self._log_debug(
-            "--> ShotGrid data arrived. (%s records)" % len(sg_data)
-        )
+        self._log_debug("--> ShotGrid data arrived. (%s records)" % len(sg_data))
 
         # pre-process data
         sg_data = self._before_data_processing(sg_data)
@@ -1072,8 +1070,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                                 self._update_item(model_item, data_item)
                             else:
                                 self._log_debug(
-                                    "Creating new model "
-                                    "item for %s" % data_item
+                                    "Creating new model " "item for %s" % data_item
                                 )
                                 self._create_item(parent_model_item, data_item)
                 elif item["mode"] == self._data_handler.DELETED:
@@ -1098,6 +1095,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         # and emit completion signal
         self.data_refreshed.emit(len(modified_items) > 0)
+
 
 """
     def __on_sg_data_arrived(self, sg_data):
