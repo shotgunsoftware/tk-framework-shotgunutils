@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_query_model &mdash; tk-framework-shotgunutils v5.8.2 documentation</title>
+  <title>shotgun_model.shotgun_query_model &mdash; tk-framework-shotgunutils v5.8.3 documentation</title>
   
 
   
@@ -122,7 +122,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.2.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.3.<br>
     
         This documentation is part of the Shotgun Pipeline Toolkit.
     
@@ -1019,12 +1019,12 @@
 <span class="sd">        Remove an item and all its children if it exists.</span>
 <span class="sd">        Removes the entire row that item belongs to.</span>
 
-<span class="sd">        :param str uid: The unique id for an item in the model.</span>
+<span class="sd">        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to delete</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># find all items in subtree and remove them</span>
         <span class="c1"># from the uid based lookup to avoid issues</span>
         <span class="c1"># where the C++ object has been deleted but we</span>
-        <span class="c1"># still a pyside reference.</span>
+        <span class="c1"># still have a pyside reference.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__remove_unique_id_r</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
         <span class="c1"># remove it</span>
@@ -1034,9 +1034,15 @@
             <span class="c1"># remove entire row that item belongs to.</span>
             <span class="c1"># we are the owner of the data so we just do a `takeRow` and not a</span>
             <span class="c1"># `removeRow` to prevent the model to delete the data. Because we</span>
-            <span class="c1"># don&#39;t keep any reference to the item, it will be garbage collected</span>
-            <span class="c1"># if not already done.</span>
+            <span class="c1"># don&#39;t keep any reference to the item, it will be garbage</span>
+            <span class="c1"># collected if not already done.</span>
             <span class="n">parent_model_item</span><span class="o">.</span><span class="n">takeRow</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">row</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If we don&#39;t have a parent (directly under the model root)</span>
+            <span class="c1"># remove our row from the model.</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">index</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="ow">and</span> <span class="n">index</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
+                <span class="n">index</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">takeRow</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">_log_debug</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1233,17 +1239,35 @@
                         <span class="p">)</span>
 
                     <span class="k">if</span> <span class="n">parent_model_item</span><span class="p">:</span>
-                        <span class="c1"># The parent exists in the view. It might not because of</span>
-                        <span class="c1"># lazy loading.</span>
+                        <span class="c1"># The parent exists in the view. It might not because</span>
+                        <span class="c1"># of lazy loading.</span>
                         <span class="c1"># If its children were already populated we need to add</span>
-                        <span class="c1"># the new ones now. If not, we let fetchMore does its job</span>
-                        <span class="c1"># later in lazy loading mode.</span>
+                        <span class="c1"># the new ones now. If not, we let fetchMore does its</span>
+                        <span class="c1"># job later in lazy loading mode.</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">canFetchMore</span><span class="p">(</span><span class="n">parent_model_item</span><span class="o">.</span><span class="n">index</span><span class="p">()):</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span>
                                 <span class="s2">&quot;Creating new model item for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">data_item</span>
                             <span class="p">)</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">_create_item</span><span class="p">(</span><span class="n">parent_model_item</span><span class="p">,</span> <span class="n">data_item</span><span class="p">)</span>
-
+                            <span class="c1"># Double check that the item we pulled from SG</span>
+                            <span class="c1"># was not already added by a fetchMore on the</span>
+                            <span class="c1"># model.</span>
+                            <span class="c1"># If it is the case, we just update the existing</span>
+                            <span class="c1"># item even, if in theory, it should already be</span>
+                            <span class="c1"># up to date.</span>
+                            <span class="n">model_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_item_by_unique_id</span><span class="p">(</span>
+                                <span class="n">data_item</span><span class="o">.</span><span class="n">unique_id</span>
+                            <span class="p">)</span>
+                            <span class="k">if</span> <span class="n">model_item</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span>
+                                    <span class="s2">&quot;Updating existing model &quot;</span>
+                                    <span class="s2">&quot;item </span><span class="si">%s</span><span class="s2"> for create&quot;</span> <span class="o">%</span> <span class="n">model_item</span>
+                                <span class="p">)</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_update_item</span><span class="p">(</span><span class="n">model_item</span><span class="p">,</span> <span class="n">data_item</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span>
+                                    <span class="s2">&quot;Creating new model &quot;</span> <span class="s2">&quot;item for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">data_item</span>
+                                <span class="p">)</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_create_item</span><span class="p">(</span><span class="n">parent_model_item</span><span class="p">,</span> <span class="n">data_item</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">DELETED</span><span class="p">:</span>
                     <span class="c1"># see if the node exists in the tree, in that case delete it.</span>
                     <span class="c1"># we check if it exists in the model because it may not have been</span>
