@@ -14,4 +14,4 @@ This repository is a part of the ShotGrid Pipeline Toolkit.
 - For information about ShotGrid in general, click here: http://www.shotgunsoftware.com/toolkit
 
 ## Have a Question?
-Don't hesitate to contact us! You can find us on knowledge.autodesk.com/contact-support
+Don't hesitate to contact us! You can find us on https://knowledge.autodesk.com/contact-support

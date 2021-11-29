@@ -217,7 +217,8 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                     )
                 else:
                     # on the leaf level, use the entity id as the unique key
-                    unique_field_value = sg_item["id"]
+                    # unique_field_value = sg_item["id"]
+                    unique_field_value = sg_item[field_name]
 
                 # two distinct cases for leaves and non-leaves
                 if on_leaf_level:
