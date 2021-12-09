@@ -985,7 +985,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         # If we don't have a URL, then we know we don't
         # have a thumbnail to worry about.
         if not url:
-            return None
+            return (None, None)
 
         # hash the path portion of the thumbnail url
         url_obj = six.moves.urllib.parse.urlparse(url)
