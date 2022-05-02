@@ -823,12 +823,12 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         Remove an item and all its children if it exists.
         Removes the entire row that item belongs to.
 
-        :param str uid: The unique id for an item in the model.
+        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to delete
         """
         # find all items in subtree and remove them
         # from the uid based lookup to avoid issues
         # where the C++ object has been deleted but we
-        # still a pyside reference.
+        # still have a pyside reference.
         self.__remove_unique_id_r(item)
 
         # remove it
@@ -838,9 +838,15 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             # remove entire row that item belongs to.
             # we are the owner of the data so we just do a `takeRow` and not a
             # `removeRow` to prevent the model to delete the data. Because we
-            # don't keep any reference to the item, it will be garbage collected
-            # if not already done.
+            # don't keep any reference to the item, it will be garbage
+            # collected if not already done.
             parent_model_item.takeRow(item.row())
+        else:
+            # If we don't have a parent (directly under the model root)
+            # remove our row from the model.
+            index = item.index()
+            if index and index.isValid():
+                index.model().takeRow(index.row())
 
     def _log_debug(self, msg):
         """
@@ -1037,17 +1043,35 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                         )
 
                     if parent_model_item:
-                        # The parent exists in the view. It might not because of
-                        # lazy loading.
+                        # The parent exists in the view. It might not because
+                        # of lazy loading.
                         # If its children were already populated we need to add
-                        # the new ones now. If not, we let fetchMore does its job
-                        # later in lazy loading mode.
+                        # the new ones now. If not, we let fetchMore does its
+                        # job later in lazy loading mode.
                         if not self.canFetchMore(parent_model_item.index()):
                             self._log_debug(
                                 "Creating new model item for %s" % data_item
                             )
-                            self._create_item(parent_model_item, data_item)
-
+                            # Double check that the item we pulled from SG
+                            # was not already added by a fetchMore on the
+                            # model.
+                            # If it is the case, we just update the existing
+                            # item even, if in theory, it should already be
+                            # up to date.
+                            model_item = self._get_item_by_unique_id(
+                                data_item.unique_id
+                            )
+                            if model_item:
+                                self._log_debug(
+                                    "Updating existing model "
+                                    "item %s for create" % model_item
+                                )
+                                self._update_item(model_item, data_item)
+                            else:
+                                self._log_debug(
+                                    "Creating new model " "item for %s" % data_item
+                                )
+                                self._create_item(parent_model_item, data_item)
                 elif item["mode"] == self._data_handler.DELETED:
                     # see if the node exists in the tree, in that case delete it.
                     # we check if it exists in the model because it may not have been

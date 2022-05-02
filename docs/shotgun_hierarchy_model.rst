@@ -14,7 +14,7 @@ your production hierarchy.
 
 The Shotgun Hierarchy Model is a custom Qt Model specialized to represent your
 Shotgun production hierarchy as defined in your site's
-`Tracking Settings <https://support.shotgunsoftware.com/hc/en-us/articles/219031138-Project-Tracking-Settings>`_.
+`Tracking Settings <https://help.autodesk.com/view/SGSUB/ENU/?guid=SG_Administrator_ar_display_options_ar_project_tracking_settings_html>`_.
 The hierarchy represented by the model is dynamically constructed based on
 a ``seed_entity_field`` which represents the target of the hierarchy (i.e. what
 you're trying to drill down to in view using the model).
