@@ -148,7 +148,6 @@ specialized to hold the contents of a particular shotgun API
 refreshes its data asynchronously.
 
 .. autoclass:: ShotgunHierarchyModel
-    :inherited-members:
     :members:
     :exclude-members: canFetchMore,
                       fetchMore,

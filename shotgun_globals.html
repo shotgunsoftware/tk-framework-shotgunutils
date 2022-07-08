@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Globals Access &mdash; tk-framework-shotgunutils master documentation</title>
+  <title>Shotgun Globals Access &mdash; tk-framework-shotgunutils v5.8.5 documentation</title>
   
 
   
@@ -124,12 +124,12 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> master.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.5.<br>
     
-        This documentation is part of the Shotgun Pipeline Toolkit.
+        This documentation is part of the ShotGrid Pipeline Toolkit.
     
     For more information, please visit
-    <a class=custom_post_menu href='https://developer.shotgridsoftware.com'>Shotgun Support</a>.
+    <a class=custom_post_menu href='https://developer.shotgridsoftware.com'>The ShotGrid developer portal.</a>.
     The code associated with this documentation can be found
     <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
 
@@ -223,6 +223,319 @@ When you shut down your app or tool, make sure you unregister the data retriever
 <span class="n">task_manager</span><span class="o">.</span><span class="n">shut_down</span><span class="p">()</span>
 </pre></div>
 </div>
+<dl class="function">
+<dt id="shotgun_globals.register_bg_task_manager">
+<code class="descclassname">shotgun_globals.</code><code class="descname">register_bg_task_manager</code><span class="sig-paren">(</span><em>task_manager</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.register_bg_task_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a background task manager with the singleton.
+Once a background task manager has been registered, the schema
+singleton can refresh its cache.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_manager</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">task_manager.BackgroundTaskManager</span></code>) – Background task manager to use</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.unregister_bg_task_manager">
+<code class="descclassname">shotgun_globals.</code><code class="descname">unregister_bg_task_manager</code><span class="sig-paren">(</span><em>task_manager</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.unregister_bg_task_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unregister a previously registered data retriever with the singleton.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_manager</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">task_manager.BackgroundTaskManager</span></code>) – Background task manager to use</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.get_type_display_name">
+<code class="descclassname">shotgun_globals.</code><code class="descname">get_type_display_name</code><span class="sig-paren">(</span><em>sg_entity_type</em>, <em>project_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.get_type_display_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the display name for a Shotgun entity type.
+If no display name is known for this object, the system
+name is returned, e.g. the same that’s being passed in
+via the sg_entity_type parameter.</p>
+<p>If the data is not present locally, a cache reload
+will be triggered, meaning that subsequent cache requests may
+return valid data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sg_entity_type</strong> – Shotgun entity type</li>
+<li><strong>project_id</strong> – The id of the project entity to get a name from.
+If None, the current context’s project will be used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Entity type display name</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.get_field_display_name">
+<code class="descclassname">shotgun_globals.</code><code class="descname">get_field_display_name</code><span class="sig-paren">(</span><em>sg_entity_type</em>, <em>field_name</em>, <em>project_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.get_field_display_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the display name for a given Shotgun field. If the field
+cannot be found or the value is not yet cached, the system name
+for the field is returned.</p>
+<p>If the data is not present locally, a cache reload
+will be triggered, meaning that subsequent cache requests may
+return valid data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sg_entity_type</strong> – Shotgun entity type</li>
+<li><strong>field_name</strong> – Shotgun field name</li>
+<li><strong>project_id</strong> – The id of the project entity to get a name from.
+If None, the current context’s project will be used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Field display name</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.get_empty_phrase">
+<code class="descclassname">shotgun_globals.</code><code class="descname">get_empty_phrase</code><span class="sig-paren">(</span><em>sg_entity_type</em>, <em>field_name</em>, <em>project_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.get_empty_phrase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an appropriate phrase to describe the fact that
+a given Shotgun field is empty. The phrase will differ depending on
+the data type of the field.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sg_entity_type</strong> – Shotgun entity type</li>
+<li><strong>field_name</strong> – Shotgun field name</li>
+<li><strong>project_id</strong> – The id of the project entity to get a phrase from.
+If None, the current context’s project will be used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Empty phrase string</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.get_status_display_name">
+<code class="descclassname">shotgun_globals.</code><code class="descname">get_status_display_name</code><span class="sig-paren">(</span><em>status_code</em>, <em>project_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.get_status_display_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the display name for a given status code.
+If the status code cannot be found or haven’t been loaded,
+the status code is returned back.</p>
+<p>If the data is not present locally, a cache reload
+will be triggered, meaning that subsequent cache requests may
+return valid data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>status_code</strong> – Status short code (e.g ‘ip’)</li>
+<li><strong>project_id</strong> – The id of the project entity to get a name from.
+If None, the current context’s project will be used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">string with descriptive status name</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.get_status_color">
+<code class="descclassname">shotgun_globals.</code><code class="descname">get_status_color</code><span class="sig-paren">(</span><em>status_code</em>, <em>project_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.get_status_color" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the color for a given status code.
+If the status code cannot be found or haven’t been loaded,
+None is returned.</p>
+<p>If the data is not present locally, a cache reload
+will be triggered, meaning that subsequent cache requests may
+return valid data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>status_code</strong> – Status short code (e.g ‘ip’)</li>
+<li><strong>project_id</strong> – The id of the project entity to get a color from.
+If None, the current context’s project will be used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">string with r,g,b values, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;123,255,10&quot;</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.get_entity_type_icon">
+<code class="descclassname">shotgun_globals.</code><code class="descname">get_entity_type_icon</code><span class="sig-paren">(</span><em>entity_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_globals/icon.html#get_entity_type_icon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_globals.get_entity_type_icon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the icon for the specified entity type if available.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity_type</strong> – The entity type to retrieve the icon for</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A QIcon if an icon was found for the specified entity
+type, otherwise None.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.get_entity_type_icon_url">
+<code class="descclassname">shotgun_globals.</code><code class="descname">get_entity_type_icon_url</code><span class="sig-paren">(</span><em>entity_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_globals/icon.html#get_entity_type_icon_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_globals.get_entity_type_icon_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the icon resource path for the specified entity type if available.</p>
+<p>This is useful if you want to include an icon in a <code class="docutils literal notranslate"><span class="pre">QLabel</span></code> using
+an <code class="docutils literal notranslate"><span class="pre">&lt;img&gt;</span></code> html tag.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity_type</strong> – The entity type to retrieve the icon for</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A string url with a qt resource path</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.get_valid_values">
+<code class="descclassname">shotgun_globals.</code><code class="descname">get_valid_values</code><span class="sig-paren">(</span><em>sg_entity_type</em>, <em>field_name</em>, <em>project_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.get_valid_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns valid values for fields with a list of choices.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sg_entity_type</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – The entity type.</li>
+<li><strong>field_name</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – The name of the field on the entity</li>
+<li><strong>project_id</strong> – The id of the project entity to get a name from.
+If None, the current context’s project will be used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A <code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code> of valid values defined by the schema</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="docutils literal notranslate"><span class="pre">ValueError</span></code> if the field has no valid values.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.field_is_editable">
+<code class="descclassname">shotgun_globals.</code><code class="descname">field_is_editable</code><span class="sig-paren">(</span><em>sg_entity_type</em>, <em>field_name</em>, <em>project_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.field_is_editable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a boolean identifying the editability of the entity’s field.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sg_entity_type</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – the entity type</li>
+<li><strong>field_name</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – the field name to check editibility</li>
+<li><strong>project_id</strong> – The project Entity id. If None, the current
+context’s project will be used, or the “site”
+cache location will be returned if the current
+context does not have an associated project.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="docutils literal notranslate"><span class="pre">field_name</span></code> may be in “bubble” notation. This method will account
+for it and return the editability setting for the evaluated entity type
+and field defined in the bubble noation. For example, if the field is
+defined as “sg_sequence.Sequence.code”, this method will return the
+editability of the <cite>code</cite> field on the <cite>Sequence</cite> entity.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">True</span></code> if the field is ediable, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.field_is_visible">
+<code class="descclassname">shotgun_globals.</code><code class="descname">field_is_visible</code><span class="sig-paren">(</span><em>sg_entity_type</em>, <em>field_name</em>, <em>project_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_globals.field_is_visible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a boolean identifying the visibility of the entity’s field.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sg_entity_type</strong> – the entity type</li>
+<li><strong>field_name</strong> – the field name to check visibility</li>
+<li><strong>project_id</strong> – The project Entity id. If None, the current
+context’s project will be used, or the “site”
+cache location will be returned if the current
+context does not have an associated project.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="docutils literal notranslate"><span class="pre">field_name</span></code> may be in “bubble” notation. This method will account
+for it and return the visibility setting for the evaluated entity type
+and field defined in the bubble noation. For example, if the field is
+defined as “sg_sequence.Sequence.code”, this method will return the
+visibility of the <cite>code</cite> field on the <cite>Sequence</cite> entity.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">True</span></code> if the field is visible, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shotgun_globals.create_human_readable_date">
+<code class="descclassname">shotgun_globals.</code><code class="descname">create_human_readable_date</code><span class="sig-paren">(</span><em>dt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_globals/date_time.html#create_human_readable_date"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_globals.create_human_readable_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the date represented by the argument as a string, displaying recent
+dates as “Yesterday”, “Today”, or “Tomorrow”.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/2/library/datetime.html#datetime.date" title="(in Python v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a> or <a class="reference external" href="https://docs.python.org/2/library/datetime.html#datetime.datetime" title="(in Python v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>) – The date convert to a string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A String representing date appropriate for display</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 
 
