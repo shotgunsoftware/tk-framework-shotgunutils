@@ -190,6 +190,7 @@ types for the asset types. The leaf nodes in this case would be assets.
 
 .. autoclass:: ShotgunModel
     :members:
+    :inherited-members:
     :exclude-members: reset, clear, hasChildren, fetchMore, canFetchMore,
                       ensure_data_is_loaded, destroy, hard_refresh, is_data_cached
 
