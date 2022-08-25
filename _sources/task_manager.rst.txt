@@ -95,4 +95,3 @@ Class BackgroundTaskManager
 
 .. autoclass:: BackgroundTaskManager
     :members:
-    :inherited-members:

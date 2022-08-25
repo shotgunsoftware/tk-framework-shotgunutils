@@ -84,4 +84,3 @@ Class ShotgunDataRetriever
 
 .. autoclass:: ShotgunDataRetriever
     :members:
-    :inherited-members:

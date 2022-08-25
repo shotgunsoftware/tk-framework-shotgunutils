@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Hierarchy Model &mdash; tk-framework-shotgunutils master documentation</title>
+  <title>Shotgun Hierarchy Model &mdash; tk-framework-shotgunutils fix-developer-docs documentation</title>
   
 
   
@@ -134,7 +134,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> master.<br>
+    <b>tk-framework-shotgunutils</b> fix-developer-docs.<br>
     
         This documentation is part of the ShotGrid Pipeline Toolkit.
     
@@ -225,7 +225,7 @@ Shotgun production hierarchy as defined in your site’s
 The hierarchy represented by the model is dynamically constructed based on
 a <code class="docutils literal notranslate"><span class="pre">seed_entity_field</span></code> which represents the target of the hierarchy (i.e. what
 you’re trying to drill down to in view using the model).</p>
-<p>Like the <a class="reference external" href="http://developer.shotgridsoftware.com/tk-framework-shotgunutils/shotgun_model.html#shotgun_model.ShotgunModel" title="(in tk-framework-shotgunutils vv5.8.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunModel</span></code></a>, the <a class="reference external" href="http://developer.shotgridsoftware.com/tk-framework-shotgunutils/shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel" title="(in tk-framework-shotgunutils vv5.8.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code></a> uses a disk based
+<p>Like the <code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunModel</span></code>, the <code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code> uses a disk based
 cache and runs queries asynchronously to Shotgun in the background for
 performance. You derive your own model class from it, set up a query, and then
 hook up your model to a Qt View which will draw the data. The class contains
@@ -303,7 +303,7 @@ drilling down to entities with linked versions.</p>
 <p>The simple setup outlined above could be extended in the following ways:</p>
 <ul class="simple">
 <li>If you need more control of how the data is being retrieved, consider instead
-creating your own class and derive from <a class="reference external" href="http://developer.shotgridsoftware.com/tk-framework-shotgunutils/shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel" title="(in tk-framework-shotgunutils vv5.8.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code></a>. This
+creating your own class and derive from <code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code>. This
 makes it possible to customize the data as it arrives from Shotgun and how it
 will be displayed by the view.</li>
 <li>If you want to retrieve results from your view, connect signals to the view’s
@@ -326,11 +326,11 @@ more information, see <code class="xref py py-class docutils literal notranslate
 access. Use this when you want to prototype data modeling or if your are looking
 for a simple hierarchy without any customization. All you need to do is to
 instantiate the class (typically once, in your constructor) and then call
-<a class="reference external" href="http://developer.shotgridsoftware.com/tk-framework-shotgunutils/shotgun_hierarchy_model.html#shotgun_model.SimpleShotgunHierarchyModel.load_data" title="(in tk-framework-shotgunutils vv5.8.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SimpleShotgunHierarchyModel.load_data()</span></code></a> to specify the type of
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">SimpleShotgunHierarchyModel.load_data()</span></code> to specify the type of
 hierarchy to build in the model. Subsequently, call
-<a class="reference external" href="http://developer.shotgridsoftware.com/tk-framework-shotgunutils/shotgun_model.html#shotgun_model.SimpleShotgunModel.load_data" title="(in tk-framework-shotgunutils vv5.8.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_data()</span></code></a> whenever you wish to change the
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">load_data()</span></code> whenever you wish to change the
 hierarchy represented by the model.</p>
-<p>This class derives from <a class="reference external" href="http://developer.shotgridsoftware.com/tk-framework-shotgunutils/shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel" title="(in tk-framework-shotgunutils vv5.8.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code></a> so all the customization
+<p>This class derives from <code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code> so all the customization
 methods available in the normal ShotgunModel can also be subclassed from this
 class.</p>
 </div>

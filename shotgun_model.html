@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Model &mdash; tk-framework-shotgunutils master documentation</title>
+  <title>Shotgun Model &mdash; tk-framework-shotgunutils fix-developer-docs documentation</title>
   
 
   
@@ -137,7 +137,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> master.<br>
+    <b>tk-framework-shotgunutils</b> fix-developer-docs.<br>
     
         This documentation is part of the ShotGrid Pipeline Toolkit.
     
@@ -287,7 +287,7 @@ toolkit app:</p>
 <p>The simple setup outlined above could be extended in the following ways:</p>
 <ul class="simple">
 <li>If you need more control of how the data is being retrieved, consider instead creating
-your own class and derive from <a class="reference external" href="http://developer.shotgridsoftware.com/tk-framework-shotgunutils/shotgun_model.html#shotgun_model.ShotgunModel" title="(in tk-framework-shotgunutils vv5.8.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunModel</span></code></a>. This makes it possible to customize
+your own class and derive from <code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunModel</span></code>. This makes it possible to customize
 the shotgun data as it arrives from Shotgun, control the hierarchy grouping and many other
 things.</li>
 <li>If you want to retrieve results from your view, connect signals to the view’s selection model.</li>
@@ -339,17 +339,17 @@ like <code class="docutils literal notranslate"><span class="pre">{&quot;name&qu
 <p>Convenience wrapper around the Shotgun model for quick and easy access. Use this when you want
 to prototype data modeling or if your are looking for a simple flat data set reflecting a
 shotgun query. All you need to do is to instantiate the class (typically once, in your constructor)
-and then call <a class="reference external" href="http://developer.shotgridsoftware.com/tk-framework-shotgunutils/shotgun_model.html#shotgun_model.SimpleShotgunModel.load_data" title="(in tk-framework-shotgunutils vv5.8.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SimpleShotgunModel.load_data()</span></code></a> to
+and then call <code class="xref py py-meth docutils literal notranslate"><span class="pre">SimpleShotgunModel.load_data()</span></code> to
 specify which shotgun query to load up in the model. Subsequently call
-<a class="reference external" href="http://developer.shotgridsoftware.com/tk-framework-shotgunutils/shotgun_model.html#shotgun_model.SimpleShotgunModel.load_data" title="(in tk-framework-shotgunutils vv5.8.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_data()</span></code></a> whenever you
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">load_data()</span></code> whenever you
 wish to change the Shotgun query associated with the model.</p>
-<p>This class derives from <a class="reference external" href="http://developer.shotgridsoftware.com/tk-framework-shotgunutils/shotgun_model.html#shotgun_model.ShotgunModel" title="(in tk-framework-shotgunutils vv5.8.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunModel</span></code></a> so all the
+<p>This class derives from <code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunModel</span></code> so all the
 customization methods available in the
 normal ShotgunModel can also be subclassed from this class.</p>
 </div>
 <div class="section" id="shotgunentitymodel">
 <h2>ShotgunEntityModel<a class="headerlink" href="#shotgunentitymodel" title="Permalink to this headline">¶</a></h2>
-<p>Another convenience wrapper around the <a class="reference external" href="http://developer.shotgridsoftware.com/tk-framework-shotgunutils/shotgun_model.html#shotgun_model.ShotgunModel" title="(in tk-framework-shotgunutils vv5.8.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunModel</span></code></a>. This model is useful when you
+<p>Another convenience wrapper around the <code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunModel</span></code>. This model is useful when you
 want to represent a tree view of Sequences, Shots or Assets. By default, the model will
 associate standard dark-style Shotgun entity type icons to items in the list.</p>
 </div>
