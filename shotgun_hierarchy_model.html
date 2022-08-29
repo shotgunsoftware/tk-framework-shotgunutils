@@ -225,7 +225,7 @@ Shotgun production hierarchy as defined in your site’s
 The hierarchy represented by the model is dynamically constructed based on
 a <code class="docutils literal notranslate"><span class="pre">seed_entity_field</span></code> which represents the target of the hierarchy (i.e. what
 you’re trying to drill down to in view using the model).</p>
-<p>Like the <code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunModel</span></code>, the <code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code> uses a disk based
+<p>Like the <a class="reference internal" href="shotgun_model.html#shotgun_model.ShotgunModel" title="shotgun_model.ShotgunModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunModel</span></code></a>, the <a class="reference internal" href="#shotgun_model.ShotgunHierarchyModel" title="shotgun_model.ShotgunHierarchyModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code></a> uses a disk based
 cache and runs queries asynchronously to Shotgun in the background for
 performance. You derive your own model class from it, set up a query, and then
 hook up your model to a Qt View which will draw the data. The class contains
@@ -303,7 +303,7 @@ drilling down to entities with linked versions.</p>
 <p>The simple setup outlined above could be extended in the following ways:</p>
 <ul class="simple">
 <li>If you need more control of how the data is being retrieved, consider instead
-creating your own class and derive from <code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code>. This
+creating your own class and derive from <a class="reference internal" href="#shotgun_model.ShotgunHierarchyModel" title="shotgun_model.ShotgunHierarchyModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code></a>. This
 makes it possible to customize the data as it arrives from Shotgun and how it
 will be displayed by the view.</li>
 <li>If you want to retrieve results from your view, connect signals to the view’s
@@ -316,7 +316,7 @@ matching a particular search criteria, use a Proxy Model (typically
 <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QSortFilterProxyModel.html#PySide.QtGui.QSortFilterProxyModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSortFilterProxyModel</span></code></a>).</li>
 <li>If you want to control the way items are displayed in the view, consider using
 the Shotgun delegates module which is part of the Qt widgets framework. For
-more information, see <code class="xref py py-class docutils literal notranslate"><span class="pre">views.WidgetDelegate</span></code></li>
+more information, see <a class="reference external" href="http://developer.shotgridsoftware.com/tk-framework-qtwidgets/views.html#views.WidgetDelegate" title="(in tk-framework-qtwidgets vv2.10.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">WidgetDelegate</span></code></a></li>
 </ul>
 </div>
 </div>
@@ -326,13 +326,97 @@ more information, see <code class="xref py py-class docutils literal notranslate
 access. Use this when you want to prototype data modeling or if your are looking
 for a simple hierarchy without any customization. All you need to do is to
 instantiate the class (typically once, in your constructor) and then call
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">SimpleShotgunHierarchyModel.load_data()</span></code> to specify the type of
+<a class="reference internal" href="#shotgun_model.SimpleShotgunHierarchyModel.load_data" title="shotgun_model.SimpleShotgunHierarchyModel.load_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SimpleShotgunHierarchyModel.load_data()</span></code></a> to specify the type of
 hierarchy to build in the model. Subsequently, call
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">load_data()</span></code> whenever you wish to change the
+<a class="reference internal" href="shotgun_model.html#shotgun_model.SimpleShotgunModel.load_data" title="shotgun_model.SimpleShotgunModel.load_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_data()</span></code></a> whenever you wish to change the
 hierarchy represented by the model.</p>
-<p>This class derives from <code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code> so all the customization
+<p>This class derives from <a class="reference internal" href="#shotgun_model.ShotgunHierarchyModel" title="shotgun_model.ShotgunHierarchyModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code></a> so all the customization
 methods available in the normal ShotgunModel can also be subclassed from this
 class.</p>
+<dl class="class">
+<dt id="shotgun_model.SimpleShotgunHierarchyModel">
+<em class="property">class </em><code class="descclassname">shotgun_model.</code><code class="descname">SimpleShotgunHierarchyModel</code><span class="sig-paren">(</span><em>parent</em>, <em>schema_generation=0</em>, <em>bg_task_manager=None</em>, <em>include_root=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/simple_shotgun_hierarchy_model.html#SimpleShotgunHierarchyModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.SimpleShotgunHierarchyModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">shotgun_model.shotgun_hierarchy_model.ShotgunHierarchyModel</span></code></p>
+<p>Convenience wrapper around the Shotgun Hierarchy model for quick and easy
+access.</p>
+<p>All you need to do is to instantiate the class (typically once, in your
+constructor) and then call <a class="reference internal" href="#shotgun_model.SimpleShotgunHierarchyModel.load_data" title="shotgun_model.SimpleShotgunHierarchyModel.load_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_data()</span></code></a> to specify which shotgun
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">shotgun_api3.Shotgun.nav_expand</span></code> query to load up
+the top-level items in the hierarchy. The remaining items will be queried
+asynchronously as items are expanded.</p>
+<p>Subsequently call <a class="reference internal" href="#shotgun_model.SimpleShotgunHierarchyModel.load_data" title="shotgun_model.SimpleShotgunHierarchyModel.load_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_data()</span></code></a> whenever you wish to change the
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">shotgun_api3.Shotgun.nav_expand</span></code> query associated
+with the model.</p>
+<p>This class derives from <a class="reference internal" href="#shotgun_model.ShotgunHierarchyModel" title="shotgun_model.ShotgunHierarchyModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code></a> so all the
+customization methods available in the normal <a class="reference internal" href="#shotgun_model.ShotgunHierarchyModel" title="shotgun_model.ShotgunHierarchyModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code></a>
+can also be subclassed from this class.</p>
+<p>Initialize the Hierarcy model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parent</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">QObject</span></code>) – The model’s parent.</li>
+<li><strong>schema_generation</strong> – Schema generation number. Advanced parameter.
+If your shotgun model contains logic in subclassed methods that
+modify the shotgun data prior to it being put into the cache system
+that the ShotgunModel maintains, you can use this option to ensure
+that different versions of the code access different caches. If you
+change your custom business logic around and update the generation
+number, both new and old versions of the code will work correctly
+against the cached data.</li>
+<li><strong>bg_task_manager</strong> (<a class="reference internal" href="task_manager.html#task_manager.BackgroundTaskManager" title="task_manager.BackgroundTaskManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">BackgroundTaskManager</span></code></a>) – Background task manager to use for any
+asynchronous work. If this is None then a task manager will be
+created as needed.</li>
+<li><strong>include_root</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – Defines the name of an additional, top-level
+model item that represents the root. In views, this item will appear
+as a sibling to top-level children of the root. This allows for
+UX whereby a user can select an item representing the root without
+having a UI that shows a single, top-level item. An example would
+be displaying published file entity hierarchy with top level items:
+“Assets”, “Shots”, and “Project Publishes”. In this example, the
+supplied arg would look like: <code class="docutils literal notranslate"><span class="pre">include_root=&quot;Project</span> <span class="pre">Publishes&quot;</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">include_root</span></code> is <cite>None</cite>, no root item will be added.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="shotgun_model.SimpleShotgunHierarchyModel.load_data">
+<code class="descname">load_data</code><span class="sig-paren">(</span><em>seed_entity_field</em>, <em>root=None</em>, <em>entity_fields=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/simple_shotgun_hierarchy_model.html#SimpleShotgunHierarchyModel.load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.SimpleShotgunHierarchyModel.load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads shotgun data into the model, using the cache if possible.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>seed_entity_field</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – <p>This is a string that corresponds to the
+field on an entity used to seed the hierarchy. For example, a value
+of <code class="docutils literal notranslate"><span class="pre">Version.entity</span></code> would cause the model to display a hierarchy
+where the leaves match the entity value of Version entities.</p>
+<p>NOTE: This value is currently limited to either <code class="docutils literal notranslate"><span class="pre">Version.entity</span></code>
+or <code class="docutils literal notranslate"><span class="pre">PublishedFile.entity</span></code></p>
+</li>
+<li><strong>root</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – This is the entity that will be at the root
+of the hierarchy view. By default, this value is <code class="docutils literal notranslate"><span class="pre">None</span></code>, which
+means the root of the hierarchy will be at the site level. Only
+projects can be set as the root of a hierarchy model.</li>
+<li><strong>entity_fields</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – A dictionary that identifies what fields to
+include on returned entities. Since the hierarchy can include any
+entity structure, this argument allows for specification of
+additional fields to include as these entities are returned. The
+dict’s keys correspond to the entity type and the value is a list
+of field names to return.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="shotgunhierarchymodel">
 <h2>ShotgunHierarchyModel<a class="headerlink" href="#shotgunhierarchymodel" title="Permalink to this headline">¶</a></h2>
@@ -341,6 +425,1033 @@ class.</p>
 specialized to hold the contents of a particular shotgun API
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">shotgun_api3.Shotgun.nav_expand</span></code> query. It is cached and
 refreshes its data asynchronously.</p>
+<dl class="class">
+<dt id="shotgun_model.ShotgunHierarchyModel">
+<em class="property">class </em><code class="descclassname">shotgun_model.</code><code class="descname">ShotgunHierarchyModel</code><span class="sig-paren">(</span><em>parent</em>, <em>schema_generation=0</em>, <em>bg_task_manager=None</em>, <em>include_root=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Qt Model representing a Shotgun hierarchy.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Use of this model requires version Shotgun <code class="docutils literal notranslate"><span class="pre">v7.0.2</span></code> or later.
+Attempts to construct an instance of this model on an older version of
+Shotgun will result with a single item in the model saying that
+Hierarchy model isn’t supported. A warning will also be logged.</p>
+</div>
+<p>This class implements a standard <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtCore/QAbstractItemModel.html#PySide.QtCore.QAbstractItemModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QAbstractItemModel</span></code></a>
+specialized to hold the contents of a particular Shotgun query. It is cached
+and refreshes its data asynchronously.</p>
+<p>In order to use this class, you normally subclass it and implement certain
+key data methods for setting up queries, customizing etc. Then you connect
+your class to a <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QAbstractItemView.html#PySide.QtGui.QAbstractItemView" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QAbstractItemView</span></code></a> of some sort which
+will display the result.</p>
+<p>The model stores a single column, lazy-loaded Shotgun Hierarchy as queried
+via the <code class="xref py py-meth docutils literal notranslate"><span class="pre">shotgun_api3.Shotgun.nav_expand</span></code>
+python-api method. The structure of items in the hierarchy mimics what is
+found in Shotgun as configured in each project’s
+<a class="reference external" href="https://help.autodesk.com/view/SGSUB/ENU/?guid=SG_Administrator_ar_display_options_ar_project_tracking_settings_html">Tracking Settings</a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Signal:</th><td class="field-body">async_item_retrieval_completed (<a class="reference internal" href="#shotgun_model.ShotgunHierarchyModel" title="shotgun_model.ShotgunHierarchyModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code></a>): Emitted when a query to
+<a class="reference internal" href="#shotgun_model.ShotgunHierarchyModel.async_item_from_entity" title="shotgun_model.ShotgunHierarchyModel.async_item_from_entity"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ShotgunHierarchyModel.async_item_from_entity()</span></code></a> or
+<a class="reference internal" href="#shotgun_model.ShotgunHierarchyModel.async_item_from_paths" title="shotgun_model.ShotgunHierarchyModel.async_item_from_paths"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ShotgunHierarchyModel.async_item_from_paths()</span></code></a> has completed.</td>
+</tr>
+</tbody>
+</table>
+<p>Initialize the Hierarcy model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parent</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">QObject</span></code>) – The model’s parent.</li>
+<li><strong>schema_generation</strong> – Schema generation number. Advanced parameter.
+If your shotgun model contains logic in subclassed methods that
+modify the shotgun data prior to it being put into the cache system
+that the ShotgunModel maintains, you can use this option to ensure
+that different versions of the code access different caches. If you
+change your custom business logic around and update the generation
+number, both new and old versions of the code will work correctly
+against the cached data.</li>
+<li><strong>bg_task_manager</strong> (<a class="reference internal" href="task_manager.html#task_manager.BackgroundTaskManager" title="task_manager.BackgroundTaskManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">BackgroundTaskManager</span></code></a>) – Background task manager to use for any
+asynchronous work. If this is None then a task manager will be
+created as needed.</li>
+<li><strong>include_root</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – Defines the name of an additional, top-level
+model item that represents the root. In views, this item will appear
+as a sibling to top-level children of the root. This allows for
+UX whereby a user can select an item representing the root without
+having a UI that shows a single, top-level item. An example would
+be displaying published file entity hierarchy with top level items:
+“Assets”, “Shots”, and “Project Publishes”. In this example, the
+supplied arg would look like: <code class="docutils literal notranslate"><span class="pre">include_root=&quot;Project</span> <span class="pre">Publishes&quot;</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">include_root</span></code> is <cite>None</cite>, no root item will be added.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Loading the Hierarchy Data</strong></p>
+<p>These methods are used by subclasses to define the Shotgun query that loads
+and caches the hierarchy items and refreshes them once cached.</p>
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._load_data">
+<code class="descname">_load_data</code><span class="sig-paren">(</span><em>seed_entity_field</em>, <em>root=None</em>, <em>entity_fields=None</em>, <em>cache_seed=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel._load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the main method to use to configure the hierarchy model. You
+basically pass a specific <code class="xref py py-meth docutils literal notranslate"><span class="pre">shotgun_api3.Shotgun.nav_expand</span></code>
+query to the model and it will start tracking this particular set of parameters.</p>
+<p>Any existing data contained in the model will be cleared.</p>
+<p>This method will not call the Shotgun API. If cached data is available,
+this will be immediately loaded (this operation is very fast even for
+substantial amounts of data).</p>
+<p>If you want to refresh the data contained in the model (which you
+typically want to), call the <code class="xref py py-meth docutils literal notranslate"><span class="pre">_refresh_data()</span></code> method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>seed_entity_field</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – <p>This is a string that corresponds to the
+field on an entity used to seed the hierarchy. For example, a value
+of <code class="docutils literal notranslate"><span class="pre">Version.entity</span></code> would cause the model to display a hierarchy
+where the leaves match the entity value of Version entities.</p>
+<p>NOTE: This value is currently limited to either <code class="docutils literal notranslate"><span class="pre">Version.entity</span></code>
+or <code class="docutils literal notranslate"><span class="pre">PublishedFile.entity</span></code></p>
+</li>
+<li><strong>root</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – This is the entity that will be at the root
+of the hierarchy view. By default, this value is <code class="docutils literal notranslate"><span class="pre">None</span></code>, which
+means the root of the hierarchy will be at the site level. Only
+projects can be set as the root of a hierarchy model.</li>
+<li><strong>entity_fields</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – A dictionary that identifies what fields to
+include on returned entities. Since the hierarchy can include any
+entity structure, this argument allows for specification of
+additional fields to include as these entities are returned. The
+dict’s keys correspond to the entity type and the value is a list
+of field names to return.</li>
+<li><strong>cache_seed</strong> – Advanced parameter. With each shotgun query being cached on disk,
+the model generates a cache seed which it is using to store data on
+disk. Since the cache data on disk is a reflection of a particular
+hierarchy query, this seed is typically generated from the
+seed entity field and return entity fields supplied to this method.
+However, in cases where you are doing advanced subclassing, for
+example when you are culling out data based on some external state,
+the model state does not solely depend on the shotgun parameters. It
+may also depend on some external factors. In this case, the cache
+seed should also be influenced by those parameters and you can pass
+an external string via this parameter which will be added to the
+seed.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if cached data was loaded, False if not.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.destroy">
+<code class="descname">destroy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.destroy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call this method prior to destroying this object.</p>
+<p>Base implementation ensures the data worker is stopped and calls
+<code class="docutils literal notranslate"><span class="pre">clear()</span></code> on the model.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.hard_refresh">
+<code class="descname">hard_refresh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.hard_refresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears any caches on disk, then refreshes the data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.is_data_cached">
+<code class="descname">is_data_cached</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.is_data_cached" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if the model has any cached data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">True</span></code> if cached data exists for the model, <code class="docutils literal notranslate"><span class="pre">False</span></code>
+otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Customizing the Hierarchy Items</strong></p>
+<p>The following methods can be used by subclasses to customize the model
+and the information it displays when attached to a view.</p>
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._before_data_processing">
+<code class="descname">_before_data_processing</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._before_data_processing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called just after data has been retrieved from Shotgun but before any
+processing takes place.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You can subclass this if you want to perform summaries,
+calculations and other manipulations of the data before it is
+passed on to the model class.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> – a shotgun dictionary, as retunrned by a CRUD SG API call.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">should return a shotgun dictionary, of the same form as the
+input.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._finalize_item">
+<code class="descname">_finalize_item</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._finalize_item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called whenever an item is fully constructed, either because a shotgun
+query returned it or because it was loaded as part of a cache load from
+disk.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You can subclass this if you want to run post processing on
+the data as it is arriving. For example, if you are showing a list
+of task statuses in a filter view, you may want to remember which
+statuses a user had checked and unchecked the last time he was
+running the tool. By subclassing this method you can easily apply
+those settings before items appear in the UI.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> – <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QStandardItem</span></code></a> that is about to be
+added to the model.  This has been primed with the standard settings
+that the ShotgunModel handles.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._item_created">
+<code class="descname">_item_created</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel._item_created"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._item_created" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when an item is created, before it is added to the model.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This base class implementation must be called in any
+subclasses overriding this behavior. Failure to do so will result in
+unexpected behavior.</p>
+</div>
+<p>This base class implementation handles setting the foreground color
+of the item if it has no associated entities.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> (<a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QStandardItem</span></code></a>) – The item that was just created.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._load_external_data">
+<code class="descname">_load_external_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._load_external_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called whenever the model needs to be rebuilt from scratch. This is
+called prior to any shotgun data is added to the model.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You can subclass this to add custom data to the model in a
+very flexible fashion. If you for example are loading published
+files from Shotgun, you could use this to load up a listing of
+files on disk, resulting in a model that shows both published files
+and local files.  External data will not be cached by the
+ShotgunModel framework.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QStandardItem</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._populate_item">
+<code class="descname">_populate_item</code><span class="sig-paren">(</span><em>item</em>, <em>sg_data</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._populate_item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whenever an item is downloaded from Shotgun, this method is called. It
+allows subclasses to intercept the construction of a
+<a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QStandardItem</span></code></a> and add additional metadata or
+make other changes that may be useful. Nothing needs to be returned.</p>
+<p>This method is called before the item is added into the model tree. At
+the point when the item is added into the tree, various signals will
+fire, informing views and proxy models that a new item has been added.
+This methods allows a subclassing object to add custom data prior to
+this.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>item</strong> – <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QStandardItem</span></code></a> that is about to be
+added to the model.</li>
+<li><strong>sg_data</strong> – Shotgun data dictionary that was received from Shotgun.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._populate_default_thumbnail">
+<code class="descname">_populate_default_thumbnail</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel._populate_default_thumbnail"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._populate_default_thumbnail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the icon for the supplied item based on its “kind” as returned
+by the <code class="xref py py-meth docutils literal notranslate"><span class="pre">shotgun_api3.Shotgun.nav_expand</span></code> api call.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> – The <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QStandardItem</span></code></a> item to set the
+icon for.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel._set_tooltip">
+<code class="descname">_set_tooltip</code><span class="sig-paren">(</span><em>item</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel._set_tooltip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the tooltip for the supplied item.</p>
+<p>Called when an item is created.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>item</strong> – Shotgun model item that requires a tooltip.</li>
+<li><strong>data</strong> – Dictionary of the SG data associated with the model.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Instance Methods</strong></p>
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.item_from_path">
+<code class="descname">item_from_path</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel.item_from_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.item_from_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QStandardItem</span></code></a> for the supplied path.</p>
+<p>Returns <code class="docutils literal notranslate"><span class="pre">None</span></code> if not found.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – The path to search the tree for. The paths match those
+used by and returned from the python-api’s
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">shotgun_api3.Shotgun.nav_expand</span></code> method.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QStandardItem.html#PySide.QtGui.QStandardItem" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QStandardItem</span></code></a> or <code class="docutils literal notranslate"><span class="pre">None</span></code> if not found</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.async_item_from_entity">
+<code class="descname">async_item_from_entity</code><span class="sig-paren">(</span><em>entity</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel.async_item_from_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.async_item_from_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Asynchronously loads an entity’s node and all its parents and emits a signal with the
+associated <code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyItem</span></code> when the node is loaded.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – Entity dictionary with keys <code class="docutils literal notranslate"><span class="pre">type</span></code> and <code class="docutils literal notranslate"><span class="pre">id</span></code>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Signals:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">async_item_retrieval_completed</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.async_item_from_paths">
+<code class="descname">async_item_from_paths</code><span class="sig-paren">(</span><em>paths</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/shotgun_hierarchy_model.html#ShotgunHierarchyModel.async_item_from_paths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.async_item_from_paths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a list of paths that incrementally dig deeper into the
+model and signals when the node is found and loaded in memory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>list</strong><strong>(</strong><strong>str</strong><strong>)</strong> – List of paths from the nav api that drill down further
+and further into the tree.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Signals:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">async_item_retrieval_completed</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.appendColumn">
+<code class="descname">appendColumn</code><span class="sig-paren">(</span><em>self, items: typing.Sequence[PySide2.QtGui.QStandardItem]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.appendColumn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.appendRow">
+<code class="descname">appendRow</code><span class="sig-paren">(</span><em>self</em>, <em>item: PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.appendRow" title="Permalink to this definition">¶</a></dt>
+<dd><p>appendRow(self, items: typing.Sequence[PySide2.QtGui.QStandardItem]) -&gt; None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.beginInsertColumns">
+<code class="descname">beginInsertColumns</code><span class="sig-paren">(</span><em>self</em>, <em>parent: PySide2.QtCore.QModelIndex</em>, <em>first: int</em>, <em>last: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.beginInsertColumns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.beginInsertRows">
+<code class="descname">beginInsertRows</code><span class="sig-paren">(</span><em>self</em>, <em>parent: PySide2.QtCore.QModelIndex</em>, <em>first: int</em>, <em>last: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.beginInsertRows" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.beginMoveColumns">
+<code class="descname">beginMoveColumns</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent: PySide2.QtCore.QModelIndex</em>, <em>sourceFirst: int</em>, <em>sourceLast: int</em>, <em>destinationParent: PySide2.QtCore.QModelIndex</em>, <em>destinationColumn: int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.beginMoveColumns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.beginMoveRows">
+<code class="descname">beginMoveRows</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent: PySide2.QtCore.QModelIndex</em>, <em>sourceFirst: int</em>, <em>sourceLast: int</em>, <em>destinationParent: PySide2.QtCore.QModelIndex</em>, <em>destinationRow: int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.beginMoveRows" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.beginRemoveColumns">
+<code class="descname">beginRemoveColumns</code><span class="sig-paren">(</span><em>self</em>, <em>parent: PySide2.QtCore.QModelIndex</em>, <em>first: int</em>, <em>last: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.beginRemoveColumns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.beginRemoveRows">
+<code class="descname">beginRemoveRows</code><span class="sig-paren">(</span><em>self</em>, <em>parent: PySide2.QtCore.QModelIndex</em>, <em>first: int</em>, <em>last: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.beginRemoveRows" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.beginResetModel">
+<code class="descname">beginResetModel</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.beginResetModel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.blockSignals">
+<code class="descname">blockSignals</code><span class="sig-paren">(</span><em>self</em>, <em>b: bool</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.blockSignals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.buddy">
+<code class="descname">buddy</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QModelIndex<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.buddy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.canDropMimeData">
+<code class="descname">canDropMimeData</code><span class="sig-paren">(</span><em>self</em>, <em>data: PySide2.QtCore.QMimeData</em>, <em>action: PySide2.QtCore.Qt.DropAction</em>, <em>row: int</em>, <em>column: int</em>, <em>parent: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.canDropMimeData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.changePersistentIndex">
+<code class="descname">changePersistentIndex</code><span class="sig-paren">(</span><em>self</em>, <em>from_: PySide2.QtCore.QModelIndex</em>, <em>to: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.changePersistentIndex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.changePersistentIndexList">
+<code class="descname">changePersistentIndexList</code><span class="sig-paren">(</span><em>self, from_: typing.List[int], to: typing.List[int]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.changePersistentIndexList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.checkIndex">
+<code class="descname">checkIndex</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em>, <em>options: PySide2.QtCore.QAbstractItemModel.CheckIndexOptions = Instance(PySide2.QtCore.QAbstractItemModel.CheckIndexOptions.NoOption)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.checkIndex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.childEvent">
+<code class="descname">childEvent</code><span class="sig-paren">(</span><em>self</em>, <em>event: PySide2.QtCore.QChildEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.childEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.children">
+<code class="descname">children</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.List[PySide2.QtCore.QObject]<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.children" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.clearItemData">
+<code class="descname">clearItemData</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.clearItemData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>self</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="shotgun_model.ShotgunHierarchyModel.connect">
+<em class="property">static </em><code class="descname">connect</code><span class="sig-paren">(</span><em>arg__1: PySide2.QtCore.QObject</em>, <em>arg__2: bytes</em>, <em>arg__3: typing.Callable</em>, <em>type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>connect(self, arg__1: bytes, arg__2: typing.Callable, type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; bool
+connect(self, arg__1: bytes, arg__2: PySide2.QtCore.QObject, arg__3: bytes, type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; bool
+connect(self, sender: PySide2.QtCore.QObject, signal: bytes, member: bytes, type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection
+connect(sender: PySide2.QtCore.QObject, signal: PySide2.QtCore.QMetaMethod, receiver: PySide2.QtCore.QObject, method: PySide2.QtCore.QMetaMethod, type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection
+connect(sender: PySide2.QtCore.QObject, signal: bytes, receiver: PySide2.QtCore.QObject, member: bytes, type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.connectNotify">
+<code class="descname">connectNotify</code><span class="sig-paren">(</span><em>self</em>, <em>signal: PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.connectNotify" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.createIndex">
+<code class="descname">createIndex</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>column: int</em>, <em>id: int = 0</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QModelIndex<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.createIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>createIndex(self, row: int, column: int, ptr: object) -&gt; PySide2.QtCore.QModelIndex</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.customEvent">
+<code class="descname">customEvent</code><span class="sig-paren">(</span><em>self</em>, <em>event: PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.customEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em>, <em>role: int = PySide2.QtCore.Qt.ItemDataRole.DisplayRole</em><span class="sig-paren">)</span> &#x2192; typing.Any<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.decodeData">
+<code class="descname">decodeData</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>column: int</em>, <em>parent: PySide2.QtCore.QModelIndex</em>, <em>stream: PySide2.QtCore.QDataStream</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.decodeData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.deleteLater">
+<code class="descname">deleteLater</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.deleteLater" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="shotgun_model.ShotgunHierarchyModel.disconnect">
+<em class="property">static </em><code class="descname">disconnect</code><span class="sig-paren">(</span><em>arg__1: PySide2.QtCore.QMetaObject.Connection</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>disconnect(arg__1: PySide2.QtCore.QObject, arg__2: bytes, arg__3: typing.Callable) -&gt; bool
+disconnect(self, arg__1: bytes, arg__2: typing.Callable) -&gt; bool
+disconnect(self, receiver: PySide2.QtCore.QObject, member: typing.Union[bytes, NoneType] = None) -&gt; bool
+disconnect(self, signal: bytes, receiver: PySide2.QtCore.QObject, member: bytes) -&gt; bool
+disconnect(sender: PySide2.QtCore.QObject, signal: PySide2.QtCore.QMetaMethod, receiver: PySide2.QtCore.QObject, member: PySide2.QtCore.QMetaMethod) -&gt; bool
+disconnect(sender: PySide2.QtCore.QObject, signal: bytes, receiver: PySide2.QtCore.QObject, member: bytes) -&gt; bool</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.disconnectNotify">
+<code class="descname">disconnectNotify</code><span class="sig-paren">(</span><em>self</em>, <em>signal: PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.disconnectNotify" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.dropMimeData">
+<code class="descname">dropMimeData</code><span class="sig-paren">(</span><em>self</em>, <em>data: PySide2.QtCore.QMimeData</em>, <em>action: PySide2.QtCore.Qt.DropAction</em>, <em>row: int</em>, <em>column: int</em>, <em>parent: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.dropMimeData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.dumpObjectInfo">
+<code class="descname">dumpObjectInfo</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.dumpObjectInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.dumpObjectTree">
+<code class="descname">dumpObjectTree</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.dumpObjectTree" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.dynamicPropertyNames">
+<code class="descname">dynamicPropertyNames</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.List[PySide2.QtCore.QByteArray]<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.dynamicPropertyNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.emit">
+<code class="descname">emit</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1: bytes</em>, <em>*args: None</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.emit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.encodeData">
+<code class="descname">encodeData</code><span class="sig-paren">(</span><em>self, indexes: typing.List[int], stream: PySide2.QtCore.QDataStream</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.encodeData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.endInsertColumns">
+<code class="descname">endInsertColumns</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.endInsertColumns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.endInsertRows">
+<code class="descname">endInsertRows</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.endInsertRows" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.endMoveColumns">
+<code class="descname">endMoveColumns</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.endMoveColumns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.endMoveRows">
+<code class="descname">endMoveRows</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.endMoveRows" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.endRemoveColumns">
+<code class="descname">endRemoveColumns</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.endRemoveColumns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.endRemoveRows">
+<code class="descname">endRemoveRows</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.endRemoveRows" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.endResetModel">
+<code class="descname">endResetModel</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.endResetModel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.event">
+<code class="descname">event</code><span class="sig-paren">(</span><em>self</em>, <em>event: PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.event" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.eventFilter">
+<code class="descname">eventFilter</code><span class="sig-paren">(</span><em>self</em>, <em>watched: PySide2.QtCore.QObject</em>, <em>event: PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.eventFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.findChild">
+<code class="descname">findChild</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1: type</em>, <em>arg__2: str = ''</em><span class="sig-paren">)</span> &#x2192; object<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.findChild" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.findChildren">
+<code class="descname">findChildren</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1: type</em>, <em>arg__2: PySide2.QtCore.QRegExp</em><span class="sig-paren">)</span> &#x2192; typing.Iterable<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.findChildren" title="Permalink to this definition">¶</a></dt>
+<dd><p>findChildren(self, arg__1: type, arg__2: PySide2.QtCore.QRegularExpression) -&gt; typing.Iterable
+findChildren(self, arg__1: type, arg__2: str = ‘’) -&gt; typing.Iterable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.findItems">
+<code class="descname">findItems</code><span class="sig-paren">(</span><em>self</em>, <em>text: str</em>, <em>flags: PySide2.QtCore.Qt.MatchFlags = PySide2.QtCore.Qt.MatchFlag.MatchExactly</em>, <em>column: int = 0</em><span class="sig-paren">)</span> &#x2192; typing.List[PySide2.QtGui.QStandardItem]<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.findItems" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.Qt.ItemFlags<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.hasIndex">
+<code class="descname">hasIndex</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>column: int</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.hasIndex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>self</em>, <em>section: int</em>, <em>orientation: PySide2.QtCore.Qt.Orientation</em>, <em>role: int = PySide2.QtCore.Qt.ItemDataRole.DisplayRole</em><span class="sig-paren">)</span> &#x2192; typing.Any<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.horizontalHeaderItem">
+<code class="descname">horizontalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>column: int</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.horizontalHeaderItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.index">
+<code class="descname">index</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>column: int</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QModelIndex<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.indexFromItem">
+<code class="descname">indexFromItem</code><span class="sig-paren">(</span><em>self</em>, <em>item: PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QModelIndex<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.indexFromItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.inherits">
+<code class="descname">inherits</code><span class="sig-paren">(</span><em>self</em>, <em>classname: bytes</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.inherits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.insertColumn">
+<code class="descname">insertColumn</code><span class="sig-paren">(</span><em>self, column: int, items: typing.Sequence[PySide2.QtGui.QStandardItem]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.insertColumn" title="Permalink to this definition">¶</a></dt>
+<dd><p>insertColumn(self, column: int, parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)) -&gt; bool</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.insertColumns">
+<code class="descname">insertColumns</code><span class="sig-paren">(</span><em>self</em>, <em>column: int</em>, <em>count: int</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.insertColumns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.insertRow">
+<code class="descname">insertRow</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>item: PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.insertRow" title="Permalink to this definition">¶</a></dt>
+<dd><p>insertRow(self, row: int, items: typing.Sequence[PySide2.QtGui.QStandardItem]) -&gt; None
+insertRow(self, row: int, parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)) -&gt; bool</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.insertRows">
+<code class="descname">insertRows</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>count: int</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.insertRows" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.installEventFilter">
+<code class="descname">installEventFilter</code><span class="sig-paren">(</span><em>self</em>, <em>filterObj: PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.installEventFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.invisibleRootItem">
+<code class="descname">invisibleRootItem</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.invisibleRootItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.isSignalConnected">
+<code class="descname">isSignalConnected</code><span class="sig-paren">(</span><em>self</em>, <em>signal: PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.isSignalConnected" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.isWidgetType">
+<code class="descname">isWidgetType</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.isWidgetType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.isWindowType">
+<code class="descname">isWindowType</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.isWindowType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.item">
+<code class="descname">item</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>column: int = 0</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.item" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.itemData">
+<code class="descname">itemData</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; typing.Dict[int, typing.Any]<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.itemData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.itemFromIndex">
+<code class="descname">itemFromIndex</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.itemFromIndex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.itemPrototype">
+<code class="descname">itemPrototype</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.itemPrototype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.killTimer">
+<code class="descname">killTimer</code><span class="sig-paren">(</span><em>self</em>, <em>id: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.killTimer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.match">
+<code class="descname">match</code><span class="sig-paren">(</span><em>self</em>, <em>start: PySide2.QtCore.QModelIndex</em>, <em>role: int</em>, <em>value: typing.Any</em>, <em>hits: int = 1</em>, <em>flags: PySide2.QtCore.Qt.MatchFlags = Instance(Qt.MatchFlags(Qt.MatchStartsWith|Qt.MatchWrap))</em><span class="sig-paren">)</span> &#x2192; typing.List[int]<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.match" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.metaObject">
+<code class="descname">metaObject</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QMetaObject<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.metaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.mimeData">
+<code class="descname">mimeData</code><span class="sig-paren">(</span><em>self, indexes: typing.List[int]</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QMimeData<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.mimeData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.mimeTypes">
+<code class="descname">mimeTypes</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.List[str]<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.mimeTypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.moveColumn">
+<code class="descname">moveColumn</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent: PySide2.QtCore.QModelIndex</em>, <em>sourceColumn: int</em>, <em>destinationParent: PySide2.QtCore.QModelIndex</em>, <em>destinationChild: int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.moveColumn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.moveColumns">
+<code class="descname">moveColumns</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent: PySide2.QtCore.QModelIndex</em>, <em>sourceColumn: int</em>, <em>count: int</em>, <em>destinationParent: PySide2.QtCore.QModelIndex</em>, <em>destinationChild: int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.moveColumns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.moveRow">
+<code class="descname">moveRow</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent: PySide2.QtCore.QModelIndex</em>, <em>sourceRow: int</em>, <em>destinationParent: PySide2.QtCore.QModelIndex</em>, <em>destinationChild: int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.moveRow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.moveRows">
+<code class="descname">moveRows</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent: PySide2.QtCore.QModelIndex</em>, <em>sourceRow: int</em>, <em>count: int</em>, <em>destinationParent: PySide2.QtCore.QModelIndex</em>, <em>destinationChild: int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.moveRows" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.moveToThread">
+<code class="descname">moveToThread</code><span class="sig-paren">(</span><em>self</em>, <em>thread: PySide2.QtCore.QThread</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.moveToThread" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.objectName">
+<code class="descname">objectName</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.objectName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.parent">
+<code class="descname">parent</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QObject<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.parent" title="Permalink to this definition">¶</a></dt>
+<dd><p>parent(self, child: PySide2.QtCore.QModelIndex) -&gt; PySide2.QtCore.QModelIndex</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.persistentIndexList">
+<code class="descname">persistentIndexList</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.List[int]<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.persistentIndexList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.property">
+<code class="descname">property</code><span class="sig-paren">(</span><em>self</em>, <em>name: bytes</em><span class="sig-paren">)</span> &#x2192; typing.Any<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.property" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.receivers">
+<code class="descname">receivers</code><span class="sig-paren">(</span><em>self</em>, <em>signal: bytes</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.receivers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="shotgun_model.ShotgunHierarchyModel.registerUserData">
+<em class="property">static </em><code class="descname">registerUserData</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.registerUserData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.removeColumn">
+<code class="descname">removeColumn</code><span class="sig-paren">(</span><em>self</em>, <em>column: int</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.removeColumn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.removeColumns">
+<code class="descname">removeColumns</code><span class="sig-paren">(</span><em>self</em>, <em>column: int</em>, <em>count: int</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.removeColumns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.removeEventFilter">
+<code class="descname">removeEventFilter</code><span class="sig-paren">(</span><em>self</em>, <em>obj: PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.removeEventFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.removeRow">
+<code class="descname">removeRow</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.removeRow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.removeRows">
+<code class="descname">removeRows</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>count: int</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.removeRows" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.resetInternalData">
+<code class="descname">resetInternalData</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.resetInternalData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.revert">
+<code class="descname">revert</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.revert" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.roleNames">
+<code class="descname">roleNames</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.Dict[int, PySide2.QtCore.QByteArray]<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.roleNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>self</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.sender">
+<code class="descname">sender</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QObject<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.sender" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.senderSignalIndex">
+<code class="descname">senderSignalIndex</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.senderSignalIndex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.setColumnCount">
+<code class="descname">setColumnCount</code><span class="sig-paren">(</span><em>self</em>, <em>columns: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.setColumnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em>, <em>value: typing.Any</em>, <em>role: int = PySide2.QtCore.Qt.ItemDataRole.EditRole</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.setHeaderData">
+<code class="descname">setHeaderData</code><span class="sig-paren">(</span><em>self</em>, <em>section: int</em>, <em>orientation: PySide2.QtCore.Qt.Orientation</em>, <em>value: typing.Any</em>, <em>role: int = PySide2.QtCore.Qt.ItemDataRole.EditRole</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.setHeaderData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.setHorizontalHeaderItem">
+<code class="descname">setHorizontalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>column: int</em>, <em>item: PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.setHorizontalHeaderItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.setHorizontalHeaderLabels">
+<code class="descname">setHorizontalHeaderLabels</code><span class="sig-paren">(</span><em>self, labels: typing.Sequence[str]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.setHorizontalHeaderLabels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.setItem">
+<code class="descname">setItem</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>column: int</em>, <em>item: PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.setItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>setItem(self, row: int, item: PySide2.QtGui.QStandardItem) -&gt; None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.setItemData">
+<code class="descname">setItemData</code><span class="sig-paren">(</span><em>self, index: PySide2.QtCore.QModelIndex, roles: typing.Dict[int, typing.Any]</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.setItemData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.setItemPrototype">
+<code class="descname">setItemPrototype</code><span class="sig-paren">(</span><em>self</em>, <em>item: PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.setItemPrototype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.setItemRoleNames">
+<code class="descname">setItemRoleNames</code><span class="sig-paren">(</span><em>self, roleNames: typing.Dict[int, PySide2.QtCore.QByteArray]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.setItemRoleNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.setObjectName">
+<code class="descname">setObjectName</code><span class="sig-paren">(</span><em>self</em>, <em>name: str</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.setObjectName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.setParent">
+<code class="descname">setParent</code><span class="sig-paren">(</span><em>self</em>, <em>parent: PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.setParent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.setProperty">
+<code class="descname">setProperty</code><span class="sig-paren">(</span><em>self</em>, <em>name: bytes</em>, <em>value: typing.Any</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.setProperty" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.setRowCount">
+<code class="descname">setRowCount</code><span class="sig-paren">(</span><em>self</em>, <em>rows: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.setRowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.setSortRole">
+<code class="descname">setSortRole</code><span class="sig-paren">(</span><em>self</em>, <em>role: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.setSortRole" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.setVerticalHeaderItem">
+<code class="descname">setVerticalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>item: PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.setVerticalHeaderItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.setVerticalHeaderLabels">
+<code class="descname">setVerticalHeaderLabels</code><span class="sig-paren">(</span><em>self, labels: typing.Sequence[str]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.setVerticalHeaderLabels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.sibling">
+<code class="descname">sibling</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>column: int</em>, <em>idx: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QModelIndex<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.sibling" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.signalsBlocked">
+<code class="descname">signalsBlocked</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.signalsBlocked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.sort">
+<code class="descname">sort</code><span class="sig-paren">(</span><em>self</em>, <em>column: int</em>, <em>order: PySide2.QtCore.Qt.SortOrder = PySide2.QtCore.Qt.SortOrder.AscendingOrder</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.sort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.sortRole">
+<code class="descname">sortRole</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.sortRole" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.span">
+<code class="descname">span</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QSize<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.span" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.startTimer">
+<code class="descname">startTimer</code><span class="sig-paren">(</span><em>self</em>, <em>interval: int</em>, <em>timerType: PySide2.QtCore.Qt.TimerType = PySide2.QtCore.Qt.TimerType.CoarseTimer</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.startTimer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.submit">
+<code class="descname">submit</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.submit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.supportedDragActions">
+<code class="descname">supportedDragActions</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.Qt.DropActions<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.supportedDragActions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.supportedDropActions">
+<code class="descname">supportedDropActions</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.Qt.DropActions<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.supportedDropActions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.takeColumn">
+<code class="descname">takeColumn</code><span class="sig-paren">(</span><em>self</em>, <em>column: int</em><span class="sig-paren">)</span> &#x2192; typing.List[PySide2.QtGui.QStandardItem]<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.takeColumn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.takeHorizontalHeaderItem">
+<code class="descname">takeHorizontalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>column: int</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.takeHorizontalHeaderItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.takeItem">
+<code class="descname">takeItem</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>column: int = 0</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.takeItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.takeRow">
+<code class="descname">takeRow</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em><span class="sig-paren">)</span> &#x2192; typing.List[PySide2.QtGui.QStandardItem]<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.takeRow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.takeVerticalHeaderItem">
+<code class="descname">takeVerticalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.takeVerticalHeaderItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.thread">
+<code class="descname">thread</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QThread<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.thread" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.timerEvent">
+<code class="descname">timerEvent</code><span class="sig-paren">(</span><em>self</em>, <em>event: PySide2.QtCore.QTimerEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.timerEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.tr">
+<code class="descname">tr</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1: bytes</em>, <em>arg__2: bytes = b''</em>, <em>arg__3: int = -1</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.tr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="shotgun_model.ShotgunHierarchyModel.verticalHeaderItem">
+<code class="descname">verticalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunHierarchyModel.verticalHeaderItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 
