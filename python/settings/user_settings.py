@@ -109,9 +109,9 @@ class UserSettings(object):
                       passed in via value will be converted to strs and native python types. Unicode
                       strs will be converted to utf-8.
         :param scope: The scope for this settings value, as defined by the constants belonging to this class.
-        :param pickle_setting: True will pickle the setting value before storing it. Most
-            setting values should be pickeld (see note below), but there are some data types
-            that need to be stored as their raw value (e.g. QByteArray).
+        :param pickle_setting: True will pickle and sanitize the raw setting value before storing it. Most
+            setting values should be pickeld (see note below), but there are some data types that need to be
+            stored as their raw value (e.g. QByteArray).
         :type picke_setting: bool
         """
         full_name = self.__resolve_settings_name(name, scope)
@@ -169,10 +169,12 @@ class UserSettings(object):
         :param name: Name of the setting to store.
         :param default: Default value to return if the setting is not stored.
         :param scope: The scope associated with this setting.
-        :param is_setting_pickled: Set to True hints that the setting was pickled on storing
-            the value, and thus retrieve will unpickle the setting value before returning the
-            setting value. Set to False hints that the setting was not pickled on storing the
-            value, and thus retrieve will not attempt to unpickle the raw setting value.
+        :param is_setting_pickled: Set to True hints that the setting was pickled/sanitized
+            on storing the raw value, and thus retrieve will unpickle/unsanitize before
+            returning the setting value. Set to False hints that the setting was not
+            pickled/sanitized on storing the raw value, and thus retrieve will not
+            unpickle/unsanitize the raw setting value before returnig it.
+        :type is_setting_pickled: bool
         :returns: The stored value, default if the value is not available
         """
         full_name = self.__resolve_settings_name(name, scope)
