@@ -99,7 +99,7 @@ class UserSettings(object):
     ########################################################################################
     # public methods
 
-    def store(self, name, value, scope=SCOPE_GLOBAL):
+    def store(self, name, value, scope=SCOPE_GLOBAL, pickle_setting=True):
         """
         Stores a setting for an app. This setting is tied to the current login.
 
@@ -109,7 +109,10 @@ class UserSettings(object):
                       passed in via value will be converted to strs and native python types. Unicode
                       strs will be converted to utf-8.
         :param scope: The scope for this settings value, as defined by the constants belonging to this class.
-
+        :param pickle_setting: True will pickle and sanitize the raw setting value before storing it. Most
+            setting values should be pickeld (see note below), but there are some data types that need to be
+            stored as their raw value (e.g. QByteArray).
+        :type picke_setting: bool
         """
         full_name = self.__resolve_settings_name(name, scope)
         self.__fw.log_debug("User Settings Manager: Storing %s" % full_name)
@@ -145,20 +148,33 @@ class UserSettings(object):
             #
             # To get around this, we need to write a string inside the QSettings, so
             # use sgtk.util.pickle
-            value_str = sgtk.util.pickle.dumps(sanitize_qt(value))
-            self.__settings.setValue(full_name, six.ensure_str(value_str))
+            if pickle_setting:
+                # Only sanitize and pickle the raw value if indicated.
+                sanitized_value = sanitize_qt(value)
+                settings_value = six.ensure_str(sgtk.util.pickle.dumps(sanitized_value))
+            else:
+                # Store the raw value. Some objects cannot be retrieved correctly after
+                # sanitizing, like QByteArray.
+                settings_value = value
+            self.__settings.setValue(full_name, settings_value)
         except Exception as e:
             self.__fw.log_warning(
                 "Error storing user setting '%s'. Error details: %s" % (full_name, e)
             )
 
-    def retrieve(self, name, default=None, scope=SCOPE_GLOBAL):
+    def retrieve(self, name, default=None, scope=SCOPE_GLOBAL, is_setting_pickled=True):
         """
         Retrieves a setting for a particular app for the current login.
 
         :param name: Name of the setting to store.
         :param default: Default value to return if the setting is not stored.
         :param scope: The scope associated with this setting.
+        :param is_setting_pickled: Set to True hints that the setting was pickled/sanitized
+            on storing the raw value, and thus retrieve will unpickle/unsanitize before
+            returning the setting value. Set to False hints that the setting was not
+            pickled/sanitized on storing the raw value, and thus retrieve will not
+            unpickle/unsanitize the raw setting value before returnig it.
+        :type is_setting_pickled: bool
         :returns: The stored value, default if the value is not available
         """
         full_name = self.__resolve_settings_name(name, scope)
@@ -170,9 +186,15 @@ class UserSettings(object):
 
             if raw_value is None:
                 resolved_val = default
-            else:
+            elif is_setting_pickled and isinstance(raw_value, six.string_types):
+                # Unpickle the raw value if it was hinted that the settings raw value was
+                # pickled before storing it, and the raw value is a string.
                 resolved_val = sgtk.util.pickle.loads(six.ensure_binary(raw_value))
                 resolved_val = sanitize_qt(resolved_val)
+            else:
+                # Do not unpickle the raw value, either it was hinted that the raw value
+                # was not pickeld on store or the raw value itself is not a string.
+                resolved_val = raw_value
         except Exception as e:
             self.__fw.log_warning(
                 "Error retrieving value for stored user setting '%s' - reverting to "
