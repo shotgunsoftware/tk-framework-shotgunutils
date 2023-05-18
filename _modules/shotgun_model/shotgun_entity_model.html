@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_entity_model &mdash; tk-framework-shotgunutils v5.8.5 documentation</title>
+  <title>shotgun_model.shotgun_entity_model &mdash; tk-framework-shotgunutils v5.8.6 documentation</title>
   
 
   
@@ -122,7 +122,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.5.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.6.<br>
     
         This documentation is part of the ShotGrid Pipeline Toolkit.
     
@@ -218,7 +218,7 @@
 
 
 <div class="viewcode-block" id="ShotgunEntityModel"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel">[docs]</a><span class="k">class</span> <span class="nc">ShotgunEntityModel</span><span class="p">(</span><span class="n">ShotgunModel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A model that contains a hierarchy of Shotgun entity data and sets the icon for each item</span>
 <span class="sd">    to the icon for the entity type if available.</span>
 
@@ -240,7 +240,7 @@
         <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">bg_task_manager</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param entity_type:         The type of the entities that should be loaded into this model.</span>
 <span class="sd">        :param filters:             A list of filters to be applied to entities in the model - these</span>
 <span class="sd">                                    will be passed to the Shotgun API find() call when populating the</span>
@@ -286,7 +286,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">hierarchy</span><span class="p">,</span> <span class="n">fields</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Call to clean-up the model when it is finished with</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ShotgunModel</span><span class="o">.</span><span class="n">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -294,7 +294,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_default_icon</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="ShotgunEntityModel.get_entity_icon"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel.get_entity_icon">[docs]</a>    <span class="k">def</span> <span class="nf">get_entity_icon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convenience method. Retrieve the icon for the specified entity type if available.</span>
 
 <span class="sd">        :param entity_type: The entity type to retrieve the icon for</span>
@@ -305,7 +305,7 @@
         <span class="k">return</span> <span class="n">shotgun_globals</span><span class="o">.</span><span class="n">get_entity_type_icon</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunEntityModel.get_entities"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel.get_entities">[docs]</a>    <span class="k">def</span> <span class="nf">get_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get entities for the current item by traversing up the tree and pulling entity information</span>
 <span class="sd">        from each item if possible</span>
 
@@ -330,7 +330,7 @@
         <span class="k">return</span> <span class="n">entities</span></div>
 
 <div class="viewcode-block" id="ShotgunEntityModel.get_entity"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel.get_entity">[docs]</a>    <span class="k">def</span> <span class="nf">get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the Shotgun entity details for the specified model item.</span>
 
 <span class="sd">        :param item:    The item to retrieve the entity details for.</span>
@@ -359,13 +359,13 @@
         <span class="k">return</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="ShotgunEntityModel.async_refresh"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel.async_refresh">[docs]</a>    <span class="k">def</span> <span class="nf">async_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Trigger an asynchronous refresh of the model</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_data</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="nf">_populate_default_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Whenever an item is constructed, this methods is called. It allows subclasses to intercept</span>
 <span class="sd">        the construction of a QStandardItem and add additional metadata or make other changes</span>
 <span class="sd">        that may be useful. Nothing needs to be returned.</span>
@@ -401,7 +401,7 @@
         <span class="n">item</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">entity_icon</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_icon</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_default_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sg_entity</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the default icon for the specified entity.</span>
 
 <span class="sd">        :param sg_entity:   A Shotgun entity dictionary for the entity to get the</span>
@@ -467,7 +467,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2022, Autodesk
+        &copy; Copyright 2023, Autodesk
 
     </p>
   </div> 

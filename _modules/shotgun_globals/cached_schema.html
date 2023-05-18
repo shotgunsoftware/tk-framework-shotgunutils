@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_globals.cached_schema &mdash; tk-framework-shotgunutils v5.8.5 documentation</title>
+  <title>shotgun_globals.cached_schema &mdash; tk-framework-shotgunutils v5.8.6 documentation</title>
   
 
   
@@ -122,7 +122,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.5.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.6.<br>
     
         This documentation is part of the ShotGrid Pipeline Toolkit.
     
@@ -219,7 +219,7 @@
 
 
 <span class="k">class</span> <span class="nc">CachedShotgunSchema</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wraps around the shotgun schema and caches it for fast lookups.</span>
 
 <span class="sd">    Singleton-style setup, so all access method happen via class methods:</span>
@@ -246,7 +246,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">__get_instance</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Singleton access</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -254,7 +254,7 @@
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__instance</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -274,7 +274,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_cached_status</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_is_schema_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Whether the schema has been loaded into memory.</span>
 
 <span class="sd">        :param project_id:  The project Entity id. If None, the current</span>
@@ -288,7 +288,7 @@
         <span class="k">return</span> <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_schema</span>
 
     <span class="k">def</span> <span class="nf">_is_status_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Whether statuses have been loaded into memory.</span>
 
 <span class="sd">        :param project_id:  The project Entity id. If None, the current</span>
@@ -302,7 +302,7 @@
         <span class="k">return</span> <span class="n">project_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_data</span>
 
     <span class="k">def</span> <span class="nf">_get_current_project_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the id of the current project.</span>
 
 <span class="sd">        :returns: The project id associated with the current context, or ``None``</span>
@@ -320,7 +320,7 @@
         <span class="k">return</span> <span class="n">project_id</span>
 
     <span class="k">def</span> <span class="nf">_get_cache_root_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets the parent bundle&#39;s cache location.</span>
 
 <span class="sd">        :param project_id:  The project Entity id. If None, the current</span>
@@ -349,7 +349,7 @@
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">cache_location</span>
 
     <span class="k">def</span> <span class="nf">_get_schema_cache_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets the path to the schema cache file.</span>
 
 <span class="sd">        :param project_id:  The project Entity id. If None, the current</span>
@@ -362,7 +362,7 @@
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_cache_root_path</span><span class="p">(</span><span class="n">project_id</span><span class="p">),</span> <span class="s2">&quot;sg_schema.pickle&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_status_cache_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets the path to the status cache file.</span>
 
 <span class="sd">        :param project_id:  The project Entity id. If None, the current</span>
@@ -375,7 +375,7 @@
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_cache_root_path</span><span class="p">(</span><span class="n">project_id</span><span class="p">),</span> <span class="s2">&quot;sg_status.pickle&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_load_cached_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load cached status from disk if it exists.</span>
 
 <span class="sd">        :param project_id:  The project Entity id. If None, the current</span>
@@ -410,7 +410,7 @@
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">_load_cached_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load cached metaschema from disk if it exists.</span>
 
 <span class="sd">        :param project_id:  The project Entity id. If None, the current</span>
@@ -441,7 +441,7 @@
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">_check_schema_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">field_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check and potentially trigger a cache refresh.</span>
 
 <span class="sd">        :param str entity_type: Shotgun entity type</span>
@@ -487,7 +487,7 @@
                 <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_check_status_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Request status data from Shotgun.</span>
 
 <span class="sd">        :param int project_id: The project Entity id. If None, the current</span>
@@ -525,7 +525,7 @@
                 <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_on_worker_failure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Asynchronous callback - the worker thread errored.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -541,7 +541,7 @@
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_status_query_ids</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">_on_worker_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">request_type</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Signaled whenever the worker completes something.</span>
 <span class="sd">        This method will dispatch the work to different methods</span>
 <span class="sd">        depending on what async task has completed.</span>
@@ -616,7 +616,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register_bg_task_manager</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">task_manager</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Register a background task manager with the singleton.</span>
 <span class="sd">        Once a background task manager has been registered, the schema</span>
 <span class="sd">        singleton can refresh its cache.</span>
@@ -640,7 +640,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">unregister_bg_task_manager</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">task_manager</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Unregister a previously registered data retriever with the singleton.</span>
 
 <span class="sd">        :param task_manager: Background task manager to use</span>
@@ -683,7 +683,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">run_on_schema_loaded</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the given callback once the schema is loaded.</span>
 
 <span class="sd">        :param callback:    Method with no argument to run when the schema is loaded</span>
@@ -703,7 +703,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">is_valid_entity_type</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if the given `sg_entity_type` is in the schema.</span>
 
 <span class="sd">        :param sg_entity_type:  Shotgun entity type</span>
@@ -724,7 +724,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_entity_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the fields for a Shotgun entity type.</span>
 
 <span class="sd">        :param sg_entity_type:  Shotgun entity type</span>
@@ -747,7 +747,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_type_display_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the display name for a Shotgun entity type.</span>
 <span class="sd">        If no display name is known for this object, the system</span>
 <span class="sd">        name is returned, e.g. the same that&#39;s being passed in</span>
@@ -781,7 +781,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_field_display_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the display name for a given Shotgun field. If the field</span>
 <span class="sd">        cannot be found or the value is not yet cached, the system name</span>
 <span class="sd">        for the field is returned.</span>
@@ -823,7 +823,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_empty_phrase</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get an appropriate phrase to describe the fact that</span>
 <span class="sd">        a given Shotgun field is empty. The phrase will differ depending on</span>
 <span class="sd">        the data type of the field.</span>
@@ -859,7 +859,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_data_type</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the data type for the given Shotgun field.</span>
 
 <span class="sd">        :param sg_entity_type:  Shotgun entity type</span>
@@ -895,7 +895,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_valid_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the valid entity types that the given Shotgun field can link to.</span>
 
 <span class="sd">        :param sg_entity_type:  Shotgun entity type</span>
@@ -941,7 +941,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_valid_values</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns valid values for fields with a list of choices.</span>
 
 <span class="sd">        :param str sg_entity_type:  The entity type.</span>
@@ -986,7 +986,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_status_display_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">status_code</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the display name for a given status code.</span>
 <span class="sd">        If the status code cannot be found or haven&#39;t been loaded,</span>
 <span class="sd">        the status code is returned back.</span>
@@ -1018,7 +1018,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_status_color</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">status_code</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the color for a given status code.</span>
 <span class="sd">        If the status code cannot be found or haven&#39;t been loaded,</span>
 <span class="sd">        None is returned.</span>
@@ -1051,7 +1051,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">field_is_editable</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a boolean identifying the editability of the entity&#39;s field.</span>
 
 <span class="sd">        :param str sg_entity_type: the entity type</span>
@@ -1102,7 +1102,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">field_is_visible</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a boolean identifying the visibility of the entity&#39;s field.</span>
 
 <span class="sd">        :param sg_entity_type: the entity type</span>
@@ -1153,7 +1153,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_ordered_status_list</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">display_names</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of statuses in their order as defined by the</span>
 <span class="sd">        Shotgun site preferences.</span>
 
@@ -1190,7 +1190,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">clear_cached_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove both the schema and status cache files from disk for</span>
 <span class="sd">        the specified project_id. If no project_id is specified, then</span>
 <span class="sd">        use the current context project.</span>
@@ -1229,7 +1229,7 @@
 
 
 <span class="k">def</span> <span class="nf">_account_for_bubble_fields</span><span class="p">(</span><span class="n">sg_entity_type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Detect bubble fields and return the proper entity type and field name.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect bubble fields and return the proper entity type and field name.</span>
 
 <span class="sd">    :param str sg_entity_type: The intput entity type name. If the field name</span>
 <span class="sd">        is a bubbled field notation, this value will be replaced by the</span>
@@ -1265,7 +1265,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2022, Autodesk
+        &copy; Copyright 2023, Autodesk
 
     </p>
   </div> 

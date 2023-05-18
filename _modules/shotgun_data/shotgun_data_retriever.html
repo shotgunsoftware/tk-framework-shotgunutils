@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v5.8.5 documentation</title>
+  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v5.8.6 documentation</title>
   
 
   
@@ -122,7 +122,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.5.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.6.<br>
     
         This documentation is part of the ShotGrid Pipeline Toolkit.
     
@@ -221,7 +221,7 @@
 
 
 <span class="k">def</span> <span class="nf">_indicate_resource_accessed</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Helper to indicate a resource was accessed and shouldn&#39;t be considered</span>
 <span class="sd">    old when cleaning up old cached data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -229,7 +229,7 @@
 
 
 <div class="viewcode-block" id="ShotgunDataRetriever"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever">[docs]</a><span class="k">class</span> <span class="nc">ShotgunDataRetriever</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Asynchronous data retriever class which can be used to retrieve data and</span>
 <span class="sd">    thumbnails from Shotgun and from disk thumbnail cache. Uses the</span>
 <span class="sd">    :class:`~task_manager.BackgroundTaskManager` to run tasks in background</span>
@@ -325,7 +325,7 @@
     <span class="n">_DOWNLOAD_THUMB_PRIORITY</span> <span class="o">=</span> <span class="mi">20</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param parent: Parent object</span>
 <span class="sd">        :type parent: :class:`~PySide.QtGui.QWidget`</span>
 <span class="sd">        :param sg: Optional Shotgun API Instance</span>
@@ -353,7 +353,7 @@
 
 <div class="viewcode-block" id="ShotgunDataRetriever.download_thumbnail"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.download_thumbnail">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">download_thumbnail</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convenience and compatibility method for quick and easy synchrnous thumbnail download.</span>
 <span class="sd">        This will retrieve a shotgun thumbnail given a url - if it already exists in the cache,</span>
 <span class="sd">        a path to it will be returned instantly. If not, it will be downloaded from Shotgun,</span>
@@ -421,7 +421,7 @@
 
 <div class="viewcode-block" id="ShotgunDataRetriever.download_thumbnail_source"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.download_thumbnail_source">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">download_thumbnail_source</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">bundle</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convenience and compatibility method for quick and easy synchronous thumbnail download.</span>
 <span class="sd">        This will retrieve the source file for a thumbnail given a shotgun entity type and id.</span>
 <span class="sd">        If the resolved thumbnail source file has already been cached, a path to it will be</span>
@@ -506,7 +506,7 @@
         <span class="k">return</span> <span class="n">path_to_cached_thumb</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.start"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Start the retriever thread.</span>
 
 <span class="sd">        :raises:    TankError if there is no :class:`~task_manager.BackgroundTaskManager` associated with this instance</span>
@@ -518,7 +518,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">start_processing</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.stop"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gracefully stop the receiver.</span>
 
 <span class="sd">        Once stop() has been called, the object needs to be discarded.</span>
@@ -561,7 +561,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.clear"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Clears the queue.</span>
 
 <span class="sd">        Any currently processing item will complete without interruption, and signals will be</span>
@@ -573,7 +573,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">stop_task_group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bg_tasks_group</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.stop_work"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.stop_work">[docs]</a>    <span class="k">def</span> <span class="nf">stop_work</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Stop the specified task</span>
 
 <span class="sd">        :param task_id: The task to stop</span>
@@ -584,7 +584,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_manager</span><span class="o">.</span><span class="n">stop_task</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.get_schema"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.get_schema">[docs]</a>    <span class="k">def</span> <span class="nf">get_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Execute the schema_read and schema_entity_read methods asynchronously</span>
 
 <span class="sd">        :param project_id:  If specified, the schema listing returned will</span>
@@ -602,7 +602,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.execute_find"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_find">[docs]</a>    <span class="k">def</span> <span class="nf">execute_find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Executes a Shotgun find query asynchronously.</span>
 
 <span class="sd">        This method takes the same parameters as the Shotgun find() call.</span>
@@ -626,7 +626,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.execute_find_one"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_find_one">[docs]</a>    <span class="k">def</span> <span class="nf">execute_find_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Executes a Shotgun find_one query asynchronously.</span>
 
 <span class="sd">        This method takes the same parameters as the Shotgun find_one() call.</span>
@@ -650,7 +650,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.execute_update"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_update">[docs]</a>    <span class="k">def</span> <span class="nf">execute_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Execute a Shotgun update call asynchronously</span>
 
 <span class="sd">        This method takes the same parameters as the Shotgun update() call.</span>
@@ -673,7 +673,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.execute_create"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_create">[docs]</a>    <span class="k">def</span> <span class="nf">execute_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Execute a Shotgun create call asynchronously</span>
 
 <span class="sd">        The query will be queued up and once processed, either a</span>
@@ -696,7 +696,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.execute_delete"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_delete">[docs]</a>    <span class="k">def</span> <span class="nf">execute_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Execute a Shotgun delete call asynchronously</span>
 
 <span class="sd">        This method takes the same parameters as the Shotgun delete() call.</span>
@@ -719,7 +719,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.execute_method"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_method">[docs]</a>    <span class="k">def</span> <span class="nf">execute_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Executes a generic execution of a method asynchronously.  This is pretty much a</span>
 <span class="sd">        wrapper for executing a task through the :class:`~task_manager.BackgroundTaskManager`.</span>
 
@@ -751,7 +751,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.execute_text_search"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_text_search">[docs]</a>    <span class="k">def</span> <span class="nf">execute_text_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Executes a Shotgun ``text_search`` query asynchronously.</span>
 
 <span class="sd">        See the python api documentation here:</span>
@@ -777,7 +777,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.execute_nav_expand"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_nav_expand">[docs]</a>    <span class="k">def</span> <span class="nf">execute_nav_expand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Executes a Shotgun ``nav_expand`` query asynchronously.</span>
 
 <span class="sd">        See the python api documentation here:</span>
@@ -803,7 +803,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.execute_nav_search_string"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_nav_search_string">[docs]</a>    <span class="k">def</span> <span class="nf">execute_nav_search_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Executes a Shotgun ``nav_search_string`` query asynchronously.</span>
 
 <span class="sd">        See the python api documentation here:</span>
@@ -829,7 +829,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.execute_nav_search_entity"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.execute_nav_search_entity">[docs]</a>    <span class="k">def</span> <span class="nf">execute_nav_search_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Executes a Shotgun ``nav_search_entity`` query asynchronously.</span>
 
 <span class="sd">        See the python api documentation here:</span>
@@ -855,7 +855,7 @@
         <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_add_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_cb</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">task_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">task_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Simplified wrapper to add a task to the task manager.  All tasks get added into</span>
 <span class="sd">        the same group (self._bg_tasks_group) and the returned task_id is cast to a string</span>
 <span class="sd">        to retain backwards compatibility (it used to return a uuid string).</span>
@@ -882,7 +882,7 @@
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.request_attachment"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.request_attachment">[docs]</a>    <span class="k">def</span> <span class="nf">request_attachment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attachment_entity</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Downloads an attachment from Shotgun asynchronously or returns a cached</span>
 <span class="sd">        file path if found.</span>
 
@@ -940,7 +940,7 @@
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">check_task_id</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.request_thumbnail"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.request_thumbnail">[docs]</a>    <span class="k">def</span> <span class="nf">request_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">load_image</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Downloads a thumbnail from Shotgun asynchronously or returns a cached thumbnail</span>
 <span class="sd">        if found.  Optionally loads the thumbnail into a QImage.</span>
 
@@ -999,7 +999,7 @@
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">check_task_id</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunDataRetriever.request_thumbnail_source"><a class="viewcode-back" href="../../shotgun_data.html#shotgun_data.ShotgunDataRetriever.request_thumbnail_source">[docs]</a>    <span class="k">def</span> <span class="nf">request_thumbnail_source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">load_image</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Downloads a thumbnail from Shotgun asynchronously or returns a cached thumbnail</span>
 <span class="sd">        if found.  Optionally loads the thumbnail into a QImage.</span>
 
@@ -1037,7 +1037,7 @@
     <span class="c1"># Background task management and methods</span>
 
     <span class="k">def</span> <span class="nf">_download_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Downloads a file located at the given url to the provided file path.</span>
 
 <span class="sd">        :param str file_path: The target path.</span>
@@ -1125,7 +1125,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_get_attachment_path</span><span class="p">(</span><span class="n">attachment_entity</span><span class="p">,</span> <span class="n">bundle</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the location on disk suitable for an attachment file.</span>
 
 <span class="sd">        :param dict attachment_entity: The Attachment entity definition.</span>
@@ -1144,7 +1144,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_get_thumbnail_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle</span><span class="p">,</span> <span class="n">directory_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the location on disk suitable for a thumbnail given its url and</span>
 <span class="sd">        whether a cached file for the specified ``url`` already exists. Two cases</span>
 <span class="sd">        are handled:</span>
@@ -1274,7 +1274,7 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">,</span> <span class="n">cached_thumb_exists</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_task_get_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that gets executed in a background task/thread to retrieve the fields</span>
 <span class="sd">        and types schema from Shotgun</span>
 
@@ -1298,7 +1298,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;schema&quot;</span><span class="p">,</span> <span class="s2">&quot;fields&quot;</span><span class="p">:</span> <span class="n">sg_field_schema</span><span class="p">,</span> <span class="s2">&quot;types&quot;</span><span class="p">:</span> <span class="n">sg_type_schema</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_execute_find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
 <span class="sd">        find query</span>
 
@@ -1311,7 +1311,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;find&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_execute_find_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
 <span class="sd">        find_one query</span>
 
@@ -1324,7 +1324,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;find_one&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_execute_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
 <span class="sd">        update call</span>
 
@@ -1337,7 +1337,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_execute_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
 <span class="sd">        create call</span>
 
@@ -1350,7 +1350,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_execute_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
 <span class="sd">        delete call</span>
 
@@ -1363,7 +1363,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_execute_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">method_args</span><span class="p">,</span> <span class="n">method_kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that gets executed in a background task/thread to execute a method</span>
 <span class="sd">        with a thread-specific shotgun connection.</span>
 
@@ -1377,7 +1377,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;method&quot;</span><span class="p">,</span> <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="n">res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_execute_text_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
 <span class="sd">        ``text_search`` query</span>
 
@@ -1390,7 +1390,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;text_search&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_execute_nav_expand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
 <span class="sd">        ``nav_expand`` query</span>
 
@@ -1403,7 +1403,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;nav_expand&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_execute_nav_search_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
 <span class="sd">        ``nav_search_string`` query</span>
 
@@ -1422,7 +1422,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;nav_search_string&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_execute_nav_search_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that gets executed in a background task/thread to perform a Shotgun</span>
 <span class="sd">        ``nav_search_entity`` query</span>
 
@@ -1458,7 +1458,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;nav_search_entity&quot;</span><span class="p">,</span> <span class="s2">&quot;sg_result&quot;</span><span class="p">:</span> <span class="n">sg_res</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_check_attachment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attachment_entity</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check to see if an attachment file exists for the specified Attachment</span>
 <span class="sd">        entity.</span>
 
@@ -1486,7 +1486,7 @@
         <span class="k">return</span> <span class="n">data</span>
 
     <span class="k">def</span> <span class="nf">_task_check_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">load_image</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check to see if a thumbnail exists for the specified url.  If it does then it is returned.</span>
 
 <span class="sd">        :param url:         The url to return the cached path for</span>
@@ -1523,7 +1523,7 @@
         <span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_task_download_attachment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">attachment_entity</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Download the specified attachment. This downloads the file associated with</span>
 <span class="sd">        the provided Attachment entity into the framework&#39;s cache directory structure</span>
 <span class="sd">        and returns the cached path.</span>
@@ -1560,7 +1560,7 @@
     <span class="k">def</span> <span class="nf">_task_download_thumbnail</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">thumb_path</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">load_image</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Download the thumbnail for the specified entity type, id and field.  This downloads the</span>
 <span class="sd">        thumbnail into the thumbnail cache directory and returns the cached path.</span>
 
@@ -1622,7 +1622,7 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_on_task_completed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Slot triggered when a task is completed.</span>
 
 <span class="sd">        :param task_id: The id of the task that has completed</span>
@@ -1692,7 +1692,7 @@
                 <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_on_task_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Slot triggered when a task fails for some reason</span>
 
 <span class="sd">        :param task_id: The id of the task that failed</span>
@@ -1730,7 +1730,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2022, Autodesk
+        &copy; Copyright 2023, Autodesk
 
     </p>
   </div> 

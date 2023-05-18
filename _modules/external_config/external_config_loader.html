@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>external_config.external_config_loader &mdash; tk-framework-shotgunutils v5.8.5 documentation</title>
+  <title>external_config.external_config_loader &mdash; tk-framework-shotgunutils v5.8.6 documentation</title>
   
 
   
@@ -122,7 +122,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.5.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.6.<br>
     
         This documentation is part of the ShotGrid Pipeline Toolkit.
     
@@ -221,7 +221,7 @@
 
 
 <div class="viewcode-block" id="ExternalConfigurationLoader"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalConfigurationLoader">[docs]</a><span class="k">class</span> <span class="nc">ExternalConfigurationLoader</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for loading configurations across contexts.</span>
 
 <span class="sd">    **Signal Interface**</span>
@@ -254,7 +254,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">,</span> <span class="n">engine_name</span><span class="p">,</span> <span class="n">plugin_id</span><span class="p">,</span> <span class="n">base_config</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="p">,</span> <span class="n">parent</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the class with the following parameters:</span>
 
 <span class="sd">        .. note:: The interpreter needs to support the VFX Platform, e.g be</span>
@@ -289,19 +289,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_bg_task_manager</span><span class="o">.</span><span class="n">task_failed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_failed</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        String representation</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;&lt;CommandHandler </span><span class="si">%s</span><span class="s2">@</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ExternalConfigurationLoader.shut_down"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalConfigurationLoader.shut_down">[docs]</a>    <span class="k">def</span> <span class="nf">shut_down</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Shut down and deallocate.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_state</span><span class="o">.</span><span class="n">shut_down</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ExternalConfigurationLoader.refresh_shotgun_global_state"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalConfigurationLoader.refresh_shotgun_global_state">[docs]</a>    <span class="k">def</span> <span class="nf">refresh_shotgun_global_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Requests an async refresh. If the State of Shotgun has</span>
 <span class="sd">        changed in a way which may affect configurations, this will</span>
 <span class="sd">        result in a ``configurations_changed`` signal being emitted.</span>
@@ -315,42 +315,42 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">engine_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The name of the engine associated with this external configuration loader.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">interpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The Python interpreter to when bootstrapping and loading external configurations.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">plugin_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The plugin id which will be used when executing external requests.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">base_config_uri</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Configuration URI string to be used when nothing is provided via Shotgun overrides.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_config_uri</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">software_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Hash string representing the state of the software</span>
 <span class="sd">        entity in Shotgun or None if not yet determined.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_state</span><span class="o">.</span><span class="n">get_software_hash</span><span class="p">()</span>
 
 <div class="viewcode-block" id="ExternalConfigurationLoader.request_configurations"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalConfigurationLoader.request_configurations">[docs]</a>    <span class="k">def</span> <span class="nf">request_configurations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Requests a list of configuration objects for the given project.</span>
 
 <span class="sd">        Emits a ``configurations_loaded`` signal when the configurations</span>
@@ -430,7 +430,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">[</span><span class="n">unique_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">project_id</span></div>
 
     <span class="k">def</span> <span class="nf">_execute_get_configurations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="p">,</span> <span class="n">state_hash</span><span class="p">,</span> <span class="n">toolkit_manager</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Background task to load configs using the ToolkitManager.</span>
 
 <span class="sd">        :param int project_id: Project id to load configs for.</span>
@@ -451,7 +451,7 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">state_hash</span><span class="p">,</span> <span class="n">configs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_task_completed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique_id</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called after pipeline configuration enumeration completes.</span>
 
 <span class="sd">        :param str unique_id: unique task id</span>
@@ -521,7 +521,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">configurations_loaded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">config_objects</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_task_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique_id</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">traceback_str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called after pipeline configuration enumeration fails.</span>
 
 <span class="sd">        :param str unique_id: unique task id</span>
@@ -551,7 +551,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2022, Autodesk
+        &copy; Copyright 2023, Autodesk
 
     </p>
   </div> 

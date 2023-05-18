@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>external_config.config.config_base &mdash; tk-framework-shotgunutils v5.8.5 documentation</title>
+  <title>external_config.config.config_base &mdash; tk-framework-shotgunutils v5.8.6 documentation</title>
   
 
   
@@ -122,7 +122,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.5.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.6.<br>
     
         This documentation is part of the ShotGrid Pipeline Toolkit.
     
@@ -224,7 +224,7 @@
 
 
 <div class="viewcode-block" id="ExternalConfiguration"><a class="viewcode-back" href="../../../external_config.html#external_config.ExternalConfiguration">[docs]</a><span class="k">class</span> <span class="nc">ExternalConfiguration</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Object wrapping an external pipeline configuration.</span>
 
 <span class="sd">    **Signals**</span>
@@ -274,7 +274,7 @@
         <span class="n">pipeline_config_uri</span><span class="p">,</span>
         <span class="n">status</span><span class="o">=</span><span class="n">CONFIGURATION_READY</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. note:: This class is constructed by :class:`ExternalConfigurationLoader`.</span>
 <span class="sd">            Do not construct objects by hand.</span>
 
@@ -317,28 +317,28 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">plugin_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The plugin id associated with the configuration.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_id</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">engine_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The engine name associated with the configuration.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">interpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The Python interpreter to use when accessing this configuration</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span>
 
     <span class="nd">@interpreter</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">interpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets the configuration&#39;s Python interpreter.</span>
 
 <span class="sd">        :param str interpreter: The Python interpreter path.</span>
@@ -347,14 +347,14 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">software_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A hash of the state of the software entity associated with this configuration.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_software_hash</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_primary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns ``True`` if this is the primary configuration, ``False`` if not.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span>
@@ -368,7 +368,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns ``True`` if this configuration contains valid data that can be</span>
 <span class="sd">        used in the current environment, and ``False`` if the configuration is</span>
 <span class="sd">        inaccessible for some reason.</span>
@@ -377,7 +377,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The current status of the configuration. This will be returned as an</span>
 <span class="sd">        enum value provided by :class:`ExternalConfiguration`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -385,7 +385,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">pipeline_configuration_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The associated pipeline configuration id or ``None`` if not defined.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># note: subclassed implementations will override this return value</span>
@@ -393,7 +393,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">pipeline_configuration_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The name of the associated pipeline configuration or ``None`` if not defined.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># note: subclassed implementations will override this return value</span>
@@ -401,14 +401,14 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">descriptor_uri</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The descriptor URI associated with this pipeline configuration.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_config_uri</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">tracking_latest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns True if this configuration is tracking an external &#39;latest version&#39;.</span>
 <span class="sd">        This means that we cannot rely on any caches - because a remote process</span>
 <span class="sd">        may release a new &quot;latest&quot; version, we cannot know simply by computing a</span>
@@ -429,7 +429,7 @@
 <div class="viewcode-block" id="ExternalConfiguration.request_commands"><a class="viewcode-back" href="../../../external_config.html#external_config.ExternalConfiguration.request_commands">[docs]</a>    <span class="k">def</span> <span class="nf">request_commands</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">link_entity_type</span><span class="p">,</span> <span class="n">engine_fallback</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Request commands for the given shotgun entity.</span>
 
 <span class="sd">        A ``commands_loaded`` signal will be emitted once the commands are available.</span>
@@ -468,7 +468,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_ids</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">link_entity_type</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_compute_config_hash_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">link_entity_type</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates a hash to uniquely identify the configuration.</span>
 
 <span class="sd">        :param str entity_type: Associated entity type</span>
@@ -485,7 +485,7 @@
     <span class="k">def</span> <span class="nf">_request_commands</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">project_id</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">link_entity_type</span><span class="p">,</span> <span class="n">engine_fallback</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Execution, runs in a separate thread and launches an external</span>
 <span class="sd">        process to cache commands.</span>
 
@@ -596,7 +596,7 @@
     <span class="k">def</span> <span class="nf">_run_external_process</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">cache_path</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">engine_name</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Helper method. Executes the external caching process.</span>
 
 <span class="sd">        :param int cache_path: Path to cache file to write</span>
@@ -668,7 +668,7 @@
             <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">filesystem</span><span class="o">.</span><span class="n">safe_delete_file</span><span class="p">(</span><span class="n">args_file</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_task_completed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique_id</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called after command caching completes.</span>
 
 <span class="sd">        :param str unique_id: unique task id</span>
@@ -709,7 +709,7 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_task_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique_id</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">traceback_str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called if command caching fails.</span>
 
 <span class="sd">        :param str unique_id: unique task id</span>
@@ -743,7 +743,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2022, Autodesk
+        &copy; Copyright 2023, Autodesk
 
     </p>
   </div> 

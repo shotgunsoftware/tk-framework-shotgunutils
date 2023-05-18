@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.8.5 documentation</title>
+  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.8.6 documentation</title>
   
 
   
@@ -122,7 +122,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.5.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.6.<br>
     
         This documentation is part of the ShotGrid Pipeline Toolkit.
     
@@ -230,7 +230,7 @@
 
 
 <div class="viewcode-block" id="ShotgunHierarchyModel"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel">[docs]</a><span class="k">class</span> <span class="nc">ShotgunHierarchyModel</span><span class="p">(</span><span class="n">ShotgunQueryModel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A Qt Model representing a Shotgun hierarchy.</span>
 
 <span class="sd">    .. warning::</span>
@@ -269,7 +269,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">schema_generation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include_root</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the Hierarcy model.</span>
 
 <span class="sd">        :param parent: The model&#39;s parent.</span>
@@ -344,7 +344,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_empty_item_color</span> <span class="o">=</span> <span class="n">color_mix</span><span class="p">(</span><span class="n">text_color</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">base_color</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        String representation of this instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2"> path:</span><span class="si">%s</span><span class="s2"> seed:</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span>
@@ -357,7 +357,7 @@
     <span class="c1"># public methods</span>
 
 <div class="viewcode-block" id="ShotgunHierarchyModel.item_from_path"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel.item_from_path">[docs]</a>    <span class="k">def</span> <span class="nf">item_from_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a :class:`~PySide.QtGui.QStandardItem` for the supplied path.</span>
 
 <span class="sd">        Returns ``None`` if not found.</span>
@@ -375,13 +375,13 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_item_loaded</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
     <span class="k">class</span> <span class="nc">_NodeRefresher</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This class is used to launch a refresh request to the model and try</span>
 <span class="sd">        again to resolve the node when the refresh has happened.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_refresh</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
-            <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Triggers a fetchMore on the first node in the paths to refresh.</span>
 
 <span class="sd">            :param list(str) path_to_refresh: List of nodes to refresh asynchronously.</span>
@@ -399,7 +399,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_path_to_refresh</span> <span class="o">=</span> <span class="n">path_to_refresh</span>
 
         <span class="k">def</span> <span class="nf">_node_refreshed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-            <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Called when the ``async_item_retrieval_completed`` signal is emitted.</span>
 
 <span class="sd">            :param item: The ShotgunHierarchyItem that was loaded.</span>
@@ -420,7 +420,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">async_item_from_paths</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path_to_refresh</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ShotgunHierarchyModel.async_item_from_entity"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel.async_item_from_entity">[docs]</a>    <span class="k">def</span> <span class="nf">async_item_from_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Asynchronously loads an entity&#39;s node and all its parents and emits a signal with the</span>
 <span class="sd">        associated :class:`ShotgunHierarchyItem` when the node is loaded.</span>
 
@@ -432,7 +432,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">async_item_from_paths</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_resolve_entity_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Resolves an entities path in the nav hierarchy.</span>
 
 <span class="sd">        .. note::</span>
@@ -474,7 +474,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;/&quot;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="ShotgunHierarchyModel.async_item_from_paths"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel.async_item_from_paths">[docs]</a>    <span class="k">def</span> <span class="nf">async_item_from_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes a list of paths that incrementally dig deeper into the</span>
 <span class="sd">        model and signals when the node is found and loaded in memory.</span>
 
@@ -510,7 +510,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">async_item_retrieval_completed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">fetchMore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve child items for a node.</span>
 
 <span class="sd">        :param index: The index of the item being tested.</span>
@@ -528,7 +528,7 @@
     <span class="c1"># protected methods</span>
 
     <span class="k">def</span> <span class="nf">_get_default_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the default path to use for loading data.</span>
 
 <span class="sd">        Attempts to determine the current context and root at the context&#39;s</span>
@@ -553,7 +553,7 @@
         <span class="k">return</span> <span class="n">path</span>
 
 <div class="viewcode-block" id="ShotgunHierarchyModel._item_created"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel._item_created">[docs]</a>    <span class="k">def</span> <span class="nf">_item_created</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called when an item is created, before it is added to the model.</span>
 
 <span class="sd">        .. warning:: This base class implementation must be called in any</span>
@@ -575,7 +575,7 @@
 <div class="viewcode-block" id="ShotgunHierarchyModel._load_data"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel._load_data">[docs]</a>    <span class="k">def</span> <span class="nf">_load_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">seed_entity_field</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entity_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache_seed</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is the main method to use to configure the hierarchy model. You</span>
 <span class="sd">        basically pass a specific :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()`</span>
 <span class="sd">        query to the model and it will start tracking this particular set of parameters.</span>
@@ -695,7 +695,7 @@
         <span class="k">return</span> <span class="n">nodes_generated</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="ShotgunHierarchyModel._populate_default_thumbnail"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel._populate_default_thumbnail">[docs]</a>    <span class="k">def</span> <span class="nf">_populate_default_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets the icon for the supplied item based on its &quot;kind&quot; as returned</span>
 <span class="sd">        by the :meth:`~shotgun-api3:shotgun_api3.Shotgun.nav_expand()` api call.</span>
 
@@ -721,7 +721,7 @@
             <span class="n">item</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">icon</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_create_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">data_item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a model item for the tree given data out of the data store</span>
 
 <span class="sd">        :param :class:`~PySide.QtGui.QStandardItem` parent: Model item to parent the node under</span>
@@ -750,7 +750,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_node_refreshed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_update_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">data_item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates a model item with the given data</span>
 
 <span class="sd">        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to update</span>
@@ -791,7 +791,7 @@
     <span class="c1"># private methods</span>
 
     <span class="k">def</span> <span class="nf">__compute_cache_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache_seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates and returns a cache path to use for this instance&#39;s query.</span>
 
 <span class="sd">        :param cache_seed: Cache seed supplied to the ``__init__`` method.</span>
@@ -864,7 +864,7 @@
         <span class="k">return</span> <span class="n">data_cache_path</span>
 
     <span class="k">def</span> <span class="nf">__hierarchy_is_supported</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks the current Shotgun connection to make sure it supports</span>
 <span class="sd">        hierarchy queries.</span>
 
@@ -910,7 +910,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2022, Autodesk
+        &copy; Copyright 2023, Autodesk
 
     </p>
   </div> 

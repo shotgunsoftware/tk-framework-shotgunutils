@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Asynchronous Data Retriever &mdash; tk-framework-shotgunutils v5.8.5 documentation</title>
+  <title>Shotgun Asynchronous Data Retriever &mdash; tk-framework-shotgunutils v5.8.6 documentation</title>
   
 
   
@@ -129,7 +129,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.5.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.6.<br>
     
         This documentation is part of the ShotGrid Pipeline Toolkit.
     
@@ -248,7 +248,7 @@ always take precedence over shotgun thumbnail downloads.</p>
 
 
     <span class="k">def</span> <span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Executed when the widget dialog is closed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># gracefully stop our data retriever. This call</span>
@@ -259,13 +259,13 @@ always take precedence over shotgun thumbnail downloads.</p>
         <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__on_worker_failure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Asynchronous callback - the worker thread errored.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span> <span class="s2">&quot;Error: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg</span>
 
     <span class="k">def</span> <span class="nf">__on_worker_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">request_type</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Signaled whenever the worker completes something.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span> <span class="s2">&quot;Data arrived: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">data</span>
@@ -859,37 +859,37 @@ possible to match them up.</p>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.blockSignals">
-<code class="descname">blockSignals</code><span class="sig-paren">(</span><em>self</em>, <em>b: bool</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.blockSignals" title="Permalink to this definition">¶</a></dt>
+<code class="descname">blockSignals</code><span class="sig-paren">(</span><em>self</em>, <em>b:bool</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.blockSignals" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.childEvent">
-<code class="descname">childEvent</code><span class="sig-paren">(</span><em>self</em>, <em>event: PySide2.QtCore.QChildEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.childEvent" title="Permalink to this definition">¶</a></dt>
+<code class="descname">childEvent</code><span class="sig-paren">(</span><em>self</em>, <em>event:PySide2.QtCore.QChildEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.childEvent" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.children">
-<code class="descname">children</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.List[PySide2.QtCore.QObject]<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.children" title="Permalink to this definition">¶</a></dt>
+<code class="descname">children</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.List<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.children" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="staticmethod">
 <dt id="shotgun_data.ShotgunDataRetriever.connect">
-<em class="property">static </em><code class="descname">connect</code><span class="sig-paren">(</span><em>arg__1: PySide2.QtCore.QObject</em>, <em>arg__2: bytes</em>, <em>arg__3: typing.Callable</em>, <em>type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.connect" title="Permalink to this definition">¶</a></dt>
-<dd><p>connect(self, arg__1: bytes, arg__2: typing.Callable, type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; bool
-connect(self, arg__1: bytes, arg__2: PySide2.QtCore.QObject, arg__3: bytes, type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; bool
-connect(self, sender: PySide2.QtCore.QObject, signal: bytes, member: bytes, type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection
-connect(sender: PySide2.QtCore.QObject, signal: PySide2.QtCore.QMetaMethod, receiver: PySide2.QtCore.QObject, method: PySide2.QtCore.QMetaMethod, type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection
-connect(sender: PySide2.QtCore.QObject, signal: bytes, receiver: PySide2.QtCore.QObject, member: bytes, type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection</p>
+<em class="property">static </em><code class="descname">connect</code><span class="sig-paren">(</span><em>arg__1:PySide2.QtCore.QObject</em>, <em>arg__2:bytes</em>, <em>arg__3:typing.Callable</em>, <em>type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>connect(self, arg__1:bytes, arg__2:typing.Callable, type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; bool
+connect(self, arg__1:bytes, arg__2:PySide2.QtCore.QObject, arg__3:bytes, type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; bool
+connect(self, sender:PySide2.QtCore.QObject, signal:bytes, member:bytes, type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection
+connect(sender:PySide2.QtCore.QObject, signal:PySide2.QtCore.QMetaMethod, receiver:PySide2.QtCore.QObject, method:PySide2.QtCore.QMetaMethod, type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection
+connect(sender:PySide2.QtCore.QObject, signal:bytes, receiver:PySide2.QtCore.QObject, member:bytes, type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.connectNotify">
-<code class="descname">connectNotify</code><span class="sig-paren">(</span><em>self</em>, <em>signal: PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.connectNotify" title="Permalink to this definition">¶</a></dt>
+<code class="descname">connectNotify</code><span class="sig-paren">(</span><em>self</em>, <em>signal:PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.connectNotify" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.customEvent">
-<code class="descname">customEvent</code><span class="sig-paren">(</span><em>self</em>, <em>event: PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.customEvent" title="Permalink to this definition">¶</a></dt>
+<code class="descname">customEvent</code><span class="sig-paren">(</span><em>self</em>, <em>event:PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.customEvent" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -899,18 +899,18 @@ connect(sender: PySide2.QtCore.QObject, signal: bytes, receiver: PySide2.QtCore.
 
 <dl class="staticmethod">
 <dt id="shotgun_data.ShotgunDataRetriever.disconnect">
-<em class="property">static </em><code class="descname">disconnect</code><span class="sig-paren">(</span><em>arg__1: PySide2.QtCore.QMetaObject.Connection</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.disconnect" title="Permalink to this definition">¶</a></dt>
-<dd><p>disconnect(arg__1: PySide2.QtCore.QObject, arg__2: bytes, arg__3: typing.Callable) -&gt; bool
-disconnect(self, arg__1: bytes, arg__2: typing.Callable) -&gt; bool
-disconnect(self, receiver: PySide2.QtCore.QObject, member: typing.Union[bytes, NoneType] = None) -&gt; bool
-disconnect(self, signal: bytes, receiver: PySide2.QtCore.QObject, member: bytes) -&gt; bool
-disconnect(sender: PySide2.QtCore.QObject, signal: PySide2.QtCore.QMetaMethod, receiver: PySide2.QtCore.QObject, member: PySide2.QtCore.QMetaMethod) -&gt; bool
-disconnect(sender: PySide2.QtCore.QObject, signal: bytes, receiver: PySide2.QtCore.QObject, member: bytes) -&gt; bool</p>
+<em class="property">static </em><code class="descname">disconnect</code><span class="sig-paren">(</span><em>arg__1:PySide2.QtCore.QMetaObject.Connection</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>disconnect(arg__1:PySide2.QtCore.QObject, arg__2:bytes, arg__3:typing.Callable) -&gt; bool
+disconnect(self, arg__1:bytes, arg__2:typing.Callable) -&gt; bool
+disconnect(self, receiver:PySide2.QtCore.QObject, member:typing.Union[bytes, NoneType]=None) -&gt; bool
+disconnect(self, signal:bytes, receiver:PySide2.QtCore.QObject, member:bytes) -&gt; bool
+disconnect(sender:PySide2.QtCore.QObject, signal:PySide2.QtCore.QMetaMethod, receiver:PySide2.QtCore.QObject, member:PySide2.QtCore.QMetaMethod) -&gt; bool
+disconnect(sender:PySide2.QtCore.QObject, signal:bytes, receiver:PySide2.QtCore.QObject, member:bytes) -&gt; bool</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.disconnectNotify">
-<code class="descname">disconnectNotify</code><span class="sig-paren">(</span><em>self</em>, <em>signal: PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.disconnectNotify" title="Permalink to this definition">¶</a></dt>
+<code class="descname">disconnectNotify</code><span class="sig-paren">(</span><em>self</em>, <em>signal:PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.disconnectNotify" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -925,49 +925,49 @@ disconnect(sender: PySide2.QtCore.QObject, signal: bytes, receiver: PySide2.QtCo
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.dynamicPropertyNames">
-<code class="descname">dynamicPropertyNames</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.List[PySide2.QtCore.QByteArray]<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.dynamicPropertyNames" title="Permalink to this definition">¶</a></dt>
+<code class="descname">dynamicPropertyNames</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.List<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.dynamicPropertyNames" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.emit">
-<code class="descname">emit</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1: bytes</em>, <em>*args: None</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.emit" title="Permalink to this definition">¶</a></dt>
+<code class="descname">emit</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1:bytes</em>, <em>*args:None</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.emit" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.event">
-<code class="descname">event</code><span class="sig-paren">(</span><em>self</em>, <em>event: PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.event" title="Permalink to this definition">¶</a></dt>
+<code class="descname">event</code><span class="sig-paren">(</span><em>self</em>, <em>event:PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.event" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.eventFilter">
-<code class="descname">eventFilter</code><span class="sig-paren">(</span><em>self</em>, <em>watched: PySide2.QtCore.QObject</em>, <em>event: PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.eventFilter" title="Permalink to this definition">¶</a></dt>
+<code class="descname">eventFilter</code><span class="sig-paren">(</span><em>self</em>, <em>watched:PySide2.QtCore.QObject</em>, <em>event:PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.eventFilter" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.findChild">
-<code class="descname">findChild</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1: type</em>, <em>arg__2: str = ''</em><span class="sig-paren">)</span> &#x2192; object<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.findChild" title="Permalink to this definition">¶</a></dt>
+<code class="descname">findChild</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1:type</em>, <em>arg__2:str=''</em><span class="sig-paren">)</span> &#x2192; object<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.findChild" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.findChildren">
-<code class="descname">findChildren</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1: type</em>, <em>arg__2: PySide2.QtCore.QRegExp</em><span class="sig-paren">)</span> &#x2192; typing.Iterable<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.findChildren" title="Permalink to this definition">¶</a></dt>
-<dd><p>findChildren(self, arg__1: type, arg__2: PySide2.QtCore.QRegularExpression) -&gt; typing.Iterable
-findChildren(self, arg__1: type, arg__2: str = ‘’) -&gt; typing.Iterable</p>
+<code class="descname">findChildren</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1:type</em>, <em>arg__2:PySide2.QtCore.QRegExp</em><span class="sig-paren">)</span> &#x2192; typing.Iterable<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.findChildren" title="Permalink to this definition">¶</a></dt>
+<dd><p>findChildren(self, arg__1:type, arg__2:PySide2.QtCore.QRegularExpression) -&gt; typing.Iterable
+findChildren(self, arg__1:type, arg__2:str=’’) -&gt; typing.Iterable</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.inherits">
-<code class="descname">inherits</code><span class="sig-paren">(</span><em>self</em>, <em>classname: bytes</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.inherits" title="Permalink to this definition">¶</a></dt>
+<code class="descname">inherits</code><span class="sig-paren">(</span><em>self</em>, <em>classname:bytes</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.inherits" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.installEventFilter">
-<code class="descname">installEventFilter</code><span class="sig-paren">(</span><em>self</em>, <em>filterObj: PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.installEventFilter" title="Permalink to this definition">¶</a></dt>
+<code class="descname">installEventFilter</code><span class="sig-paren">(</span><em>self</em>, <em>filterObj:PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.installEventFilter" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.isSignalConnected">
-<code class="descname">isSignalConnected</code><span class="sig-paren">(</span><em>self</em>, <em>signal: PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.isSignalConnected" title="Permalink to this definition">¶</a></dt>
+<code class="descname">isSignalConnected</code><span class="sig-paren">(</span><em>self</em>, <em>signal:PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.isSignalConnected" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -982,7 +982,7 @@ findChildren(self, arg__1: type, arg__2: str = ‘’) -&gt; typing.Iterable</p>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.killTimer">
-<code class="descname">killTimer</code><span class="sig-paren">(</span><em>self</em>, <em>id: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.killTimer" title="Permalink to this definition">¶</a></dt>
+<code class="descname">killTimer</code><span class="sig-paren">(</span><em>self</em>, <em>id:int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.killTimer" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -992,7 +992,7 @@ findChildren(self, arg__1: type, arg__2: str = ‘’) -&gt; typing.Iterable</p>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.moveToThread">
-<code class="descname">moveToThread</code><span class="sig-paren">(</span><em>self</em>, <em>thread: PySide2.QtCore.QThread</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.moveToThread" title="Permalink to this definition">¶</a></dt>
+<code class="descname">moveToThread</code><span class="sig-paren">(</span><em>self</em>, <em>thread:PySide2.QtCore.QThread</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.moveToThread" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1007,12 +1007,12 @@ findChildren(self, arg__1: type, arg__2: str = ‘’) -&gt; typing.Iterable</p>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.property">
-<code class="descname">property</code><span class="sig-paren">(</span><em>self</em>, <em>name: bytes</em><span class="sig-paren">)</span> &#x2192; typing.Any<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.property" title="Permalink to this definition">¶</a></dt>
+<code class="descname">property</code><span class="sig-paren">(</span><em>self</em>, <em>name:bytes</em><span class="sig-paren">)</span> &#x2192; typing.Any<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.property" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.receivers">
-<code class="descname">receivers</code><span class="sig-paren">(</span><em>self</em>, <em>signal: bytes</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.receivers" title="Permalink to this definition">¶</a></dt>
+<code class="descname">receivers</code><span class="sig-paren">(</span><em>self</em>, <em>signal:bytes</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.receivers" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="staticmethod">
@@ -1022,7 +1022,7 @@ findChildren(self, arg__1: type, arg__2: str = ‘’) -&gt; typing.Iterable</p>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.removeEventFilter">
-<code class="descname">removeEventFilter</code><span class="sig-paren">(</span><em>self</em>, <em>obj: PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.removeEventFilter" title="Permalink to this definition">¶</a></dt>
+<code class="descname">removeEventFilter</code><span class="sig-paren">(</span><em>self</em>, <em>obj:PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.removeEventFilter" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1037,17 +1037,17 @@ findChildren(self, arg__1: type, arg__2: str = ‘’) -&gt; typing.Iterable</p>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.setObjectName">
-<code class="descname">setObjectName</code><span class="sig-paren">(</span><em>self</em>, <em>name: str</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.setObjectName" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setObjectName</code><span class="sig-paren">(</span><em>self</em>, <em>name:str</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.setObjectName" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.setParent">
-<code class="descname">setParent</code><span class="sig-paren">(</span><em>self</em>, <em>parent: PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.setParent" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setParent</code><span class="sig-paren">(</span><em>self</em>, <em>parent:PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.setParent" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.setProperty">
-<code class="descname">setProperty</code><span class="sig-paren">(</span><em>self</em>, <em>name: bytes</em>, <em>value: typing.Any</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.setProperty" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setProperty</code><span class="sig-paren">(</span><em>self</em>, <em>name:bytes</em>, <em>value:typing.Any</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.setProperty" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1057,7 +1057,7 @@ findChildren(self, arg__1: type, arg__2: str = ‘’) -&gt; typing.Iterable</p>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.startTimer">
-<code class="descname">startTimer</code><span class="sig-paren">(</span><em>self</em>, <em>interval: int</em>, <em>timerType: PySide2.QtCore.Qt.TimerType = PySide2.QtCore.Qt.TimerType.CoarseTimer</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.startTimer" title="Permalink to this definition">¶</a></dt>
+<code class="descname">startTimer</code><span class="sig-paren">(</span><em>self</em>, <em>interval:int</em>, <em>timerType:PySide2.QtCore.Qt.TimerType=PySide2.QtCore.Qt.TimerType.CoarseTimer</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.startTimer" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1067,12 +1067,12 @@ findChildren(self, arg__1: type, arg__2: str = ‘’) -&gt; typing.Iterable</p>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.timerEvent">
-<code class="descname">timerEvent</code><span class="sig-paren">(</span><em>self</em>, <em>event: PySide2.QtCore.QTimerEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.timerEvent" title="Permalink to this definition">¶</a></dt>
+<code class="descname">timerEvent</code><span class="sig-paren">(</span><em>self</em>, <em>event:PySide2.QtCore.QTimerEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.timerEvent" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_data.ShotgunDataRetriever.tr">
-<code class="descname">tr</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1: bytes</em>, <em>arg__2: bytes = b''</em>, <em>arg__3: int = -1</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.tr" title="Permalink to this definition">¶</a></dt>
+<code class="descname">tr</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1:bytes</em>, <em>arg__2:bytes=b''</em>, <em>arg__3:int=-1</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#shotgun_data.ShotgunDataRetriever.tr" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1100,7 +1100,7 @@ findChildren(self, arg__1: type, arg__2: str = ‘’) -&gt; typing.Iterable</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2022, Autodesk
+        &copy; Copyright 2023, Autodesk
 
     </p>
   </div> 

@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Shotgun Model &mdash; tk-framework-shotgunutils v5.8.5 documentation</title>
+  <title>Shotgun Model &mdash; tk-framework-shotgunutils v5.8.6 documentation</title>
   
 
   
@@ -137,7 +137,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.5.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.6.<br>
     
         This documentation is part of the ShotGrid Pipeline Toolkit.
     
@@ -295,13 +295,13 @@ things.</li>
 search criteria, use a Proxy Model (typically <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QSortFilterProxyModel.html#PySide.QtGui.QSortFilterProxyModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSortFilterProxyModel</span></code></a>).</li>
 <li>If you want to control the way items are displayed in the view, consider using the Shotgun delegates
 module which is part of the Qt widgets framework. For more information, see
-<a class="reference external" href="http://developer.shotgridsoftware.com/tk-framework-qtwidgets/views.html#views.WidgetDelegate" title="(in tk-framework-qtwidgets vv2.10.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">WidgetDelegate</span></code></a></li>
+<a class="reference external" href="http://developer.shotgridsoftware.com/tk-framework-qtwidgets/views.html#views.WidgetDelegate" title="(in tk-framework-qtwidgets vv2.10.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">WidgetDelegate</span></code></a></li>
 </ul>
 </div>
 <div class="section" id="progress-spinner">
 <h3>Progress Spinner<a class="headerlink" href="#progress-spinner" title="Permalink to this headline">¶</a></h3>
 <p>The model emits several signals at various points in its refresh cycle. If you want a spinner
-to pop up to indicate that data is being loaded, simply add a <a class="reference external" href="http://developer.shotgridsoftware.com/tk-framework-qtwidgets/overlay_widget.html#overlay_widget.ShotgunModelOverlayWidget" title="(in tk-framework-qtwidgets vv2.10.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunModelOverlayWidget</span></code></a>
+to pop up to indicate that data is being loaded, simply add a <a class="reference external" href="http://developer.shotgridsoftware.com/tk-framework-qtwidgets/overlay_widget.html#overlay_widget.ShotgunModelOverlayWidget" title="(in tk-framework-qtwidgets vv2.10.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunModelOverlayWidget</span></code></a>
 between your view and model, like this:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">overlay_widget</span> <span class="o">=</span> <span class="n">tank</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s2">&quot;tk-framework-qtwidgets&quot;</span><span class="p">,</span> <span class="s2">&quot;overlay_widget&quot;</span><span class="p">)</span>
 
@@ -1221,43 +1221,43 @@ level tree node, it may return:</p>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.appendColumn">
-<code class="descname">appendColumn</code><span class="sig-paren">(</span><em>self, items: typing.Sequence[PySide2.QtGui.QStandardItem]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.appendColumn" title="Permalink to this definition">¶</a></dt>
+<code class="descname">appendColumn</code><span class="sig-paren">(</span><em>self</em>, <em>items:typing.Sequence</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.appendColumn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.appendRow">
-<code class="descname">appendRow</code><span class="sig-paren">(</span><em>self</em>, <em>item: PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.appendRow" title="Permalink to this definition">¶</a></dt>
-<dd><p>appendRow(self, items: typing.Sequence[PySide2.QtGui.QStandardItem]) -&gt; None</p>
+<code class="descname">appendRow</code><span class="sig-paren">(</span><em>self</em>, <em>item:PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.appendRow" title="Permalink to this definition">¶</a></dt>
+<dd><p>appendRow(self, items:typing.Sequence) -&gt; None</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.beginInsertColumns">
-<code class="descname">beginInsertColumns</code><span class="sig-paren">(</span><em>self</em>, <em>parent: PySide2.QtCore.QModelIndex</em>, <em>first: int</em>, <em>last: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.beginInsertColumns" title="Permalink to this definition">¶</a></dt>
+<code class="descname">beginInsertColumns</code><span class="sig-paren">(</span><em>self</em>, <em>parent:PySide2.QtCore.QModelIndex</em>, <em>first:int</em>, <em>last:int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.beginInsertColumns" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.beginInsertRows">
-<code class="descname">beginInsertRows</code><span class="sig-paren">(</span><em>self</em>, <em>parent: PySide2.QtCore.QModelIndex</em>, <em>first: int</em>, <em>last: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.beginInsertRows" title="Permalink to this definition">¶</a></dt>
+<code class="descname">beginInsertRows</code><span class="sig-paren">(</span><em>self</em>, <em>parent:PySide2.QtCore.QModelIndex</em>, <em>first:int</em>, <em>last:int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.beginInsertRows" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.beginMoveColumns">
-<code class="descname">beginMoveColumns</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent: PySide2.QtCore.QModelIndex</em>, <em>sourceFirst: int</em>, <em>sourceLast: int</em>, <em>destinationParent: PySide2.QtCore.QModelIndex</em>, <em>destinationColumn: int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.beginMoveColumns" title="Permalink to this definition">¶</a></dt>
+<code class="descname">beginMoveColumns</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent:PySide2.QtCore.QModelIndex</em>, <em>sourceFirst:int</em>, <em>sourceLast:int</em>, <em>destinationParent:PySide2.QtCore.QModelIndex</em>, <em>destinationColumn:int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.beginMoveColumns" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.beginMoveRows">
-<code class="descname">beginMoveRows</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent: PySide2.QtCore.QModelIndex</em>, <em>sourceFirst: int</em>, <em>sourceLast: int</em>, <em>destinationParent: PySide2.QtCore.QModelIndex</em>, <em>destinationRow: int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.beginMoveRows" title="Permalink to this definition">¶</a></dt>
+<code class="descname">beginMoveRows</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent:PySide2.QtCore.QModelIndex</em>, <em>sourceFirst:int</em>, <em>sourceLast:int</em>, <em>destinationParent:PySide2.QtCore.QModelIndex</em>, <em>destinationRow:int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.beginMoveRows" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.beginRemoveColumns">
-<code class="descname">beginRemoveColumns</code><span class="sig-paren">(</span><em>self</em>, <em>parent: PySide2.QtCore.QModelIndex</em>, <em>first: int</em>, <em>last: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.beginRemoveColumns" title="Permalink to this definition">¶</a></dt>
+<code class="descname">beginRemoveColumns</code><span class="sig-paren">(</span><em>self</em>, <em>parent:PySide2.QtCore.QModelIndex</em>, <em>first:int</em>, <em>last:int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.beginRemoveColumns" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.beginRemoveRows">
-<code class="descname">beginRemoveRows</code><span class="sig-paren">(</span><em>self</em>, <em>parent: PySide2.QtCore.QModelIndex</em>, <em>first: int</em>, <em>last: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.beginRemoveRows" title="Permalink to this definition">¶</a></dt>
+<code class="descname">beginRemoveRows</code><span class="sig-paren">(</span><em>self</em>, <em>parent:PySide2.QtCore.QModelIndex</em>, <em>first:int</em>, <em>last:int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.beginRemoveRows" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1267,88 +1267,88 @@ level tree node, it may return:</p>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.blockSignals">
-<code class="descname">blockSignals</code><span class="sig-paren">(</span><em>self</em>, <em>b: bool</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.blockSignals" title="Permalink to this definition">¶</a></dt>
+<code class="descname">blockSignals</code><span class="sig-paren">(</span><em>self</em>, <em>b:bool</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.blockSignals" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.buddy">
-<code class="descname">buddy</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QModelIndex<a class="headerlink" href="#shotgun_model.ShotgunModel.buddy" title="Permalink to this definition">¶</a></dt>
+<code class="descname">buddy</code><span class="sig-paren">(</span><em>self</em>, <em>index:PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QModelIndex<a class="headerlink" href="#shotgun_model.ShotgunModel.buddy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.canDropMimeData">
-<code class="descname">canDropMimeData</code><span class="sig-paren">(</span><em>self</em>, <em>data: PySide2.QtCore.QMimeData</em>, <em>action: PySide2.QtCore.Qt.DropAction</em>, <em>row: int</em>, <em>column: int</em>, <em>parent: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.canDropMimeData" title="Permalink to this definition">¶</a></dt>
+<code class="descname">canDropMimeData</code><span class="sig-paren">(</span><em>self</em>, <em>data:PySide2.QtCore.QMimeData</em>, <em>action:PySide2.QtCore.Qt.DropAction</em>, <em>row:int</em>, <em>column:int</em>, <em>parent:PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.canDropMimeData" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.changePersistentIndex">
-<code class="descname">changePersistentIndex</code><span class="sig-paren">(</span><em>self</em>, <em>from_: PySide2.QtCore.QModelIndex</em>, <em>to: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.changePersistentIndex" title="Permalink to this definition">¶</a></dt>
+<code class="descname">changePersistentIndex</code><span class="sig-paren">(</span><em>self</em>, <em>from_:PySide2.QtCore.QModelIndex</em>, <em>to:PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.changePersistentIndex" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.changePersistentIndexList">
-<code class="descname">changePersistentIndexList</code><span class="sig-paren">(</span><em>self, from_: typing.List[int], to: typing.List[int]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.changePersistentIndexList" title="Permalink to this definition">¶</a></dt>
+<code class="descname">changePersistentIndexList</code><span class="sig-paren">(</span><em>self</em>, <em>from_:typing.List</em>, <em>to:typing.List</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.changePersistentIndexList" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.checkIndex">
-<code class="descname">checkIndex</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em>, <em>options: PySide2.QtCore.QAbstractItemModel.CheckIndexOptions = Instance(PySide2.QtCore.QAbstractItemModel.CheckIndexOptions.NoOption)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.checkIndex" title="Permalink to this definition">¶</a></dt>
+<code class="descname">checkIndex</code><span class="sig-paren">(</span><em>self</em>, <em>index:PySide2.QtCore.QModelIndex</em>, <em>options:PySide2.QtCore.QAbstractItemModel.CheckIndexOptions=Instance(PySide2.QtCore.QAbstractItemModel.CheckIndexOptions.NoOption)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.checkIndex" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.childEvent">
-<code class="descname">childEvent</code><span class="sig-paren">(</span><em>self</em>, <em>event: PySide2.QtCore.QChildEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.childEvent" title="Permalink to this definition">¶</a></dt>
+<code class="descname">childEvent</code><span class="sig-paren">(</span><em>self</em>, <em>event:PySide2.QtCore.QChildEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.childEvent" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.children">
-<code class="descname">children</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.List[PySide2.QtCore.QObject]<a class="headerlink" href="#shotgun_model.ShotgunModel.children" title="Permalink to this definition">¶</a></dt>
+<code class="descname">children</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.List<a class="headerlink" href="#shotgun_model.ShotgunModel.children" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.clearItemData">
-<code class="descname">clearItemData</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.clearItemData" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clearItemData</code><span class="sig-paren">(</span><em>self</em>, <em>index:PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.clearItemData" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.columnCount">
-<code class="descname">columnCount</code><span class="sig-paren">(</span><em>self</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_model.ShotgunModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>self</em>, <em>parent:PySide2.QtCore.QModelIndex=Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_model.ShotgunModel.columnCount" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="staticmethod">
 <dt id="shotgun_model.ShotgunModel.connect">
-<em class="property">static </em><code class="descname">connect</code><span class="sig-paren">(</span><em>arg__1: PySide2.QtCore.QObject</em>, <em>arg__2: bytes</em>, <em>arg__3: typing.Callable</em>, <em>type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.connect" title="Permalink to this definition">¶</a></dt>
-<dd><p>connect(self, arg__1: bytes, arg__2: typing.Callable, type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; bool
-connect(self, arg__1: bytes, arg__2: PySide2.QtCore.QObject, arg__3: bytes, type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; bool
-connect(self, sender: PySide2.QtCore.QObject, signal: bytes, member: bytes, type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection
-connect(sender: PySide2.QtCore.QObject, signal: PySide2.QtCore.QMetaMethod, receiver: PySide2.QtCore.QObject, method: PySide2.QtCore.QMetaMethod, type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection
-connect(sender: PySide2.QtCore.QObject, signal: bytes, receiver: PySide2.QtCore.QObject, member: bytes, type: PySide2.QtCore.Qt.ConnectionType = PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection</p>
+<em class="property">static </em><code class="descname">connect</code><span class="sig-paren">(</span><em>arg__1:PySide2.QtCore.QObject</em>, <em>arg__2:bytes</em>, <em>arg__3:typing.Callable</em>, <em>type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>connect(self, arg__1:bytes, arg__2:typing.Callable, type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; bool
+connect(self, arg__1:bytes, arg__2:PySide2.QtCore.QObject, arg__3:bytes, type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; bool
+connect(self, sender:PySide2.QtCore.QObject, signal:bytes, member:bytes, type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection
+connect(sender:PySide2.QtCore.QObject, signal:PySide2.QtCore.QMetaMethod, receiver:PySide2.QtCore.QObject, method:PySide2.QtCore.QMetaMethod, type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection
+connect(sender:PySide2.QtCore.QObject, signal:bytes, receiver:PySide2.QtCore.QObject, member:bytes, type:PySide2.QtCore.Qt.ConnectionType=PySide2.QtCore.Qt.ConnectionType.AutoConnection) -&gt; PySide2.QtCore.QMetaObject.Connection</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.connectNotify">
-<code class="descname">connectNotify</code><span class="sig-paren">(</span><em>self</em>, <em>signal: PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.connectNotify" title="Permalink to this definition">¶</a></dt>
+<code class="descname">connectNotify</code><span class="sig-paren">(</span><em>self</em>, <em>signal:PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.connectNotify" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.createIndex">
-<code class="descname">createIndex</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>column: int</em>, <em>id: int = 0</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QModelIndex<a class="headerlink" href="#shotgun_model.ShotgunModel.createIndex" title="Permalink to this definition">¶</a></dt>
-<dd><p>createIndex(self, row: int, column: int, ptr: object) -&gt; PySide2.QtCore.QModelIndex</p>
+<code class="descname">createIndex</code><span class="sig-paren">(</span><em>self</em>, <em>row:int</em>, <em>column:int</em>, <em>id:int=0</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QModelIndex<a class="headerlink" href="#shotgun_model.ShotgunModel.createIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>createIndex(self, row:int, column:int, ptr:object) -&gt; PySide2.QtCore.QModelIndex</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.customEvent">
-<code class="descname">customEvent</code><span class="sig-paren">(</span><em>self</em>, <em>event: PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.customEvent" title="Permalink to this definition">¶</a></dt>
+<code class="descname">customEvent</code><span class="sig-paren">(</span><em>self</em>, <em>event:PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.customEvent" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.data">
-<code class="descname">data</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em>, <em>role: int = PySide2.QtCore.Qt.ItemDataRole.DisplayRole</em><span class="sig-paren">)</span> &#x2192; typing.Any<a class="headerlink" href="#shotgun_model.ShotgunModel.data" title="Permalink to this definition">¶</a></dt>
+<code class="descname">data</code><span class="sig-paren">(</span><em>self</em>, <em>index:PySide2.QtCore.QModelIndex</em>, <em>role:int=PySide2.QtCore.Qt.ItemDataRole.DisplayRole</em><span class="sig-paren">)</span> &#x2192; typing.Any<a class="headerlink" href="#shotgun_model.ShotgunModel.data" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.decodeData">
-<code class="descname">decodeData</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>column: int</em>, <em>parent: PySide2.QtCore.QModelIndex</em>, <em>stream: PySide2.QtCore.QDataStream</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.decodeData" title="Permalink to this definition">¶</a></dt>
+<code class="descname">decodeData</code><span class="sig-paren">(</span><em>self</em>, <em>row:int</em>, <em>column:int</em>, <em>parent:PySide2.QtCore.QModelIndex</em>, <em>stream:PySide2.QtCore.QDataStream</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.decodeData" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1358,23 +1358,23 @@ connect(sender: PySide2.QtCore.QObject, signal: bytes, receiver: PySide2.QtCore.
 
 <dl class="staticmethod">
 <dt id="shotgun_model.ShotgunModel.disconnect">
-<em class="property">static </em><code class="descname">disconnect</code><span class="sig-paren">(</span><em>arg__1: PySide2.QtCore.QMetaObject.Connection</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.disconnect" title="Permalink to this definition">¶</a></dt>
-<dd><p>disconnect(arg__1: PySide2.QtCore.QObject, arg__2: bytes, arg__3: typing.Callable) -&gt; bool
-disconnect(self, arg__1: bytes, arg__2: typing.Callable) -&gt; bool
-disconnect(self, receiver: PySide2.QtCore.QObject, member: typing.Union[bytes, NoneType] = None) -&gt; bool
-disconnect(self, signal: bytes, receiver: PySide2.QtCore.QObject, member: bytes) -&gt; bool
-disconnect(sender: PySide2.QtCore.QObject, signal: PySide2.QtCore.QMetaMethod, receiver: PySide2.QtCore.QObject, member: PySide2.QtCore.QMetaMethod) -&gt; bool
-disconnect(sender: PySide2.QtCore.QObject, signal: bytes, receiver: PySide2.QtCore.QObject, member: bytes) -&gt; bool</p>
+<em class="property">static </em><code class="descname">disconnect</code><span class="sig-paren">(</span><em>arg__1:PySide2.QtCore.QMetaObject.Connection</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>disconnect(arg__1:PySide2.QtCore.QObject, arg__2:bytes, arg__3:typing.Callable) -&gt; bool
+disconnect(self, arg__1:bytes, arg__2:typing.Callable) -&gt; bool
+disconnect(self, receiver:PySide2.QtCore.QObject, member:typing.Union[bytes, NoneType]=None) -&gt; bool
+disconnect(self, signal:bytes, receiver:PySide2.QtCore.QObject, member:bytes) -&gt; bool
+disconnect(sender:PySide2.QtCore.QObject, signal:PySide2.QtCore.QMetaMethod, receiver:PySide2.QtCore.QObject, member:PySide2.QtCore.QMetaMethod) -&gt; bool
+disconnect(sender:PySide2.QtCore.QObject, signal:bytes, receiver:PySide2.QtCore.QObject, member:bytes) -&gt; bool</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.disconnectNotify">
-<code class="descname">disconnectNotify</code><span class="sig-paren">(</span><em>self</em>, <em>signal: PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.disconnectNotify" title="Permalink to this definition">¶</a></dt>
+<code class="descname">disconnectNotify</code><span class="sig-paren">(</span><em>self</em>, <em>signal:PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.disconnectNotify" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.dropMimeData">
-<code class="descname">dropMimeData</code><span class="sig-paren">(</span><em>self</em>, <em>data: PySide2.QtCore.QMimeData</em>, <em>action: PySide2.QtCore.Qt.DropAction</em>, <em>row: int</em>, <em>column: int</em>, <em>parent: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.dropMimeData" title="Permalink to this definition">¶</a></dt>
+<code class="descname">dropMimeData</code><span class="sig-paren">(</span><em>self</em>, <em>data:PySide2.QtCore.QMimeData</em>, <em>action:PySide2.QtCore.Qt.DropAction</em>, <em>row:int</em>, <em>column:int</em>, <em>parent:PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.dropMimeData" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1389,17 +1389,17 @@ disconnect(sender: PySide2.QtCore.QObject, signal: bytes, receiver: PySide2.QtCo
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.dynamicPropertyNames">
-<code class="descname">dynamicPropertyNames</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.List[PySide2.QtCore.QByteArray]<a class="headerlink" href="#shotgun_model.ShotgunModel.dynamicPropertyNames" title="Permalink to this definition">¶</a></dt>
+<code class="descname">dynamicPropertyNames</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.List<a class="headerlink" href="#shotgun_model.ShotgunModel.dynamicPropertyNames" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.emit">
-<code class="descname">emit</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1: bytes</em>, <em>*args: None</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.emit" title="Permalink to this definition">¶</a></dt>
+<code class="descname">emit</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1:bytes</em>, <em>*args:None</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.emit" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.encodeData">
-<code class="descname">encodeData</code><span class="sig-paren">(</span><em>self, indexes: typing.List[int], stream: PySide2.QtCore.QDataStream</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.encodeData" title="Permalink to this definition">¶</a></dt>
+<code class="descname">encodeData</code><span class="sig-paren">(</span><em>self</em>, <em>indexes:typing.List</em>, <em>stream:PySide2.QtCore.QDataStream</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.encodeData" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1439,92 +1439,92 @@ disconnect(sender: PySide2.QtCore.QObject, signal: bytes, receiver: PySide2.QtCo
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.event">
-<code class="descname">event</code><span class="sig-paren">(</span><em>self</em>, <em>event: PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.event" title="Permalink to this definition">¶</a></dt>
+<code class="descname">event</code><span class="sig-paren">(</span><em>self</em>, <em>event:PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.event" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.eventFilter">
-<code class="descname">eventFilter</code><span class="sig-paren">(</span><em>self</em>, <em>watched: PySide2.QtCore.QObject</em>, <em>event: PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.eventFilter" title="Permalink to this definition">¶</a></dt>
+<code class="descname">eventFilter</code><span class="sig-paren">(</span><em>self</em>, <em>watched:PySide2.QtCore.QObject</em>, <em>event:PySide2.QtCore.QEvent</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.eventFilter" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.findChild">
-<code class="descname">findChild</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1: type</em>, <em>arg__2: str = ''</em><span class="sig-paren">)</span> &#x2192; object<a class="headerlink" href="#shotgun_model.ShotgunModel.findChild" title="Permalink to this definition">¶</a></dt>
+<code class="descname">findChild</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1:type</em>, <em>arg__2:str=''</em><span class="sig-paren">)</span> &#x2192; object<a class="headerlink" href="#shotgun_model.ShotgunModel.findChild" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.findChildren">
-<code class="descname">findChildren</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1: type</em>, <em>arg__2: PySide2.QtCore.QRegExp</em><span class="sig-paren">)</span> &#x2192; typing.Iterable<a class="headerlink" href="#shotgun_model.ShotgunModel.findChildren" title="Permalink to this definition">¶</a></dt>
-<dd><p>findChildren(self, arg__1: type, arg__2: PySide2.QtCore.QRegularExpression) -&gt; typing.Iterable
-findChildren(self, arg__1: type, arg__2: str = ‘’) -&gt; typing.Iterable</p>
+<code class="descname">findChildren</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1:type</em>, <em>arg__2:PySide2.QtCore.QRegExp</em><span class="sig-paren">)</span> &#x2192; typing.Iterable<a class="headerlink" href="#shotgun_model.ShotgunModel.findChildren" title="Permalink to this definition">¶</a></dt>
+<dd><p>findChildren(self, arg__1:type, arg__2:PySide2.QtCore.QRegularExpression) -&gt; typing.Iterable
+findChildren(self, arg__1:type, arg__2:str=’’) -&gt; typing.Iterable</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.findItems">
-<code class="descname">findItems</code><span class="sig-paren">(</span><em>self</em>, <em>text: str</em>, <em>flags: PySide2.QtCore.Qt.MatchFlags = PySide2.QtCore.Qt.MatchFlag.MatchExactly</em>, <em>column: int = 0</em><span class="sig-paren">)</span> &#x2192; typing.List[PySide2.QtGui.QStandardItem]<a class="headerlink" href="#shotgun_model.ShotgunModel.findItems" title="Permalink to this definition">¶</a></dt>
+<code class="descname">findItems</code><span class="sig-paren">(</span><em>self</em>, <em>text:str</em>, <em>flags:PySide2.QtCore.Qt.MatchFlags=PySide2.QtCore.Qt.MatchFlag.MatchExactly</em>, <em>column:int=0</em><span class="sig-paren">)</span> &#x2192; typing.List<a class="headerlink" href="#shotgun_model.ShotgunModel.findItems" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.flags">
-<code class="descname">flags</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.Qt.ItemFlags<a class="headerlink" href="#shotgun_model.ShotgunModel.flags" title="Permalink to this definition">¶</a></dt>
+<code class="descname">flags</code><span class="sig-paren">(</span><em>self</em>, <em>index:PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.Qt.ItemFlags<a class="headerlink" href="#shotgun_model.ShotgunModel.flags" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.hasIndex">
-<code class="descname">hasIndex</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>column: int</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.hasIndex" title="Permalink to this definition">¶</a></dt>
+<code class="descname">hasIndex</code><span class="sig-paren">(</span><em>self</em>, <em>row:int</em>, <em>column:int</em>, <em>parent:PySide2.QtCore.QModelIndex=Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.hasIndex" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.headerData">
-<code class="descname">headerData</code><span class="sig-paren">(</span><em>self</em>, <em>section: int</em>, <em>orientation: PySide2.QtCore.Qt.Orientation</em>, <em>role: int = PySide2.QtCore.Qt.ItemDataRole.DisplayRole</em><span class="sig-paren">)</span> &#x2192; typing.Any<a class="headerlink" href="#shotgun_model.ShotgunModel.headerData" title="Permalink to this definition">¶</a></dt>
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>self</em>, <em>section:int</em>, <em>orientation:PySide2.QtCore.Qt.Orientation</em>, <em>role:int=PySide2.QtCore.Qt.ItemDataRole.DisplayRole</em><span class="sig-paren">)</span> &#x2192; typing.Any<a class="headerlink" href="#shotgun_model.ShotgunModel.headerData" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.horizontalHeaderItem">
-<code class="descname">horizontalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>column: int</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunModel.horizontalHeaderItem" title="Permalink to this definition">¶</a></dt>
+<code class="descname">horizontalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>column:int</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunModel.horizontalHeaderItem" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.index">
-<code class="descname">index</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>column: int</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QModelIndex<a class="headerlink" href="#shotgun_model.ShotgunModel.index" title="Permalink to this definition">¶</a></dt>
+<code class="descname">index</code><span class="sig-paren">(</span><em>self</em>, <em>row:int</em>, <em>column:int</em>, <em>parent:PySide2.QtCore.QModelIndex=Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QModelIndex<a class="headerlink" href="#shotgun_model.ShotgunModel.index" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.indexFromItem">
-<code class="descname">indexFromItem</code><span class="sig-paren">(</span><em>self</em>, <em>item: PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QModelIndex<a class="headerlink" href="#shotgun_model.ShotgunModel.indexFromItem" title="Permalink to this definition">¶</a></dt>
+<code class="descname">indexFromItem</code><span class="sig-paren">(</span><em>self</em>, <em>item:PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QModelIndex<a class="headerlink" href="#shotgun_model.ShotgunModel.indexFromItem" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.inherits">
-<code class="descname">inherits</code><span class="sig-paren">(</span><em>self</em>, <em>classname: bytes</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.inherits" title="Permalink to this definition">¶</a></dt>
+<code class="descname">inherits</code><span class="sig-paren">(</span><em>self</em>, <em>classname:bytes</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.inherits" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.insertColumn">
-<code class="descname">insertColumn</code><span class="sig-paren">(</span><em>self, column: int, items: typing.Sequence[PySide2.QtGui.QStandardItem]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.insertColumn" title="Permalink to this definition">¶</a></dt>
-<dd><p>insertColumn(self, column: int, parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)) -&gt; bool</p>
+<code class="descname">insertColumn</code><span class="sig-paren">(</span><em>self</em>, <em>column:int</em>, <em>items:typing.Sequence</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.insertColumn" title="Permalink to this definition">¶</a></dt>
+<dd><p>insertColumn(self, column:int, parent:PySide2.QtCore.QModelIndex=Invalid(PySide2.QtCore.QModelIndex)) -&gt; bool</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.insertColumns">
-<code class="descname">insertColumns</code><span class="sig-paren">(</span><em>self</em>, <em>column: int</em>, <em>count: int</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.insertColumns" title="Permalink to this definition">¶</a></dt>
+<code class="descname">insertColumns</code><span class="sig-paren">(</span><em>self</em>, <em>column:int</em>, <em>count:int</em>, <em>parent:PySide2.QtCore.QModelIndex=Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.insertColumns" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.insertRow">
-<code class="descname">insertRow</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>item: PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.insertRow" title="Permalink to this definition">¶</a></dt>
-<dd><p>insertRow(self, row: int, items: typing.Sequence[PySide2.QtGui.QStandardItem]) -&gt; None
-insertRow(self, row: int, parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)) -&gt; bool</p>
+<code class="descname">insertRow</code><span class="sig-paren">(</span><em>self</em>, <em>row:int</em>, <em>item:PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.insertRow" title="Permalink to this definition">¶</a></dt>
+<dd><p>insertRow(self, row:int, items:typing.Sequence) -&gt; None
+insertRow(self, row:int, parent:PySide2.QtCore.QModelIndex=Invalid(PySide2.QtCore.QModelIndex)) -&gt; bool</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.insertRows">
-<code class="descname">insertRows</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>count: int</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.insertRows" title="Permalink to this definition">¶</a></dt>
+<code class="descname">insertRows</code><span class="sig-paren">(</span><em>self</em>, <em>row:int</em>, <em>count:int</em>, <em>parent:PySide2.QtCore.QModelIndex=Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.insertRows" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.installEventFilter">
-<code class="descname">installEventFilter</code><span class="sig-paren">(</span><em>self</em>, <em>filterObj: PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.installEventFilter" title="Permalink to this definition">¶</a></dt>
+<code class="descname">installEventFilter</code><span class="sig-paren">(</span><em>self</em>, <em>filterObj:PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.installEventFilter" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1534,7 +1534,7 @@ insertRow(self, row: int, parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.Q
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.isSignalConnected">
-<code class="descname">isSignalConnected</code><span class="sig-paren">(</span><em>self</em>, <em>signal: PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.isSignalConnected" title="Permalink to this definition">¶</a></dt>
+<code class="descname">isSignalConnected</code><span class="sig-paren">(</span><em>self</em>, <em>signal:PySide2.QtCore.QMetaMethod</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.isSignalConnected" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1549,17 +1549,17 @@ insertRow(self, row: int, parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.Q
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.item">
-<code class="descname">item</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>column: int = 0</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunModel.item" title="Permalink to this definition">¶</a></dt>
+<code class="descname">item</code><span class="sig-paren">(</span><em>self</em>, <em>row:int</em>, <em>column:int=0</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunModel.item" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.itemData">
-<code class="descname">itemData</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; typing.Dict[int, typing.Any]<a class="headerlink" href="#shotgun_model.ShotgunModel.itemData" title="Permalink to this definition">¶</a></dt>
+<code class="descname">itemData</code><span class="sig-paren">(</span><em>self</em>, <em>index:PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; typing.Dict<a class="headerlink" href="#shotgun_model.ShotgunModel.itemData" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.itemFromIndex">
-<code class="descname">itemFromIndex</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunModel.itemFromIndex" title="Permalink to this definition">¶</a></dt>
+<code class="descname">itemFromIndex</code><span class="sig-paren">(</span><em>self</em>, <em>index:PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunModel.itemFromIndex" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1569,12 +1569,12 @@ insertRow(self, row: int, parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.Q
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.killTimer">
-<code class="descname">killTimer</code><span class="sig-paren">(</span><em>self</em>, <em>id: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.killTimer" title="Permalink to this definition">¶</a></dt>
+<code class="descname">killTimer</code><span class="sig-paren">(</span><em>self</em>, <em>id:int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.killTimer" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.match">
-<code class="descname">match</code><span class="sig-paren">(</span><em>self</em>, <em>start: PySide2.QtCore.QModelIndex</em>, <em>role: int</em>, <em>value: typing.Any</em>, <em>hits: int = 1</em>, <em>flags: PySide2.QtCore.Qt.MatchFlags = Instance(Qt.MatchFlags(Qt.MatchStartsWith|Qt.MatchWrap))</em><span class="sig-paren">)</span> &#x2192; typing.List[int]<a class="headerlink" href="#shotgun_model.ShotgunModel.match" title="Permalink to this definition">¶</a></dt>
+<code class="descname">match</code><span class="sig-paren">(</span><em>self</em>, <em>start:PySide2.QtCore.QModelIndex</em>, <em>role:int</em>, <em>value:typing.Any</em>, <em>hits:int=1</em>, <em>flags:PySide2.QtCore.Qt.MatchFlags=Instance(Qt.MatchFlags(Qt.MatchStartsWith|Qt.MatchWrap))</em><span class="sig-paren">)</span> &#x2192; typing.List<a class="headerlink" href="#shotgun_model.ShotgunModel.match" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1584,37 +1584,37 @@ insertRow(self, row: int, parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.Q
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.mimeData">
-<code class="descname">mimeData</code><span class="sig-paren">(</span><em>self, indexes: typing.List[int]</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QMimeData<a class="headerlink" href="#shotgun_model.ShotgunModel.mimeData" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimeData</code><span class="sig-paren">(</span><em>self</em>, <em>indexes:typing.List</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QMimeData<a class="headerlink" href="#shotgun_model.ShotgunModel.mimeData" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.mimeTypes">
-<code class="descname">mimeTypes</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.List[str]<a class="headerlink" href="#shotgun_model.ShotgunModel.mimeTypes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimeTypes</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.List<a class="headerlink" href="#shotgun_model.ShotgunModel.mimeTypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.moveColumn">
-<code class="descname">moveColumn</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent: PySide2.QtCore.QModelIndex</em>, <em>sourceColumn: int</em>, <em>destinationParent: PySide2.QtCore.QModelIndex</em>, <em>destinationChild: int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.moveColumn" title="Permalink to this definition">¶</a></dt>
+<code class="descname">moveColumn</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent:PySide2.QtCore.QModelIndex</em>, <em>sourceColumn:int</em>, <em>destinationParent:PySide2.QtCore.QModelIndex</em>, <em>destinationChild:int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.moveColumn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.moveColumns">
-<code class="descname">moveColumns</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent: PySide2.QtCore.QModelIndex</em>, <em>sourceColumn: int</em>, <em>count: int</em>, <em>destinationParent: PySide2.QtCore.QModelIndex</em>, <em>destinationChild: int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.moveColumns" title="Permalink to this definition">¶</a></dt>
+<code class="descname">moveColumns</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent:PySide2.QtCore.QModelIndex</em>, <em>sourceColumn:int</em>, <em>count:int</em>, <em>destinationParent:PySide2.QtCore.QModelIndex</em>, <em>destinationChild:int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.moveColumns" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.moveRow">
-<code class="descname">moveRow</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent: PySide2.QtCore.QModelIndex</em>, <em>sourceRow: int</em>, <em>destinationParent: PySide2.QtCore.QModelIndex</em>, <em>destinationChild: int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.moveRow" title="Permalink to this definition">¶</a></dt>
+<code class="descname">moveRow</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent:PySide2.QtCore.QModelIndex</em>, <em>sourceRow:int</em>, <em>destinationParent:PySide2.QtCore.QModelIndex</em>, <em>destinationChild:int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.moveRow" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.moveRows">
-<code class="descname">moveRows</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent: PySide2.QtCore.QModelIndex</em>, <em>sourceRow: int</em>, <em>count: int</em>, <em>destinationParent: PySide2.QtCore.QModelIndex</em>, <em>destinationChild: int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.moveRows" title="Permalink to this definition">¶</a></dt>
+<code class="descname">moveRows</code><span class="sig-paren">(</span><em>self</em>, <em>sourceParent:PySide2.QtCore.QModelIndex</em>, <em>sourceRow:int</em>, <em>count:int</em>, <em>destinationParent:PySide2.QtCore.QModelIndex</em>, <em>destinationChild:int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.moveRows" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.moveToThread">
-<code class="descname">moveToThread</code><span class="sig-paren">(</span><em>self</em>, <em>thread: PySide2.QtCore.QThread</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.moveToThread" title="Permalink to this definition">¶</a></dt>
+<code class="descname">moveToThread</code><span class="sig-paren">(</span><em>self</em>, <em>thread:PySide2.QtCore.QThread</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.moveToThread" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1625,22 +1625,22 @@ insertRow(self, row: int, parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.Q
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.parent">
 <code class="descname">parent</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QObject<a class="headerlink" href="#shotgun_model.ShotgunModel.parent" title="Permalink to this definition">¶</a></dt>
-<dd><p>parent(self, child: PySide2.QtCore.QModelIndex) -&gt; PySide2.QtCore.QModelIndex</p>
+<dd><p>parent(self, child:PySide2.QtCore.QModelIndex) -&gt; PySide2.QtCore.QModelIndex</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.persistentIndexList">
-<code class="descname">persistentIndexList</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.List[int]<a class="headerlink" href="#shotgun_model.ShotgunModel.persistentIndexList" title="Permalink to this definition">¶</a></dt>
+<code class="descname">persistentIndexList</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.List<a class="headerlink" href="#shotgun_model.ShotgunModel.persistentIndexList" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.property">
-<code class="descname">property</code><span class="sig-paren">(</span><em>self</em>, <em>name: bytes</em><span class="sig-paren">)</span> &#x2192; typing.Any<a class="headerlink" href="#shotgun_model.ShotgunModel.property" title="Permalink to this definition">¶</a></dt>
+<code class="descname">property</code><span class="sig-paren">(</span><em>self</em>, <em>name:bytes</em><span class="sig-paren">)</span> &#x2192; typing.Any<a class="headerlink" href="#shotgun_model.ShotgunModel.property" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.receivers">
-<code class="descname">receivers</code><span class="sig-paren">(</span><em>self</em>, <em>signal: bytes</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_model.ShotgunModel.receivers" title="Permalink to this definition">¶</a></dt>
+<code class="descname">receivers</code><span class="sig-paren">(</span><em>self</em>, <em>signal:bytes</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_model.ShotgunModel.receivers" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="staticmethod">
@@ -1650,27 +1650,27 @@ insertRow(self, row: int, parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.Q
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.removeColumn">
-<code class="descname">removeColumn</code><span class="sig-paren">(</span><em>self</em>, <em>column: int</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.removeColumn" title="Permalink to this definition">¶</a></dt>
+<code class="descname">removeColumn</code><span class="sig-paren">(</span><em>self</em>, <em>column:int</em>, <em>parent:PySide2.QtCore.QModelIndex=Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.removeColumn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.removeColumns">
-<code class="descname">removeColumns</code><span class="sig-paren">(</span><em>self</em>, <em>column: int</em>, <em>count: int</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.removeColumns" title="Permalink to this definition">¶</a></dt>
+<code class="descname">removeColumns</code><span class="sig-paren">(</span><em>self</em>, <em>column:int</em>, <em>count:int</em>, <em>parent:PySide2.QtCore.QModelIndex=Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.removeColumns" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.removeEventFilter">
-<code class="descname">removeEventFilter</code><span class="sig-paren">(</span><em>self</em>, <em>obj: PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.removeEventFilter" title="Permalink to this definition">¶</a></dt>
+<code class="descname">removeEventFilter</code><span class="sig-paren">(</span><em>self</em>, <em>obj:PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.removeEventFilter" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.removeRow">
-<code class="descname">removeRow</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.removeRow" title="Permalink to this definition">¶</a></dt>
+<code class="descname">removeRow</code><span class="sig-paren">(</span><em>self</em>, <em>row:int</em>, <em>parent:PySide2.QtCore.QModelIndex=Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.removeRow" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.removeRows">
-<code class="descname">removeRows</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>count: int</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.removeRows" title="Permalink to this definition">¶</a></dt>
+<code class="descname">removeRows</code><span class="sig-paren">(</span><em>self</em>, <em>row:int</em>, <em>count:int</em>, <em>parent:PySide2.QtCore.QModelIndex=Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.removeRows" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1685,12 +1685,12 @@ insertRow(self, row: int, parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.Q
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.roleNames">
-<code class="descname">roleNames</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.Dict[int, PySide2.QtCore.QByteArray]<a class="headerlink" href="#shotgun_model.ShotgunModel.roleNames" title="Permalink to this definition">¶</a></dt>
+<code class="descname">roleNames</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; typing.Dict<a class="headerlink" href="#shotgun_model.ShotgunModel.roleNames" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.rowCount">
-<code class="descname">rowCount</code><span class="sig-paren">(</span><em>self</em>, <em>parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_model.ShotgunModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>self</em>, <em>parent:PySide2.QtCore.QModelIndex=Invalid(PySide2.QtCore.QModelIndex)</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_model.ShotgunModel.rowCount" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1705,88 +1705,88 @@ insertRow(self, row: int, parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.Q
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.setColumnCount">
-<code class="descname">setColumnCount</code><span class="sig-paren">(</span><em>self</em>, <em>columns: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setColumnCount" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setColumnCount</code><span class="sig-paren">(</span><em>self</em>, <em>columns:int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setColumnCount" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.setData">
-<code class="descname">setData</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em>, <em>value: typing.Any</em>, <em>role: int = PySide2.QtCore.Qt.ItemDataRole.EditRole</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.setData" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setData</code><span class="sig-paren">(</span><em>self</em>, <em>index:PySide2.QtCore.QModelIndex</em>, <em>value:typing.Any</em>, <em>role:int=PySide2.QtCore.Qt.ItemDataRole.EditRole</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.setData" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.setHeaderData">
-<code class="descname">setHeaderData</code><span class="sig-paren">(</span><em>self</em>, <em>section: int</em>, <em>orientation: PySide2.QtCore.Qt.Orientation</em>, <em>value: typing.Any</em>, <em>role: int = PySide2.QtCore.Qt.ItemDataRole.EditRole</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.setHeaderData" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setHeaderData</code><span class="sig-paren">(</span><em>self</em>, <em>section:int</em>, <em>orientation:PySide2.QtCore.Qt.Orientation</em>, <em>value:typing.Any</em>, <em>role:int=PySide2.QtCore.Qt.ItemDataRole.EditRole</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.setHeaderData" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.setHorizontalHeaderItem">
-<code class="descname">setHorizontalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>column: int</em>, <em>item: PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setHorizontalHeaderItem" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setHorizontalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>column:int</em>, <em>item:PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setHorizontalHeaderItem" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.setHorizontalHeaderLabels">
-<code class="descname">setHorizontalHeaderLabels</code><span class="sig-paren">(</span><em>self, labels: typing.Sequence[str]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setHorizontalHeaderLabels" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setHorizontalHeaderLabels</code><span class="sig-paren">(</span><em>self</em>, <em>labels:typing.Sequence</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setHorizontalHeaderLabels" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.setItem">
-<code class="descname">setItem</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>column: int</em>, <em>item: PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>setItem(self, row: int, item: PySide2.QtGui.QStandardItem) -&gt; None</p>
+<code class="descname">setItem</code><span class="sig-paren">(</span><em>self</em>, <em>row:int</em>, <em>column:int</em>, <em>item:PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>setItem(self, row:int, item:PySide2.QtGui.QStandardItem) -&gt; None</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.setItemData">
-<code class="descname">setItemData</code><span class="sig-paren">(</span><em>self, index: PySide2.QtCore.QModelIndex, roles: typing.Dict[int, typing.Any]</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.setItemData" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setItemData</code><span class="sig-paren">(</span><em>self</em>, <em>index:PySide2.QtCore.QModelIndex</em>, <em>roles:typing.Dict</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.setItemData" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.setItemPrototype">
-<code class="descname">setItemPrototype</code><span class="sig-paren">(</span><em>self</em>, <em>item: PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setItemPrototype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setItemPrototype</code><span class="sig-paren">(</span><em>self</em>, <em>item:PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setItemPrototype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.setItemRoleNames">
-<code class="descname">setItemRoleNames</code><span class="sig-paren">(</span><em>self, roleNames: typing.Dict[int, PySide2.QtCore.QByteArray]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setItemRoleNames" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setItemRoleNames</code><span class="sig-paren">(</span><em>self</em>, <em>roleNames:typing.Dict</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setItemRoleNames" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.setObjectName">
-<code class="descname">setObjectName</code><span class="sig-paren">(</span><em>self</em>, <em>name: str</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setObjectName" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setObjectName</code><span class="sig-paren">(</span><em>self</em>, <em>name:str</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setObjectName" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.setParent">
-<code class="descname">setParent</code><span class="sig-paren">(</span><em>self</em>, <em>parent: PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setParent" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setParent</code><span class="sig-paren">(</span><em>self</em>, <em>parent:PySide2.QtCore.QObject</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setParent" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.setProperty">
-<code class="descname">setProperty</code><span class="sig-paren">(</span><em>self</em>, <em>name: bytes</em>, <em>value: typing.Any</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.setProperty" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setProperty</code><span class="sig-paren">(</span><em>self</em>, <em>name:bytes</em>, <em>value:typing.Any</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#shotgun_model.ShotgunModel.setProperty" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.setRowCount">
-<code class="descname">setRowCount</code><span class="sig-paren">(</span><em>self</em>, <em>rows: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setRowCount" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setRowCount</code><span class="sig-paren">(</span><em>self</em>, <em>rows:int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setRowCount" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.setSortRole">
-<code class="descname">setSortRole</code><span class="sig-paren">(</span><em>self</em>, <em>role: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setSortRole" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setSortRole</code><span class="sig-paren">(</span><em>self</em>, <em>role:int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setSortRole" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.setVerticalHeaderItem">
-<code class="descname">setVerticalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>item: PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setVerticalHeaderItem" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setVerticalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>row:int</em>, <em>item:PySide2.QtGui.QStandardItem</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setVerticalHeaderItem" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.setVerticalHeaderLabels">
-<code class="descname">setVerticalHeaderLabels</code><span class="sig-paren">(</span><em>self, labels: typing.Sequence[str]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setVerticalHeaderLabels" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setVerticalHeaderLabels</code><span class="sig-paren">(</span><em>self</em>, <em>labels:typing.Sequence</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.setVerticalHeaderLabels" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.sibling">
-<code class="descname">sibling</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>column: int</em>, <em>idx: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QModelIndex<a class="headerlink" href="#shotgun_model.ShotgunModel.sibling" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sibling</code><span class="sig-paren">(</span><em>self</em>, <em>row:int</em>, <em>column:int</em>, <em>idx:PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QModelIndex<a class="headerlink" href="#shotgun_model.ShotgunModel.sibling" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1796,7 +1796,7 @@ insertRow(self, row: int, parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.Q
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.sort">
-<code class="descname">sort</code><span class="sig-paren">(</span><em>self</em>, <em>column: int</em>, <em>order: PySide2.QtCore.Qt.SortOrder = PySide2.QtCore.Qt.SortOrder.AscendingOrder</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.sort" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sort</code><span class="sig-paren">(</span><em>self</em>, <em>column:int</em>, <em>order:PySide2.QtCore.Qt.SortOrder=PySide2.QtCore.Qt.SortOrder.AscendingOrder</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.sort" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1806,12 +1806,12 @@ insertRow(self, row: int, parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.Q
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.span">
-<code class="descname">span</code><span class="sig-paren">(</span><em>self</em>, <em>index: PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QSize<a class="headerlink" href="#shotgun_model.ShotgunModel.span" title="Permalink to this definition">¶</a></dt>
+<code class="descname">span</code><span class="sig-paren">(</span><em>self</em>, <em>index:PySide2.QtCore.QModelIndex</em><span class="sig-paren">)</span> &#x2192; PySide2.QtCore.QSize<a class="headerlink" href="#shotgun_model.ShotgunModel.span" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.startTimer">
-<code class="descname">startTimer</code><span class="sig-paren">(</span><em>self</em>, <em>interval: int</em>, <em>timerType: PySide2.QtCore.Qt.TimerType = PySide2.QtCore.Qt.TimerType.CoarseTimer</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_model.ShotgunModel.startTimer" title="Permalink to this definition">¶</a></dt>
+<code class="descname">startTimer</code><span class="sig-paren">(</span><em>self</em>, <em>interval:int</em>, <em>timerType:PySide2.QtCore.Qt.TimerType=PySide2.QtCore.Qt.TimerType.CoarseTimer</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#shotgun_model.ShotgunModel.startTimer" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1831,27 +1831,27 @@ insertRow(self, row: int, parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.Q
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.takeColumn">
-<code class="descname">takeColumn</code><span class="sig-paren">(</span><em>self</em>, <em>column: int</em><span class="sig-paren">)</span> &#x2192; typing.List[PySide2.QtGui.QStandardItem]<a class="headerlink" href="#shotgun_model.ShotgunModel.takeColumn" title="Permalink to this definition">¶</a></dt>
+<code class="descname">takeColumn</code><span class="sig-paren">(</span><em>self</em>, <em>column:int</em><span class="sig-paren">)</span> &#x2192; typing.List<a class="headerlink" href="#shotgun_model.ShotgunModel.takeColumn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.takeHorizontalHeaderItem">
-<code class="descname">takeHorizontalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>column: int</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunModel.takeHorizontalHeaderItem" title="Permalink to this definition">¶</a></dt>
+<code class="descname">takeHorizontalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>column:int</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunModel.takeHorizontalHeaderItem" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.takeItem">
-<code class="descname">takeItem</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em>, <em>column: int = 0</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunModel.takeItem" title="Permalink to this definition">¶</a></dt>
+<code class="descname">takeItem</code><span class="sig-paren">(</span><em>self</em>, <em>row:int</em>, <em>column:int=0</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunModel.takeItem" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.takeRow">
-<code class="descname">takeRow</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em><span class="sig-paren">)</span> &#x2192; typing.List[PySide2.QtGui.QStandardItem]<a class="headerlink" href="#shotgun_model.ShotgunModel.takeRow" title="Permalink to this definition">¶</a></dt>
+<code class="descname">takeRow</code><span class="sig-paren">(</span><em>self</em>, <em>row:int</em><span class="sig-paren">)</span> &#x2192; typing.List<a class="headerlink" href="#shotgun_model.ShotgunModel.takeRow" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.takeVerticalHeaderItem">
-<code class="descname">takeVerticalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunModel.takeVerticalHeaderItem" title="Permalink to this definition">¶</a></dt>
+<code class="descname">takeVerticalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>row:int</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunModel.takeVerticalHeaderItem" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1861,17 +1861,17 @@ insertRow(self, row: int, parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.Q
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.timerEvent">
-<code class="descname">timerEvent</code><span class="sig-paren">(</span><em>self</em>, <em>event: PySide2.QtCore.QTimerEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.timerEvent" title="Permalink to this definition">¶</a></dt>
+<code class="descname">timerEvent</code><span class="sig-paren">(</span><em>self</em>, <em>event:PySide2.QtCore.QTimerEvent</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#shotgun_model.ShotgunModel.timerEvent" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.tr">
-<code class="descname">tr</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1: bytes</em>, <em>arg__2: bytes = b''</em>, <em>arg__3: int = -1</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#shotgun_model.ShotgunModel.tr" title="Permalink to this definition">¶</a></dt>
+<code class="descname">tr</code><span class="sig-paren">(</span><em>self</em>, <em>arg__1:bytes</em>, <em>arg__2:bytes=b''</em>, <em>arg__3:int=-1</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#shotgun_model.ShotgunModel.tr" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="shotgun_model.ShotgunModel.verticalHeaderItem">
-<code class="descname">verticalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>row: int</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunModel.verticalHeaderItem" title="Permalink to this definition">¶</a></dt>
+<code class="descname">verticalHeaderItem</code><span class="sig-paren">(</span><em>self</em>, <em>row:int</em><span class="sig-paren">)</span> &#x2192; PySide2.QtGui.QStandardItem<a class="headerlink" href="#shotgun_model.ShotgunModel.verticalHeaderItem" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1899,7 +1899,7 @@ insertRow(self, row: int, parent: PySide2.QtCore.QModelIndex = Invalid(PySide2.Q
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2022, Autodesk
+        &copy; Copyright 2023, Autodesk
 
     </p>
   </div> 

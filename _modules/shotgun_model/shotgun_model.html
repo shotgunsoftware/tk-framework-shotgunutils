@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_model &mdash; tk-framework-shotgunutils v5.8.5 documentation</title>
+  <title>shotgun_model.shotgun_model &mdash; tk-framework-shotgunutils v5.8.6 documentation</title>
   
 
   
@@ -122,7 +122,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.5.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.6.<br>
     
         This documentation is part of the ShotGrid Pipeline Toolkit.
     
@@ -228,7 +228,7 @@
 
 
 <div class="viewcode-block" id="ShotgunModel"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel">[docs]</a><span class="k">class</span> <span class="nc">ShotgunModel</span><span class="p">(</span><span class="n">ShotgunQueryModel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A Qt Model representing a Shotgun query.</span>
 
 <span class="sd">    This class implements a standard :class:`~PySide.QtCore.QAbstractItemModel`</span>
@@ -257,7 +257,7 @@
         <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">bg_task_manager</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param parent: Parent object.</span>
 <span class="sd">        :type parent: :class:`~PySide.QtGui.QWidget`</span>
 <span class="sd">        :param download_thumbs: Boolean to indicate if this model should attempt</span>
@@ -286,7 +286,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__download_thumbs</span> <span class="o">=</span> <span class="n">download_thumbs</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        String representation of this instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2"> entity_type:</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">)</span>
@@ -296,7 +296,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">entity_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of entity ids that are part of this model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># note that all of the ids may not be loaded into the actual model</span>
@@ -304,7 +304,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">get_entity_ids</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span> <span class="k">else</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="ShotgunModel.item_from_entity"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.item_from_entity">[docs]</a>    <span class="k">def</span> <span class="nf">item_from_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a :class:`~PySide.QtGui.QStandardItem` based on</span>
 <span class="sd">        entity type and entity id. Returns none if not found.</span>
 
@@ -330,7 +330,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_item_loaded</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunModel.index_from_entity"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.index_from_entity">[docs]</a>    <span class="k">def</span> <span class="nf">index_from_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a QModelIndex based on entity type and entity id</span>
 <span class="sd">        Returns none if not found.</span>
 
@@ -344,7 +344,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunModel.get_filters"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.get_filters">[docs]</a>    <span class="k">def</span> <span class="nf">get_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of Shotgun filters representing the given item. This is useful if</span>
 <span class="sd">        you are trying to determine how intermediate leaf nodes partition leaf node data.</span>
 
@@ -380,7 +380,7 @@
         <span class="k">return</span> <span class="n">filters</span></div>
 
 <div class="viewcode-block" id="ShotgunModel.ensure_data_is_loaded"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.ensure_data_is_loaded">[docs]</a>    <span class="k">def</span> <span class="nf">ensure_data_is_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Recursively processes the model and ensures that all data</span>
 <span class="sd">        has been loaded into the model.</span>
 
@@ -410,7 +410,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ensure_data_is_loaded</span><span class="p">(</span><span class="n">child_model_index</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunModel.get_entity_type"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.get_entity_type">[docs]</a>    <span class="k">def</span> <span class="nf">get_entity_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the Shotgun Entity type associated with this model.</span>
 
 <span class="sd">        :returns: Shotgun entity type string (e.g. &#39;Shot&#39;, &#39;Asset&#39; etc).</span>
@@ -418,7 +418,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span></div>
 
 <div class="viewcode-block" id="ShotgunModel.get_additional_column_fields"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.get_additional_column_fields">[docs]</a>    <span class="k">def</span> <span class="nf">get_additional_column_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the fields for additional columns and their associated column in the model.</span>
 
 <span class="sd">        :returns: A list of dictionaries with the following keys:</span>
@@ -447,7 +447,7 @@
         <span class="n">additional_filter_presets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">editable_columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is the main method to use to configure the model. You basically</span>
 <span class="sd">        pass a specific find query to the model and it will start tracking</span>
 <span class="sd">        this particular set of filter and hierarchy parameters.</span>
@@ -596,7 +596,7 @@
         <span class="k">return</span> <span class="n">nodes_generated</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._refresh_data"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._refresh_data">[docs]</a>    <span class="k">def</span> <span class="nf">_refresh_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Rebuilds the data in the model to ensure it is up to date.</span>
 <span class="sd">        This call is asynchronous and will return instantly.</span>
 <span class="sd">        The update will be applied whenever the data from Shotgun is returned.</span>
@@ -618,7 +618,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_request_data</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._item_created"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._item_created">[docs]</a>    <span class="k">def</span> <span class="nf">_item_created</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called when an item is created, before it is added to the model.</span>
 
 <span class="sd">        .. warning:: This base class implementation must be called in any</span>
@@ -656,7 +656,7 @@
                         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._set_tooltip"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._set_tooltip">[docs]</a>    <span class="k">def</span> <span class="nf">_set_tooltip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">sg_item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called when an item is created.</span>
 
 <span class="sd">        .. note:: You can subclass this if you want to set your own tooltip for the model item. By</span>
@@ -728,7 +728,7 @@
             <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._get_additional_columns"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._get_additional_columns">[docs]</a>    <span class="k">def</span> <span class="nf">_get_additional_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primary_item</span><span class="p">,</span> <span class="n">is_leaf</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called when an item is about to be inserted into the model, to get additional items</span>
 <span class="sd">        to be included in the same row as the specified item. This provides an opportunity</span>
 <span class="sd">        for subclasses to create one or more additional columns for each item in the model.</span>
@@ -777,7 +777,7 @@
         <span class="k">return</span> <span class="n">items</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._get_additional_column_headers"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._get_additional_column_headers">[docs]</a>    <span class="k">def</span> <span class="nf">_get_additional_column_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called to set the headers for the additional columns requested from _load_data.</span>
 
 <span class="sd">        :param entity_type: type name of the entity the columns are for</span>
@@ -792,7 +792,7 @@
         <span class="p">]</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._get_columns"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._get_columns">[docs]</a>    <span class="k">def</span> <span class="nf">_get_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">is_leaf</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a row (list of QStandardItems) given an initial QStandardItem.  The item itself</span>
 <span class="sd">        is always the first item in the row, but additional columns may be appended.</span>
 
@@ -808,7 +808,7 @@
         <span class="k">return</span> <span class="n">row</span></div>
 
     <span class="k">def</span> <span class="nf">_create_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">data_item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a model item for the tree given data out of the data store</span>
 
 <span class="sd">        :param :class:`~PySide.QtGui.QStandardItem` parent: Model item to parent the node under</span>
@@ -835,7 +835,7 @@
         <span class="k">return</span> <span class="n">item</span>
 
     <span class="k">def</span> <span class="nf">_update_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">data_item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates a model item with the given data</span>
 
 <span class="sd">        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to update</span>
@@ -895,7 +895,7 @@
     <span class="c1"># private methods</span>
 
     <span class="k">def</span> <span class="nf">__compute_cache_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache_seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates and returns a cache path to use for this instance&#39;s query.</span>
 
 <span class="sd">        :param cache_seed: Cache seed supplied to the ``__init__`` method.</span>
@@ -995,7 +995,7 @@
         <span class="k">return</span> <span class="n">data_cache_path</span>
 
     <span class="k">def</span> <span class="nf">__generate_display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">sg_data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates a name from a shotgun field.</span>
 <span class="sd">        For non-nested structures, this is typically just &quot;code&quot;.</span>
 <span class="sd">        For nested structures it can either be something like sg_sequence</span>
@@ -1047,7 +1047,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2022, Autodesk
+        &copy; Copyright 2023, Autodesk
 
     </p>
   </div> 

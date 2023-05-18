@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>shotgun_model.shotgun_query_model &mdash; tk-framework-shotgunutils v5.8.5 documentation</title>
+  <title>shotgun_model.shotgun_query_model &mdash; tk-framework-shotgunutils v5.8.6 documentation</title>
   
 
   
@@ -122,7 +122,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.5.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.6.<br>
     
         This documentation is part of the ShotGrid Pipeline Toolkit.
     
@@ -232,7 +232,7 @@
 
 
 <span class="k">class</span> <span class="nc">ShotgunQueryModel</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItemModel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A Qt Model base class for querying Shotgun data.</span>
 
 <span class="sd">    This class is not meant to be used as-is, rather it provides a common</span>
@@ -310,7 +310,7 @@
     <span class="n">_SG_ITEM_UNIQUE_ID</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span> <span class="o">+</span> <span class="mi">5</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">bg_load_thumbs</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes the model and provides some default convenience members.</span>
 
 <span class="sd">        :param parent: The model&#39;s parent.</span>
@@ -376,7 +376,7 @@
     <span class="c1"># public methods</span>
 
     <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Removes all items (including header items) from the model and</span>
 <span class="sd">        sets the number of rows and columns to zero.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -432,7 +432,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">endResetModel</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Call this method prior to destroying this object.</span>
 
 <span class="sd">        Base implementation ensures the data worker is stopped and calls</span>
@@ -456,7 +456,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="n">signals_blocked</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">hard_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Clears any caches on disk, then refreshes the data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -497,7 +497,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">modelReset</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">is_data_cached</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Determine if the model has any cached data.</span>
 
 <span class="sd">        :return: ``True`` if cached data exists for the model, ``False``</span>
@@ -512,7 +512,7 @@
     <span class="c1"># methods overridden from Qt base class</span>
 
     <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Re-implements QAbstractItemModel:reset() by &#39;sealing it&#39; so that it</span>
 <span class="sd">        cannot be executed by calling code easily. This is because the reset</span>
 <span class="sd">        method often results in crashes and instability because of how</span>
@@ -532,7 +532,7 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">hasChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns True if parent has any children; otherwise returns False.</span>
 
 <span class="sd">        This is used for the staged loading of nodes in hierarchies.</span>
@@ -553,7 +553,7 @@
         <span class="k">return</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_SG_ITEM_HAS_CHILDREN</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">fetchMore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve child items for a node.</span>
 
 <span class="sd">        :param index: The index of the item being tested.</span>
@@ -579,7 +579,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">generate_child_nodes</span><span class="p">(</span><span class="n">unique_id</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_item</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">canFetchMore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns True if there is more data available for parent; otherwise</span>
 <span class="sd">        returns False.</span>
 
@@ -612,7 +612,7 @@
     <span class="c1"># subclasses to provide a consistent developer experience.</span>
 
     <span class="k">def</span> <span class="nf">_create_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">data_item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a model item for the tree given data out of the data store</span>
 
 <span class="sd">        :param :class:`~PySide.QtGui.QStandardItem` parent: Model item to parent the node under</span>
@@ -629,7 +629,7 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_update_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">data_item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates a model item with the given data</span>
 
 <span class="sd">        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to update</span>
@@ -649,7 +649,7 @@
     <span class="c1"># developers can further customize to meet their needs.</span>
 
     <span class="k">def</span> <span class="nf">_before_data_processing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called just after data has been retrieved from Shotgun but before any</span>
 <span class="sd">        processing takes place.</span>
 
@@ -665,7 +665,7 @@
         <span class="k">return</span> <span class="n">data</span>
 
     <span class="k">def</span> <span class="nf">_finalize_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called whenever an item is fully constructed, either because a shotgun</span>
 <span class="sd">        query returned it or because it was loaded as part of a cache load from</span>
 <span class="sd">        disk.</span>
@@ -685,7 +685,7 @@
         <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">_item_created</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called when an item is created, before it is added to the model.</span>
 
 <span class="sd">        .. warning:: This base class implementation must be called in any</span>
@@ -711,7 +711,7 @@
         <span class="k">return</span> <span class="n">item</span>
 
     <span class="k">def</span> <span class="nf">_get_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">is_leaf</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a row (list of QStandardItems) given an initial QStandardItem.</span>
 
 <span class="sd">        The item itself is always the first item in the row, but additional</span>
@@ -729,7 +729,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">item</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">_load_external_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called whenever the model needs to be rebuilt from scratch. This is</span>
 <span class="sd">        called prior to any shotgun data is added to the model.</span>
 
@@ -745,7 +745,7 @@
         <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">_populate_default_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called whenever an item is constructed and needs to be associated with</span>
 <span class="sd">        a default thumbnail.  In the current implementation, thumbnails are not</span>
 <span class="sd">        cached in the same way as the rest of the model data, meaning that this</span>
@@ -769,7 +769,7 @@
         <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">_populate_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">sg_data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Whenever an item is downloaded from Shotgun, this method is called. It</span>
 <span class="sd">        allows subclasses to intercept the construction of a</span>
 <span class="sd">        :class:`~PySide.QtGui.QStandardItem` and add additional metadata or</span>
@@ -790,7 +790,7 @@
         <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">_set_tooltip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets the tooltip for the supplied item.</span>
 
 <span class="sd">        Called when an item is created.</span>
@@ -802,7 +802,7 @@
         <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">_populate_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called whenever the real thumbnail for an item exists on disk. The following</span>
 <span class="sd">        execution sequence typically happens:</span>
 
@@ -837,7 +837,7 @@
         <span class="n">item</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">thumb</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_populate_thumbnail_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Similar to :meth:`_populate_thumbnail()` but this method is called instead</span>
 <span class="sd">        when the bg_load_thumbs parameter has been set to true. In this case, no</span>
 <span class="sd">        loading of thumbnail data from disk is necessary - this has already been</span>
@@ -859,7 +859,7 @@
     <span class="c1"># to manipulate and manage data returned from Shotgun.</span>
 
     <span class="k">def</span> <span class="nf">_request_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Routes a data request to the current :class:`DataHandler` and initiates</span>
 <span class="sd">        a data fetching operation. Once data has arrived, :meth:`_create_item` and</span>
 <span class="sd">        :meth:`_update_item` will be called for each created or updated object</span>
@@ -900,7 +900,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">__on_sg_data_arrived</span><span class="p">([])</span>
 
     <span class="k">def</span> <span class="nf">_request_thumbnail_download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Request that a thumbnail is downloaded for an item. If a thumbnail is successfully</span>
 <span class="sd">        retrieved, either from disk (cached) or via shotgun, the method _populate_thumbnail()</span>
 <span class="sd">        will be called. If you want to control exactly how your shotgun thumbnail is</span>
@@ -939,7 +939,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__thumb_map</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;item_ref&quot;</span><span class="p">:</span> <span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="n">item</span><span class="p">),</span> <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_ensure_item_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Ensures that the given unique id is loaded by the model.</span>
 
 <span class="sd">        :param str uid: Unique id for a :class:`ShotgunDataHandler` item.</span>
@@ -1006,7 +1006,7 @@
         <span class="k">return</span> <span class="n">item</span>
 
     <span class="k">def</span> <span class="nf">_get_item_by_unique_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convenience method. Returns an item given a unique ID.</span>
 
 <span class="sd">        The unique ``uid`` corresponds to the ``_SG_ITEM_UNIQUE_ID`` role.</span>
@@ -1021,7 +1021,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__items_by_uid</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">_delete_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove an item and all its children if it exists.</span>
 <span class="sd">        Removes the entire row that item belongs to.</span>
 
@@ -1051,7 +1051,7 @@
                 <span class="n">index</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">takeRow</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">_log_debug</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convenience wrapper around debug logging</span>
 
 <span class="sd">        :param msg: debug message</span>
@@ -1059,7 +1059,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;[</span><span class="si">%s</span><span class="s2">] </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">msg</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">_log_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convenience wrapper around warning logging</span>
 
 <span class="sd">        :param msg: debug message</span>
@@ -1070,7 +1070,7 @@
     <span class="c1"># private methods</span>
 
     <span class="k">def</span> <span class="nf">__do_depth_first_tree_deletion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Depth first iteration and deletion of all child nodes</span>
 
 <span class="sd">        :param node: :class:`~PySide.QtGui.QStandardItem` tree node</span>
@@ -1089,7 +1089,7 @@
             <span class="n">node</span><span class="o">.</span><span class="n">takeRow</span><span class="p">(</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__remove_unique_id_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Removes the unique id (if one exists) from</span>
 <span class="sd">        the self.__items_by_uid dictionary for this item</span>
 <span class="sd">        and all its children</span>
@@ -1107,7 +1107,7 @@
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__items_by_uid</span><span class="p">[</span><span class="n">unique_id</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">__on_data_retriever_work_failure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Asynchronous callback - the data retriever failed to do some work</span>
 
 <span class="sd">        :param uid: The unique id of the work that failed</span>
@@ -1127,7 +1127,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_warning</span><span class="p">(</span><span class="n">full_msg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__on_data_retriever_work_completed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">request_type</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Signaled whenever the data retriever completes some work.</span>
 <span class="sd">        This method will dispatch the work to different methods</span>
 <span class="sd">        depending on what async task has completed.</span>
@@ -1177,7 +1177,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_populate_thumbnail</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">sg_field</span><span class="p">,</span> <span class="n">thumbnail_path</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__save_data_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sg</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Asynchronous callback to perform a cache save in the background.</span>
 
 <span class="sd">        :param :class:`Shotgun` sg: Shotgun API instance</span>
@@ -1187,7 +1187,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Asynchronous cache save complete.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__on_sg_data_arrived</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sg_data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Handle asynchronous shotgun data arriving after a find request.</span>
 
 <span class="sd">        :param list sg_data: Shotgun data payload.</span>
@@ -1308,7 +1308,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2022, Autodesk
+        &copy; Copyright 2023, Autodesk
 
     </p>
   </div> 
