@@ -45,7 +45,7 @@ class WorkerThread(Thread):
         """
         with self._mutex:
             self._task = task
-            self._wait_condition.notifyAll()
+            self._wait_condition.notify_all()
 
     def shut_down(self):
         """
@@ -54,7 +54,7 @@ class WorkerThread(Thread):
         with self._mutex:
             self._results_dispatcher = None
             self._process_tasks = False
-            self._wait_condition.notifyAll()
+            self._wait_condition.notify_all()
         self.join()
 
     def run(self):

@@ -1,5 +1,6 @@
+[![VFX Platform](https://img.shields.io/badge/vfxplatform-2023%202022%202021%202020-blue.svg)](http://www.vfxplatform.com/)
+[![Python 3.7 3.9 3.10](https://img.shields.io/badge/python-3.7%20%7C%203.9%20%7C%203.10-blue.svg)](https://www.python.org/)
 [![Reference Documentation](http://img.shields.io/badge/doc-reference-blue.svg)](http://developer.shotgridsoftware.com/tk-framework-shotgunutils)
-[![Python 2.7 3.7](https://img.shields.io/badge/python-2.7%20%7C%203.7-blue.svg)](https://www.python.org/)
 [![codecov](https://codecov.io/gh/shotgunsoftware/tk-framework-shotgunutils/branch/master/graph/badge.svg)](https://codecov.io/gh/shotgunsoftware/tk-framework-shotgunutils)
 [![Build Status](https://dev.azure.com/shotgun-ecosystem/Toolkit/_apis/build/status/Frameworks/tk-framework-shotgunutils?branchName=master)](https://dev.azure.com/shotgun-ecosystem/Toolkit/_build/latest?definitionId=44&branchName=master)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
