@@ -55,7 +55,9 @@ class WorkerThread(Thread):
             self._results_dispatcher = None
             self._process_tasks = False
             self._wait_condition.notifyAll()
-        self.join()
+            
+        self._process_tasks = False
+        #self.join()
 
     def run(self):
         """
