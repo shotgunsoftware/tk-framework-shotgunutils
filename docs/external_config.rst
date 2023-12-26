@@ -29,19 +29,16 @@ Class ExternalConfigurationLoader
 ============================================
 .. autoclass:: ExternalConfigurationLoader
     :members:
-    :inherited-members:
 
 Class ExternalConfiguration
 ============================================
 
 .. autoclass:: ExternalConfiguration
     :members:
-    :inherited-members:
 
 Class ExternalCommand
 ============================================
 
 .. autoclass:: ExternalCommand
     :members:
-    :inherited-members:
     :exclude-members: create
