@@ -758,7 +758,6 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         item = self._get_item_by_unique_id(uid)
 
         if not item:
-
             # item was not part of the model. Attempt to load its parents until it is visible.
             self._log_debug(
                 "Item %s does not exist in the tree - will expand tree." % data_item
@@ -1074,7 +1073,9 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                                 )
                                 # Incoming items were added to the end.
                                 # We place them together at the top instead.
-                                self._create_item(parent_model_item, data_item, top_index=idx)
+                                self._create_item(
+                                    parent_model_item, data_item, top_index=idx
+                                )
                 elif item["mode"] == self._data_handler.DELETED:
                     # see if the node exists in the tree, in that case delete it.
                     # we check if it exists in the model because it may not have been
