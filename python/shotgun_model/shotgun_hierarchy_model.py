@@ -518,12 +518,13 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         if icon:
             item.setIcon(icon)
 
-    def _create_item(self, parent, data_item):
+    def _create_item(self, parent, data_item, top_index=None):
         """
         Creates a model item for the tree given data out of the data store
 
         :param :class:`~PySide.QtGui.QStandardItem` parent: Model item to parent the node under
         :param :class:`ShotgunItemData` data_item: Data to populate new item with
+        :param int top_index: Indicates an index the item should be placed on the tree
 
         :returns: Model item
         :rtype: :class:`ShotgunStandardItem`

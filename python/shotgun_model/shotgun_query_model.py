@@ -409,12 +409,13 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
     # abstract, protected methods. these methods should be implemented by
     # subclasses to provide a consistent developer experience.
 
-    def _create_item(self, parent, data_item):
+    def _create_item(self, parent, data_item, top_index=None):
         """
         Creates a model item for the tree given data out of the data store
 
         :param :class:`~PySide.QtGui.QStandardItem` parent: Model item to parent the node under
         :param :class:`ShotgunItemData` data_item: Data to populate new item with
+        :param int top_index: Indicates an index the item should be placed on the tree
 
         :returns: Model item
         :rtype: :class:`ShotgunStandardItem`
@@ -757,7 +758,6 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         item = self._get_item_by_unique_id(uid)
 
         if not item:
-
             # item was not part of the model. Attempt to load its parents until it is visible.
             self._log_debug(
                 "Item %s does not exist in the tree - will expand tree." % data_item
@@ -1024,7 +1024,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
             # we have some items loaded into our qt model. Look at the diff
             # and make sure that what's loaded in the model is up to date.
-            for item in modified_items:
+            for idx, item in enumerate(modified_items):
                 data_item = item["data"]
 
                 self._log_debug("Processing change %s" % item)
@@ -1071,7 +1071,11 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                                 self._log_debug(
                                     "Creating new model " "item for %s" % data_item
                                 )
-                                self._create_item(parent_model_item, data_item)
+                                # Incoming items were added to the end.
+                                # We place them together at the top instead.
+                                self._create_item(
+                                    parent_model_item, data_item, top_index=idx
+                                )
                 elif item["mode"] == self._data_handler.DELETED:
                     # see if the node exists in the tree, in that case delete it.
                     # we check if it exists in the model because it may not have been

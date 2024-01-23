@@ -605,12 +605,13 @@ class ShotgunModel(ShotgunQueryModel):
         row.extend(self._get_additional_columns(item, is_leaf, self.__column_fields))
         return row
 
-    def _create_item(self, parent, data_item):
+    def _create_item(self, parent, data_item, top_index=None):
         """
         Creates a model item for the tree given data out of the data store
 
         :param :class:`~PySide.QtGui.QStandardItem` parent: Model item to parent the node under
         :param :class:`ShotgunItemData` data_item: Data to populate new item with
+        :param int top_index: Indicates an index the item should be placed on the tree
 
         :returns: Model item
         :rtype: :class:`ShotgunStandardItem`
@@ -628,7 +629,10 @@ class ShotgunModel(ShotgunQueryModel):
         row = self._get_columns(item, data_item.is_leaf())
 
         # and attach the node
-        parent.appendRow(row)
+        if top_index is not None:
+            parent.insertRow(top_index, row)
+        else:
+            parent.appendRow(row)
 
         return item
 
