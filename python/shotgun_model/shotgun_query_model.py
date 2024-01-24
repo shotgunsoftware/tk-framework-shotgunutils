@@ -880,11 +880,15 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         # delete the child leaves
         for index in range(node.rowCount(), 0, -1):
-            # Use `takeRow` instead of `removeRow` to prevent model from deleting
-            # the data before we're done using it. takeRow does not free the memory
-            # but we own the objects and do not keep a reference to it, so garbage
-            # collection will take care of freeing up the memory for us.
-            node.takeRow(index - 1)
+            if sgtk.platform.current_engine().instance_name == "tk-houdini":
+                node.removeRow(index - 1)
+            else:
+                # For every other engine,
+                # Use `takeRow` instead of `removeRow` to prevent model from deleting
+                # the data before we're done using it. takeRow does not free the memory
+                # but we own the objects and do not keep a reference to it, so garbage
+                # collection will take care of freeing up the memory for us.
+                node.takeRow(index - 1)
 
     def __remove_unique_id_r(self, item):
         """
