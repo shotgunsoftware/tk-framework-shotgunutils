@@ -7,12 +7,12 @@
 [![Linting](https://img.shields.io/badge/PEP8%20by-Hound%20CI-a873d1.svg)](https://houndci.com)
 
 ## Documentation
-This repository is a part of the ShotGrid Pipeline Toolkit.
+This repository is a part of the Flow Production Tracking Toolkit.
 
 - For more information about this app and for release notes, *see the wiki section*.
 - For API Reference, see https://developer.shotgridsoftware.com/tk-framework-shotgunutils
 - For general information and documentation, click here: https://help.autodesk.com/view/SGDEV/ENU/?contextId=SA_INTEGRATIONS_USER_GUIDE
-- For information about ShotGrid in general, click here: https://www.autodesk.com/products/shotgrid/overview
+- For information about Flow Production Tracking in general, click here: https://www.autodesk.com/products/shotgrid/overview
 
 ## Have a Question?
 Don't hesitate to contact us at https://www.autodesk.com/support/contact-support

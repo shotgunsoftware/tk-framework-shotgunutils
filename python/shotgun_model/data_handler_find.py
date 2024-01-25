@@ -323,7 +323,8 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
         self._cache = new_cache
 
         self._log_debug(
-            "ShotGrid data (%d records) received and processed. " % len(sg_data)
+            "Flow Production Tracking data (%d records) received and processed. "
+            % len(sg_data)
         )
         self._log_debug("    The new tree is %d records." % self._cache.size)
         self._log_debug(

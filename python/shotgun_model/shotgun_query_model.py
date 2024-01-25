@@ -920,7 +920,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             return
         self.__current_work_id = None
 
-        full_msg = "Error retrieving data from ShotGrid: %s" % msg
+        full_msg = "Error retrieving data from Flow Production Tracking: %s" % msg
         self.data_refresh_fail.emit(full_msg)
         self._log_warning(full_msg)
 
@@ -990,7 +990,9 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         :param list sg_data: Shotgun data payload.
         """
-        self._log_debug("--> ShotGrid data arrived. (%s records)" % len(sg_data))
+        self._log_debug(
+            "--> Flow Production Tracking data arrived. (%s records)" % len(sg_data)
+        )
 
         # pre-process data
         sg_data = self._before_data_processing(sg_data)
@@ -1001,7 +1003,8 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         modified_items = self._data_handler.update_data(sg_data)
 
         self._log_debug(
-            "ShotGrid data contained %d modifications" % len(modified_items)
+            "Flow Production Tracking data contained %d modifications"
+            % len(modified_items)
         )
 
         if len(modified_items) > 0:
