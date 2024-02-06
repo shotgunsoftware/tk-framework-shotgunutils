@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>shotgun_model.shotgun_model &mdash; tk-framework-shotgunutils v5.8.7 documentation</title>
+  <title>shotgun_model.shotgun_model &mdash; tk-framework-shotgunutils v5.8.8 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -28,7 +28,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-    <a href='http://developer.shotgridsoftware.com'>
+    <a href='https://help.autodesk.com/view/SGDEV/ENU/'>
     
         <img style='width: 191px;
                 height: 60px;
@@ -84,12 +84,12 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.7.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.8.<br>
     
         This documentation is part of the ShotGrid Pipeline Toolkit.
     
     For more information, please visit
-    <a class=custom_post_menu href='https://developer.shotgridsoftware.com'>The ShotGrid developer portal.</a>.
+    <a class=custom_post_menu href='https://help.autodesk.com/view/SGDEV/ENU/'>The ShotGrid developer portal.</a>.
     The code associated with this documentation can be found
     <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
 
@@ -735,12 +735,13 @@
         <span class="n">row</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_additional_columns</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">is_leaf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">row</span></div>
 
-    <span class="k">def</span> <span class="nf">_create_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">data_item</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_create_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">data_item</span><span class="p">,</span> <span class="n">top_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a model item for the tree given data out of the data store</span>
 
 <span class="sd">        :param :class:`~PySide.QtGui.QStandardItem` parent: Model item to parent the node under</span>
 <span class="sd">        :param :class:`ShotgunItemData` data_item: Data to populate new item with</span>
+<span class="sd">        :param int top_index: Indicates an index the item should be placed on the tree</span>
 
 <span class="sd">        :returns: Model item</span>
 <span class="sd">        :rtype: :class:`ShotgunStandardItem`</span>
@@ -758,7 +759,10 @@
         <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_columns</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">data_item</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">())</span>
 
         <span class="c1"># and attach the node</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">top_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">insertRow</span><span class="p">(</span><span class="n">top_index</span><span class="p">,</span> <span class="n">row</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">item</span>
 
@@ -972,7 +976,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, Autodesk.</p>
+    <p>&#169; Copyright 2024, Autodesk.</p>
   </div>
 
    

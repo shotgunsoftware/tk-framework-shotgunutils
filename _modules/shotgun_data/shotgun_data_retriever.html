@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v5.8.7 documentation</title>
+  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v5.8.8 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -28,7 +28,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-    <a href='http://developer.shotgridsoftware.com'>
+    <a href='https://help.autodesk.com/view/SGDEV/ENU/'>
     
         <img style='width: 191px;
                 height: 60px;
@@ -84,12 +84,12 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.7.<br>
+    <b>tk-framework-shotgunutils</b> v5.8.8.<br>
     
         This documentation is part of the ShotGrid Pipeline Toolkit.
     
     For more information, please visit
-    <a class=custom_post_menu href='https://developer.shotgridsoftware.com'>The ShotGrid developer portal.</a>.
+    <a class=custom_post_menu href='https://help.autodesk.com/view/SGDEV/ENU/'>The ShotGrid developer portal.</a>.
     The code associated with this documentation can be found
     <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-shotgunutils'>here</a>.
 
@@ -1115,7 +1115,7 @@
         <span class="c1"># If we don&#39;t have a URL, then we know we don&#39;t</span>
         <span class="c1"># have a thumbnail to worry about.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="c1"># hash the path portion of the thumbnail url</span>
         <span class="n">url_obj</span> <span class="o">=</span> <span class="n">six</span><span class="o">.</span><span class="n">moves</span><span class="o">.</span><span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
@@ -1655,7 +1655,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, Autodesk.</p>
+    <p>&#169; Copyright 2024, Autodesk.</p>
   </div>
 
    
