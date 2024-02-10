@@ -686,7 +686,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         ):
             return (
                 False,
-                "The version of SG being used does not support querying for the project "
+                "The version of PTR being used does not support querying for the project "
                 "hierarchy. v7.0.2 is required.",
             )
         elif not hasattr(sg_connection, "nav_expand"):

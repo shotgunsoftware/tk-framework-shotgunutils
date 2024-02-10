@@ -184,7 +184,7 @@ class ShotgunDataRetriever(QtCore.QObject):
             bundle.ensure_folder_exists(os.path.dirname(path_to_cached_thumb))
 
             # download using standard core method. This will ensure that
-            # proxy and connection settings as set in the SG API are used
+            # proxy and connection settings as set in the PTR API are used
             try:
                 # Ask sgtk.util.download_url() to append the file type extension
                 # to the input path_to_cached_thumb to get the full path to the
@@ -264,7 +264,7 @@ class ShotgunDataRetriever(QtCore.QObject):
             bundle.ensure_folder_exists(os.path.dirname(path_to_cached_thumb))
 
             # download using standard core method. This will ensure that
-            # proxy and connection settings as set in the SG API are used.
+            # proxy and connection settings as set in the PTR API are used.
             # Allow the core method to determine the file type extension
             # for the url about to be downloaded. Capture the full path to the
             # thumbnail file as returned by sgtk.util.download_url().
@@ -858,7 +858,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         """
         try:
             # download using standard core method. This will ensure that
-            # proxy and connection settings as set in the SG API are used
+            # proxy and connection settings as set in the PTR API are used
             try:
                 # Ask sgtk.util.download_url() to append the file type extension
                 # to the input file_path to get the full path to the cache file.
@@ -891,7 +891,7 @@ class ShotgunDataRetriever(QtCore.QObject):
                     )
                 else:
                     # Again, download using standard core method. This will ensure that
-                    # proxy and connection settings as set in the SG API are used.
+                    # proxy and connection settings as set in the PTR API are used.
                     url = sg_data[field]
                     try:
                         # Ask sgtk.util.download_url() to append the file type extension

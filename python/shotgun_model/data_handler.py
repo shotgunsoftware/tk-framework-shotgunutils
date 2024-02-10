@@ -341,7 +341,7 @@ class ShotgunDataHandler(object):
 
     def _sg_clean_data(self, sg_data):
         """
-        Recursively clean the supplied SG data for use by clients.
+        Recursively clean the supplied PTR data for use by clients.
 
         This method currently handles:
 
@@ -353,7 +353,7 @@ class ShotgunDataHandler(object):
         # Older versions of Shotgun return special timezone classes. Qt is
         # struggling to handle these. In fact, on linux it is struggling to
         # serialize any complex object via QDataStream. So we need to account
-        # for this for older versions of SG.
+        # for this for older versions of PTR.
         #
         # Convert time stamps to unix time. Unix time is a number representing
         # the timestamp in the number of seconds since 1 Jan 1970 in the UTC
