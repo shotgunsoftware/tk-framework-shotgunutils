@@ -17,8 +17,8 @@ configuration:
 requires_shotgun_fields:
 
 # More verbose description of this item
-display_name: "ShotGrid Utilities Framework"
-description: "A Collection of Qt objects and utilities to simplify app development and ShotGrid connectivity."
+display_name: "Flow Production Tracking Utilities Framework"
+description: "A Collection of Qt objects and utilities to simplify app development and Flow Production Tracking connectivity."
 
 # Required minimum versions for this item to run
 requires_shotgun_version:

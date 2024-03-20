@@ -51,7 +51,7 @@ class ExternalCommand(object):
         :returns: True if the given data passes validation, False if not.
         """
         # We're only testing icon paths here just because that's the problem we
-        # have right now in SG Create, but it's entirely possible (and maybe
+        # have right now in Create, but it's entirely possible (and maybe
         # advisable) to check other things that are file/directory paths on
         # disk that might no longer exist.
         icon_passes = True
@@ -503,7 +503,7 @@ class ExternalCommand(object):
             # some very bad behavior where it looked like PYTHONPATH was inherited from
             # this top-level environment rather than what is being set in external_runner
             # prior to launch. Also, the cwd is set a path we own so we avoid a situation
-            # where the pwd contains conflicting DLLs, like SG Create's Qt DLLs that might
+            # where the pwd contains conflicting DLLs, like Create's Qt DLLs that might
             # be loaded before another software's Qt DLLs because of the way DLLs are loaded...
             # (shorturl.at/nzDJW)
             output = sgtk.util.process.subprocess_check_output(args, cwd=subprocess_cwd)

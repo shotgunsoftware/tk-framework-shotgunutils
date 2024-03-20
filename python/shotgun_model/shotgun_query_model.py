@@ -456,7 +456,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             calculations and other manipulations of the data before it is
             passed on to the model class.
 
-        :param data: a shotgun dictionary, as retunrned by a CRUD SG API call.
+        :param data: a shotgun dictionary, as retunrned by a CRUD PTR API call.
         :returns: should return a shotgun dictionary, of the same form as the
             input.
         """
@@ -595,7 +595,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         Called when an item is created.
 
         :param item: Shotgun model item that requires a tooltip.
-        :param data: Dictionary of the SG data associated with the model.
+        :param data: Dictionary of the PTR data associated with the model.
         """
         # the default implementation does not set a tooltip
         pass
@@ -920,7 +920,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
             return
         self.__current_work_id = None
 
-        full_msg = "Error retrieving data from ShotGrid: %s" % msg
+        full_msg = "Error retrieving data from Flow Production Tracking: %s" % msg
         self.data_refresh_fail.emit(full_msg)
         self._log_warning(full_msg)
 
@@ -990,7 +990,9 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
 
         :param list sg_data: Shotgun data payload.
         """
-        self._log_debug("--> ShotGrid data arrived. (%s records)" % len(sg_data))
+        self._log_debug(
+            "--> Flow Production Tracking data arrived. (%s records)" % len(sg_data)
+        )
 
         # pre-process data
         sg_data = self._before_data_processing(sg_data)
@@ -1001,7 +1003,8 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         modified_items = self._data_handler.update_data(sg_data)
 
         self._log_debug(
-            "ShotGrid data contained %d modifications" % len(modified_items)
+            "Flow Production Tracking data contained %d modifications"
+            % len(modified_items)
         )
 
         if len(modified_items) > 0:
@@ -1052,7 +1055,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                             self._log_debug(
                                 "Creating new model item for %s" % data_item
                             )
-                            # Double check that the item we pulled from SG
+                            # Double check that the item we pulled from PTR
                             # was not already added by a fetchMore on the
                             # model.
                             # If it is the case, we just update the existing

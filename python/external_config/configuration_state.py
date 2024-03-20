@@ -132,7 +132,7 @@ class ConfigurationState(QtCore.QObject):
         :param bool has_changed: The cached data changed
         """
         if has_changed:
-            logger.debug("ShotGrid software entity change detected.")
+            logger.debug("Flow Production Tracking software entity change detected.")
             self.state_changed.emit()
 
     def _on_pipeline_configs_refreshed(self, has_changed):
@@ -142,7 +142,7 @@ class ConfigurationState(QtCore.QObject):
         :param bool has_changed: The cached data changed
         """
         if has_changed:
-            logger.debug("ShotGrid pipeline config change detected.")
+            logger.debug("Flow Production Tracking pipeline config change detected.")
             self.state_changed.emit()
 
 

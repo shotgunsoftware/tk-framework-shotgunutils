@@ -49,7 +49,7 @@ class ShotgunHierarchyItem(ShotgunStandardItem):
         Being "entity related" means it represents an entity, an entity type,
         a list of entities, or a generic container for entities.
 
-        Some items returned from the SG hierarchy are merely placeholders that
+        Some items returned from the PTR hierarchy are merely placeholders that
         tell the user that there are no associated entities. For these items,
         this method will return ``False``.
 

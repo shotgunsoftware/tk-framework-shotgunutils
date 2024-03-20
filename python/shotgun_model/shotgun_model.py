@@ -790,7 +790,7 @@ class ShotgunModel(ShotgunQueryModel):
 
         if sgtk.util.is_windows() and len(data_cache_path) > 250:
             self._log_warning(
-                "ShotGrid model data cache file path may be affected by windows "
+                "Flow Production Tracking model data cache file path may be affected by windows "
                 "windows MAX_PATH limitation."
             )
 
