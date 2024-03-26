@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>external_config.external_command &mdash; tk-framework-shotgunutils v5.8.8 documentation</title>
+  <title>external_config.external_command &mdash; tk-framework-shotgunutils v5.9.0 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -84,7 +84,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.8.<br>
+    <b>tk-framework-shotgunutils</b> v5.9.0.<br>
     
         This documentation is part of the Flow Production Tracking.
     
@@ -181,7 +181,7 @@
 <span class="sd">        :returns: True if the given data passes validation, False if not.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># We&#39;re only testing icon paths here just because that&#39;s the problem we</span>
-        <span class="c1"># have right now in SG Create, but it&#39;s entirely possible (and maybe</span>
+        <span class="c1"># have right now in Create, but it&#39;s entirely possible (and maybe</span>
         <span class="c1"># advisable) to check other things that are file/directory paths on</span>
         <span class="c1"># disk that might no longer exist.</span>
         <span class="n">icon_passes</span> <span class="o">=</span> <span class="kc">True</span>
@@ -633,7 +633,7 @@
             <span class="c1"># some very bad behavior where it looked like PYTHONPATH was inherited from</span>
             <span class="c1"># this top-level environment rather than what is being set in external_runner</span>
             <span class="c1"># prior to launch. Also, the cwd is set a path we own so we avoid a situation</span>
-            <span class="c1"># where the pwd contains conflicting DLLs, like SG Create&#39;s Qt DLLs that might</span>
+            <span class="c1"># where the pwd contains conflicting DLLs, like Create&#39;s Qt DLLs that might</span>
             <span class="c1"># be loaded before another software&#39;s Qt DLLs because of the way DLLs are loaded...</span>
             <span class="c1"># (shorturl.at/nzDJW)</span>
             <span class="n">output</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">subprocess_check_output</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">subprocess_cwd</span><span class="p">)</span>

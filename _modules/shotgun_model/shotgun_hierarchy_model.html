@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.8.8 documentation</title>
+  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.9.0 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -84,7 +84,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.8.<br>
+    <b>tk-framework-shotgunutils</b> v5.9.0.<br>
     
         This documentation is part of the Flow Production Tracking.
     
@@ -786,7 +786,7 @@
         <span class="c1"># warn if the path is longer than the windows max path limitation</span>
         <span class="k">if</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">is_windows</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_cache_path</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">250</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log_warning</span><span class="p">(</span>
-                <span class="s2">&quot;ShotGrid hierarchy data cache file path may be affected by &quot;</span>
+                <span class="s2">&quot;Flow Production Tracking hierarchy data cache file path may be affected by &quot;</span>
                 <span class="s2">&quot;windows MAX_PATH limitation.&quot;</span>
             <span class="p">)</span>
 
@@ -816,7 +816,7 @@
         <span class="p">):</span>
             <span class="k">return</span> <span class="p">(</span>
                 <span class="kc">False</span><span class="p">,</span>
-                <span class="s2">&quot;The version of SG being used does not support querying for the project &quot;</span>
+                <span class="s2">&quot;The version of PTR being used does not support querying for the project &quot;</span>
                 <span class="s2">&quot;hierarchy. v7.0.2 is required.&quot;</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sg_connection</span><span class="p">,</span> <span class="s2">&quot;nav_expand&quot;</span><span class="p">):</span>

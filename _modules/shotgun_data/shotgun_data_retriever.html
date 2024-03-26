@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v5.8.8 documentation</title>
+  <title>shotgun_data.shotgun_data_retriever &mdash; tk-framework-shotgunutils v5.9.0 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -84,7 +84,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.8.8.<br>
+    <b>tk-framework-shotgunutils</b> v5.9.0.<br>
     
         This documentation is part of the Flow Production Tracking.
     
@@ -314,7 +314,7 @@
             <span class="n">bundle</span><span class="o">.</span><span class="n">ensure_folder_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">))</span>
 
             <span class="c1"># download using standard core method. This will ensure that</span>
-            <span class="c1"># proxy and connection settings as set in the SG API are used</span>
+            <span class="c1"># proxy and connection settings as set in the PTR API are used</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># Ask sgtk.util.download_url() to append the file type extension</span>
                 <span class="c1"># to the input path_to_cached_thumb to get the full path to the</span>
@@ -394,7 +394,7 @@
             <span class="n">bundle</span><span class="o">.</span><span class="n">ensure_folder_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path_to_cached_thumb</span><span class="p">))</span>
 
             <span class="c1"># download using standard core method. This will ensure that</span>
-            <span class="c1"># proxy and connection settings as set in the SG API are used.</span>
+            <span class="c1"># proxy and connection settings as set in the PTR API are used.</span>
             <span class="c1"># Allow the core method to determine the file type extension</span>
             <span class="c1"># for the url about to be downloaded. Capture the full path to the</span>
             <span class="c1"># thumbnail file as returned by sgtk.util.download_url().</span>
@@ -988,7 +988,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># download using standard core method. This will ensure that</span>
-            <span class="c1"># proxy and connection settings as set in the SG API are used</span>
+            <span class="c1"># proxy and connection settings as set in the PTR API are used</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># Ask sgtk.util.download_url() to append the file type extension</span>
                 <span class="c1"># to the input file_path to get the full path to the cache file.</span>
@@ -1021,7 +1021,7 @@
                     <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># Again, download using standard core method. This will ensure that</span>
-                    <span class="c1"># proxy and connection settings as set in the SG API are used.</span>
+                    <span class="c1"># proxy and connection settings as set in the PTR API are used.</span>
                     <span class="n">url</span> <span class="o">=</span> <span class="n">sg_data</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="c1"># Ask sgtk.util.download_url() to append the file type extension</span>
