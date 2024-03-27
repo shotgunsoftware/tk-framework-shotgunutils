@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shotgun Hierarchy Model &mdash; tk-framework-shotgunutils v5.9.0 documentation</title>
+  <title>Shotgun Hierarchy Model &mdash; tk-framework-shotgunutils v5.9.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
@@ -116,7 +116,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.9.0.<br>
+    <b>tk-framework-shotgunutils</b> v5.9.1.<br>
     
         This documentation is part of the Flow Production Tracking.
     
@@ -172,7 +172,7 @@ Shotgun production hierarchy as defined in your site’s
 The hierarchy represented by the model is dynamically constructed based on
 a <code class="docutils literal notranslate"><span class="pre">seed_entity_field</span></code> which represents the target of the hierarchy (i.e. what
 you’re trying to drill down to in view using the model).</p>
-<p>Like the <a class="reference internal" href="shotgun_model.html#shotgun_model.ShotgunModel" title="shotgun_model.ShotgunModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunModel</span></code></a>, the <a class="reference external" href="https://developers.shotgridsoftware.com/tk-framework-shotgunutils/shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel" title="(in tk-framework-shotgunutils vv5.8.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code></a> uses a disk based
+<p>Like the <a class="reference internal" href="shotgun_model.html#shotgun_model.ShotgunModel" title="shotgun_model.ShotgunModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunModel</span></code></a>, the <code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code> uses a disk based
 cache and runs queries asynchronously to Shotgun in the background for
 performance. You derive your own model class from it, set up a query, and then
 hook up your model to a Qt View which will draw the data. The class contains
@@ -250,7 +250,7 @@ drilling down to entities with linked versions.</p>
 <p>The simple setup outlined above could be extended in the following ways:</p>
 <ul class="simple">
 <li><p>If you need more control of how the data is being retrieved, consider instead
-creating your own class and derive from <a class="reference external" href="https://developers.shotgridsoftware.com/tk-framework-shotgunutils/shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel" title="(in tk-framework-shotgunutils vv5.8.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code></a>. This
+creating your own class and derive from <code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code>. This
 makes it possible to customize the data as it arrives from Shotgun and how it
 will be displayed by the view.</p></li>
 <li><p>If you want to retrieve results from your view, connect signals to the view’s
@@ -263,7 +263,7 @@ matching a particular search criteria, use a Proxy Model (typically
 <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/QSortFilterProxyModel.html#PySide.QtGui.QSortFilterProxyModel" title="(in PySide v1.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSortFilterProxyModel</span></code></a>).</p></li>
 <li><p>If you want to control the way items are displayed in the view, consider using
 the Shotgun delegates module which is part of the Qt widgets framework. For
-more information, see <a class="reference external" href="https://developers.shotgridsoftware.com/tk-framework-qtwidgets/views.html#views.WidgetDelegate" title="(in tk-framework-qtwidgets vv2.11.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">WidgetDelegate</span></code></a></p></li>
+more information, see <a class="reference external" href="https://developers.shotgridsoftware.com/tk-framework-qtwidgets/views.html#views.WidgetDelegate" title="(in tk-framework-qtwidgets vv2.11.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">WidgetDelegate</span></code></a></p></li>
 </ul>
 </section>
 </section>
@@ -277,13 +277,13 @@ instantiate the class (typically once, in your constructor) and then call
 hierarchy to build in the model. Subsequently, call
 <a class="reference internal" href="shotgun_model.html#shotgun_model.SimpleShotgunModel.load_data" title="shotgun_model.SimpleShotgunModel.load_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_data()</span></code></a> whenever you wish to change the
 hierarchy represented by the model.</p>
-<p>This class derives from <a class="reference external" href="https://developers.shotgridsoftware.com/tk-framework-shotgunutils/shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel" title="(in tk-framework-shotgunutils vv5.8.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code></a> so all the customization
+<p>This class derives from <code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code> so all the customization
 methods available in the normal ShotgunModel can also be subclassed from this
 class.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="shotgun_model.SimpleShotgunHierarchyModel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">shotgun_model.</span></span><span class="sig-name descname"><span class="pre">SimpleShotgunHierarchyModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema_generation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg_task_manager</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shotgun_model/simple_shotgun_hierarchy_model.html#SimpleShotgunHierarchyModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shotgun_model.SimpleShotgunHierarchyModel" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://developers.shotgridsoftware.com/tk-framework-shotgunutils/shotgun_hierarchy_model.html#shotgun_model.ShotgunHierarchyModel" title="(in tk-framework-shotgunutils vv5.8.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ShotgunHierarchyModel</span></code></p>
 <p>Convenience wrapper around the Shotgun Hierarchy model for quick and easy
 access.</p>
 <p>All you need to do is to instantiate the class (typically once, in your
