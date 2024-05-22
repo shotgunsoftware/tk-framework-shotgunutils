@@ -211,8 +211,6 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
                 "Model item refreshed: %s", item.data(self.parent()._SG_ITEM_UNIQUE_ID)
             )
             self.parent()._node_refreshed.disconnect(self._node_refreshed)
-            utils = sgtk.platform.current_bundle().import_module("utils")
-            utils.safe_delete_later(self)
 
             # Try again to async deep load the node and the next tokens.
             self.parent().async_item_from_paths(self._path_to_refresh)

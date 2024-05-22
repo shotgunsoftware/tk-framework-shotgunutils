@@ -9,4 +9,3 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 from .color import color_mix
-from .qt import safe_delete_later
