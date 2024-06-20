@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.9.1 documentation</title>
+  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.10.0 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -84,7 +84,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.9.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.10.0.<br>
     
         This documentation is part of the Flow Production Tracking.
     
@@ -341,8 +341,6 @@
                 <span class="s2">&quot;Model item refreshed: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">_SG_ITEM_UNIQUE_ID</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">_node_refreshed</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_node_refreshed</span><span class="p">)</span>
-            <span class="n">utils</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_bundle</span><span class="p">()</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;utils&quot;</span><span class="p">)</span>
-            <span class="n">utils</span><span class="o">.</span><span class="n">safe_delete_later</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
             <span class="c1"># Try again to async deep load the node and the next tokens.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">async_item_from_paths</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path_to_refresh</span><span class="p">)</span>
