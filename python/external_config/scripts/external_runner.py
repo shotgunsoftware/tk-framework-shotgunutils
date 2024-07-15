@@ -512,6 +512,12 @@ if __name__ == "__main__":
             qt_importer.QtCore.Qt.AA_ShareOpenGLContexts
         )
 
+    # Enable High DPI support in Qt5 (default enabled in Qt6)
+    if qt_importer.QtCore.qVersion()[0] == "5":
+        qt_importer.QtCore.QCoreApplication.setAttribute(
+            qt_importer.QtCore.Qt.AA_EnableHighDpiScaling
+        )
+
     # we don't want this process to have any traces of
     # any previous environment
     if "TANK_CURRENT_PC" in os.environ:
