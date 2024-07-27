@@ -10,7 +10,11 @@
 import os
 import hashlib
 import sgtk
-from tank_vendor import six
+
+try:
+    from tank_vendor import sgutils
+except ImportError:
+    from tank_vendor import six as sgutils
 
 logger = sgtk.platform.get_logger(__name__)
 
@@ -137,13 +141,13 @@ def get_cache_path(identifier_dict):
     """
     params_hash = hashlib.md5()
     for (k, v) in identifier_dict.items():
-        params_hash.update(six.ensure_binary(str(k)))
-        params_hash.update(six.ensure_binary(str(v)))
+        params_hash.update(sgutils.ensure_binary(str(k)))
+        params_hash.update(sgutils.ensure_binary(str(v)))
 
     # add current user to hash
     user = sgtk.get_authenticated_user()
     if user and user.login:
-        params_hash.update(six.ensure_binary(user.login))
+        params_hash.update(sgutils.ensure_binary(user.login))
 
     cache_location = sgtk.platform.current_bundle().cache_location
 
