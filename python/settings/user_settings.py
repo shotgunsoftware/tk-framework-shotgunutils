@@ -156,7 +156,9 @@ class UserSettings(object):
             if pickle_setting:
                 # Only sanitize and pickle the raw value if indicated.
                 sanitized_value = sanitize_qt(value)
-                settings_value = sgutils.ensure_str(sgtk.util.pickle.dumps(sanitized_value))
+                settings_value = sgutils.ensure_str(
+                    sgtk.util.pickle.dumps(sanitized_value)
+                )
             else:
                 # Store the raw value. Some objects cannot be retrieved correctly after
                 # sanitizing, like QByteArray.
