@@ -940,9 +940,17 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         if self.__current_work_id == uid:
             # our data has arrived from sg!
             # process the data
-            self.__current_work_id = None
-            sg_data = data["sg"]
-            self.__on_sg_data_arrived(sg_data)
+            try:
+                self.__current_work_id = None
+                sg_data = data["sg"]
+                self.__on_sg_data_arrived(sg_data)
+            except Exception as e:
+                self._log_warning(
+                    "Error processing data from Flow Production Tracking: %s" % e
+                )
+                self.data_refresh_fail.emit(
+                    "Error processing data from Flow Production Tracking: %s" % e
+                )
 
         elif uid in self.__thumb_map:
             # a thumbnail is now present on disk!

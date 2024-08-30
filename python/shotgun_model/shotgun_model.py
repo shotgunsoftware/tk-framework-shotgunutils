@@ -382,9 +382,13 @@ class ShotgunModel(ShotgunQueryModel):
 
         # construct the top level nodes
         self._log_debug("Creating model nodes for top level of data tree...")
-        nodes_generated = self._data_handler.generate_child_nodes(
-            None, root, self._create_item
-        )
+        try:
+            nodes_generated = self._data_handler.generate_child_nodes(
+                None, root, self._create_item
+            )
+        except Exception as e:
+            self._log_warning("Couldn't load cached data: %s" % e)
+            nodes_generated = 0
 
         # if we got some data, emit cache load signal
         if nodes_generated > 0:
@@ -658,6 +662,13 @@ class ShotgunModel(ShotgunQueryModel):
         # transfer a unique id from the data backend so we can
         # refer back to this node later on
         item.setData(data_item.unique_id, self._SG_ITEM_UNIQUE_ID)
+
+        if not data_item.field in data_item.shotgun_data:
+            raise sgtk.TankError(
+                "Field '%s' is not present in the data for entity type %s, "
+                "check the field exists in your Flow Production Tracking site."
+                % (data_item.field, data_item.shotgun_data["type"])
+            )
 
         # store the actual value we have
         item.setData(
