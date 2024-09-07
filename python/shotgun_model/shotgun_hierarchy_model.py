@@ -22,7 +22,11 @@ from .shotgun_hierarchy_item import ShotgunHierarchyItem
 from .shotgun_query_model import ShotgunQueryModel
 from .data_handler_nav import ShotgunNavDataHandler
 from .util import sanitize_for_qt_model
-from tank_vendor import six
+
+try:
+    from tank_vendor import sgutils
+except ImportError:
+    from tank_vendor import six as sgutils
 
 logger = sgtk.platform.get_logger(__name__)
 
@@ -604,26 +608,26 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # even though the navigation path provides a nice organizational
         # structure for caching, it can get long. to avoid MAX_PATH issues on
         # windows, just hash it
-        params_hash.update(six.ensure_binary(str(self._path)))
+        params_hash.update(sgutils.ensure_binary(str(self._path)))
 
         # include the schema generation number for clients
-        params_hash.update(six.ensure_binary(str(self._schema_generation)))
+        params_hash.update(sgutils.ensure_binary(str(self._schema_generation)))
 
         # If this value changes over time (like between Qt4 and Qt5), we need to
         # assume our previous user roles are invalid since Qt might have taken
         # it over. If role's value is 32, don't add it to the hash so we don't
         # invalidate PySide/PyQt4 caches.
         if QtCore.Qt.UserRole != 32:
-            params_hash.update(six.ensure_binary(str(QtCore.Qt.UserRole)))
+            params_hash.update(sgutils.ensure_binary(str(QtCore.Qt.UserRole)))
 
         # include the cache_seed for additional user control over external state
-        params_hash.update(six.ensure_binary(str(cache_seed)))
+        params_hash.update(sgutils.ensure_binary(str(cache_seed)))
 
         # iterate through the sorted entity fields to ensure consistent order
         for (entity_type, fields) in sorted(self._entity_fields.items()):
             for field in fields:
                 entity_field_hash.update(
-                    six.ensure_binary("%s.%s" % (entity_type, field))
+                    sgutils.ensure_binary("%s.%s" % (entity_type, field))
                 )
 
         # convert the seed entity field into a path segment.

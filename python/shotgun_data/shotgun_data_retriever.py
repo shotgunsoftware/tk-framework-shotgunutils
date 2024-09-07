@@ -17,6 +17,11 @@ import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 from sgtk import TankError
 
+try:
+    from tank_vendor import sgutils
+except ImportError:
+    from tank_vendor import six as sgutils
+
 
 def _indicate_resource_accessed(file_path):
     """
@@ -990,7 +995,7 @@ class ShotgunDataRetriever(QtCore.QObject):
         # hash the path portion of the thumbnail url
         url_obj = six.moves.urllib.parse.urlparse(url)
         url_hash = hashlib.md5()
-        url_hash.update(six.ensure_binary(str(url_obj.path)))
+        url_hash.update(sgutils.ensure_binary(str(url_obj.path)))
         hash_str = url_hash.hexdigest()
 
         # Now turn this hash into a tree structure. For a discussion about sensible
