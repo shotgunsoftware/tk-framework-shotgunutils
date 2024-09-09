@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.10.0 documentation</title>
+  <title>shotgun_model.shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.10.1 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -84,7 +84,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.10.0.<br>
+    <b>tk-framework-shotgunutils</b> v5.10.1.<br>
     
         This documentation is part of the Flow Production Tracking.
     
@@ -152,7 +152,11 @@
 <span class="kn">from</span> <span class="nn">.shotgun_query_model</span> <span class="kn">import</span> <span class="n">ShotgunQueryModel</span>
 <span class="kn">from</span> <span class="nn">.data_handler_nav</span> <span class="kn">import</span> <span class="n">ShotgunNavDataHandler</span>
 <span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">sanitize_for_qt_model</span>
-<span class="kn">from</span> <span class="nn">tank_vendor</span> <span class="kn">import</span> <span class="n">six</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">tank_vendor</span> <span class="kn">import</span> <span class="n">sgutils</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">tank_vendor</span> <span class="kn">import</span> <span class="n">six</span> <span class="k">as</span> <span class="n">sgutils</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -734,26 +738,26 @@
         <span class="c1"># even though the navigation path provides a nice organizational</span>
         <span class="c1"># structure for caching, it can get long. to avoid MAX_PATH issues on</span>
         <span class="c1"># windows, just hash it</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">)))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sgutils</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">)))</span>
 
         <span class="c1"># include the schema generation number for clients</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema_generation</span><span class="p">)))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sgutils</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema_generation</span><span class="p">)))</span>
 
         <span class="c1"># If this value changes over time (like between Qt4 and Qt5), we need to</span>
         <span class="c1"># assume our previous user roles are invalid since Qt might have taken</span>
         <span class="c1"># it over. If role&#39;s value is 32, don&#39;t add it to the hash so we don&#39;t</span>
         <span class="c1"># invalidate PySide/PyQt4 caches.</span>
         <span class="k">if</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span> <span class="o">!=</span> <span class="mi">32</span><span class="p">:</span>
-            <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)))</span>
+            <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sgutils</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)))</span>
 
         <span class="c1"># include the cache_seed for additional user control over external state</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cache_seed</span><span class="p">)))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sgutils</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cache_seed</span><span class="p">)))</span>
 
         <span class="c1"># iterate through the sorted entity fields to ensure consistent order</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">fields</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entity_fields</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
             <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
                 <span class="n">entity_field_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                    <span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+                    <span class="n">sgutils</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
                 <span class="p">)</span>
 
         <span class="c1"># convert the seed entity field into a path segment.</span>

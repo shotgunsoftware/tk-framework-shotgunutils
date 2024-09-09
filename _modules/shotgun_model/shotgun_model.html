@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>shotgun_model.shotgun_model &mdash; tk-framework-shotgunutils v5.10.0 documentation</title>
+  <title>shotgun_model.shotgun_model &mdash; tk-framework-shotgunutils v5.10.1 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -84,7 +84,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.10.0.<br>
+    <b>tk-framework-shotgunutils</b> v5.10.1.<br>
     
         This documentation is part of the Flow Production Tracking.
     
@@ -152,7 +152,11 @@
 <span class="kn">from</span> <span class="nn">.data_handler_find</span> <span class="kn">import</span> <span class="n">ShotgunFindDataHandler</span>
 <span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">get_sanitized_data</span><span class="p">,</span> <span class="n">get_sg_data</span><span class="p">,</span> <span class="n">sanitize_for_qt_model</span>
 <span class="kn">from</span> <span class="nn">tank_vendor.six.moves</span> <span class="kn">import</span> <span class="nb">range</span>
-<span class="kn">from</span> <span class="nn">tank_vendor</span> <span class="kn">import</span> <span class="n">six</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">tank_vendor</span> <span class="kn">import</span> <span class="n">sgutils</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">tank_vendor</span> <span class="kn">import</span> <span class="n">six</span> <span class="k">as</span> <span class="n">sgutils</span>
 
 
 <div class="viewcode-block" id="ShotgunModel"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel">[docs]</a><span class="k">class</span> <span class="nc">ShotgunModel</span><span class="p">(</span><span class="n">ShotgunQueryModel</span><span class="p">):</span>
@@ -880,24 +884,24 @@
         <span class="c1">#</span>
         <span class="c1"># A simple approach would be to encode the data in a JSON structured</span>
         <span class="c1"># with ordered keys and then having the text representation of that data.</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__schema_generation</span><span class="p">)))</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fields</span><span class="p">)))</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__order</span><span class="p">)))</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy</span><span class="p">)))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sgutils</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__schema_generation</span><span class="p">)))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sgutils</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fields</span><span class="p">)))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sgutils</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__order</span><span class="p">)))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sgutils</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy</span><span class="p">)))</span>
         <span class="c1"># If this value changes over time (like between Qt4 and Qt5), we need to</span>
         <span class="c1"># assume our previous user roles are invalid since Qt might have taken over</span>
         <span class="c1"># it. If role&#39;s value is 32, don&#39;t add it to the hash so we don&#39;t</span>
         <span class="c1"># invalidate PySide/PyQt4 caches.</span>
         <span class="k">if</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span> <span class="o">!=</span> <span class="mi">32</span><span class="p">:</span>
-            <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)))</span>
+            <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sgutils</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)))</span>
 
         <span class="c1"># now hash up the filter parameters and the seed - these are dynamic</span>
         <span class="c1"># values that tend to change and be data driven, so they are handled</span>
         <span class="c1"># on a different level in the path</span>
         <span class="n">filter_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
-        <span class="n">filter_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__filters</span><span class="p">)))</span>
-        <span class="n">filter_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__additional_filter_presets</span><span class="p">)))</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cache_seed</span><span class="p">)))</span>
+        <span class="n">filter_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sgutils</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__filters</span><span class="p">)))</span>
+        <span class="n">filter_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sgutils</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__additional_filter_presets</span><span class="p">)))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sgutils</span><span class="o">.</span><span class="n">ensure_binary</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cache_seed</span><span class="p">)))</span>
 
         <span class="c1"># Organize files on disk based on entity type and then filter hash</span>
         <span class="c1"># keep extension names etc short in order to stay away from MAX_PATH</span>
