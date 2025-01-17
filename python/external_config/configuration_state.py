@@ -170,9 +170,7 @@ class ConfigStateModel(ShotgunModel):
         :param parent: QT parent object.
         :type parent: :class:`~PySide.QtGui.QObject`
         """
-        super().__init__(
-            parent, download_thumbs=False, bg_task_manager=bg_task_manager
-        )
+        super().__init__(parent, download_thumbs=False, bg_task_manager=bg_task_manager)
         self._entity_type = entity_type
         self._filters = filters
 

@@ -101,9 +101,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             supplied arg would look like: ``include_root="Project Publishes"``.
             If ``include_root`` is `None`, no root item will be added.
         """
-        super().__init__(
-            parent, bg_load_thumbs=True, bg_task_manager=bg_task_manager
-        )
+        super().__init__(parent, bg_load_thumbs=True, bg_task_manager=bg_task_manager)
 
         # check for hierarchy support
         (
@@ -624,7 +622,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         params_hash.update(sgutils.ensure_binary(str(cache_seed)))
 
         # iterate through the sorted entity fields to ensure consistent order
-        for (entity_type, fields) in sorted(self._entity_fields.items()):
+        for entity_type, fields in sorted(self._entity_fields.items()):
             for field in fields:
                 entity_field_hash.update(
                     sgutils.ensure_binary("%s.%s" % (entity_type, field))
