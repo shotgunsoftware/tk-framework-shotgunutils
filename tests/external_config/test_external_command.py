@@ -28,7 +28,7 @@ class TestExternalCommand(ExternalConfigBase):
         """
         Initial setup.
         """
-        super(TestExternalCommand, self).setUp()
+        super().setUp()
 
         self._icon_path = (
             "/Applications/Autodesk/maya2017/Maya.app/Contents/icons/mayaico.png"

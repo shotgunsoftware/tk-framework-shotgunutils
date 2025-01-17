@@ -64,7 +64,7 @@ class ShotgunNavDataHandler(ShotgunDataHandler):
             supplied arg would look like: ``include_root="Project Publishes"``.
             If ``include_root`` is ``None``, no root item will be added.
         """
-        super(ShotgunNavDataHandler, self).__init__(cache_path)
+        super().__init__(cache_path)
         self.__root_path = root_path
         self.__seed_entity_field = seed_entity_field
         self.__entity_fields = entity_fields

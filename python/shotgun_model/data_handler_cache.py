@@ -70,9 +70,9 @@ class ShotgunDataHandlerCache(object):
         if parent_uid is None:
             return self._cache[self.CACHE_CHILDREN].keys()
         else:
-            return self._cache[self.CACHE_BY_UID][
-                parent_uid][self.CACHE_CHILDREN].keys()
-
+            return self._cache[self.CACHE_BY_UID][parent_uid][
+                self.CACHE_CHILDREN
+            ].keys()
 
     def item_exists(self, unique_id):
         """

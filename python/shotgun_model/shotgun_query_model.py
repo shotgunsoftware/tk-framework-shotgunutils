@@ -130,7 +130,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         :protected _shotgun_globals: ``shotgunutils.shotgun_globals`` handle
         """
         # intialize the Qt base class
-        super(ShotgunQueryModel, self).__init__(parent)
+        super().__init__(parent)
 
         # keep a handle to the current app/engine/fw bundle for convenience
         self._bundle = sgtk.platform.current_bundle()
@@ -338,14 +338,14 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         :type index: :class:`~PySide.QtCore.QModelIndex`
         """
         if not index.isValid():
-            return super(ShotgunQueryModel, self).hasChildren(index)
+            return super().hasChildren(index)
 
         item = self.itemFromIndex(index)
 
         if not isinstance(item, ShotgunStandardItem):
             # there may be items of other types in the model
             # (although unlikely) in that case push to base class
-            return super(ShotgunQueryModel, self).hasChildren(index)
+            return super().hasChildren(index)
 
         return item.data(self._SG_ITEM_HAS_CHILDREN)
 
@@ -357,12 +357,12 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         :type index: :class:`~PySide.QtCore.QModelIndex`
         """
         if not index.isValid():
-            return super(ShotgunQueryModel, self).fetchMore(index)
+            return super().fetchMore(index)
 
         item = self.itemFromIndex(index)
 
         if not isinstance(item, ShotgunStandardItem):
-            return super(ShotgunQueryModel, self).fetchMore(index)
+            return super().fetchMore(index)
 
         # set the flag to prevent subsequent attempts to fetch more
         item.setData(True, self._SG_ITEM_FETCHED_MORE)
@@ -384,13 +384,13 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
         :type index: :class:`~PySide.QtCore.QModelIndex`
         """
         if not index.isValid():
-            return super(ShotgunQueryModel, self).canFetchMore(index)
+            return super().canFetchMore(index)
 
         # get the item and its stored hierarchy data
         item = self.itemFromIndex(index)
 
         if not isinstance(item, ShotgunStandardItem):
-            return super(ShotgunQueryModel, self).canFetchMore(index)
+            return super().canFetchMore(index)
 
         if item.data(self._SG_ITEM_FETCHED_MORE):
             # more data has already been queried for this item

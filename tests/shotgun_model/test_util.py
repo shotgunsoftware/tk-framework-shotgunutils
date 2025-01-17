@@ -24,7 +24,7 @@ class TestShotgunModelUtil(TestShotgunUtilsFramework):
         """
         Fixtures setup
         """
-        super(TestShotgunModelUtil, self).setUp()
+        super().setUp()
         self.shotgun_model = self.framework.import_module("shotgun_model")
         self.has_qstring = hasattr(sgtk.platform.qt.QtCore, "QString")
         self.has_qbytearray = hasattr(sgtk.platform.qt.QtCore, "QByteArray")

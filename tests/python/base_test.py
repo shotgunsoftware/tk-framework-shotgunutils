@@ -36,7 +36,7 @@ class TestShotgunUtilsFramework(TankTestBase):
         """
         Fixtures setup
         """
-        super(TestShotgunUtilsFramework, self).setUp()
+        super().setUp()
 
         self.setup_fixtures()
 

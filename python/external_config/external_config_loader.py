@@ -68,7 +68,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
         :param parent: QT parent object.
         :type parent: :class:`~PySide.QtGui.QObject`
         """
-        super(ExternalConfigurationLoader, self).__init__(parent)
+        super().__init__(parent)
 
         self._task_ids = {}
 

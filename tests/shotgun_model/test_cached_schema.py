@@ -27,7 +27,7 @@ class TestCachedSchema(TestShotgunUtilsFramework):
         """
         Fixtures setup
         """
-        super(TestCachedSchema, self).setUp()
+        super().setUp()
 
         self._patch_mockgun("schema_read")
         self._patch_mockgun("schema_entity_read")

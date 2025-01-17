@@ -48,7 +48,7 @@ class InvalidExternalConfiguration(ExternalConfiguration):
         :param int status: The status of the configuration as an enum defined by
             :class:`ExternalConfiguration`.
         """
-        super(InvalidExternalConfiguration, self).__init__(
+        super().__init__(
             parent=parent,
             bg_task_manager=bg_task_manager,
             plugin_id=plugin_id,

@@ -23,7 +23,7 @@ class TestHierarchyModel(TestShotgunUtilsFramework):
         """
         Fixtures setup
         """
-        super(TestHierarchyModel, self).setUp()
+        super().setUp()
 
         # We need a background task manager so the model can fetch data in the background.
         self._bg_task_manager = self.framework.import_module(

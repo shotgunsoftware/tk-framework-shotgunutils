@@ -76,7 +76,7 @@ class ShotgunModel(ShotgunQueryModel):
                                  this is None then a task manager will be created as needed.
         :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         """
-        super(ShotgunModel, self).__init__(parent, bg_load_thumbs, bg_task_manager)
+        super().__init__(parent, bg_load_thumbs, bg_task_manager)
 
         # default value so that __repr__ can be used before load_data
         self.__entity_type = None
@@ -433,7 +433,7 @@ class ShotgunModel(ShotgunQueryModel):
         :type item: :class:`~PySide.QtGui.QStandardItem`
         """
         # as per docs, call the base implementation
-        super(ShotgunModel, self)._item_created(item)
+        super()._item_created(item)
 
         # request thumbnail for this item
         if self.__download_thumbs:

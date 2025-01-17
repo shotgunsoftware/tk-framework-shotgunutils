@@ -30,7 +30,7 @@ class TestDataHandler(TestShotgunUtilsFramework):
         """
         Fixtures setup
         """
-        super(TestDataHandler, self).setUp()
+        super().setUp()
         self.shotgun_model = self.framework.import_module("shotgun_model")
 
     def test_basic_io(self):

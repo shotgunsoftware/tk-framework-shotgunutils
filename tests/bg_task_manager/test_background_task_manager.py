@@ -20,7 +20,7 @@ class TestBackgroundTaskManager(TestShotgunUtilsFramework):
     """
 
     def setUp(self):
-        super(self.__class__, self).setUp()
+        super().setUp()
         self.BackgroundTaskManager = self.framework.import_module(
             "task_manager"
         ).BackgroundTaskManager

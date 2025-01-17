@@ -58,7 +58,7 @@ class ConfigurationState(QtCore.QObject):
         :param parent: QT parent object.
         :type parent: :class:`~PySide.QtGui.QObject`
         """
-        super(ConfigurationState, self).__init__(parent)
+        super().__init__(parent)
 
         self._software_model = ConfigStateModel("Software", [], bg_task_manager, parent)
 
@@ -170,7 +170,7 @@ class ConfigStateModel(ShotgunModel):
         :param parent: QT parent object.
         :type parent: :class:`~PySide.QtGui.QObject`
         """
-        super(ConfigStateModel, self).__init__(
+        super().__init__(
             parent, download_thumbs=False, bg_task_manager=bg_task_manager
         )
         self._entity_type = entity_type

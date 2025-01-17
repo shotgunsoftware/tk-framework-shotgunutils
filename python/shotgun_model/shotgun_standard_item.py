@@ -49,47 +49,47 @@ class ShotgunStandardItem(QtGui.QStandardItem):
         """
         Base class override which runs sanitize_qt() on the returned data
         """
-        val = super(ShotgunStandardItem, self).statusTip(*args, **kwargs)
+        val = super().statusTip(*args, **kwargs)
         return sanitize_qt(val)
 
     def text(self, *args, **kwargs):
         """
         Base class override which runs sanitize_qt() on the returned data
         """
-        val = super(ShotgunStandardItem, self).text(*args, **kwargs)
+        val = super().text(*args, **kwargs)
         return sanitize_qt(val)
 
     def toolTip(self, *args, **kwargs):
         """
         Base class override which runs sanitize_qt() on the returned data
         """
-        val = super(ShotgunStandardItem, self).toolTip(*args, **kwargs)
+        val = super().toolTip(*args, **kwargs)
         return sanitize_qt(val)
 
     def whatsThis(self, *args, **kwargs):
         """
         Base class override which runs sanitize_qt() on the returned data
         """
-        val = super(ShotgunStandardItem, self).whatsThis(*args, **kwargs)
+        val = super().whatsThis(*args, **kwargs)
         return sanitize_qt(val)
 
     def accessibleDescription(self, *args, **kwargs):
         """
         Base class override which runs sanitize_qt() on the returned data
         """
-        val = super(ShotgunStandardItem, self).accessibleDescription(*args, **kwargs)
+        val = super().accessibleDescription(*args, **kwargs)
         return sanitize_qt(val)
 
     def accessibleText(self, *args, **kwargs):
         """
         Base class override which runs sanitize_qt() on the returned data
         """
-        val = super(ShotgunStandardItem, self).accessibleText(*args, **kwargs)
+        val = super().accessibleText(*args, **kwargs)
         return sanitize_qt(val)
 
     def data(self, *args, **kwargs):
         """
         Base class override which runs sanitize_qt() on the returned data
         """
-        val = super(ShotgunStandardItem, self).data(*args, **kwargs)
+        val = super().data(*args, **kwargs)
         return sanitize_qt(val)

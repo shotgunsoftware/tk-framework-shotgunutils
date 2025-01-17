@@ -61,7 +61,7 @@ class ShotgunDataHandler(object):
         """
         :param cache_path: Path to cache file location
         """
-        super(ShotgunDataHandler, self).__init__()
+        super().__init__()
         # keep a handle to the current app/engine/fw bundle for convenience
         self._bundle = sgtk.platform.current_bundle()
         # the path to the cache file
