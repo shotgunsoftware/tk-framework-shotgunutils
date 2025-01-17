@@ -10,7 +10,6 @@
 
 
 from .util import compare_shotgun_data
-from tank_vendor import six
 
 
 class ShotgunDataHandlerCache(object):
@@ -58,7 +57,7 @@ class ShotgunDataHandlerCache(object):
         """
         All uids in unspecified order, as an iterator for scalability
         """
-        return six.iterkeys(self._cache[self.CACHE_BY_UID])
+        return self._cache[self.CACHE_BY_UID].keys()
 
     def get_child_uids(self, parent_uid):
         """
@@ -69,11 +68,11 @@ class ShotgunDataHandlerCache(object):
         :returns: list of child uids
         """
         if parent_uid is None:
-            return six.iterkeys(self._cache[self.CACHE_CHILDREN])
+            return self._cache[self.CACHE_CHILDREN].keys()
         else:
-            return six.iterkeys(
-                self._cache[self.CACHE_BY_UID][parent_uid][self.CACHE_CHILDREN]
-            )
+            return self._cache[self.CACHE_BY_UID][
+                parent_uid][self.CACHE_CHILDREN].keys()
+
 
     def item_exists(self, unique_id):
         """
@@ -131,7 +130,7 @@ class ShotgunDataHandlerCache(object):
             cache_node = self._cache[self.CACHE_BY_UID].get(parent_uid)
 
         if cache_node:
-            for item in six.itervalues(cache_node[self.CACHE_CHILDREN]):
+            for item in cache_node[self.CACHE_CHILDREN].values():
                 data_item = ShotgunItemData(item)
                 yield data_item
 

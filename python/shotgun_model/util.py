@@ -8,10 +8,11 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+import urllib
+
 from tank.platform.qt import QtCore
 
 from tank_vendor import six
-from tank_vendor.six.moves import range
 
 # precalculated for performance
 HAS_QVARIANT = hasattr(QtCore, "QVariant")
@@ -92,13 +93,10 @@ def sanitize_for_qt_model(val):
 
     elif isinstance(val, dict):
         new_val = {}
-        for (k, v) in six.iteritems(val):
+        for k, v in val.items():
             # go through dictionary and convert each value separately
             new_val[k] = sanitize_for_qt_model(v)
         return new_val
-
-    elif six.PY2 and isinstance(val, str):
-        return val.decode("UTF-8")
 
     # for everything else, just pass through
     return val
@@ -118,9 +116,6 @@ def sanitize_qt(val):
     # test things in order of probable occurrence for speed
     if val is None:
         return None
-
-    elif six.PY2 and isinstance(val, unicode):
-        return val.encode("UTF-8")
 
     elif HAS_QSTRING and isinstance(val, QtCore.QString):
         # convert any QStrings to utf-8 encoded strings
@@ -142,20 +137,13 @@ def sanitize_qt(val):
 
     elif isinstance(val, dict):
         new_val = {}
-        for (k, v) in six.iteritems(val):
+        for k, v in val.items():
             # both keys and values can be bad
             safe_key = sanitize_qt(k)
             safe_val = sanitize_qt(v)
             new_val[safe_key] = safe_val
         return new_val
 
-    # QT Version: 5.9.5
-    # PySide Version: 5.9.0a1
-    # The value should be `int` but it is `long`.
-    # longs do not exist in Python 3, so we need to cast those.
-    elif six.PY2 and isinstance(val, long):
-        val = int(val)
-        return val
     else:
         return val
 
@@ -206,8 +194,8 @@ def compare_shotgun_data(a, b):
     ):
         # attempt to parse values are urls and eliminate the querystring
         # compare hostname + path only
-        url_obj_a = six.moves.urllib.parse.urlparse(a)
-        url_obj_b = six.moves.urllib.parse.urlparse(b)
+        url_obj_a = urllib.parse.urlparse(a)
+        url_obj_b = urllib.parse.urlparse(b)
         compare_str_a = "%s/%s" % (url_obj_a.netloc, url_obj_a.path)
         compare_str_b = "%s/%s" % (url_obj_b.netloc, url_obj_b.path)
         if compare_str_a != compare_str_b:
