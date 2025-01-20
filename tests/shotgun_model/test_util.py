@@ -66,15 +66,10 @@ class TestShotgunModelUtil(TestShotgunUtilsFramework):
                 sgtk.platform.qt.QtCore.QString("Something"), "Something"
             )
         if self.has_qbytearray:
-            if six.PY2:
-                self._test_sanitize_qt(
-                    sgtk.platform.qt.QtCore.QByteArray(b"Something"), "Something"
-                )
-            else:
-                # FIXME: Under Python 3, PySide2's QByteArray doesn't have any way on
-                # extracting a str out of a QByteArray. The __str__ method is actually
-                # broken.
-                pass
+            # FIXME: Under Python 3, PySide2's QByteArray doesn't have any way on
+            # extracting a str out of a QByteArray. The __str__ method is actually
+            # broken.
+            pass
 
         if self.has_qvariant:
             self._test_sanitize_qt(sgtk.platform.qt.QtCore.QVariant(1), 1)
