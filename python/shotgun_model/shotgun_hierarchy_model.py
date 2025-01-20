@@ -622,7 +622,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         params_hash.update(sgutils.ensure_binary(str(cache_seed)))
 
         # iterate through the sorted entity fields to ensure consistent order
-        for entity_type, fields in sorted(self._entity_fields.items()):
+        for (entity_type, fields) in sorted(self._entity_fields.items()):
             for field in fields:
                 entity_field_hash.update(
                     sgutils.ensure_binary("%s.%s" % (entity_type, field))

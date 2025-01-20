@@ -94,7 +94,7 @@ class ResultsDispatcher(QtCore.QThread):
         QtCore.QThread.__init__(self, parent)
         # Results that will need to be dispatched to the background task
         # manager.
-        self._results = queue.Queue()
+        self._results = six.moves.queue.Queue()
         self._bundle = sgtk.platform.current_bundle()
 
     def _log(self, msg):
