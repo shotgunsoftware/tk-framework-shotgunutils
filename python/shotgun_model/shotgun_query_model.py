@@ -11,7 +11,6 @@
 import sgtk
 import weakref
 import datetime
-from tank_vendor.six.moves import range
 
 # NOTE: This is a dummy call to work around a known bug in datetime
 # whereby there is code imported at call time that is done so in a

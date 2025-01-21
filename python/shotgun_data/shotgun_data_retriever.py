@@ -993,7 +993,7 @@ class ShotgunDataRetriever(QtCore.QObject):
             return (None, None)
 
         # hash the path portion of the thumbnail url
-        url_obj = six.moves.urllib.parse.urlparse(url)
+        url_obj = urllib.parse.urlparse(url)
         url_hash = hashlib.md5()
         url_hash.update(sgutils.ensure_binary(str(url_obj.path)))
         hash_str = url_hash.hexdigest()

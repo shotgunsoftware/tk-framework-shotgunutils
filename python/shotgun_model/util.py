@@ -7,11 +7,10 @@
 # By accessing, using, copying or modifying this work you indicate your
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
-
+import urllib
 from tank.platform.qt import QtCore
 
 from tank_vendor import six
-from tank_vendor.six.moves import range
 
 # precalculated for performance
 HAS_QVARIANT = hasattr(QtCore, "QVariant")
@@ -206,8 +205,8 @@ def compare_shotgun_data(a, b):
     ):
         # attempt to parse values are urls and eliminate the querystring
         # compare hostname + path only
-        url_obj_a = six.moves.urllib.parse.urlparse(a)
-        url_obj_b = six.moves.urllib.parse.urlparse(b)
+        url_obj_a = urllib.parse.urlparse(a)
+        url_obj_b = urllib.parse.urlparse(b)
         compare_str_a = "%s/%s" % (url_obj_a.netloc, url_obj_a.path)
         compare_str_b = "%s/%s" % (url_obj_b.netloc, url_obj_b.path)
         if compare_str_a != compare_str_b:
