@@ -21,7 +21,6 @@ from .shotgun_standard_item import ShotgunStandardItem
 from .shotgun_query_model import ShotgunQueryModel
 from .data_handler_find import ShotgunFindDataHandler
 from .util import get_sanitized_data, get_sg_data, sanitize_for_qt_model
-from tank_vendor.six.moves import range
 
 try:
     from tank_vendor import sgutils
