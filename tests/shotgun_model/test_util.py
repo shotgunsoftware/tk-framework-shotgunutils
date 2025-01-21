@@ -58,6 +58,19 @@ class TestShotgunModelUtil(TestShotgunUtilsFramework):
             {"key": "value", "another_key": 1, "third_key": 3.0},
             {"key": "value", "another_key": 1, "third_key": 3.0},
         )
+        # In Python 2 we have extra data types to worry about, like unicode and long
+        if six.PY2:
+            self._test_sanitize_qt(unicode("Something"), "Something")
+            self._test_sanitize_qt(long(1), int(1))
+            self._test_sanitize_qt([unicode("one"), 2, 3.0], [unicode("one"), 2, 3.0])
+            self._test_sanitize_qt(
+                {
+                    unicode("key"): unicode("value"),
+                    unicode("another_key"): 1,
+                    unicode("third_key"): 3.0,
+                },
+                {"key": "value", "another_key": 1, "third_key": 3.0},
+            )
 
         # TODO: This hasn't been tested with PyQt5, as tk-core doesn't support it yet.
         # Maybe there will be some issues, as QString is only available on PyQtn
