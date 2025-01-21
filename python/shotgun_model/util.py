@@ -11,6 +11,7 @@ import urllib
 from tank.platform.qt import QtCore
 
 from tank_vendor import six
+from tank_vendor.six.moves import range
 
 # precalculated for performance
 HAS_QVARIANT = hasattr(QtCore, "QVariant")
