@@ -122,6 +122,35 @@ class UserSettings(object):
         full_name = self.__resolve_settings_name(name, scope)
         self.__fw.log_debug("User Settings Manager: Storing %s" % full_name)
         try:
+            # Weird behaviour incoming:
+            # When QSettings sees a value that it deems to complicated for Qt,
+            # it pickles it!
+            # Pickling a class for example would force QSetting to pickle the value
+            # first. But so does passing in a bytes object!
+            # If you are running Python 3, then the protocol used will be 3, which
+            # becomes an issue if you're switching to Python 2 to read the same setting
+            # since QSetting will first try to unpickle the value and protocol 3
+            # didn't exist in Python 2.
+            #
+            # This very small scripts reproduces that weird behavior:
+            #
+            # from PySide2 import QtCore
+            # import sys
+            #
+            # settings = QtCore.QSettings("test")
+            #
+            # if sys.version_info[0] == 2:
+            #     print(settings.value("test_value"))
+            # else:
+            #     settings.setValue(
+            #         "test_value",
+            #         b"binary value"
+            #     )
+            #
+            # Running this script once with Python 3 will write to QSettings and running
+            # it with Python 2 will read it and raise a pickler error, even tough we
+            # never used the pickler in our code in the first place.
+            #
             # To get around this, we need to write a string inside the QSettings, so
             # use sgtk.util.pickle
             if pickle_setting:
