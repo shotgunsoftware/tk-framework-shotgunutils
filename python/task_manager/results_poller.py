@@ -14,9 +14,8 @@ Results dispatcher for the background task manager.
 
 import queue
 
-from tank_vendor import six
-from sgtk.platform.qt import QtCore
 import sgtk
+from sgtk.platform.qt import QtCore
 
 
 class _TaskCompletedEvent(object):
@@ -94,7 +93,7 @@ class ResultsDispatcher(QtCore.QThread):
         QtCore.QThread.__init__(self, parent)
         # Results that will need to be dispatched to the background task
         # manager.
-        self._results = six.moves.queue.Queue()
+        self._results = queue.Queue()
         self._bundle = sgtk.platform.current_bundle()
 
     def _log(self, msg):
