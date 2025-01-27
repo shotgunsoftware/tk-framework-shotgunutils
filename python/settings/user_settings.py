@@ -120,6 +120,15 @@ class UserSettings(object):
         full_name = self.__resolve_settings_name(name, scope)
         self.__fw.log_debug("User Settings Manager: Storing %s" % full_name)
         try:
+            # Legacy Python 2 settings warning:
+            # QSettings can pickle values like bytes or classes when the data
+            # is too complex for Qt. If a setting was written with Python 3
+            # (protocol 3), it will raise an error when read with Python 2
+            # (since protocol 3 didn't exist in Python 2).
+            #
+            # Although Python 2 is no longer supported, legacy settings written
+            # in Python 2 may still exist. To ensure compatibility, avoid storing
+            # binary data or complex objects in QSettings.
             if pickle_setting:
                 # Only sanitize and pickle the raw value if indicated.
                 sanitized_value = sanitize_qt(value)
