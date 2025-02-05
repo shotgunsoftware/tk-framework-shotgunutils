@@ -30,7 +30,7 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         """
         Fixtures setup
         """
-        super(TestDataRetriever, self).setUp()
+        super().setUp()
         self.shotgun_data = self.framework.import_module("shotgun_data")
 
     @patch("sgtk.util.download_url")

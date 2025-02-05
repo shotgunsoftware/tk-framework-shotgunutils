@@ -101,9 +101,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             supplied arg would look like: ``include_root="Project Publishes"``.
             If ``include_root`` is `None`, no root item will be added.
         """
-        super(ShotgunHierarchyModel, self).__init__(
-            parent, bg_load_thumbs=True, bg_task_manager=bg_task_manager
-        )
+        super().__init__(parent, bg_load_thumbs=True, bg_task_manager=bg_task_manager)
 
         # check for hierarchy support
         (
@@ -189,7 +187,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             :param list(str) path_to_refresh: List of nodes to refresh asynchronously.
             :param model: ``ShotgunHierarchyModel`` we are requesting the nodes for.
             """
-            super(ShotgunHierarchyModel._NodeRefresher, self).__init__(model)
+            super().__init__(model)
             # Connect to the node refreshed signal so we know when
             # our node is refreshed.
             model._node_refreshed.connect(self._node_refreshed)
@@ -322,7 +320,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             if isinstance(item, ShotgunHierarchyItem) and self.canFetchMore(index):
                 self._request_data(item.path())
 
-        return super(ShotgunHierarchyModel, self).fetchMore(index)
+        return super().fetchMore(index)
 
     ############################################################################
     # protected methods
@@ -367,7 +365,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         :type item: :class:`~PySide.QtGui.QStandardItem`
         """
         # call base class implementation as per docs
-        super(ShotgunHierarchyModel, self)._item_created(item)
+        super()._item_created(item)
 
         if not item.is_entity_related():
             item.setForeground(self._empty_item_color)

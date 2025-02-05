@@ -65,7 +65,7 @@ class LiveExternalConfiguration(ExternalConfiguration):
         :param str pipeline_config_uri: Descriptor URI string for the config
         :param str pipeline_config_folder: Folder where the configuration is located
         """
-        super(LiveExternalConfiguration, self).__init__(
+        super().__init__(
             parent,
             bg_task_manager,
             plugin_id,

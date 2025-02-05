@@ -56,7 +56,7 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
         """
         Initial setup.
         """
-        super(ExternalConfigBase, self).setUp()
+        super().setUp()
 
         self._john_doe = self.mockgun.create("HumanUser", {"login": "john.doe"})
         self._project = self.mockgun.create("Project", {"name": "my_project"})

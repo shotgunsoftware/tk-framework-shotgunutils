@@ -27,7 +27,7 @@ class TestCachedSchema(TestShotgunUtilsFramework):
         """
         Fixtures setup
         """
-        super(TestCachedSchema, self).setUp()
+        super().setUp()
 
         self._patch_mockgun("schema_read")
         self._patch_mockgun("schema_entity_read")
@@ -101,10 +101,6 @@ class TestCachedSchema(TestShotgunUtilsFramework):
         # The data reloaded from disk should be the same as before.
         assert self._cached_schema._field_schema, self.mockgun.schema_read()
         assert self._cached_schema._type_schema, self.mockgun.schema_entity_read()
-
-        if six.PY2:
-            self._assert_no_unicode(self._cached_schema._field_schema)
-            self._assert_no_unicode(self._cached_schema._type_schema)
 
     def test_is_valid_entity_type(self):
         """

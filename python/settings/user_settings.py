@@ -8,8 +8,8 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+import urllib
 import sgtk
-from tank_vendor import six
 from sgtk.platform.qt import QtCore
 from sgtk import TankError
 from ..shotgun_model import sanitize_qt
@@ -54,9 +54,7 @@ class UserSettings(object):
         # now organize various keys
 
         # studio level settings - base it on the server host name
-        _, sg_hostname, _, _, _ = six.moves.urllib.parse.urlsplit(
-            self.__fw.sgtk.shotgun_url
-        )
+        _, sg_hostname, _, _, _ = urllib.parse.urlsplit(self.__fw.sgtk.shotgun_url)
         self.__site_key = sg_hostname
 
         # project level settings
@@ -122,37 +120,15 @@ class UserSettings(object):
         full_name = self.__resolve_settings_name(name, scope)
         self.__fw.log_debug("User Settings Manager: Storing %s" % full_name)
         try:
-            # Weird behaviour incoming:
-            # When QSettings sees a value that it deems to complicated for Qt,
-            # it pickles it!
-            # Pickling a class for example would force QSetting to pickle the value
-            # first. But so does passing in a bytes object!
-            # If you are running Python 3, then the protocol used will be 3, which
-            # becomes an issue if you're switching to Python 2 to read the same setting
-            # since QSetting will first try to unpickle the value and protocol 3
-            # didn't exist in Python 2.
+            # Legacy Python 2 settings warning:
+            # QSettings can pickle values like bytes or classes when the data
+            # is too complex for Qt. If a setting was written with Python 3
+            # (protocol 3), it will raise an error when read with Python 2
+            # (since protocol 3 didn't exist in Python 2).
             #
-            # This very small scripts reproduces that weird behavior:
-            #
-            # from PySide2 import QtCore
-            # import sys
-            #
-            # settings = QtCore.QSettings("test")
-            #
-            # if sys.version_info[0] == 2:
-            #     print(settings.value("test_value"))
-            # else:
-            #     settings.setValue(
-            #         "test_value",
-            #         b"binary value"
-            #     )
-            #
-            # Running this script once with Python 3 will write to QSettings and running
-            # it with Python 2 will read it and raise a pickler error, even tough we
-            # never used the pickler in our code in the first place.
-            #
-            # To get around this, we need to write a string inside the QSettings, so
-            # use sgtk.util.pickle
+            # Although Python 2 is no longer supported, legacy settings written
+            # in Python 2 may still exist. To ensure compatibility, avoid storing
+            # binary data or complex objects in QSettings.
             if pickle_setting:
                 # Only sanitize and pickle the raw value if indicated.
                 sanitized_value = sanitize_qt(value)

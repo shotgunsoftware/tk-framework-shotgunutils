@@ -9,7 +9,6 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 # make sure that py25 has access to with statement
-from __future__ import with_statement
 
 import os
 import sgtk

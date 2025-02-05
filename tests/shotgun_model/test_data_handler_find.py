@@ -31,7 +31,7 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         """
         Fixtures setup
         """
-        super(TestShotgunFindDataHandler, self).setUp()
+        super().setUp()
         self.shotgun_model = self.framework.import_module("shotgun_model")
 
     def test_generate_data_request(self):

@@ -29,7 +29,7 @@ class WorkerThread(Thread):
         :param results_dispatcher: Results dispatcher from the background task manager.
         :param parent:  The parent QObject for this thread
         """
-        super(WorkerThread, self).__init__()
+        super().__init__()
 
         self._task = None
         self._process_tasks = True

@@ -24,7 +24,7 @@ class TestExternalConfigLoader(ExternalConfigBase):
         """
         Initial setup.
         """
-        super(TestExternalConfigLoader, self).setUp()
+        super().setUp()
 
     def test_task_failed(self):
         """

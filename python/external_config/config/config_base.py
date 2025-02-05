@@ -90,7 +90,7 @@ class ExternalConfiguration(QtCore.QObject):
         :param int status: The status of the configuration. This is defined as a enum value
             provided by :class:`ExternalConfiguration`.
         """
-        super(ExternalConfiguration, self).__init__(parent)
+        super().__init__(parent)
 
         self._pipeline_config_uri = pipeline_config_uri
         self._plugin_id = plugin_id

@@ -9,8 +9,8 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
+import urllib
 import glob
-from tank_vendor import six
 import hashlib
 
 import sgtk
@@ -246,14 +246,14 @@ class ShotgunDataRetriever(QtCore.QObject):
 
         :returns: A path to the thumbnail on disk.
         """
-        thumb_source_url = six.moves.urllib.parse.urlunparse(
+        thumb_source_url = urllib.parse.urlunparse(
             (
                 bundle.shotgun.config.scheme,
                 bundle.shotgun.config.server,
                 "/thumbnail/full/%s/%s"
                 % (
-                    six.moves.urllib.parse.quote(str(entity_type)),
-                    six.moves.urllib.parse.quote(str(entity_id)),
+                    urllib.parse.quote(str(entity_type)),
+                    urllib.parse.quote(str(entity_id)),
                 ),
                 None,
                 None,
@@ -817,14 +817,14 @@ class ShotgunDataRetriever(QtCore.QObject):
                   possible to match them up.
         """
         # construct the url that refers to the thumbnail's source image
-        thumb_source_url = six.moves.urllib.parse.urlunparse(
+        thumb_source_url = urllib.parse.urlunparse(
             (
                 self._bundle.shotgun.config.scheme,
                 self._bundle.shotgun.config.server,
                 "/thumbnail/full/%s/%s"
                 % (
-                    six.moves.urllib.parse.quote(str(entity_type)),
-                    six.moves.urllib.parse.quote(str(entity_id)),
+                    urllib.parse.quote(str(entity_type)),
+                    urllib.parse.quote(str(entity_id)),
                 ),
                 None,
                 None,
@@ -993,7 +993,7 @@ class ShotgunDataRetriever(QtCore.QObject):
             return (None, None)
 
         # hash the path portion of the thumbnail url
-        url_obj = six.moves.urllib.parse.urlparse(url)
+        url_obj = urllib.parse.urlparse(url)
         url_hash = hashlib.md5()
         url_hash.update(sgutils.ensure_binary(str(url_obj.path)))
         hash_str = url_hash.hexdigest()

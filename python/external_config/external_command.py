@@ -143,7 +143,7 @@ class ExternalCommand(object):
             supports multiple selection.
         :param str icon: The path to a square png icon file representing this item
         """
-        super(ExternalCommand, self).__init__()
+        super().__init__()
 
         # keep a handle to the current app/engine/fw bundle for convenience
         self._bundle = sgtk.platform.current_bundle()

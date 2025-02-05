@@ -24,7 +24,7 @@ class TestShotgunModelUtil(TestShotgunUtilsFramework):
         """
         Fixtures setup
         """
-        super(TestShotgunModelUtil, self).setUp()
+        super().setUp()
         self.shotgun_model = self.framework.import_module("shotgun_model")
         self.has_qstring = hasattr(sgtk.platform.qt.QtCore, "QString")
         self.has_qbytearray = hasattr(sgtk.platform.qt.QtCore, "QByteArray")
@@ -58,19 +58,6 @@ class TestShotgunModelUtil(TestShotgunUtilsFramework):
             {"key": "value", "another_key": 1, "third_key": 3.0},
             {"key": "value", "another_key": 1, "third_key": 3.0},
         )
-        # In Python 2 we have extra data types to worry about, like unicode and long
-        if six.PY2:
-            self._test_sanitize_qt(unicode("Something"), "Something")
-            self._test_sanitize_qt(long(1), int(1))
-            self._test_sanitize_qt([unicode("one"), 2, 3.0], [unicode("one"), 2, 3.0])
-            self._test_sanitize_qt(
-                {
-                    unicode("key"): unicode("value"),
-                    unicode("another_key"): 1,
-                    unicode("third_key"): 3.0,
-                },
-                {"key": "value", "another_key": 1, "third_key": 3.0},
-            )
 
         # TODO: This hasn't been tested with PyQt5, as tk-core doesn't support it yet.
         # Maybe there will be some issues, as QString is only available on PyQtn
@@ -79,25 +66,15 @@ class TestShotgunModelUtil(TestShotgunUtilsFramework):
                 sgtk.platform.qt.QtCore.QString("Something"), "Something"
             )
         if self.has_qbytearray:
-            if six.PY2:
-                self._test_sanitize_qt(
-                    sgtk.platform.qt.QtCore.QByteArray(b"Something"), "Something"
-                )
-            else:
-                # FIXME: Under Python 3, PySide2's QByteArray doesn't have any way on
-                # extracting a str out of a QByteArray. The __str__ method is actually
-                # broken.
-                pass
+            # FIXME: Under Python 3, PySide2's QByteArray doesn't have any way on
+            # extracting a str out of a QByteArray. The __str__ method is actually
+            # broken.
+            pass
 
         if self.has_qvariant:
             self._test_sanitize_qt(sgtk.platform.qt.QtCore.QVariant(1), 1)
             self._test_sanitize_qt(sgtk.platform.qt.QtCore.QVariant("text"), "text")
             self._test_sanitize_qt(sgtk.platform.qt.QtCore.QVariant(3.2), 3.2)
-            if six.PY2:
-                self._test_sanitize_qt(
-                    sgtk.platform.qt.QtCore.QVariant(unicode("text")), "text"
-                )
-                self._test_sanitize_qt(sgtk.platform.qt.QtCore.QVariant(long(1)), 1)
 
     def _test_sanitize_for_qt_model(self, input, expected):
         """
@@ -115,23 +92,9 @@ class TestShotgunModelUtil(TestShotgunUtilsFramework):
         Ensure values about to be stored into a Qt model will be
         sanitized properly.
         """
-        if six.PY2:
-            self._test_sanitize_for_qt_model(unicode("text"), unicode("text"))
-            self._test_sanitize_for_qt_model("text", unicode("text"))
-            self._test_sanitize_for_qt_model(
-                {unicode("text"): unicode("text2")}, {unicode("text"): unicode("text2")}
-            )
-            self._test_sanitize_for_qt_model(
-                {"text": "text2"}, {unicode("text"): unicode("text2")}
-            )
-            self._test_sanitize_for_qt_model(
-                ["text", unicode("text2")], [unicode("text"), unicode("text2")]
-            )
-        else:
-            self._test_sanitize_for_qt_model("text", "text")
-            self._test_sanitize_for_qt_model({"text": "text2"}, {"text": "text2"})
-            self._test_sanitize_for_qt_model(["text", "text2"], ["text", "text2"])
-
+        self._test_sanitize_for_qt_model("text", "text")
+        self._test_sanitize_for_qt_model({"text": "text2"}, {"text": "text2"})
+        self._test_sanitize_for_qt_model(["text", "text2"], ["text", "text2"])
         self._test_sanitize_for_qt_model(None, None)
         self._test_sanitize_for_qt_model(1, 1)
         self._test_sanitize_for_qt_model(3.1, 3.1)

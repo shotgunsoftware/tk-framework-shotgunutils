@@ -7,7 +7,6 @@
 # By accessing, using, copying or modifying this work you indicate your
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
-from __future__ import with_statement
 
 import errno
 import os
@@ -62,7 +61,7 @@ class ShotgunDataHandler(object):
         """
         :param cache_path: Path to cache file location
         """
-        super(ShotgunDataHandler, self).__init__()
+        super().__init__()
         # keep a handle to the current app/engine/fw bundle for convenience
         self._bundle = sgtk.platform.current_bundle()
         # the path to the cache file

@@ -21,7 +21,6 @@ from .shotgun_standard_item import ShotgunStandardItem
 from .shotgun_query_model import ShotgunQueryModel
 from .data_handler_find import ShotgunFindDataHandler
 from .util import get_sanitized_data, get_sg_data, sanitize_for_qt_model
-from tank_vendor.six.moves import range
 
 try:
     from tank_vendor import sgutils
@@ -77,7 +76,7 @@ class ShotgunModel(ShotgunQueryModel):
                                  this is None then a task manager will be created as needed.
         :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`
         """
-        super(ShotgunModel, self).__init__(parent, bg_load_thumbs, bg_task_manager)
+        super().__init__(parent, bg_load_thumbs, bg_task_manager)
 
         # default value so that __repr__ can be used before load_data
         self.__entity_type = None
@@ -434,7 +433,7 @@ class ShotgunModel(ShotgunQueryModel):
         :type item: :class:`~PySide.QtGui.QStandardItem`
         """
         # as per docs, call the base implementation
-        super(ShotgunModel, self)._item_created(item)
+        super()._item_created(item)
 
         # request thumbnail for this item
         if self.__download_thumbs:

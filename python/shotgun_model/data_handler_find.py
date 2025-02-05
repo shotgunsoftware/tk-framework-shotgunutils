@@ -61,7 +61,7 @@ class ShotgunFindDataHandler(ShotgunDataHandler):
                                           ``[{"preset_name":"LATEST","latest_by":"BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT"}]``
         :param cache_path:                Path to cache file location
         """
-        super(ShotgunFindDataHandler, self).__init__(cache_path)
+        super().__init__(cache_path)
         self.__entity_type = entity_type
         self.__filters = filters
         self.__order = order

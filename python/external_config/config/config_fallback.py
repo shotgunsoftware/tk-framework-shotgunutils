@@ -50,7 +50,7 @@ class FallbackExternalConfiguration(ExternalConfiguration):
         :param str software_hash: Hash representing the state of the Shotgun software entity
         :param str pipeline_config_uri: Descriptor URI string for the config
         """
-        super(FallbackExternalConfiguration, self).__init__(
+        super().__init__(
             parent,
             bg_task_manager,
             plugin_id,

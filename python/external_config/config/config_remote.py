@@ -51,7 +51,7 @@ class RemoteExternalConfiguration(ExternalConfiguration):
         :param are pipeline_config_name: Pipeline Configuration name
         :param str pipeline_config_uri: Descriptor URI string for the config
         """
-        super(RemoteExternalConfiguration, self).__init__(
+        super().__init__(
             parent,
             bg_task_manager,
             plugin_id,
