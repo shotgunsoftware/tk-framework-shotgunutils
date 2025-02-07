@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>shotgun_model.simple_shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.10.1 documentation</title>
+  <title>shotgun_model.simple_shotgun_hierarchy_model &mdash; tk-framework-shotgunutils v5.10.2 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -84,7 +84,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.10.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.10.2.<br>
     
         This documentation is part of the Flow Production Tracking.
     
@@ -138,10 +138,10 @@
 <span class="c1"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights</span>
 <span class="c1"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
 
-<span class="kn">from</span> <span class="nn">.shotgun_hierarchy_model</span> <span class="kn">import</span> <span class="n">ShotgunHierarchyModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.shotgun_hierarchy_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ShotgunHierarchyModel</span>
 
 
-<div class="viewcode-block" id="SimpleShotgunHierarchyModel"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.SimpleShotgunHierarchyModel">[docs]</a><span class="k">class</span> <span class="nc">SimpleShotgunHierarchyModel</span><span class="p">(</span><span class="n">ShotgunHierarchyModel</span><span class="p">):</span>
+<div class="viewcode-block" id="SimpleShotgunHierarchyModel"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.SimpleShotgunHierarchyModel">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SimpleShotgunHierarchyModel</span><span class="p">(</span><span class="n">ShotgunHierarchyModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convenience wrapper around the Shotgun Hierarchy model for quick and easy</span>
 <span class="sd">    access.</span>
@@ -161,7 +161,7 @@
 <span class="sd">    can also be subclassed from this class.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SimpleShotgunHierarchyModel.load_data"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.SimpleShotgunHierarchyModel.load_data">[docs]</a>    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed_entity_field</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entity_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="SimpleShotgunHierarchyModel.load_data"><a class="viewcode-back" href="../../shotgun_hierarchy_model.html#shotgun_model.SimpleShotgunHierarchyModel.load_data">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed_entity_field</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entity_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Loads shotgun data into the model, using the cache if possible.</span>
 
@@ -186,9 +186,7 @@
 <span class="sd">            of field names to return.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">SimpleShotgunHierarchyModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span>
-            <span class="n">seed_entity_field</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">entity_fields</span><span class="o">=</span><span class="n">entity_fields</span>
-        <span class="p">)</span></div></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span><span class="n">seed_entity_field</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">entity_fields</span><span class="o">=</span><span class="n">entity_fields</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>
@@ -198,7 +196,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Autodesk.</p>
+    <p>&#169; Copyright 2025, Autodesk.</p>
   </div>
 
    

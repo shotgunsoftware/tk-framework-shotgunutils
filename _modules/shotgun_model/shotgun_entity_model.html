@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>shotgun_model.shotgun_entity_model &mdash; tk-framework-shotgunutils v5.10.1 documentation</title>
+  <title>shotgun_model.shotgun_entity_model &mdash; tk-framework-shotgunutils v5.10.2 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -84,7 +84,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.10.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.10.2.<br>
     
         This documentation is part of the Flow Production Tracking.
     
@@ -138,14 +138,14 @@
 <span class="c1"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights</span>
 <span class="c1"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
 
-<span class="kn">import</span> <span class="nn">sgtk</span>
-<span class="kn">from</span> <span class="nn">sgtk.platform.qt</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sgtk</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sgtk.platform.qt</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
 
-<span class="kn">from</span> <span class="nn">.shotgun_model</span> <span class="kn">import</span> <span class="n">ShotgunModel</span>
-<span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">get_sg_data</span><span class="p">,</span> <span class="n">get_sanitized_data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.shotgun_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ShotgunModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_sg_data</span><span class="p">,</span> <span class="n">get_sanitized_data</span>
 
 
-<div class="viewcode-block" id="ShotgunEntityModel"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel">[docs]</a><span class="k">class</span> <span class="nc">ShotgunEntityModel</span><span class="p">(</span><span class="n">ShotgunModel</span><span class="p">):</span>
+<div class="viewcode-block" id="ShotgunEntityModel"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ShotgunEntityModel</span><span class="p">(</span><span class="n">ShotgunModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A model that contains a hierarchy of Shotgun entity data and sets the icon for each item</span>
 <span class="sd">    to the icon for the entity type if available.</span>
@@ -156,7 +156,7 @@
     <span class="c1"># global cache of step colours - avoids querying from Shotgun multiple times!</span>
     <span class="n">_SG_STEP_COLOURS</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">entity_type</span><span class="p">,</span>
         <span class="n">filters</span><span class="p">,</span>
@@ -213,7 +213,7 @@
         <span class="c1"># load the data from the cache:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">hierarchy</span><span class="p">,</span> <span class="n">fields</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Call to clean-up the model when it is finished with</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -221,7 +221,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_step_swatch_icons</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_default_icon</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="ShotgunEntityModel.get_entity_icon"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel.get_entity_icon">[docs]</a>    <span class="k">def</span> <span class="nf">get_entity_icon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">):</span>
+<div class="viewcode-block" id="ShotgunEntityModel.get_entity_icon"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel.get_entity_icon">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_entity_icon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convenience method. Retrieve the icon for the specified entity type if available.</span>
 
@@ -232,7 +232,7 @@
         <span class="n">shotgun_globals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;shotgun_globals&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">shotgun_globals</span><span class="o">.</span><span class="n">get_entity_type_icon</span><span class="p">(</span><span class="n">entity_type</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ShotgunEntityModel.get_entities"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel.get_entities">[docs]</a>    <span class="k">def</span> <span class="nf">get_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+<div class="viewcode-block" id="ShotgunEntityModel.get_entities"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel.get_entities">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get entities for the current item by traversing up the tree and pulling entity information</span>
 <span class="sd">        from each item if possible</span>
@@ -257,7 +257,7 @@
 
         <span class="k">return</span> <span class="n">entities</span></div>
 
-<div class="viewcode-block" id="ShotgunEntityModel.get_entity"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel.get_entity">[docs]</a>    <span class="k">def</span> <span class="nf">get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+<div class="viewcode-block" id="ShotgunEntityModel.get_entity"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel.get_entity">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the Shotgun entity details for the specified model item.</span>
 
@@ -286,13 +286,13 @@
 
         <span class="k">return</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="ShotgunEntityModel.async_refresh"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel.async_refresh">[docs]</a>    <span class="k">def</span> <span class="nf">async_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ShotgunEntityModel.async_refresh"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunEntityModel.async_refresh">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">async_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Trigger an asynchronous refresh of the model</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_data</span><span class="p">()</span></div>
 
-    <span class="k">def</span> <span class="nf">_populate_default_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_populate_default_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Whenever an item is constructed, this methods is called. It allows subclasses to intercept</span>
 <span class="sd">        the construction of a QStandardItem and add additional metadata or make other changes</span>
@@ -328,7 +328,7 @@
         <span class="c1"># update item icon</span>
         <span class="n">item</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">entity_icon</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_icon</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_get_default_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sg_entity</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_default_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sg_entity</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the default icon for the specified entity.</span>
 
@@ -392,7 +392,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Autodesk.</p>
+    <p>&#169; Copyright 2025, Autodesk.</p>
   </div>
 
    

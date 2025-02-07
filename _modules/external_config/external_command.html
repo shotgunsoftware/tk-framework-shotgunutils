@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>external_config.external_command &mdash; tk-framework-shotgunutils v5.10.1 documentation</title>
+  <title>external_config.external_command &mdash; tk-framework-shotgunutils v5.10.2 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -84,7 +84,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.10.1.<br>
+    <b>tk-framework-shotgunutils</b> v5.10.2.<br>
     
         This documentation is part of the Flow Production Tracking.
     
@@ -137,15 +137,15 @@
 <span class="c1"># By accessing, using, copying or modifying this work you indicate your</span>
 <span class="c1"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights</span>
 <span class="c1"># not expressly granted therein are reserved by Shotgun Software Inc.</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">sgtk</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">external_command_utils</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sgtk</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">external_command_utils</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="ExternalCommand"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand">[docs]</a><span class="k">class</span> <span class="nc">ExternalCommand</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="ExternalCommand"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ExternalCommand</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Represents an external Toolkit command (e.g. menu option).</span>
 
@@ -158,7 +158,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="ExternalCommand.is_compatible"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.is_compatible">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">is_compatible</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_compatible</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Determines if the given data is compatible.</span>
 
@@ -171,7 +171,7 @@
             <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="ExternalCommand.is_valid_data"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.is_valid_data">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">is_valid_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_valid_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Tests whether key components of the data contained in the cache are still</span>
 <span class="sd">        valid. This helps protect against file paths that might have been cached</span>
@@ -197,7 +197,7 @@
         <span class="k">return</span> <span class="n">icon_passes</span></div>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">external_configuration</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">external_configuration</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a new :class:`ExternalCommand` instance based on the</span>
 <span class="sd">        data in data. This data is generated by :meth:`external_command_utils.serialize_command`.</span>
@@ -231,7 +231,7 @@
             <span class="n">icon</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;icon&quot;</span><span class="p">],</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">callback_name</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">,</span>
@@ -273,7 +273,7 @@
 <span class="sd">            supports multiple selection.</span>
 <span class="sd">        :param str icon: The path to a square png icon file representing this item</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ExternalCommand</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="c1"># keep a handle to the current app/engine/fw bundle for convenience</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">current_bundle</span><span class="p">()</span>
@@ -313,7 +313,7 @@
             <span class="c1"># No icon provided.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_icon</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        String representation</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -325,7 +325,7 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="ExternalCommand.deserialize"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.deserialize">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a :class:`ExternalCommand` instance given some serialized data.</span>
 
@@ -355,7 +355,7 @@
             <span class="n">icon</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;icon&quot;</span><span class="p">],</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="ExternalCommand.serialize"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.serialize">[docs]</a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ExternalCommand.serialize"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.serialize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Serializes the current object into a string.</span>
 
@@ -385,7 +385,7 @@
         <span class="k">return</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">pipeline_configuration_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pipeline_configuration_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The name of the Shotgun pipeline configuration this command is associated with,</span>
 <span class="sd">        or ``None`` if no association exists.</span>
@@ -393,35 +393,35 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_config_name</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">system_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">system_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The system name for the command</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback_name</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">engine_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">engine_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The name of the engine associated with the command</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine_name</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Display name, suitable for display in a menu.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_display_name</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">icon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">icon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The path to a square png icon file representing this item</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_icon</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Group command belongs to or None if not defined.</span>
 
@@ -437,7 +437,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">is_group_default</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_group_default</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        True if this command is a default action for a group.</span>
 
@@ -453,7 +453,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_group_default</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">excluded_permission_groups_hint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">excluded_permission_groups_hint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Legacy option used by some older Shotgun toolkit apps.</span>
 <span class="sd">        Apps may hint a list of permission groups for which</span>
@@ -465,7 +465,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_deny_permissions</span> <span class="ow">or</span> <span class="p">[]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">support_shotgun_multiple_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">support_shotgun_multiple_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Legacy flag indicated by some older Toolkit apps,</span>
 <span class="sd">        indicating that the app can accept a list of</span>
@@ -474,21 +474,21 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sg_supports_multiple_selection</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">tooltip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tooltip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Associated help text tooltip.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tooltip</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">interpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">interpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The Python interpreter path to use when executing the command.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span>
 
     <span class="nd">@interpreter</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">interpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">interpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the command&#39;s Python interpreter path.</span>
 
@@ -497,7 +497,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span> <span class="o">=</span> <span class="n">interpreter</span>
 
-<div class="viewcode-block" id="ExternalCommand.execute"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ExternalCommand.execute"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.execute">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Executes the external command in a separate process.</span>
 
@@ -528,7 +528,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execute</span><span class="p">(</span><span class="n">pre_cache</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ExternalCommand.execute_on_multiple_entities"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.execute_on_multiple_entities">[docs]</a>    <span class="k">def</span> <span class="nf">execute_on_multiple_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">entity_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ExternalCommand.execute_on_multiple_entities"><a class="viewcode-back" href="../../external_config.html#external_config.ExternalCommand.execute_on_multiple_entities">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">execute_on_multiple_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">entity_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Executes the external command in a separate process. This method</span>
 <span class="sd">        provides support for executing commands that support being run on</span>
@@ -554,7 +554,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execute</span><span class="p">(</span><span class="n">pre_cache</span><span class="p">,</span> <span class="n">entity_ids</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">entity_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">entity_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Executes the external command in a separate process.</span>
 
@@ -577,7 +577,7 @@
 <span class="sd">        :returns: Output from execution session.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># local imports because this is executed from runner scripts</span>
-        <span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">create_parameter_file</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_parameter_file</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: Execute command&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
 
@@ -657,7 +657,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Autodesk.</p>
+    <p>&#169; Copyright 2025, Autodesk.</p>
   </div>
 
    
