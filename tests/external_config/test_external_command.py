@@ -11,7 +11,7 @@
 import os
 import contextlib
 
-from mock import patch
+from unittest import mock
 
 from sgtk.util import process  # noqa
 from sgtk.util import filesystem  # noqa
@@ -84,7 +84,7 @@ class TestExternalCommand(ExternalConfigBase):
             else:
                 return original_os_path_exists(path)
 
-        with patch("os.path.exists", side_effect=ico_exists):
+        with mock.patch("os.path.exists", side_effect=ico_exists):
             yield
 
     @property
@@ -175,8 +175,8 @@ class TestExternalCommand(ExternalConfigBase):
         )
         self.assertIsNone(self.ec.icon)
 
-    @patch("sgtk.util.process.subprocess_check_output")
-    @patch("sgtk.util.filesystem.safe_delete_file")
+    @mock.patch("sgtk.util.process.subprocess_check_output")
+    @mock.patch("sgtk.util.filesystem.safe_delete_file")
     def test_execute_with_default_params(self, mockedSafeDeleteFile, mockedCheckOutput):
         """
         Test & exercise the code as much as possible up to the subprocess method call
@@ -186,8 +186,8 @@ class TestExternalCommand(ExternalConfigBase):
         self.assertEqual(mockedCheckOutput.call_count, 1)
         self.assertEqual(mockedSafeDeleteFile.call_count, 1)
 
-    @patch("sgtk.util.process.subprocess_check_output")
-    @patch("sgtk.util.filesystem.safe_delete_file")
+    @mock.patch("sgtk.util.process.subprocess_check_output")
+    @mock.patch("sgtk.util.filesystem.safe_delete_file")
     def test_execute_on_multiple_entities_with_default_params(
         self, mockedSafeDeleteFile, mockedCheckOutput
     ):

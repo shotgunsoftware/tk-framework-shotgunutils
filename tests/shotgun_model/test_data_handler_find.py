@@ -10,8 +10,8 @@
 
 import sys
 import os
+from unittest import mock
 
-from mock import patch, Mock, call
 from tank_test.tank_test_base import *
 
 # import the test base class
@@ -57,8 +57,8 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
 
         # first let the data handler perform its request
         # and make sure it registers it in an expected way
-        mock_data_retriever = Mock()
-        mock_data_retriever.execute_find = Mock(return_value=1234)
+        mock_data_retriever = mock.Mock()
+        mock_data_retriever.execute_find = mock.Mock(return_value=1234)
 
         request_id = dh.generate_data_request(mock_data_retriever)
 
@@ -239,13 +239,13 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         ]
         dh.update_data(sg_data)
 
-        callback = Mock()
+        callback = mock.Mock()
 
         dh.generate_child_nodes(None, None, callback)
 
         calls = [
-            call(None, dh.get_data_item_from_uid("/Character")),
-            call(None, dh.get_data_item_from_uid("/Prop")),
+            mock.call(None, dh.get_data_item_from_uid("/Character")),
+            mock.call(None, dh.get_data_item_from_uid("/Prop")),
         ]
 
         # Python 2 and 3 have different ordering internally
@@ -254,24 +254,24 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         callback.assert_has_calls(calls, any_order=True)
 
         # and check children
-        callback = Mock()
+        callback = mock.Mock()
         dh.generate_child_nodes("/Character", None, callback)
         calls = [
-            call(None, dh.get_data_item_from_uid(4)),
-            call(None, dh.get_data_item_from_uid(5)),
-            call(None, dh.get_data_item_from_uid(6)),
+            mock.call(None, dh.get_data_item_from_uid(4)),
+            mock.call(None, dh.get_data_item_from_uid(5)),
+            mock.call(None, dh.get_data_item_from_uid(6)),
         ]
         # Python 2 and 3 have different ordering internally
         # for their keys, so we can't expect the items
         # be generated in the same order.
         callback.assert_has_calls(calls, any_order=True)
 
-        callback = Mock()
+        callback = mock.Mock()
         dh.generate_child_nodes("/Prop", None, callback)
         calls = [
-            call(None, dh.get_data_item_from_uid(1)),
-            call(None, dh.get_data_item_from_uid(2)),
-            call(None, dh.get_data_item_from_uid(3)),
+            mock.call(None, dh.get_data_item_from_uid(1)),
+            mock.call(None, dh.get_data_item_from_uid(2)),
+            mock.call(None, dh.get_data_item_from_uid(3)),
         ]
         # Python 2 and 3 have different ordering internally
         # for their keys, so we can't expect the items

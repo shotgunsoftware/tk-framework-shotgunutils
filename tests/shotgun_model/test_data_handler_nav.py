@@ -10,8 +10,8 @@
 
 import sys
 import os
+from unittest import mock
 
-from mock import patch, Mock, call
 from tank_test.tank_test_base import *
 
 # import the test base class
@@ -51,8 +51,8 @@ class TestShotgunNavDataHandler(TestShotgunUtilsFramework):
 
         # first let the data handler perform its request
         # and make sure it registers it in an expected way
-        mock_data_retriever = Mock()
-        mock_data_retriever.execute_nav_expand = Mock(return_value=1234)
+        mock_data_retriever = mock.Mock()
+        mock_data_retriever.execute_nav_expand = mock.Mock(return_value=1234)
 
         request_id = dh.generate_data_request(mock_data_retriever, "/")
 
@@ -171,14 +171,14 @@ class TestShotgunNavDataHandler(TestShotgunUtilsFramework):
 
         dh.update_data(sg_data)
 
-        callback = Mock()
+        callback = mock.Mock()
 
         dh.generate_child_nodes(None, None, callback)
 
         calls = [
-            call(None, dh.get_data_item_from_uid("/foo")),
-            call(None, dh.get_data_item_from_uid("/bar")),
-            call(None, dh.get_data_item_from_uid("/baz")),
+            mock.call(None, dh.get_data_item_from_uid("/foo")),
+            mock.call(None, dh.get_data_item_from_uid("/bar")),
+            mock.call(None, dh.get_data_item_from_uid("/baz")),
         ]
 
         # Python 2 and 3 have different ordering internally
@@ -187,12 +187,12 @@ class TestShotgunNavDataHandler(TestShotgunUtilsFramework):
         callback.assert_has_calls(calls, any_order=True)
 
         # and check children
-        callback = Mock()
+        callback = mock.Mock()
         dh.generate_child_nodes("/foo", None, callback)
         calls = [
-            call(None, dh.get_data_item_from_uid("/foo/smith")),
-            call(None, dh.get_data_item_from_uid("/foo/brown")),
-            call(None, dh.get_data_item_from_uid("/foo/jones")),
+            mock.call(None, dh.get_data_item_from_uid("/foo/smith")),
+            mock.call(None, dh.get_data_item_from_uid("/foo/brown")),
+            mock.call(None, dh.get_data_item_from_uid("/foo/jones")),
         ]
         # Python 2 and 3 have different ordering internally
         # for their keys, so we can't expect the items

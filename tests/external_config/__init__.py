@@ -9,8 +9,8 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sys
+from unittest import mock
 
-from mock import Mock
 from base_test import TestShotgunUtilsFramework
 
 
@@ -43,8 +43,8 @@ class _MockedSignal(object):
     """
 
     def __init__(self, *args, **kwargs):
-        self.emit = Mock()
-        self.connect = Mock()
+        self.emit = mock.Mock()
+        self.connect = mock.Mock()
 
 
 class ExternalConfigBase(TestShotgunUtilsFramework):
@@ -82,7 +82,7 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
         self.external_config = self.framework.import_module("external_config")
         self.shotgun_model = self.framework.import_module("shotgun_model")
 
-        self.bg_task_manager = Mock()
+        self.bg_task_manager = mock.Mock()
         self.bg_task_manager.task_completed = _MockedSignal()
 
         self._engine_name = "test_engine"

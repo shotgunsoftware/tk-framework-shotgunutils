@@ -10,7 +10,7 @@ import os
 import time
 import shutil
 
-from mock import patch
+from unittest import mock
 from tank_test.tank_test_base import setUpModule  # noqa
 
 # import the test base class
@@ -33,7 +33,7 @@ class TestDataRetriever(TestShotgunUtilsFramework):
         super().setUp()
         self.shotgun_data = self.framework.import_module("shotgun_data")
 
-    @patch("sgtk.util.download_url")
+    @mock.patch("sgtk.util.download_url")
     def test_thumbnail_cache(self, patched):
         """
         Test thumbnail caching
