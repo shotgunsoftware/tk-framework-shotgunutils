@@ -20,12 +20,6 @@ class TestExternalConfigLoader(ExternalConfigBase):
     Tests for the external config loader.
     """
 
-    def setUp(self):
-        """
-        Initial setup.
-        """
-        super().setUp()
-
     def test_task_failed(self):
         """
         Make sure we properly report a failed config retrieval.

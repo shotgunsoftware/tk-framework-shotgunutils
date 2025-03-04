@@ -274,9 +274,9 @@ class CachedShotgunSchema(QtCore.QObject):
 
             if self.__sg_data_retrievers:
                 data_retriever = self.__sg_data_retrievers[0]["data_retriever"]
-                self._sg_schema_query_ids[
-                    data_retriever.get_schema(project_id)
-                ] = project_id
+                self._sg_schema_query_ids[data_retriever.get_schema(project_id)] = (
+                    project_id
+                )
             else:
                 self._bundle.log_warning(
                     "No data retrievers registered with this schema manager. "
