@@ -41,3 +41,4 @@ jobs:
 - template: build-pipeline.yml@templates
   parameters:
     tk_toolchain_ref: ticket/SG-38086-tests
+    tk_core_ref: ticket/SG-38086-tests
