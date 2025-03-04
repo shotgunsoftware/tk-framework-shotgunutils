@@ -74,9 +74,12 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
             sorted(parameters[2]), sorted(["code", "image", "sg_asset_type"])
         )
         self.assertEqual(parameters[3], None)
-        self.assertEqual(
-            mock_data_retriever.execute_find.call_args.kwargs, {"limit": None}
-        )
+
+        if sys.version_info[0:2] >= (3, 9):
+            # kwarg property was introduced in Python 3.8
+            self.assertEqual(
+                mock_data_retriever.execute_find.call_args.kwargs, {"limit": None}
+            )
 
         self.assertEqual(request_id, 1234)
 
