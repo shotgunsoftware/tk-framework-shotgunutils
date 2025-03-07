@@ -140,7 +140,7 @@ def get_cache_path(identifier_dict):
     :retuns: path on disk, relative to the current bundle's cache location.
     """
     params_hash = hashlib.md5()
-    for (k, v) in identifier_dict.items():
+    for k, v in identifier_dict.items():
         params_hash.update(sgutils.ensure_binary(str(k)))
         params_hash.update(sgutils.ensure_binary(str(v)))
 
