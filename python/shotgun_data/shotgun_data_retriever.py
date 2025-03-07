@@ -789,7 +789,7 @@ class ShotgunDataRetriever(QtCore.QObject):
                 "entity_type": entity_type,
                 "entity_id": entity_id,
                 "field": field,
-                "load_image": load_image
+                "load_image": load_image,
                 # "thumb_path":<passed from check task>
                 # "image":<passed from check task>
             },
