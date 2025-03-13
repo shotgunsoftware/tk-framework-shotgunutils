@@ -36,7 +36,6 @@ class ShotgunUtilsFramework(sgtk.platform.Framework):
         Post an old cached data cleanup in the background
         """
         self.log_debug("%s: Initializing..." % self)
-        self.log_debug("%s: >>>> LOCAL REPO" % self)
         self._stop_cleanup = False
         self._bg_cleanup_thread = None
         self._post_old_data_cleanup()
