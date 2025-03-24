@@ -11,7 +11,7 @@
 import sys
 import os
 
-from mock import patch, Mock, call
+from unittest.mock import patch, Mock, call
 from tank_test.tank_test_base import *
 
 # import the test base class

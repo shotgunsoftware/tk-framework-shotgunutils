@@ -10,7 +10,7 @@
 
 import sys
 
-from mock import Mock
+from unittest.mock import Mock
 from base_test import TestShotgunUtilsFramework
 
 

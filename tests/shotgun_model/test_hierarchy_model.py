@@ -8,7 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 from tank_test.tank_test_base import setUpModule  # noqa
 from base_test import TestShotgunUtilsFramework

@@ -11,7 +11,7 @@
 import os
 import contextlib
 
-from mock import patch
+from unittest.mock import patch
 
 from sgtk.util import process  # noqa
 from sgtk.util import filesystem  # noqa
