@@ -10,7 +10,7 @@
 
 import time
 
-import unittest.mock
+import unittest import mock
 
 from tank_vendor import six
 
