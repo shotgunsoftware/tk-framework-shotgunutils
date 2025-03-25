@@ -75,7 +75,9 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         )
         self.assertEqual(parameters[3], None)
         self.assertEqual(
-            mock_data_retriever.execute_find.call_args.kwargs, {"limit": None}
+            mock_data_retriever.execute_find.call_args.kwargs,
+            {"limit": None},
+            f"Value does not match: {mock_data_retriever.execute_find.call_args.kwargs}",
         )
 
         self.assertEqual(request_id, 1234)
