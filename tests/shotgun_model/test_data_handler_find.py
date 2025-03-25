@@ -74,13 +74,13 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
             sorted(parameters[2]), sorted(["code", "image", "sg_asset_type"])
         )
         self.assertEqual(parameters[3], None)
-        self.assertEqual(
-            mock_data_retriever.execute_find.call_args.kwargs,
-            {"limit": None},
-            f"Value does not match: {mock_data_retriever.execute_find.call_args.kwargs} {type(mock_data_retriever.execute_find.call_args.kwargs)}",
-        )
-
         self.assertEqual(request_id, 1234)
+        
+        if sys.version_info >= (3, 9):
+            # `kwargs`` property of `call_args` is only available in Python 3.8+
+            self.assertEqual(
+                mock_data_retriever.execute_find.call_args.kwargs, {"limit": None}
+            )
 
     def test_updates(self):
         """
