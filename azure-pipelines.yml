@@ -39,6 +39,3 @@ variables:
 
 jobs:
 - template: build-pipeline.yml@templates
-  parameters:
-    extra_test_dependencies:
-      - pytest-faulthandler
