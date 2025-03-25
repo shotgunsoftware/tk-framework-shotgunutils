@@ -75,9 +75,9 @@ class TestShotgunFindDataHandler(TestShotgunUtilsFramework):
         )
         self.assertEqual(parameters[3], None)
         self.assertEqual(request_id, 1234)
-        
+
         if sys.version_info >= (3, 9):
-            # `kwargs`` property of `call_args` is only available in Python 3.8+
+            # `kwargs` property of `call_args` is only available in Python 3.8+
             self.assertEqual(
                 mock_data_retriever.execute_find.call_args.kwargs, {"limit": None}
             )
