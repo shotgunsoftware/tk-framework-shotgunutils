@@ -10,7 +10,7 @@
 
 import sys
 
-from mock import Mock
+from unittest.mock import Mock
 from base_test import TestShotgunUtilsFramework
 
 
@@ -96,3 +96,10 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
             self.bg_task_manager,
             None,
         )
+
+    def tearDown(self):
+        """
+        Cleanup
+        """
+        self.external_config_loader = None
+        super().tearDown()

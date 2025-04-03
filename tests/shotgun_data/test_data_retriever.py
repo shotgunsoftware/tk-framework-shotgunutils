@@ -10,7 +10,7 @@ import os
 import time
 import shutil
 
-from mock import patch
+from unittest.mock import patch
 from tank_test.tank_test_base import setUpModule  # noqa
 
 # import the test base class
