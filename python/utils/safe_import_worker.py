@@ -2,10 +2,6 @@ import importlib
 import json
 import sys
 
-import sgtk
-
-logger = sgtk.LogManager.get_logger(__name__)
-
 
 def main():
     """
@@ -38,7 +34,6 @@ def main():
         print(json.dumps({"success": True, "result": safe_result}))
 
     except Exception as e:
-        logger.warning("Error evaluating expression: %s", str(e))
         print(json.dumps({"success": False, "error": str(e)}))
 
 
