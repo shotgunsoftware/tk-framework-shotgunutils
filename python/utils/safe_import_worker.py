@@ -1,11 +1,11 @@
-# universal_worker.py
-
+import importlib
 import json
 import sys
-import importlib
+
 import sgtk
 
 logger = sgtk.LogManager.get_logger(__name__)
+
 
 def main():
     """
@@ -40,6 +40,7 @@ def main():
     except Exception as e:
         logger.warning("Error evaluating expression: %s", str(e))
         print(json.dumps({"success": False, "error": str(e)}))
+
 
 if __name__ == "__main__":
     main()

@@ -1,10 +1,12 @@
+import json
 import os
 import subprocess
 import sys
-import json
+
 import sgtk
 
 logger = sgtk.LogManager.get_logger(__name__)
+
 
 def safe_import(module_name):
     """
@@ -20,10 +22,7 @@ def safe_import(module_name):
     :param module_name: Name of the module to import (e.g., "opentimelineio").
     :return: A RemoteAttribute object representing the imported module.
     """
-    worker_path = os.path.join(
-        os.path.dirname(__file__),
-        "safe_import_worker.py"
-    )
+    worker_path = os.path.join(os.path.dirname(__file__), "safe_import_worker.py")
 
     class RemoteAttribute:
         """
@@ -57,13 +56,12 @@ def safe_import(module_name):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 env=env,
-                text=True
+                text=True,
             )
 
-            input_data = json.dumps({
-                "module": self.module_name,
-                "expression": expression
-            })
+            input_data = json.dumps(
+                {"module": self.module_name, "expression": expression}
+            )
 
             stdout, stderr = process.communicate(input=input_data)
 
