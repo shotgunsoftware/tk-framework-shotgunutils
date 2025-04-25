@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 import json
+import sgtk
 
 logger = sgtk.LogManager.get_logger(__name__)
 
