@@ -696,7 +696,10 @@ class ShotgunModel(ShotgunQueryModel):
 
         self._set_tooltip(item, data_item.shotgun_data)
 
-        # Update the text content for the rest of the columns in the row.
+    def _update_item_columns(self, item, data_item):
+        """
+        Updates the text content of the additional columns in the model item.
+        """
         row = item.index().row()
         if row >= 0:
             for col_idx, column in enumerate(self.__column_fields, start=1):

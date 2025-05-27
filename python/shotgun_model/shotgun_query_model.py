@@ -1095,6 +1095,7 @@ class ShotgunQueryModel(QtGui.QStandardItemModel):
                     if model_item:
                         self._log_debug("Updating model item %s" % model_item)
                         self._update_item(model_item, data_item)
+                        self._update_item_columns(model_item, data_item)
 
             self._log_debug("...diffs applied!")
 
