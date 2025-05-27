@@ -696,18 +696,12 @@ class ShotgunModel(ShotgunQueryModel):
 
         self._set_tooltip(item, data_item.shotgun_data)
 
-        # Update the text content for the siblings
+        # Update the text content for the rest of the columns in the row.
         row = item.index().row()
         if row >= 0:
-            # We use range starting from 1 to skip the first column.
-            siblings = [
-                self.itemFromIndex(self.index(row, column))
-                for column in range(1, self.columnCount())
-            ]
-
-            for idx, column in enumerate(self.__column_fields):
+            for col_idx, column in enumerate(self.__column_fields, start=1):
+                sibling = self.itemFromIndex(self.index(row, col_idx))
                 column_text = sanitize_for_qt_model(data_item.shotgun_data.get(column))
-                sibling = siblings[idx] if idx < len(siblings) else None
 
                 if sibling and sibling != item and sibling.text() != column_text:
                     self._log_debug(f"Updating sibling text content {sibling}")
