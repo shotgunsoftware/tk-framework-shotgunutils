@@ -102,7 +102,7 @@ class TestModel(TestShotgunUtilsFramework):
                 # Check that only the first item was updated
                 self.assertEqual("asset1-renamed", model.item(0, 0).text())
                 self.assertEqual("asset1", model.item(0, 1).text())
-                
+
                 model._update_item_columns(model_item, data_item)
 
         # Check that the columns were updated
