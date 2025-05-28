@@ -37,15 +37,6 @@ class TestModel(TestShotgunUtilsFramework):
 
         self.shotgun_model = self.framework.import_module("shotgun_model")
 
-        patcher = patch.object(
-            self.mockgun, "server_caps", Mock(version=(8, 0, 0)), create=True
-        )
-        patcher.start()
-        self.addCleanup(patcher.stop)
-
-        patcher = patch.object(self.mockgun, "nav_expand", create=True, return_value={})
-        patcher.start()
-        self.addCleanup(patcher.stop)
 
     def test_update_and_check_row(self):
         # Create a ShotgunModel instance
