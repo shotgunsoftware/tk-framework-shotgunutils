@@ -701,14 +701,16 @@ class ShotgunModel(ShotgunQueryModel):
         Updates the text content of the additional columns in the model item.
         """
         row = item.index().row()
-        if row >= 0:
-            for col_idx, column in enumerate(self.__column_fields, start=1):
-                sibling = self.itemFromIndex(self.index(row, col_idx))
-                column_text = sanitize_for_qt_model(data_item.shotgun_data.get(column))
+        if row < 0:
+            return
 
-                if sibling and sibling != item and sibling.text() != column_text:
-                    self._log_debug(f"Updating sibling text content {sibling}")
-                    sibling.setText(column_text)
+        for col_idx, column in enumerate(self.__column_fields, start=1):
+            sibling = self.itemFromIndex(self.index(row, col_idx))
+            column_text = sanitize_for_qt_model(data_item.shotgun_data.get(column))
+
+            if sibling and sibling != item and sibling.text() != column_text:
+                self._log_debug(f"Updating sibling text content {sibling}")
+                sibling.setText(column_text)
 
     ########################################################################################
     # private methods
