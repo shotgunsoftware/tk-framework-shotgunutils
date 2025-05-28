@@ -96,14 +96,16 @@ class TestModel(TestShotgunUtilsFramework):
         for item in diff:
             data_item = item["data"]
             model_item = model._get_item_by_unique_id(data_item.unique_id)
-            if model_item:
-                model._update_item(model_item, data_item)
+            self.assertTrue(model_item is not None, "Item should exist in the model")
 
-                # Check that only the first item was updated
-                self.assertEqual("asset1-renamed", model.item(0, 0).text())
-                self.assertEqual("asset1", model.item(0, 1).text())
+            model._update_item(model_item, data_item)
 
-                model._update_item_columns(model_item, data_item)
+            # Check that only the first item was updated
+            self.assertEqual("asset1-renamed", model.item(0, 0).text())
+            self.assertEqual("asset1", model.item(0, 1).text())
+            self.assertEqual("wtg", model.item(0, 3).text())
+
+            model._update_item_columns(model_item, data_item)
 
         # Check that the columns were updated
         self.assertEqual("asset1-renamed", model.item(0, 0).text())
