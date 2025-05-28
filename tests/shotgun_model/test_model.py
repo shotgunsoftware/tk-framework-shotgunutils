@@ -37,7 +37,6 @@ class TestModel(TestShotgunUtilsFramework):
 
         self.shotgun_model = self.framework.import_module("shotgun_model")
 
-
     def test_update_and_check_row(self):
         # Create a ShotgunModel instance
         model = self.shotgun_model.ShotgunModel(
