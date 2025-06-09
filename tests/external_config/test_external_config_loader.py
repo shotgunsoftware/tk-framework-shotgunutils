@@ -8,6 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+import os
 import sys
 
 from sgtk.bootstrap import ToolkitManager
@@ -123,3 +124,12 @@ class TestExternalConfigLoader(ExternalConfigBase):
         ec.request_configurations(self._project["id"])
         self.assertEqual(len(ec._task_ids.items()), 1)  # No duplicate of task ids
         self.bg_task_manager.add_task.assert_called_once()
+
+class TestExternalConfigScript(ExternalConfigBase):
+    def test_external_runner_import(self):
+        dummy_utils_folder = os.path.abspath(
+            os.path.join(self.fixtures_root, "modules")
+        )
+        module = self.external_config._import_py_file(dummy_utils_folder, "foo")
+        self.assertTrue(hasattr(module, "bar"))
+        self.assertEqual(module.bar, 42)
