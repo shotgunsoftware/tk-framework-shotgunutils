@@ -11,3 +11,4 @@
 from .external_config_loader import ExternalConfigurationLoader
 from .external_command import ExternalCommand
 from .config import ExternalConfiguration
+from .scripts.external_runner import _import_py_file  # For unit test
