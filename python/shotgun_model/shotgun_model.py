@@ -708,7 +708,14 @@ class ShotgunModel(ShotgunQueryModel):
             sibling = self.itemFromIndex(self.index(row, col_idx))
             column_text = sanitize_for_qt_model(data_item.shotgun_data.get(column))
 
-            if sibling and sibling != item and sibling.text() != column_text:
+            if all(
+                (
+                    sibling,
+                    sibling != item,
+                    sibling.data(self.SG_DATA_ROLE) is None,
+                    sibling.text() != column_text,
+                )
+            ):
                 self._log_debug(f"Updating sibling text content {sibling}")
                 sibling.setText(column_text)
 
