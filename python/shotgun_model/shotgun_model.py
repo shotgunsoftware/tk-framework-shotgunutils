@@ -696,6 +696,29 @@ class ShotgunModel(ShotgunQueryModel):
 
         self._set_tooltip(item, data_item.shotgun_data)
 
+    def _update_item_columns(self, item, data_item):
+        """
+        Updates the text content of the additional columns in the model item.
+        """
+        row = item.index().row()
+        if row < 0:
+            return
+
+        for col_idx, column in enumerate(self.__column_fields, start=1):
+            sibling = self.itemFromIndex(self.index(row, col_idx))
+            column_text = sanitize_for_qt_model(data_item.shotgun_data.get(column))
+
+            if all(
+                (
+                    sibling,
+                    sibling != item,
+                    sibling.data(self.SG_DATA_ROLE) is None,
+                    sibling.text() != column_text,
+                )
+            ):
+                self._log_debug(f"Updating sibling text content {sibling}")
+                sibling.setText(column_text)
+
     ########################################################################################
     # private methods
 
