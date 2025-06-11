@@ -125,6 +125,7 @@ class TestExternalConfigLoader(ExternalConfigBase):
         self.assertEqual(len(ec._task_ids.items()), 1)  # No duplicate of task ids
         self.bg_task_manager.add_task.assert_called_once()
 
+
 class TestExternalConfigScript(ExternalConfigBase):
     def test_external_runner_import(self):
         dummy_utils_folder = os.path.abspath(
