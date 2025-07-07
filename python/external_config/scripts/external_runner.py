@@ -17,11 +17,18 @@ import importlib.util
 import traceback
 
 
-# handle imports
-path_to_sgtk = sys.argv[1]
-# prepend sgtk to sys.path to make sure
-# know exactly what version of sgtk we are running.
-sys.path.insert(0, path_to_sgtk)
+try:
+    # handle imports
+    path_to_sgtk = sys.argv[1]
+    # prepend sgtk to sys.path to make sure
+    # know exactly what version of sgtk we are running.
+    sys.path.insert(0, path_to_sgtk)
+except IndexError:
+    # if we don't have a path to sgtk, then we are probably running
+    # this from within the context of a shotgun engine, so we can
+    # just import sgtk directly.
+    pass
+
 import sgtk
 
 # we should now be able to import QT - this is a
