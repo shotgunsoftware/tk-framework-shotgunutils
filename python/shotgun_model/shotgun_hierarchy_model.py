@@ -23,11 +23,6 @@ from .shotgun_query_model import ShotgunQueryModel
 from .data_handler_nav import ShotgunNavDataHandler
 from .util import sanitize_for_qt_model
 
-try:
-    from tank_vendor import sgutils
-except ImportError:
-    from tank_vendor import six as sgutils
-
 logger = sgtk.platform.get_logger(__name__)
 
 
