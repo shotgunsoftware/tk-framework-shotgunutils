@@ -620,7 +620,7 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         for entity_type, fields in sorted(self._entity_fields.items()):
             for field in fields:
                 entity_field_hash.update(
-                    ("%s.%s" % (entity_type, field).encode("utf-8"))
+                    f"{entity_type}.{field}".encode("utf-8")
                 )
 
         # convert the seed entity field into a path segment.
