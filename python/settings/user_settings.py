@@ -14,11 +14,6 @@ from sgtk.platform.qt import QtCore
 from sgtk import TankError
 from ..shotgun_model import sanitize_qt
 
-try:
-    from tank_vendor import sgutils
-except ImportError:
-    from tank_vendor import six as sgutils
-
 
 class UserSettings(object):
     """
@@ -120,21 +115,12 @@ class UserSettings(object):
         full_name = self.__resolve_settings_name(name, scope)
         self.__fw.log_debug("User Settings Manager: Storing %s" % full_name)
         try:
-            # Legacy Python 2 settings warning:
             # QSettings can pickle values like bytes or classes when the data
-            # is too complex for Qt. If a setting was written with Python 3
-            # (protocol 3), it will raise an error when read with Python 2
-            # (since protocol 3 didn't exist in Python 2).
-            #
-            # Although Python 2 is no longer supported, legacy settings written
-            # in Python 2 may still exist. To ensure compatibility, avoid storing
-            # binary data or complex objects in QSettings.
+            # is too complex for Qt.
             if pickle_setting:
                 # Only sanitize and pickle the raw value if indicated.
                 sanitized_value = sanitize_qt(value)
-                settings_value = sgutils.ensure_str(
-                    sgtk.util.pickle.dumps(sanitized_value)
-                )
+                settings_value = sgtk.util.pickle.dumps(sanitized_value)
             else:
                 # Store the raw value. Some objects cannot be retrieved correctly after
                 # sanitizing, like QByteArray.
@@ -172,7 +158,7 @@ class UserSettings(object):
             elif is_setting_pickled and isinstance(raw_value, str):
                 # Unpickle the raw value if it was hinted that the settings raw value was
                 # pickled before storing it, and the raw value is a string.
-                resolved_val = sgtk.util.pickle.loads(sgutils.ensure_binary(raw_value))
+                resolved_val = sgtk.util.pickle.loads(raw_value.encode("utf-8"))
                 resolved_val = sanitize_qt(resolved_val)
             else:
                 # Do not unpickle the raw value, either it was hinted that the raw value

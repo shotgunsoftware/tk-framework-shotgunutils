@@ -22,11 +22,6 @@ from .shotgun_query_model import ShotgunQueryModel
 from .data_handler_find import ShotgunFindDataHandler
 from .util import get_sanitized_data, get_sg_data, sanitize_for_qt_model
 
-try:
-    from tank_vendor import sgutils
-except ImportError:
-    from tank_vendor import six as sgutils
-
 
 class ShotgunModel(ShotgunQueryModel):
     """
@@ -766,34 +761,24 @@ class ShotgunModel(ShotgunQueryModel):
         # now hash up the rest of the parameters and make that the filename
         params_hash = hashlib.md5()
 
-        # FIXME: Python 2 and Python 3 order values differently in a dictionary,
-        # which means that their string representation are going to differ
-        # between Python versions
-        #
-        # As users are going to be drifting between Python 2 and Python 3 for a
-        # while, a fully deterministic way of generating the cache name should
-        # be implemented.
-        #
-        # A simple approach would be to encode the data in a JSON structured
-        # with ordered keys and then having the text representation of that data.
-        params_hash.update(sgutils.ensure_binary(str(self.__schema_generation)))
-        params_hash.update(sgutils.ensure_binary(str(self.__fields)))
-        params_hash.update(sgutils.ensure_binary(str(self.__order)))
-        params_hash.update(sgutils.ensure_binary(str(self.__hierarchy)))
+        params_hash.update(str(self.__schema_generation).encode("utf-8"))
+        params_hash.update(str(self.__fields).encode("utf-8"))
+        params_hash.update(str(self.__order).encode("utf-8"))
+        params_hash.update(str(self.__hierarchy).encode("utf-8"))
         # If this value changes over time (like between Qt4 and Qt5), we need to
         # assume our previous user roles are invalid since Qt might have taken over
         # it. If role's value is 32, don't add it to the hash so we don't
         # invalidate PySide/PyQt4 caches.
         if QtCore.Qt.UserRole != 32:
-            params_hash.update(sgutils.ensure_binary(str(QtCore.Qt.UserRole)))
+            params_hash.update(str(QtCore.Qt.UserRole).encode("utf-8"))
 
         # now hash up the filter parameters and the seed - these are dynamic
         # values that tend to change and be data driven, so they are handled
         # on a different level in the path
         filter_hash = hashlib.md5()
-        filter_hash.update(sgutils.ensure_binary(str(self.__filters)))
-        filter_hash.update(sgutils.ensure_binary(str(self.__additional_filter_presets)))
-        params_hash.update(sgutils.ensure_binary(str(cache_seed)))
+        filter_hash.update(str(self.__filters).encode("utf-8"))
+        filter_hash.update(str(self.__additional_filter_presets).encode("utf-8"))
+        params_hash.update(str(cache_seed).encode("utf-8"))
 
         # Organize files on disk based on entity type and then filter hash
         # keep extension names etc short in order to stay away from MAX_PATH

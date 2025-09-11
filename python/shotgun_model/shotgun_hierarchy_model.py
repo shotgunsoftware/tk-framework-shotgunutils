@@ -23,11 +23,6 @@ from .shotgun_query_model import ShotgunQueryModel
 from .data_handler_nav import ShotgunNavDataHandler
 from .util import sanitize_for_qt_model
 
-try:
-    from tank_vendor import sgutils
-except ImportError:
-    from tank_vendor import six as sgutils
-
 logger = sgtk.platform.get_logger(__name__)
 
 
@@ -606,27 +601,25 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
         # even though the navigation path provides a nice organizational
         # structure for caching, it can get long. to avoid MAX_PATH issues on
         # windows, just hash it
-        params_hash.update(sgutils.ensure_binary(str(self._path)))
+        params_hash.update((str(self._path)).encode("utf-8"))
 
         # include the schema generation number for clients
-        params_hash.update(sgutils.ensure_binary(str(self._schema_generation)))
+        params_hash.update((str(self._schema_generation)).encode("utf-8"))
 
         # If this value changes over time (like between Qt4 and Qt5), we need to
         # assume our previous user roles are invalid since Qt might have taken
         # it over. If role's value is 32, don't add it to the hash so we don't
         # invalidate PySide/PyQt4 caches.
         if QtCore.Qt.UserRole != 32:
-            params_hash.update(sgutils.ensure_binary(str(QtCore.Qt.UserRole)))
+            params_hash.update((str(QtCore.Qt.UserRole)).encode("utf-8"))
 
         # include the cache_seed for additional user control over external state
-        params_hash.update(sgutils.ensure_binary(str(cache_seed)))
+        params_hash.update((str(cache_seed)).encode("utf-8"))
 
         # iterate through the sorted entity fields to ensure consistent order
         for entity_type, fields in sorted(self._entity_fields.items()):
             for field in fields:
-                entity_field_hash.update(
-                    sgutils.ensure_binary("%s.%s" % (entity_type, field))
-                )
+                entity_field_hash.update(f"{entity_type}.{field}".encode("utf-8"))
 
         # convert the seed entity field into a path segment.
         # example: Version.entity => Version/entity

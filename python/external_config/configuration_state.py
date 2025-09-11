@@ -15,11 +15,6 @@ import json
 
 from sgtk.platform.qt import QtCore, QtGui
 
-try:
-    from tank_vendor import sgutils
-except ImportError:
-    from tank_vendor import six as sgutils
-
 logger = sgtk.platform.get_logger(__name__)
 
 shotgun_model = sgtk.platform.current_bundle().import_module("shotgun_model")
@@ -204,7 +199,7 @@ class ConfigStateModel(ShotgunModel):
             hash_data = {"sg_data": self._get_sg_data(), "entity_ids": self.entity_ids}
             hash_data_str = json.dumps(hash_data, sort_keys=True)
 
-            return hashlib.md5(sgutils.ensure_binary(hash_data_str)).hexdigest()
+            return hashlib.md5(hash_data_str.encode("utf-8")).hexdigest()
 
     def _get_sg_data(self):
         """
