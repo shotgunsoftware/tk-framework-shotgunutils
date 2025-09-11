@@ -13,23 +13,22 @@ import re
 import sys
 import errno
 import inspect
+import importlib.util
 import traceback
 
-# Until we remove the use of imp from this code,
-# we must suppress the warning here as it will pop up in the Shotgun browser
-# integration as a message box, when running in Python 3.4 >.
-import warnings
 
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
-    import imp
+try:
+    # handle imports
+    path_to_sgtk = sys.argv[1]
+    # prepend sgtk to sys.path to make sure
+    # know exactly what version of sgtk we are running.
+    sys.path.insert(0, path_to_sgtk)
+except IndexError:
+    # if we don't have a path to sgtk, then we are probably running
+    # this from within the context of a shotgun engine, so we can
+    # just import sgtk directly.
+    pass
 
-
-# handle imports
-path_to_sgtk = sys.argv[1]
-# prepend sgtk to sys.path to make sure
-# know exactly what version of sgtk we are running.
-sys.path.insert(0, path_to_sgtk)
 import sgtk
 
 # we should now be able to import QT - this is a
@@ -251,12 +250,13 @@ def _import_py_file(python_path, name):
     :param str name: name of py file (without extension)
     :returns: Python object
     """
-    mfile, pathname, description = imp.find_module(name, [python_path])
-    try:
-        module = imp.load_module(name, mfile, pathname, description)
-    finally:
-        if mfile:
-            mfile.close()
+    module_path = os.path.join(python_path, f"{name}.py")
+    spec = importlib.util.spec_from_file_location(name, module_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Could not find module {name} at {module_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
     return module
 
 
