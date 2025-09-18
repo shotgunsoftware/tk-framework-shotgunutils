@@ -15,4 +15,4 @@ This repository is a part of the Flow Production Tracking Toolkit.
 - For information about Flow Production Tracking in general, click here: https://www.autodesk.com/products/flow-production-tracking/overview
 
 ## Have a Question?
-Don't hesitate to contact us at https://www.autodesk.com/support/contact-support
+Don't hesitate to contact us at https://www.autodesk.com/support
