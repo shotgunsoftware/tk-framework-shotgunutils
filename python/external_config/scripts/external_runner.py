@@ -426,7 +426,7 @@ def main():
             # TankMissingEnvironmentFile: Missing environment file: /path/to/env/shotgun_camera.yml
             #
             if re.match(
-                "^Missing environment file:.*shotgun_[a-zA-Z0-9]+\.yml$", str(e)
+                "^Missing environment file:.*shotgun_[a-zA-Z0-9]+\\.yml$", str(e)
             ):
                 logger.debug(
                     "Bootstrap returned legacy fallback exception '%s'. "
