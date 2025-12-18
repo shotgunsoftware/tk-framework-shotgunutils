@@ -858,20 +858,23 @@ class CachedShotgunSchema(QtCore.QObject):
         """
         Build a mapping of entity type to project-visible Pipeline Steps.
 
-        :param list all_steps: List of Step dictionaries (as returned by a Shotgun find).
+        :param list all_steps: List of Step dictionaries (e.g. from a Shotgun find).
         :param int project_id: Project id whose schema visibility is applied.
 
-        This helper inspects the project's schema for each entity type and includes
-        only the Steps that are exposed via visible 'step_*' fields in that project.
-        The mapping is constructed from the provided ``all_steps`` list and filtered
-        by matching the field display name of visible 'step_*' fields to the Step
-        ``code``. The special display name "ALL TASKS" is ignored.
+        This inspects the project's schema for each entity type and includes only
+        those Steps that are exposed via visible 'step_*' fields for the project.
+        A field is eligible when:
+          - its name starts with 'step_'
+          - it is marked visible for the project
+          - its display name is not "ALL TASKS"
+          - its display name matches a Step 'code' present in ``all_steps``
 
-        - Input Steps are expected to be dicts containing at least: 'id', 'code',
-          'entity_type' and optionally 'color'.
-        - Returned lists are sorted by the Step 'code'.
+        Notes:
+        - Input Steps must contain at least: 'id', 'code', 'entity_type' (and may include 'color').
+        - The resulting order follows the schema fields iteration order; no extra sorting is applied.
 
-         :returns: dict[str, list[dict]] mapping entity type to visible Step dicts.
+
+        :returns: dict[str, list[dict]] mapping entity type to visible Step dicts.
         """
 
         self = cls.__get_instance()
@@ -887,30 +890,42 @@ class CachedShotgunSchema(QtCore.QObject):
 
         for entity_type, step_lookup_by_code in steps_by_entity_and_code.items():
             try:
-                schema_fields = self._bundle.shotgun.schema_field_read(
-                    entity_type,
-                    project_entity={"type": "Project", "id": project_id},
+                entity_fields = cls.get_entity_fields(
+                    entity_type, project_id=project_id
                 )
-            except Exception as e:
-                self._bundle.log_error(
-                    "Caught error attempting to read schema for entity type [%s] :\n%s"
-                    % (entity_type, e)
+            except Exception:
+                self._bundle.log_debug(
+                    f"Could not get entity fields for entity type {entity_type}"
                 )
-                raise
-            visible_steps = [
-                step_lookup_by_code[field_schema.get("name", {}).get("value")]
-                for field_name, field_schema in schema_fields.items()
-                if field_name
-                and field_name.startswith("step_")
-                and field_schema.get("visible", {}).get("value")
-                and field_schema.get("name", {}).get("value")
-                and field_schema.get("name", {}).get("value") != "ALL TASKS"
-                and field_schema.get("name", {}).get("value") in step_lookup_by_code
-            ]
-            if not visible_steps:
+                entity_fields = []
+
+            visible_step_codes = []
+            for field_name in entity_fields:
+                if not field_name.startswith("step_"):
+                    continue
+                try:
+                    if cls.field_is_visible(
+                        entity_type, field_name, project_id=project_id
+                    ):
+                        display_name = cls.get_field_display_name(
+                            entity_type, field_name, project_id=project_id
+                        )
+                        if (
+                            display_name
+                            and display_name != "ALL TASKS"
+                            and display_name in step_lookup_by_code
+                        ):
+                            visible_step_codes.append(display_name)
+                except Exception as e:
+                    self._bundle.log_debug(e)
+                    continue
+
+            if not visible_step_codes:
                 continue
-            visible_steps.sort(key=lambda x: x.get("code") or "")
-            step_map[entity_type].extend(visible_steps)
+
+            step_map[entity_type].extend(
+                [step_lookup_by_code[code] for code in visible_step_codes]
+            )
         return step_map
 
     @classmethod
