@@ -873,6 +873,7 @@ class CachedShotgunSchema(QtCore.QObject):
 
          :returns: dict[str, list[dict]] mapping entity type to visible Step dicts.
         """
+
         self = cls.__get_instance()
         steps_by_entity_and_code = defaultdict(dict)
 
