@@ -60,14 +60,16 @@ class ResultsDispatcher(QtCore.QThread):
     """
     Dispatches events synchronously to the thread that owns this object.
 
-    This implementation uses Qt's QMetaObject invokeMethod to carry information
-    to the background task manager thread in a thread-safe manner. This approach
-    was originally adopted to work around race conditions that existed in older
-    Qt bindings when there was a lot of signalling between two threads.
+    Signalling between two different threads in Qt can have subtle race conditions
+    when there is a lot of signalling between two threads. Some of these issues
+    have been fixed in later versions of the Qt bindings.
 
-    The background task manager does a lot of inter-thread communications, and
-    this implementation provides a robust and stable mechanism for handling
-    task completion and failure events.
+    The background task manager does a lot of inter-thread communications and
+    therefore can fall prey to these potential deadlocks.
+
+    Therefore, we instead use Qt's QMetaObject invokeMethod to carry information
+    to the background task manager thread in a thread-safe manner, since it
+    doesn't exhibit the problematic behaviour that Qt's signals can have.
     """
 
     class _ShutdownHint(object):
