@@ -60,18 +60,14 @@ class ResultsDispatcher(QtCore.QThread):
     """
     Dispatches events synchronously to the thread that owns this object.
 
-    Signalling between two different threads in PySide is broken in several versions
-    of PySide. There are very subtle race conditions that arise when there is a lot
-    of signalling between two threads. Some of these things have been fixed in later
-    versions of PySide, but most hosts integrate PySide 1.2.2 and lower, which are
-    victim of this race condition.
+    This implementation uses Qt's QMetaObject invokeMethod to carry information
+    to the background task manager thread in a thread-safe manner. This approach
+    was originally adopted to work around race conditions that existed in older
+    Qt bindings when there was a lot of signalling between two threads.
 
-    The background task manager does a lot on inter-threads communications and
-    therefore can easily fall pray to these deadlocks that exist within PySide.
-
-    Therefore, we instead use Qt's QMetaObject invokeMethod to carry information
-    to the background task manager thread in a thread-safe manner, since it
-    doesn't exhibit the bad behaviour from PySide's signals.
+    The background task manager does a lot of inter-thread communications, and
+    this implementation provides a robust and stable mechanism for handling
+    task completion and failure events.
     """
 
     class _ShutdownHint(object):
