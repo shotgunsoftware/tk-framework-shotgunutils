@@ -477,9 +477,7 @@ class ExternalConfiguration(QtCore.QObject):
             # this was not for us
             return
 
-        (project_id, entity_type, entity_id, link_entity_type) = self._task_ids[
-            unique_id
-        ]
+        project_id, entity_type, entity_id, link_entity_type = self._task_ids[unique_id]
 
         del self._task_ids[unique_id]
 
@@ -519,9 +517,7 @@ class ExternalConfiguration(QtCore.QObject):
             # this was not for us
             return
 
-        (project_id, entity_type, entity_id, link_entity_type) = self._task_ids[
-            unique_id
-        ]
+        project_id, entity_type, entity_id, link_entity_type = self._task_ids[unique_id]
 
         del self._task_ids[unique_id]
 

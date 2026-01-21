@@ -16,7 +16,6 @@ import inspect
 import importlib.util
 import traceback
 
-
 try:
     # handle imports
     path_to_sgtk = sys.argv[1]
@@ -91,7 +90,7 @@ class QtTaskRunner(qt_importer.QtCore.QObject):
     completed = qt_importer.QtCore.Signal()
 
     # statuses
-    (SUCCESS, GENERAL_ERROR, ERROR_ENGINE_NOT_STARTED) = range(3)
+    SUCCESS, GENERAL_ERROR, ERROR_ENGINE_NOT_STARTED = range(3)
 
     def __init__(self, callback):
         """
