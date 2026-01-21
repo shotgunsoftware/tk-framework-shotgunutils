@@ -262,7 +262,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
         del self._task_ids[unique_id]
 
         logger.debug("Received configuration info from external process.")
-        (project_id, state_hash, config_dicts) = result
+        project_id, state_hash, config_dicts = result
 
         # check that the configs are complete. If not, issue warnings
         config_objects = []

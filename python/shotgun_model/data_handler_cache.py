@@ -22,7 +22,7 @@ class ShotgunDataHandlerCache(object):
     """
 
     # internal constants for serialization performance
-    (CACHE_BY_UID, CACHE_CHILDREN, UID, IS_LEAF, PARENT, FIELD, SG_DATA) = range(7)
+    CACHE_BY_UID, CACHE_CHILDREN, UID, IS_LEAF, PARENT, FIELD, SG_DATA = range(7)
 
     def __init__(self, raw_data=None):
         """

@@ -604,7 +604,7 @@ class CachedShotgunSchema(QtCore.QObject):
         self = cls.__get_instance()
         project_id = project_id or self._get_current_project_id()
 
-        (sg_entity_type, field_name) = _account_for_bubble_fields(
+        sg_entity_type, field_name = _account_for_bubble_fields(
             sg_entity_type, field_name
         )
 
@@ -641,7 +641,7 @@ class CachedShotgunSchema(QtCore.QObject):
         self = cls.__get_instance()
         project_id = project_id or self._get_current_project_id()
 
-        (sg_entity_type, field_name) = _account_for_bubble_fields(
+        sg_entity_type, field_name = _account_for_bubble_fields(
             sg_entity_type, field_name
         )
 
@@ -678,7 +678,7 @@ class CachedShotgunSchema(QtCore.QObject):
         self = cls.__get_instance()
         project_id = project_id or self._get_current_project_id()
 
-        (sg_entity_type, field_name) = _account_for_bubble_fields(
+        sg_entity_type, field_name = _account_for_bubble_fields(
             sg_entity_type, field_name
         )
 
@@ -714,7 +714,7 @@ class CachedShotgunSchema(QtCore.QObject):
         self = cls.__get_instance()
         project_id = project_id or self._get_current_project_id()
 
-        (sg_entity_type, field_name) = _account_for_bubble_fields(
+        sg_entity_type, field_name = _account_for_bubble_fields(
             sg_entity_type, field_name
         )
 
@@ -762,7 +762,7 @@ class CachedShotgunSchema(QtCore.QObject):
         self = cls.__get_instance()
         project_id = project_id or self._get_current_project_id()
 
-        (sg_entity_type, field_name) = _account_for_bubble_fields(
+        sg_entity_type, field_name = _account_for_bubble_fields(
             sg_entity_type, field_name
         )
 
@@ -879,7 +879,7 @@ class CachedShotgunSchema(QtCore.QObject):
         project_id = project_id or self._get_current_project_id()
         self._check_schema_refresh(sg_entity_type, field_name, project_id=project_id)
 
-        (sg_entity_type, field_name) = _account_for_bubble_fields(
+        sg_entity_type, field_name = _account_for_bubble_fields(
             sg_entity_type, field_name
         )
 
@@ -930,7 +930,7 @@ class CachedShotgunSchema(QtCore.QObject):
         project_id = project_id or self._get_current_project_id()
         self._check_schema_refresh(sg_entity_type, field_name, project_id=project_id)
 
-        (sg_entity_type, field_name) = _account_for_bubble_fields(
+        sg_entity_type, field_name = _account_for_bubble_fields(
             sg_entity_type, field_name
         )
 
@@ -1053,6 +1053,6 @@ def _account_for_bubble_fields(sg_entity_type, field_name):
     """
 
     if "." in field_name:
-        (sg_entity_type, field_name) = field_name.split(".")[-2:]
+        sg_entity_type, field_name = field_name.split(".")[-2:]
 
     return (sg_entity_type, field_name)
