@@ -55,7 +55,7 @@ class ShotgunDataHandler(object):
     FORMAT_VERSION = 27
 
     # constants for updates
-    (UPDATED, ADDED, DELETED) = range(3)
+    UPDATED, ADDED, DELETED = range(3)
 
     def __init__(self, cache_path):
         """
