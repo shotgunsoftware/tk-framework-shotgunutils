@@ -101,5 +101,33 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
         """
         Cleanup
         """
+        # CRITICAL: Explicitly disconnect all Qt signals before destroying the object
+        # to prevent segfaults during garbage collection. Qt can crash if it tries
+        # to disconnect signals from partially-destroyed objects.
+        if self.external_config_loader is not None:
+            # Disconnect from bg_task_manager signals
+            try:
+                self.bg_task_manager.task_completed.disconnect(
+                    self.external_config_loader._task_completed
+                )
+            except (RuntimeError, TypeError):
+                # Signal might already be disconnected or object partially destroyed
+                pass
+
+            try:
+                self.bg_task_manager.task_failed.disconnect(
+                    self.external_config_loader._task_failed
+                )
+            except (RuntimeError, TypeError):
+                pass
+
+            # Disconnect internal signals if they exist
+            try:
+                if hasattr(self.external_config_loader, "_shotgun_state"):
+                    self.external_config_loader._shotgun_state.state_changed.disconnect()
+            except (RuntimeError, TypeError):
+                pass
+
         self.external_config_loader = None
+        self.bg_task_manager = None
         super().tearDown()
