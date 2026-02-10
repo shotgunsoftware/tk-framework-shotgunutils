@@ -59,7 +59,7 @@ class TestCachedSchema(TestShotgunUtilsFramework):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-    def skip_test_serialize_unserialize_schema(self):
+    def test_serialize_unserialize_schema(self):
         """
         Test serialization and unserialization of a schema.
         """
