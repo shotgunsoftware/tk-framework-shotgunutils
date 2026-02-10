@@ -102,26 +102,34 @@ class ExternalConfigurationLoader(QtCore.QObject):
         logger.debug("Shutting down ExternalConfigurationLoader")
 
         # Disconnect bg_task_manager signals
-        try:
-            self._bg_task_manager.task_completed.disconnect(self._task_completed)
-            logger.debug("Disconnected task_completed signal")
-        except (RuntimeError, TypeError, AttributeError) as e:
-            logger.debug("Could not disconnect task_completed signal: %s", e)
+        # Only disconnect if using real Qt signals (not mocked)
+        if hasattr(self._bg_task_manager.task_completed, "disconnect"):
+            try:
+                self._bg_task_manager.task_completed.disconnect(
+                    self._task_completed
+                )
+                logger.debug("Disconnected task_completed signal")
+            except (RuntimeError, TypeError, AttributeError) as e:
+                logger.debug("Could not disconnect task_completed signal: %s", e)
 
-        try:
-            self._bg_task_manager.task_failed.disconnect(self._task_failed)
-            logger.debug("Disconnected task_failed signal")
-        except (RuntimeError, TypeError, AttributeError) as e:
-            logger.debug("Could not disconnect task_failed signal: %s", e)
+        if hasattr(self._bg_task_manager.task_failed, "disconnect"):
+            try:
+                self._bg_task_manager.task_failed.disconnect(self._task_failed)
+                logger.debug("Disconnected task_failed signal")
+            except (RuntimeError, TypeError, AttributeError) as e:
+                logger.debug("Could not disconnect task_failed signal: %s", e)
 
         # Disconnect internal state_changed signal
-        try:
-            self._shotgun_state.state_changed.disconnect(
-                self.configurations_changed.emit
-            )
-            logger.debug("Disconnected state_changed signal")
-        except (RuntimeError, TypeError, AttributeError) as e:
-            logger.debug("Could not disconnect state_changed signal: %s", e)
+        if hasattr(self._shotgun_state.state_changed, "disconnect"):
+            try:
+                self._shotgun_state.state_changed.disconnect(
+                    self.configurations_changed.emit
+                )
+                logger.debug("Disconnected state_changed signal")
+            except (RuntimeError, TypeError, AttributeError) as e:
+                logger.debug(
+                    "Could not disconnect state_changed signal: %s", e
+                )
 
         self._shotgun_state.shut_down()
         logger.debug("ExternalConfigurationLoader shutdown complete")
