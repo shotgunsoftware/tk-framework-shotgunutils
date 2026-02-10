@@ -8,6 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+import sys
 import time
 
 from unittest import mock
@@ -138,11 +139,17 @@ class TestCachedSchema(TestShotgunUtilsFramework):
 
         # The schema is loaded by a background thread, so we'll have to process events so the results can more in.
         before = time.time()
+        
+        # Python 3.13+ has different threading/GIL behavior that can make
+        # background tasks slower on some platforms (especially macOS).
+        # Use a longer timeout to accommodate platform-specific variance.
+        timeout = 30 if sys.version_info >= (3, 13) else 10
+        
         while (
             self._cached_schema._is_schema_loaded() is False
             or self._cached_schema._is_status_loaded() is False
         ):
             self._qapp.processEvents()
             assert (
-                before + 10 > time.time()
+                before + timeout > time.time()
             ), "Timeout, schema shouldn't take this long to load from Mockgun."
