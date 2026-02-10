@@ -95,29 +95,25 @@ class ExternalConfigurationLoader(QtCore.QObject):
     def shut_down(self):
         """
         Shut down and deallocate.
-        
+
         Explicitly disconnects all Qt signals to prevent segmentation faults
         during garbage collection, especially with PySide6 6.8.3+.
         """
         logger.debug("Shutting down ExternalConfigurationLoader")
-        
+
         # Disconnect bg_task_manager signals
         try:
-            self._bg_task_manager.task_completed.disconnect(
-                self._task_completed
-            )
+            self._bg_task_manager.task_completed.disconnect(self._task_completed)
             logger.debug("Disconnected task_completed signal")
         except (RuntimeError, TypeError, AttributeError) as e:
-            logger.debug(
-                "Could not disconnect task_completed signal: %s", e
-            )
-        
+            logger.debug("Could not disconnect task_completed signal: %s", e)
+
         try:
             self._bg_task_manager.task_failed.disconnect(self._task_failed)
             logger.debug("Disconnected task_failed signal")
         except (RuntimeError, TypeError, AttributeError) as e:
             logger.debug("Could not disconnect task_failed signal: %s", e)
-        
+
         # Disconnect internal state_changed signal
         try:
             self._shotgun_state.state_changed.disconnect(
@@ -126,7 +122,7 @@ class ExternalConfigurationLoader(QtCore.QObject):
             logger.debug("Disconnected state_changed signal")
         except (RuntimeError, TypeError, AttributeError) as e:
             logger.debug("Could not disconnect state_changed signal: %s", e)
-        
+
         self._shotgun_state.shut_down()
         logger.debug("ExternalConfigurationLoader shutdown complete")
 
