@@ -138,7 +138,6 @@ class TestCachedSchema(TestShotgunUtilsFramework):
 
         # The schema is loaded by a background thread, so we'll have to process events so the results can more in.
         before = time.time()
-
         while (
             self._cached_schema._is_schema_loaded() is False
             or self._cached_schema._is_status_loaded() is False
