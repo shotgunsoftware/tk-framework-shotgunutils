@@ -101,6 +101,9 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
         """
         Cleanup
         """
+        import sgtk
+        logger = sgtk.platform.get_logger(__name__)
+        logger.info("Tearing down ExternalConfigBase test case.")
         # CRITICAL: Explicitly disconnect all Qt signals before destroying the object
         # to prevent segfaults during garbage collection. Qt can crash if it tries
         # to disconnect signals from partially-destroyed objects.
@@ -112,22 +115,23 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
                 )
             except (RuntimeError, TypeError):
                 # Signal might already be disconnected or object partially destroyed
-                pass
+                logger.warning("Failed to disconnect task_completed signal, it may already be disconnected or the object may be partially destroyed.")
 
             try:
                 self.bg_task_manager.task_failed.disconnect(
                     self.external_config_loader._task_failed
                 )
             except (RuntimeError, TypeError):
-                pass
+                logger.warning("Failed to disconnect task_failed signal, it may already be disconnected or the object may be partially destroyed.")
 
             # Disconnect internal signals if they exist
             try:
                 if hasattr(self.external_config_loader, "_shotgun_state"):
                     self.external_config_loader._shotgun_state.state_changed.disconnect()
             except (RuntimeError, TypeError):
-                pass
+                logger.warning("Failed to disconnect state_changed signal, it may already be disconnected or the object may be partially destroyed.")
 
         self.external_config_loader = None
         self.bg_task_manager = None
+        logger.info("ExternalConfigBase test case teardown complete.")
         super().tearDown()
