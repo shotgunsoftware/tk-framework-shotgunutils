@@ -99,37 +99,39 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
 
     def tearDown(self):
         """
-        Cleanup
+        Cleanup - disconnect Qt signals before destroying objects
+        to prevent segfaults during garbage collection
         """
         import sgtk
         logger = sgtk.platform.get_logger(__name__)
         logger.info("Tearing down ExternalConfigBase test case.")
-        # CRITICAL: Explicitly disconnect all Qt signals before destroying the object
-        # to prevent segfaults during garbage collection. Qt can crash if it tries
-        # to disconnect signals from partially-destroyed objects.
+        
         if self.external_config_loader is not None:
-            # Disconnect from bg_task_manager signals
-            try:
-                self.bg_task_manager.task_completed.disconnect(
-                    self.external_config_loader._task_completed
-                )
-            except (RuntimeError, TypeError):
-                # Signal might already be disconnected or object partially destroyed
-                logger.warning("Failed to disconnect task_completed signal, it may already be disconnected or the object may be partially destroyed.")
+            # Only disconnect if using real Qt signals (not mocked)
+            if hasattr(self.bg_task_manager.task_completed, 'disconnect'):
+                try:
+                    self.bg_task_manager.task_completed.disconnect(
+                        self.external_config_loader._task_completed
+                    )
+                except (RuntimeError, TypeError, AttributeError):
+                    pass
 
-            try:
-                self.bg_task_manager.task_failed.disconnect(
-                    self.external_config_loader._task_failed
-                )
-            except (RuntimeError, TypeError):
-                logger.warning("Failed to disconnect task_failed signal, it may already be disconnected or the object may be partially destroyed.")
+            if hasattr(self.bg_task_manager, 'task_failed') and \
+               hasattr(self.bg_task_manager.task_failed, 'disconnect'):
+                try:
+                    self.bg_task_manager.task_failed.disconnect(
+                        self.external_config_loader._task_failed
+                    )
+                except (RuntimeError, TypeError, AttributeError):
+                    pass
 
-            # Disconnect internal signals if they exist
-            try:
-                if hasattr(self.external_config_loader, "_shotgun_state"):
+            if hasattr(self.external_config_loader, "_shotgun_state") and \
+               hasattr(self.external_config_loader._shotgun_state, 'state_changed') and \
+               hasattr(self.external_config_loader._shotgun_state.state_changed, 'disconnect'):
+                try:
                     self.external_config_loader._shotgun_state.state_changed.disconnect()
-            except (RuntimeError, TypeError):
-                logger.warning("Failed to disconnect state_changed signal, it may already be disconnected or the object may be partially destroyed.")
+                except (RuntimeError, TypeError, AttributeError):
+                    pass
 
         self.external_config_loader = None
         self.bg_task_manager = None
