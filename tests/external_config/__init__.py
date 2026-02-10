@@ -113,35 +113,48 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
         """
 
         import sgtk
+
         logger = sgtk.platform.get_logger(__name__)
         logger.info("Tearing down ExternalConfigBase test case.")
 
         if self.external_config_loader is not None:
             # Only disconnect if using real Qt signals (not mocked)
-            if hasattr(self.bg_task_manager.task_completed, 'disconnect'):
+            if hasattr(self.bg_task_manager.task_completed, "disconnect"):
                 try:
                     self.bg_task_manager.task_completed.disconnect(
                         self.external_config_loader._task_completed
                     )
                 except (RuntimeError, TypeError, AttributeError):
-                    logger.warning("Failed to disconnect task_completed signal, it may have already been disconnected or was not connected.")
+                    logger.warning(
+                        "Failed to disconnect task_completed signal, it may have already been disconnected or was not connected."
+                    )
 
-            if hasattr(self.bg_task_manager, 'task_failed') and \
-               hasattr(self.bg_task_manager.task_failed, 'disconnect'):
+            if hasattr(self.bg_task_manager, "task_failed") and hasattr(
+                self.bg_task_manager.task_failed, "disconnect"
+            ):
                 try:
                     self.bg_task_manager.task_failed.disconnect(
                         self.external_config_loader._task_failed
                     )
                 except (RuntimeError, TypeError, AttributeError):
-                    logger.warning("Failed to disconnect task_failed signal, it may have already been disconnected or was not connected.")
+                    logger.warning(
+                        "Failed to disconnect task_failed signal, it may have already been disconnected or was not connected."
+                    )
 
-            if hasattr(self.external_config_loader, "_shotgun_state") and \
-               hasattr(self.external_config_loader._shotgun_state, 'state_changed') and \
-               hasattr(self.external_config_loader._shotgun_state.state_changed, 'disconnect'):
+            if (
+                hasattr(self.external_config_loader, "_shotgun_state")
+                and hasattr(self.external_config_loader._shotgun_state, "state_changed")
+                and hasattr(
+                    self.external_config_loader._shotgun_state.state_changed,
+                    "disconnect",
+                )
+            ):
                 try:
                     self.external_config_loader._shotgun_state.state_changed.disconnect()
                 except (RuntimeError, TypeError, AttributeError):
-                    logger.warning("Failed to disconnect shotgun state_changed signal, it may have already been disconnected or was not connected.")
+                    logger.warning(
+                        "Failed to disconnect shotgun state_changed signal, it may have already been disconnected or was not connected."
+                    )
 
             # Now safe to call shut_down
             ### self.external_config_loader.shut_down()
