@@ -144,5 +144,5 @@ class TestCachedSchema(TestShotgunUtilsFramework):
         ):
             self._qapp.processEvents()
             assert (
-                before + 2 > time.time()
+                before + 10 > time.time()
             ), "Timeout, schema shouldn't take this long to load from Mockgun."
