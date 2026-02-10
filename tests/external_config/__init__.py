@@ -99,48 +99,11 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
 
     def tearDown(self):
         """
-        Cleanup - disconnect Qt signals before destroying objects
-        to prevent segfaults during garbage collection
+        Cleanup - call shut_down() to properly disconnect signals
         """
-        import sgtk
-        logger = sgtk.platform.get_logger(__name__)
-        logger.info("Tearing down ExternalConfigBase test case.")
-        
         if self.external_config_loader is not None:
-            # Only disconnect if using real Qt signals (not mocked)
-            if hasattr(self.bg_task_manager.task_completed, 'disconnect'):
-                try:
-                    self.bg_task_manager.task_completed.disconnect(
-                        self.external_config_loader._task_completed
-                    )
-                    logger.debug("Disconnected task_completed signal")
-                except (RuntimeError, TypeError, AttributeError) as e:
-                    logger.debug(
-                        "Could not disconnect task_completed: %s", e
-                    )
-
-            if hasattr(self.bg_task_manager, 'task_failed') and \
-               hasattr(self.bg_task_manager.task_failed, 'disconnect'):
-                try:
-                    self.bg_task_manager.task_failed.disconnect(
-                        self.external_config_loader._task_failed
-                    )
-                    logger.debug("Disconnected task_failed signal")
-                except (RuntimeError, TypeError, AttributeError) as e:
-                    logger.debug("Could not disconnect task_failed: %s", e)
-
-            if hasattr(self.external_config_loader, "_shotgun_state") and \
-               hasattr(self.external_config_loader._shotgun_state, 'state_changed') and \
-               hasattr(self.external_config_loader._shotgun_state.state_changed, 'disconnect'):
-                try:
-                    self.external_config_loader._shotgun_state.state_changed.disconnect()
-                    logger.debug("Disconnected state_changed signal")
-                except (RuntimeError, TypeError, AttributeError) as e:
-                    logger.debug(
-                        "Could not disconnect state_changed: %s", e
-                    )
+            self.external_config_loader.shut_down()
 
         self.external_config_loader = None
         self.bg_task_manager = None
-        logger.info("ExternalConfigBase test case teardown complete.")
         super().tearDown()
