@@ -99,9 +99,49 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
 
     def tearDown(self):
         """
-        Cleanup - call shut_down() to properly disconnect signals
+        Cleanup - disconnect Qt signals before destroying objects.
+
+        This prevents random segmentation faults during CI test runs with
+        PySide6 6.8.3+. The issue occurs when Qt attempts to auto-disconnect
+        signals from partially-destroyed QObjects, accessing freed memory.
+
+        NOTE: This may indicate a potential production bug in
+        ExternalConfigurationLoader.shut_down() which doesn't disconnect
+        signals before cleanup. However, we have no customer reports or
+        evidence of production crashes, so this fix remains test-only for
+        now to minimize risk.
         """
         if self.external_config_loader is not None:
+            # Disconnect signals before shut_down to prevent segfaults
+            # Only disconnect if using real Qt signals (not mocked)
+            if hasattr(self.bg_task_manager.task_completed, "disconnect"):
+                try:
+                    self.bg_task_manager.task_completed.disconnect(
+                        self.external_config_loader._task_completed
+                    )
+                except (RuntimeError, TypeError, AttributeError):
+                    pass
+
+            if hasattr(self.bg_task_manager.task_failed, "disconnect"):
+                try:
+                    self.bg_task_manager.task_failed.disconnect(
+                        self.external_config_loader._task_failed
+                    )
+                except (RuntimeError, TypeError, AttributeError):
+                    pass
+
+            if hasattr(
+                self.external_config_loader._shotgun_state.state_changed,
+                "disconnect",
+            ):
+                try:
+                    self.external_config_loader._shotgun_state.state_changed.disconnect(
+                        self.external_config_loader.configurations_changed.emit
+                    )
+                except (RuntimeError, TypeError, AttributeError):
+                    pass
+
+            # Now safe to call shut_down
             self.external_config_loader.shut_down()
 
         self.external_config_loader = None
