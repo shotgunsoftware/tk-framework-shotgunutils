@@ -114,7 +114,9 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
         if self.external_config_loader is not None:
             # Disconnect signals before shut_down to prevent segfaults
             # Only disconnect if using real Qt signals (not mocked)
-            if hasattr(self.bg_task_manager.task_completed, "disconnect"):
+            if hasattr(self.bg_task_manager, "task_completed") and hasattr(
+                self.bg_task_manager.task_completed, "disconnect"
+            ):
                 try:
                     self.bg_task_manager.task_completed.disconnect(
                         self.external_config_loader._task_completed
@@ -122,7 +124,9 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
                 except (RuntimeError, TypeError, AttributeError):
                     pass
 
-            if hasattr(self.bg_task_manager.task_failed, "disconnect"):
+            if hasattr(self.bg_task_manager, "task_failed") and hasattr(
+                self.bg_task_manager.task_failed, "disconnect"
+            ):
                 try:
                     self.bg_task_manager.task_failed.disconnect(
                         self.external_config_loader._task_failed
@@ -130,9 +134,15 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
                 except (RuntimeError, TypeError, AttributeError):
                     pass
 
-            if hasattr(
-                self.external_config_loader._shotgun_state.state_changed,
-                "disconnect",
+            if (
+                hasattr(self.external_config_loader, "_shotgun_state")
+                and hasattr(
+                    self.external_config_loader._shotgun_state, "state_changed"
+                )
+                and hasattr(
+                    self.external_config_loader._shotgun_state.state_changed,
+                    "disconnect",
+                )
             ):
                 try:
                     self.external_config_loader._shotgun_state.state_changed.disconnect(
