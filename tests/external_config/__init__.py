@@ -113,8 +113,11 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
                     self.bg_task_manager.task_completed.disconnect(
                         self.external_config_loader._task_completed
                     )
-                except (RuntimeError, TypeError, AttributeError):
-                    pass
+                    logger.debug("Disconnected task_completed signal")
+                except (RuntimeError, TypeError, AttributeError) as e:
+                    logger.debug(
+                        "Could not disconnect task_completed: %s", e
+                    )
 
             if hasattr(self.bg_task_manager, 'task_failed') and \
                hasattr(self.bg_task_manager.task_failed, 'disconnect'):
@@ -122,16 +125,20 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
                     self.bg_task_manager.task_failed.disconnect(
                         self.external_config_loader._task_failed
                     )
-                except (RuntimeError, TypeError, AttributeError):
-                    pass
+                    logger.debug("Disconnected task_failed signal")
+                except (RuntimeError, TypeError, AttributeError) as e:
+                    logger.debug("Could not disconnect task_failed: %s", e)
 
             if hasattr(self.external_config_loader, "_shotgun_state") and \
                hasattr(self.external_config_loader._shotgun_state, 'state_changed') and \
                hasattr(self.external_config_loader._shotgun_state.state_changed, 'disconnect'):
                 try:
                     self.external_config_loader._shotgun_state.state_changed.disconnect()
-                except (RuntimeError, TypeError, AttributeError):
-                    pass
+                    logger.debug("Disconnected state_changed signal")
+                except (RuntimeError, TypeError, AttributeError) as e:
+                    logger.debug(
+                        "Could not disconnect state_changed: %s", e
+                    )
 
         self.external_config_loader = None
         self.bg_task_manager = None
