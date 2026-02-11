@@ -99,7 +99,15 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
 
     def tearDown(self):
         """
-        Cleanup
+        Cleanup - release references before calling super().tearDown().
+
+        Setting instance variables to None releases references to Qt objects,
+        allowing them to be destroyed in a controlled order before the parent
+        tearDown runs. This prevents random segmentation faults during CI test
+        runs with PySide6 6.8.3+ where Qt signal auto-disconnection can access
+        freed memory during object destruction.
         """
+
         self.external_config_loader = None
+        self.bg_task_manager = None
         super().tearDown()
