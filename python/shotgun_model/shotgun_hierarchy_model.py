@@ -183,15 +183,27 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             :param model: ``ShotgunHierarchyModel`` we are requesting the nodes for.
             """
             super().__init__(model)
+            self._path_to_refresh = path_to_refresh
+
+            # Fetch data from this path's parent (path_to_refresh[0]), which is
+            # expected to already be loaded. Guard against it being absent:
+            # if item_from_path() returns None, abort gracefully instead of
+            # crashing on `.index()` of None (see SG-45127).
+            parent_item = model.item_from_path(path_to_refresh[0])
+            if parent_item is None:
+                logger.debug(
+                    "Cannot refresh %s: ancestor %r is not loaded.",
+                    path_to_refresh,
+                    path_to_refresh[0],
+                )
+                return
+
             # Connect to the node refreshed signal so we know when
             # our node is refreshed.
             model._node_refreshed.connect(self._node_refreshed)
 
             logger.debug("Fetching more on %s" % path_to_refresh[0])
-            # Fetch data from this path's parent.
-            model.fetchMore(model.item_from_path(path_to_refresh[0]).index())
-
-            self._path_to_refresh = path_to_refresh
+            model.fetchMore(parent_item.index())
 
         def _node_refreshed(self, item):
             """
@@ -293,8 +305,20 @@ class ShotgunHierarchyModel(ShotgunQueryModel):
             # This time around this node will already have been refreshed
             # and the code will dig deeper. At some point the last entry
             # in the list will be reached and we will emit the item.
-            logger.debug("Refreshing paths: %s", paths[idx - 1 :])
-            self._NodeRefresher(paths[idx - 1 :], self)
+            # `_NodeRefresher` fetches from path_to_refresh[0] (an already-loaded
+            # ancestor) and waits for path_to_refresh[1] (the node at `idx`).
+            if idx == 0:
+                # The first path is not loaded yet, so there is no already-loaded
+                # ancestor within `paths`. Its parent is the model root
+                # (self._path), which always exists; refresh from there.
+                # Previously `paths[idx - 1:]` evaluated to `paths[-1:]` (the
+                # deepest, never-loaded path), so item_from_path() returned None
+                # and _NodeRefresher crashed on `.index()` (see SG-45127).
+                refresh_paths = [self._path] + paths
+            else:
+                refresh_paths = paths[idx - 1 :]
+            logger.debug("Refreshing paths: %s", refresh_paths)
+            self._NodeRefresher(refresh_paths, self)
             return
 
         logger.debug("Deep load has been completed for %s", paths[-1])
