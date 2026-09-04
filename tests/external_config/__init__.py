@@ -39,12 +39,13 @@ class _MockedShotgunUser(object):
 
 class _MockedSignal(object):
     """
-    A fake Qt signal object with mocked emit and connect methods.
+    A fake Qt signal object with mocked emit, connect and disconnect methods.
     """
 
     def __init__(self, *args, **kwargs):
         self.emit = Mock()
         self.connect = Mock()
+        self.disconnect = Mock()
 
 
 class ExternalConfigBase(TestShotgunUtilsFramework):
