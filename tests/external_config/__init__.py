@@ -8,7 +8,6 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import gc
 import sys
 
 from unittest.mock import Mock
@@ -100,22 +99,21 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
 
     def tearDown(self):
         """
-        Cleanup - release references and force their destruction before
-        calling super().tearDown().
+        Cleanup - deallocate the loader's Qt object graph via its own
+        ``shut_down()`` before releasing references.
 
-        ``ExternalConfigurationLoader`` is a QObject whose Qt signals are
-        connected to peer objects. It is held alive by reference cycles (its
-        own signal connections), so merely dropping the Python references does
-        not destroy it - Python garbage-collects it at an arbitrary later
-        point, during tk-core's teardown or a subsequent test, by which time
-        its peers have been freed. Qt's C++ signal auto-disconnection then runs
-        against already-freed memory and segfaults the interpreter (a SIGSEGV
-        cannot be caught in Python). Forcing the collection here destroys it
-        deterministically, while the engine and its peers are still alive, so
-        the disconnection targets valid memory (SG-42069, SG-45136).
+        ``ExternalConfigurationLoader`` owns a graph of Qt models
+        (``ConfigurationState`` -> ``ConfigStateModel``) wired together by
+        signals. If those objects are left for Python to garbage-collect, Qt's
+        C++ signal auto-disconnection runs against already-freed peers and
+        segfaults the interpreter (SG-42069, SG-45136; a SIGSEGV cannot be
+        caught in Python). ``shut_down()`` calls ``ShotgunModel.destroy()`` on
+        each model, which disconnects and tears the graph down in the correct
+        order, so nothing is auto-disconnected from freed memory afterwards.
         """
 
+        if self.external_config_loader is not None:
+            self.external_config_loader.shut_down()
         self.external_config_loader = None
         self.bg_task_manager = None
-        gc.collect()
         super().tearDown()
