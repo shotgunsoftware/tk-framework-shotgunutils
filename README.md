@@ -6,6 +6,10 @@
 [![Build Status](https://dev.azure.com/shotgun-ecosystem/Toolkit/_apis/build/status/Frameworks/tk-framework-shotgunutils?branchName=master)](https://dev.azure.com/shotgun-ecosystem/Toolkit/_build/latest?definitionId=44&branchName=master)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
+## Note
+
+There are issues with the CI for this repository
+
 ## Documentation
 This repository is a part of the Flow Production Tracking Toolkit.
 
