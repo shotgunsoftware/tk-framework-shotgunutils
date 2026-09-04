@@ -39,12 +39,13 @@ class _MockedShotgunUser(object):
 
 class _MockedSignal(object):
     """
-    A fake Qt signal object with mocked emit and connect methods.
+    A fake Qt signal object with mocked emit, connect and disconnect methods.
     """
 
     def __init__(self, *args, **kwargs):
         self.emit = Mock()
         self.connect = Mock()
+        self.disconnect = Mock()
 
 
 class ExternalConfigBase(TestShotgunUtilsFramework):
@@ -99,15 +100,21 @@ class ExternalConfigBase(TestShotgunUtilsFramework):
 
     def tearDown(self):
         """
-        Cleanup - release references before calling super().tearDown().
+        Cleanup - deallocate the loader's Qt object graph via its own
+        ``shut_down()`` before releasing references.
 
-        Setting instance variables to None releases references to Qt objects,
-        allowing them to be destroyed in a controlled order before the parent
-        tearDown runs. This prevents random segmentation faults during CI test
-        runs with PySide6 6.8.3+ where Qt signal auto-disconnection can access
-        freed memory during object destruction.
+        ``ExternalConfigurationLoader`` owns a graph of Qt models
+        (``ConfigurationState`` -> ``ConfigStateModel``) wired together by
+        signals. If those objects are left for Python to garbage-collect, Qt's
+        C++ signal auto-disconnection runs against already-freed peers and
+        segfaults the interpreter (SG-42069, SG-45136; a SIGSEGV cannot be
+        caught in Python). ``shut_down()`` calls ``ShotgunModel.destroy()`` on
+        each model, which disconnects and tears the graph down in the correct
+        order, so nothing is auto-disconnected from freed memory afterwards.
         """
 
+        if self.external_config_loader is not None:
+            self.external_config_loader.shut_down()
         self.external_config_loader = None
         self.bg_task_manager = None
         super().tearDown()
