@@ -55,3 +55,27 @@ class TestHierarchyModel(TestShotgunUtilsFramework):
         model._load_data(
             "Version.entity", None, {"Asset": ["code", "status_list"]}, "seed"
         )
+
+    def test_async_item_from_paths_first_path_not_loaded(self):
+        """
+        SG-45127: async_item_from_paths must not crash when the first path in the
+        list is not yet loaded in the model.
+
+        With a freshly loaded model the root's children have not been fetched, so
+        item_from_path() returns None for the first path (idx == 0). Previously the
+        code sliced ``paths[idx - 1:]`` which, for idx == 0, wrapped to
+        ``paths[-1:]`` (the deepest path); _NodeRefresher then called ``.index()``
+        on the None returned by item_from_path() and raised
+        ``AttributeError: 'NoneType' object has no attribute 'index'``. It must now
+        refresh from the model root instead.
+        """
+        model = self.shotgun_model.ShotgunHierarchyModel(
+            None, bg_task_manager=self._bg_task_manager
+        )
+        model._load_data(
+            "Version.entity", None, {"Asset": ["code", "status_list"]}, "seed"
+        )
+
+        # A path whose first (and only) element is not loaded and is not the model
+        # root. This drives the idx == 0 branch. Must not raise.
+        model.async_item_from_paths(["/Project/999999"])
