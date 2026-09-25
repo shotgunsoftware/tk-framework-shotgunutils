@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shotgun Globals Access &mdash; tk-framework-shotgunutils v5.11.2 documentation</title>
+  <title>Shotgun Globals Access &mdash; tk-framework-shotgunutils v5.11.3 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
@@ -103,7 +103,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.11.2.<br>
+    <b>tk-framework-shotgunutils</b> v5.11.3.<br>
     
         This documentation is part of the Flow Production Tracking.
     
@@ -152,8 +152,8 @@ The globals are cached locally for fast access and updated in a background worke
 Pass a data retriever object to the module in order for it to pull updates from Shotgun.
 When you shut down your app or tool, make sure you unregister the data retriever.</p>
 <p>The sample code below shows how you can use the globals in your Toolkit App Code:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">shotgun_globals</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s2">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s2">&quot;shotgun_globals&quot;</span><span class="p">)</span>
-<span class="n">task_manager</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s2">&quot;tk-framework-shotgunutils&quot;</span><span class="p">,</span> <span class="s2">&quot;task_manager&quot;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">shotgun_globals</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s2">"tk-framework-shotgunutils"</span><span class="p">,</span> <span class="s2">"shotgun_globals"</span><span class="p">)</span>
+<span class="n">task_manager</span> <span class="o">=</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">import_framework</span><span class="p">(</span><span class="s2">"tk-framework-shotgunutils"</span><span class="p">,</span> <span class="s2">"task_manager"</span><span class="p">)</span>
 
 
 <span class="c1"># typically, in your UI or app constructor, create a</span>
@@ -166,7 +166,7 @@ When you shut down your app or tool, make sure you unregister the data retriever
 <span class="n">shotgun_globals</span><span class="o">.</span><span class="n">register_bg_task_manager</span><span class="p">(</span><span class="n">task_manager</span><span class="p">)</span>
 
 <span class="c1"># at runtime, access things</span>
-<span class="n">shotgun_globals</span><span class="o">.</span><span class="n">get_type_display_name</span><span class="p">(</span><span class="s2">&quot;CustomEntity01&quot;</span><span class="p">)</span>
+<span class="n">shotgun_globals</span><span class="o">.</span><span class="n">get_type_display_name</span><span class="p">(</span><span class="s2">"CustomEntity01"</span><span class="p">)</span>
 
 <span class="c1"># at shutdown time, unregister</span>
 <span class="n">shotgun_globals</span><span class="o">.</span><span class="n">unregister_bg_task_manager</span><span class="p">(</span><span class="n">task_manager</span><span class="p">)</span>
@@ -181,7 +181,7 @@ Once a background task manager has been registered, the schema
 singleton can refresh its cache.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>task_manager</strong> (<a class="reference external" href="https://developers.shotgridsoftware.com/tk-framework-shotgunutils/task_manager.html#task_manager.BackgroundTaskManager" title="(in tk-framework-shotgunutils vv5.11.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BackgroundTaskManager</span></code></a>) – Background task manager to use</p>
+<dd class="field-odd"><p><strong>task_manager</strong> (<a class="reference external" href="https://developers.shotgridsoftware.com/tk-framework-shotgunutils/task_manager.html#task_manager.BackgroundTaskManager" title="(in tk-framework-shotgunutils vv5.11.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BackgroundTaskManager</span></code></a>) – Background task manager to use</p>
 </dd>
 </dl>
 </dd></dl>
@@ -192,7 +192,7 @@ singleton can refresh its cache.</p>
 <dd><p>Unregister a previously registered data retriever with the singleton.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>task_manager</strong> (<a class="reference external" href="https://developers.shotgridsoftware.com/tk-framework-shotgunutils/task_manager.html#task_manager.BackgroundTaskManager" title="(in tk-framework-shotgunutils vv5.11.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BackgroundTaskManager</span></code></a>) – Background task manager to use</p>
+<dd class="field-odd"><p><strong>task_manager</strong> (<a class="reference external" href="https://developers.shotgridsoftware.com/tk-framework-shotgunutils/task_manager.html#task_manager.BackgroundTaskManager" title="(in tk-framework-shotgunutils vv5.11.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BackgroundTaskManager</span></code></a>) – Background task manager to use</p>
 </dd>
 </dl>
 </dd></dl>

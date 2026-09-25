@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>shotgun_model.shotgun_model &mdash; tk-framework-shotgunutils v5.11.2 documentation</title>
+  <title>shotgun_model.shotgun_model &mdash; tk-framework-shotgunutils v5.11.3 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -85,7 +85,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.11.2.<br>
+    <b>tk-framework-shotgunutils</b> v5.11.3.<br>
     
         This documentation is part of the Flow Production Tracking.
     
@@ -133,7 +133,7 @@
 <span class="c1">#</span>
 <span class="c1"># CONFIDENTIAL AND PROPRIETARY</span>
 <span class="c1">#</span>
-<span class="c1"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit</span>
+<span class="c1"># This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit</span>
 <span class="c1"># Source Code License included in this distribution package. See LICENSE.</span>
 <span class="c1"># By accessing, using, copying or modifying this work you indicate your</span>
 <span class="c1"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights</span>
@@ -155,7 +155,7 @@
 
 
 <div class="viewcode-block" id="ShotgunModel"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ShotgunModel</span><span class="p">(</span><span class="n">ShotgunQueryModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A Qt Model representing a Shotgun query.</span>
 
 <span class="sd">    This class implements a standard :class:`~PySide.QtCore.QAbstractItemModel`</span>
@@ -168,13 +168,13 @@
 <span class="sd">    If you need to do manipulations such as sorting or filtering on the data,</span>
 <span class="sd">    connect a proxy model (typically :class:`~PySide.QtGui.QSortFilterProxyModel`)</span>
 <span class="sd">    between your class and the view.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Custom model role that holds the associated value</span>
     <span class="n">SG_ASSOCIATED_FIELD_ROLE</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span> <span class="o">+</span> <span class="mi">10</span>
 
     <span class="c1"># header value for the first column</span>
-    <span class="n">FIRST_COLUMN_HEADER</span> <span class="o">=</span> <span class="s2">&quot;Name&quot;</span>
+    <span class="n">FIRST_COLUMN_HEADER</span> <span class="o">=</span> <span class="s2">"Name"</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -184,7 +184,7 @@
         <span class="n">bg_load_thumbs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">bg_task_manager</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        :param parent: Parent object.</span>
 <span class="sd">        :type parent: :class:`~PySide.QtGui.QWidget`</span>
 <span class="sd">        :param download_thumbs: Boolean to indicate if this model should attempt</span>
@@ -201,7 +201,7 @@
 <span class="sd">        :param bg_task_manager:  Background task manager to use for any asynchronous work. If</span>
 <span class="sd">                                 this is None then a task manager will be created as needed.</span>
 <span class="sd">        :type bg_task_manager: :class:`~task_manager.BackgroundTaskManager`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">bg_load_thumbs</span><span class="p">,</span> <span class="n">bg_task_manager</span><span class="p">)</span>
 
         <span class="c1"># default value so that __repr__ can be used before load_data</span>
@@ -213,65 +213,65 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__download_thumbs</span> <span class="o">=</span> <span class="n">download_thumbs</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        String representation of this instance</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2"> entity_type:</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="s2">"&lt;</span><span class="si">%s</span><span class="s2"> entity_type:</span><span class="si">%s</span><span class="s2">&gt;"</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">)</span>
 
     <span class="c1">########################################################################################</span>
     <span class="c1"># public methods</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">entity_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns a list of entity ids that are part of this model.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># note that all of the ids may not be loaded into the actual model</span>
         <span class="c1"># yet so we have to query the data handler for this.</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">get_entity_ids</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span> <span class="k">else</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="ShotgunModel.item_from_entity"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.item_from_entity">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">item_from_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns a :class:`~PySide.QtGui.QStandardItem` based on</span>
 <span class="sd">        entity type and entity id. Returns none if not found.</span>
 
 <span class="sd">        :param entity_type: Shotgun entity type to look for</span>
 <span class="sd">        :param entity_id: Shotgun entity id to look for</span>
 <span class="sd">        :returns: :class:`~PySide.QtGui.QStandardItem` or None if not found</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span>
-            <span class="s2">&quot;Resolving model item for entity </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">)</span>
+            <span class="s2">"Resolving model item for entity </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">"</span> <span class="o">%</span> <span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">)</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">entity_type</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;...entity type is not part of this model!&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">"...entity type is not part of this model!"</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="n">uid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">get_uid_from_entity_id</span><span class="p">(</span><span class="n">entity_id</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">uid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># no match in data store</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;...entity id is not part of the data set&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">"...entity id is not part of the data set"</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_item_loaded</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunModel.index_from_entity"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.index_from_entity">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">index_from_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns a QModelIndex based on entity type and entity id</span>
 <span class="sd">        Returns none if not found.</span>
 
 <span class="sd">        :param entity_type: Shotgun entity type to look for</span>
 <span class="sd">        :param entity_id: Shotgun entity id to look for</span>
 <span class="sd">        :returns: :class:`~PySide.QtCore.QModelIndex` or None if not found</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">item_from_entity</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunModel.get_filters"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.get_filters">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns a list of Shotgun filters representing the given item. This is useful if</span>
 <span class="sd">        you are trying to determine how intermediate leaf nodes partition leaf node data.</span>
 
@@ -283,18 +283,18 @@
 <span class="sd">        nodes will be the shot names. If you execute the get_filters() method on a sequence</span>
 <span class="sd">        level tree node, it may return::</span>
 
-<span class="sd">            [ [&#39;sg_sequence&#39;, &#39;is&#39;, {&#39;type&#39;: &#39;Sequence&#39;, &#39;id&#39;: 123, &#39;name&#39;: &#39;foo&#39;}] ]</span>
+<span class="sd">            [ ['sg_sequence', 'is', {'type': 'Sequence', 'id': 123, 'name': 'foo'}] ]</span>
 
 <span class="sd">        If you execute the get_filters() on a status node in the tree, it may return::</span>
 
 <span class="sd">            [</span>
-<span class="sd">              [&#39;sg_sequence&#39;, &#39;is&#39;, {&#39;type&#39;: &#39;Sequence&#39;, &#39;id&#39;: 123, &#39;name&#39;: &#39;foo&#39;}],</span>
-<span class="sd">              [&#39;sg_status&#39;, &#39;is&#39;, &#39;ip&#39;]</span>
+<span class="sd">              ['sg_sequence', 'is', {'type': 'Sequence', 'id': 123, 'name': 'foo'}],</span>
+<span class="sd">              ['sg_status', 'is', 'ip']</span>
 <span class="sd">            ]</span>
 
 <span class="sd">        :param item: One of the :class:`~PySide.QtGui.QStandardItem` items that are associated with this model.</span>
 <span class="sd">        :returns: standard shotgun filter list to represent that item</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># prime filters with our base query</span>
         <span class="n">filters</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__filters</span><span class="p">)</span>
 
@@ -302,12 +302,12 @@
         <span class="n">p</span> <span class="o">=</span> <span class="n">item</span>
         <span class="k">while</span> <span class="n">p</span><span class="p">:</span>
             <span class="n">field_data</span> <span class="o">=</span> <span class="n">get_sanitized_data</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SG_ASSOCIATED_FIELD_ROLE</span><span class="p">)</span>
-            <span class="n">filters</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">field_data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="s2">&quot;is&quot;</span><span class="p">,</span> <span class="n">field_data</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]])</span>
+            <span class="n">filters</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">field_data</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="s2">"is"</span><span class="p">,</span> <span class="n">field_data</span><span class="p">[</span><span class="s2">"value"</span><span class="p">]])</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">filters</span></div>
 
 <div class="viewcode-block" id="ShotgunModel.ensure_data_is_loaded"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.ensure_data_is_loaded">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">ensure_data_is_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Recursively processes the model and ensures that all data</span>
 <span class="sd">        has been loaded into the model.</span>
 
@@ -324,7 +324,7 @@
 <span class="sd">        :param index: Model index for which to recursively load data.</span>
 <span class="sd">                      If set to None, the entire tree will be loaded.</span>
 <span class="sd">        :type index: :class:`~PySide.QtCore.QModelIndex`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># load everything</span>
             <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">()</span>
@@ -337,24 +337,24 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ensure_data_is_loaded</span><span class="p">(</span><span class="n">child_model_index</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunModel.get_entity_type"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.get_entity_type">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_entity_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns the Shotgun Entity type associated with this model.</span>
 
-<span class="sd">        :returns: Shotgun entity type string (e.g. &#39;Shot&#39;, &#39;Asset&#39; etc).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        :returns: Shotgun entity type string (e.g. 'Shot', 'Asset' etc).</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span></div>
 
 <div class="viewcode-block" id="ShotgunModel.get_additional_column_fields"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel.get_additional_column_fields">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_additional_column_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns the fields for additional columns and their associated column in the model.</span>
 
 <span class="sd">        :returns: A list of dictionaries with the following keys:</span>
-<span class="sd">            &quot;field&quot;: the requested additional field for the column</span>
-<span class="sd">            &quot;column_idx&quot;: the column number in the model associated with the additional field</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">            "field": the requested additional field for the column</span>
+<span class="sd">            "column_idx": the column number in the model associated with the additional field</span>
+<span class="sd">        """</span>
         <span class="c1"># column is one greater than the index because of the default initial column</span>
         <span class="k">return</span> <span class="p">[</span>
-            <span class="p">{</span><span class="s2">&quot;column_idx&quot;</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">}</span>
+            <span class="p">{</span><span class="s2">"column_idx"</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"field"</span><span class="p">:</span> <span class="n">field</span><span class="p">}</span>
             <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span><span class="p">)</span>
         <span class="p">]</span></div>
 
@@ -374,7 +374,7 @@
         <span class="n">additional_filter_presets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">editable_columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        This is the main method to use to configure the model. You basically</span>
 <span class="sd">        pass a specific find query to the model and it will start tracking</span>
 <span class="sd">        this particular set of filter and hierarchy parameters.</span>
@@ -391,15 +391,15 @@
 <span class="sd">        .. code-block:: python</span>
 
 <span class="sd">            # Example call from a subclass of ShotgunModel that displays assets.</span>
-<span class="sd">            # Additional &quot;code&quot; and &quot; description&quot; columns will be displayed,</span>
-<span class="sd">            # and the &quot;description&quot; column will be editable.</span>
+<span class="sd">            # Additional "code" and " description" columns will be displayed,</span>
+<span class="sd">            # and the "description" column will be editable.</span>
 <span class="sd">            self._load_data(</span>
-<span class="sd">                &quot;Asset&quot;,                            # entity_type</span>
+<span class="sd">                "Asset",                            # entity_type</span>
 <span class="sd">                [],                                 # filters</span>
-<span class="sd">                [&quot;sg_asset_type&quot;, &quot;code&quot;],          # hierarchy</span>
-<span class="sd">                [&quot;description&quot;],                    # fields</span>
-<span class="sd">                columns=[&quot;code&quot;, &quot;description&quot;],    # additional columns to display</span>
-<span class="sd">                editable_columns=[&quot;description&quot;],</span>
+<span class="sd">                ["sg_asset_type", "code"],          # hierarchy</span>
+<span class="sd">                ["description"],                    # fields</span>
+<span class="sd">                columns=["code", "description"],    # additional columns to display</span>
+<span class="sd">                editable_columns=["description"],</span>
 <span class="sd">            )</span>
 
 <span class="sd">        :param entity_type:               Shotgun entity type to download</span>
@@ -408,11 +408,11 @@
 <span class="sd">                                          and no API calls will be made.</span>
 <span class="sd">        :param hierarchy:                 List of grouping fields. These should be names of Shotgun</span>
 <span class="sd">                                          fields. If you for example want to create a list of items,</span>
-<span class="sd">                                          the value ``[&quot;code&quot;]`` will be suitable. This will generate a data</span>
-<span class="sd">                                          model which is flat and where each item&#39;s default name is the</span>
+<span class="sd">                                          the value ``["code"]`` will be suitable. This will generate a data</span>
+<span class="sd">                                          model which is flat and where each item's default name is the</span>
 <span class="sd">                                          Shotgun name field. If you want to generate a tree where assets</span>
 <span class="sd">                                          are broken down by asset type, you could instead specify</span>
-<span class="sd">                                          ``[&quot;sg_asset_type&quot;, &quot;code&quot;]``.</span>
+<span class="sd">                                          ``["sg_asset_type", "code"]``.</span>
 <span class="sd">        :param fields:                    Fields to retrieve from Shotgun (in addition to the ones specified</span>
 <span class="sd">                                          in the hierarchy parameter). Standard Shotgun API syntax. If you</span>
 <span class="sd">                                          specify None for this parameter, Shotgun will not be called when</span>
@@ -443,11 +443,11 @@
 <span class="sd">                                          that the data from the loaded entity will be available field by field. Subclasses can modify</span>
 <span class="sd">                                          this behavior by overriding _get_additional_columns.</span>
 <span class="sd">        :param additional_filter_presets: List of Shotgun filter presets to apply, e.g.</span>
-<span class="sd">                                          ``[{&quot;preset_name&quot;:&quot;LATEST&quot;,&quot;latest_by&quot;:&quot;BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT&quot;}]``</span>
+<span class="sd">                                          ``[{"preset_name":"LATEST","latest_by":"BY_PIPELINE_STEP_NUMBER_AND_ENTITIES_CREATED_AT"}]``</span>
 <span class="sd">        :param list editable_columns:     A subset of ``columns`` that will be editable in views that use this model.</span>
 
 <span class="sd">        :returns:                         True if cached data was loaded, False if not.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># we are changing the query</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">query_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
 
@@ -467,19 +467,19 @@
         <span class="c1"># make sure `editable_fields` is a subset of `column_fields`</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__editable_fields</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">TankError</span><span class="p">(</span>
-                <span class="s2">&quot;The `editable_fields` argument is not a subset of &quot;</span> <span class="s2">&quot;`column_fields`.&quot;</span>
+                <span class="s2">"The `editable_fields` argument is not a subset of "</span> <span class="s2">"`column_fields`."</span>
             <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Model Reset for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Entity type: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Filters: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__filters</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Hierarchy: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Fields: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Order: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__order</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Columns: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Editable Columns: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__editable_fields</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Filter Presets: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__additional_filter_presets</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">"Model Reset for </span><span class="si">%s</span><span class="s2">"</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">"Entity type: </span><span class="si">%s</span><span class="s2">"</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">"Filters: </span><span class="si">%s</span><span class="s2">"</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__filters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">"Hierarchy: </span><span class="si">%s</span><span class="s2">"</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">"Fields: </span><span class="si">%s</span><span class="s2">"</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">"Order: </span><span class="si">%s</span><span class="s2">"</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__order</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">"Columns: </span><span class="si">%s</span><span class="s2">"</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__column_fields</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">"Editable Columns: </span><span class="si">%s</span><span class="s2">"</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__editable_fields</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">"Filter Presets: </span><span class="si">%s</span><span class="s2">"</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__additional_filter_presets</span><span class="p">)</span>
 
         <span class="c1"># get the cache path based on these new data query parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span> <span class="o">=</span> <span class="n">ShotgunFindDataHandler</span><span class="p">(</span>
@@ -494,12 +494,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">__compute_cache_path</span><span class="p">(</span><span class="n">seed</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="c1"># load up from disk</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Loading data from cache file into memory...&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">"Loading data from cache file into memory..."</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">load_cache</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;First population pass: Calling _load_external_data()&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">"First population pass: Calling _load_external_data()"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_external_data</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;External data population done.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">"External data population done."</span><span class="p">)</span>
 
         <span class="c1"># set our headers</span>
         <span class="n">headers</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">FIRST_COLUMN_HEADER</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_additional_column_headers</span><span class="p">(</span>
@@ -510,7 +510,7 @@
         <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">()</span>
 
         <span class="c1"># construct the top level nodes</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">&quot;Creating model nodes for top level of data tree...&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="s2">"Creating model nodes for top level of data tree..."</span><span class="p">)</span>
         <span class="n">nodes_generated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">generate_child_nodes</span><span class="p">(</span>
             <span class="kc">None</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_item</span>
         <span class="p">)</span>
@@ -523,7 +523,7 @@
         <span class="k">return</span> <span class="n">nodes_generated</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._refresh_data"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._refresh_data">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">_refresh_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Rebuilds the data in the model to ensure it is up to date.</span>
 <span class="sd">        This call is asynchronous and will return instantly.</span>
 <span class="sd">        The update will be applied whenever the data from Shotgun is returned.</span>
@@ -541,11 +541,11 @@
 <span class="sd">        If data has been modified or deleted, a full rebuild is issued, meaning that</span>
 <span class="sd">        all existing items from the model are removed. This does affect view related</span>
 <span class="sd">        states such as selection.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_request_data</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._item_created"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._item_created">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">_item_created</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Called when an item is created, before it is added to the model.</span>
 
 <span class="sd">        .. warning:: This base class implementation must be called in any</span>
@@ -557,7 +557,7 @@
 
 <span class="sd">        :param item: The item that was just created.</span>
 <span class="sd">        :type item: :class:`~PySide.QtGui.QStandardItem`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># as per docs, call the base implementation</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_item_created</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
@@ -567,10 +567,10 @@
 
             <span class="k">if</span> <span class="n">sg_data</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">sg_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="c1"># note: we check for all fields containing &quot;image&quot;</span>
-                    <span class="c1"># so that we&#39;ll catch a field such as &#39;sg_sequence.Sequence.image&#39;</span>
-                    <span class="c1"># as well as a straight &#39;image&#39; field</span>
-                    <span class="k">if</span> <span class="s2">&quot;image&quot;</span> <span class="ow">in</span> <span class="n">field</span> <span class="ow">and</span> <span class="n">sg_data</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># note: we check for all fields containing "image"</span>
+                    <span class="c1"># so that we'll catch a field such as 'sg_sequence.Sequence.image'</span>
+                    <span class="c1"># as well as a straight 'image' field</span>
+                    <span class="k">if</span> <span class="s2">"image"</span> <span class="ow">in</span> <span class="n">field</span> <span class="ow">and</span> <span class="n">sg_data</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="c1"># we have a thumb we are supposed to download!</span>
                         <span class="c1"># get the thumbnail - store the unique id we get back from</span>
                         <span class="c1"># the data retrieve in a dict for fast lookup later</span>
@@ -578,12 +578,12 @@
                             <span class="n">item</span><span class="p">,</span>
                             <span class="n">field</span><span class="p">,</span>
                             <span class="n">sg_data</span><span class="p">[</span><span class="n">field</span><span class="p">],</span>
-                            <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">),</span>
-                            <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">),</span>
+                            <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"type"</span><span class="p">),</span>
+                            <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"id"</span><span class="p">),</span>
                         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._set_tooltip"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._set_tooltip">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">_set_tooltip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">sg_item</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Called when an item is created.</span>
 
 <span class="sd">        .. note:: You can subclass this if you want to set your own tooltip for the model item. By</span>
@@ -595,47 +595,47 @@
 <span class="sd">            .. code-block:: python</span>
 
 <span class="sd">               {</span>
-<span class="sd">                   &quot;type&quot;: &quot;Task&quot;,</span>
-<span class="sd">                   &quot;entity&quot;: {                       # (1) Tooltip becomes &quot;Asset &#39;Alice&#39;&quot;</span>
-<span class="sd">                       &quot;sg_asset_type&quot;: &quot;Character&quot;, # (2) Tooltip becomes &quot;Asset Type &#39;Character&#39;&quot;</span>
-<span class="sd">                       &quot;type&quot;: &quot;Asset&quot;,</span>
-<span class="sd">                       &quot;code&quot;: &quot;Alice&quot;</span>
+<span class="sd">                   "type": "Task",</span>
+<span class="sd">                   "entity": {                       # (1) Tooltip becomes "Asset 'Alice'"</span>
+<span class="sd">                       "sg_asset_type": "Character", # (2) Tooltip becomes "Asset Type 'Character'"</span>
+<span class="sd">                       "type": "Asset",</span>
+<span class="sd">                       "code": "Alice"</span>
 <span class="sd">                   },</span>
-<span class="sd">                   &quot;content&quot;: &quot;Art&quot;                  # (3) Tooltip becomes &quot;Task &#39;Art&#39;&quot;</span>
+<span class="sd">                   "content": "Art"                  # (3) Tooltip becomes "Task 'Art'"</span>
 <span class="sd">               }</span>
 
-<span class="sd">            1) If the field is an entity (e.g. entity), then the display name of that entity&#39;s type</span>
+<span class="sd">            1) If the field is an entity (e.g. entity), then the display name of that entity's type</span>
 <span class="sd">            will be used.</span>
 
 <span class="sd">            2) If the field is part of a sub-entity (e.g entity.Asset.sg_asset_type), the display</span>
-<span class="sd">            name of the sub-entity&#39;s type followed by a space and the sub-entity&#39;s field display name</span>
+<span class="sd">            name of the sub-entity's type followed by a space and the sub-entity's field display name</span>
 <span class="sd">            will be used.</span>
 
 <span class="sd">            3) If the field is part of an entity and not an entity field(e.g. content), the display</span>
-<span class="sd">            name of the entity&#39;s type will be used.</span>
+<span class="sd">            name of the entity's type will be used.</span>
 
 <span class="sd">            In all cases, the string ends with the quoted name of the ShotgunStandardItem.</span>
 
 <span class="sd">        :param item: Shotgun model item that requires a tooltip.</span>
 <span class="sd">        :param sg_item: Dictionary of the entity associated with the Shotgun model item.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SG_ASSOCIATED_FIELD_ROLE</span><span class="p">)</span>
-        <span class="n">field</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sg_item</span><span class="p">[</span><span class="n">field</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">sg_item</span><span class="p">[</span><span class="n">field</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sg_item</span><span class="p">[</span><span class="n">field</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"type"</span> <span class="ow">in</span> <span class="n">sg_item</span><span class="p">[</span><span class="n">field</span><span class="p">]:</span>
             <span class="c1"># This is scenario 1 described above.</span>
             <span class="n">item</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span>
-                <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span>
+                <span class="s2">"</span><span class="si">%s</span><span class="s2"> '</span><span class="si">%s</span><span class="s2">'"</span>
                 <span class="o">%</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_globals</span><span class="o">.</span><span class="n">get_type_display_name</span><span class="p">(</span><span class="n">sg_item</span><span class="p">[</span><span class="n">field</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_globals</span><span class="o">.</span><span class="n">get_type_display_name</span><span class="p">(</span><span class="n">sg_item</span><span class="p">[</span><span class="n">field</span><span class="p">][</span><span class="s2">"type"</span><span class="p">]),</span>
                     <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">field</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="s2">"."</span> <span class="ow">in</span> <span class="n">field</span><span class="p">:</span>
             <span class="c1"># This is scenario 2 described above. We only want to get the last entity and field.</span>
-            <span class="n">_</span><span class="p">,</span> <span class="n">sub_entity_type</span><span class="p">,</span> <span class="n">sub_entity_field_name</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">sub_entity_type</span><span class="p">,</span> <span class="n">sub_entity_field_name</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
             <span class="n">item</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span>
-                <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span>
+                <span class="s2">"</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> '</span><span class="si">%s</span><span class="s2">'"</span>
                 <span class="o">%</span> <span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_globals</span><span class="o">.</span><span class="n">get_type_display_name</span><span class="p">(</span><span class="n">sub_entity_type</span><span class="p">),</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_globals</span><span class="o">.</span><span class="n">get_field_display_name</span><span class="p">(</span>
@@ -647,15 +647,15 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># This is scenario 3 described above.</span>
             <span class="n">item</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span>
-                <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span>
+                <span class="s2">"</span><span class="si">%s</span><span class="s2"> '</span><span class="si">%s</span><span class="s2">'"</span>
                 <span class="o">%</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_globals</span><span class="o">.</span><span class="n">get_type_display_name</span><span class="p">(</span><span class="n">sg_item</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_globals</span><span class="o">.</span><span class="n">get_type_display_name</span><span class="p">(</span><span class="n">sg_item</span><span class="p">[</span><span class="s2">"type"</span><span class="p">]),</span>
                     <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span>
                 <span class="p">)</span>
             <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._get_additional_columns"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._get_additional_columns">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">_get_additional_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primary_item</span><span class="p">,</span> <span class="n">is_leaf</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Called when an item is about to be inserted into the model, to get additional items</span>
 <span class="sd">        to be included in the same row as the specified item. This provides an opportunity</span>
 <span class="sd">        for subclasses to create one or more additional columns for each item in the model.</span>
@@ -678,7 +678,7 @@
 <span class="sd">        :param columns: list of Shotgun field names requested as the columns from _load_data</span>
 
 <span class="sd">        :returns: list of :class:`~PySide.QtGui.QStandardItem`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># default implementation will create items for the given fields from the item if it is a leaf</span>
         <span class="c1"># with the display role being the string value for the field and the actual data value in</span>
         <span class="c1"># SG_ASSOCIATED_FIELD_ROLE</span>
@@ -704,14 +704,14 @@
         <span class="k">return</span> <span class="n">items</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._get_additional_column_headers"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._get_additional_column_headers">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">_get_additional_column_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Called to set the headers for the additional columns requested from _load_data.</span>
 
 <span class="sd">        :param entity_type: type name of the entity the columns are for</span>
 <span class="sd">        :param columns: list of Shotgun field names requested as the columns from _load_data</span>
 
 <span class="sd">        :returns: list of strings to use as the headers</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># default implementation will set the headers to the display names for the fields</span>
         <span class="k">return</span> <span class="p">[</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_shotgun_globals</span><span class="o">.</span><span class="n">get_field_display_name</span><span class="p">(</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
@@ -719,7 +719,7 @@
         <span class="p">]</span></div>
 
 <div class="viewcode-block" id="ShotgunModel._get_columns"><a class="viewcode-back" href="../../shotgun_model.html#shotgun_model.ShotgunModel._get_columns">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">_get_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">is_leaf</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns a row (list of QStandardItems) given an initial QStandardItem.  The item itself</span>
 <span class="sd">        is always the first item in the row, but additional columns may be appended.</span>
 
@@ -727,7 +727,7 @@
 <span class="sd">        :param is_leaf: A boolean indicating if the item is a leaf item or not</span>
 
 <span class="sd">        :returns: A list of :class:`~PySide.QtGui.QStandardItem` s</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># the first item in the row is always the standard shotgun model item,</span>
         <span class="c1"># but subclasses may provide additional columns to be appended.</span>
         <span class="n">row</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">]</span>
@@ -735,7 +735,7 @@
         <span class="k">return</span> <span class="n">row</span></div>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">data_item</span><span class="p">,</span> <span class="n">top_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Creates a model item for the tree given data out of the data store</span>
 
 <span class="sd">        :param :class:`~PySide.QtGui.QStandardItem` parent: Model item to parent the node under</span>
@@ -744,7 +744,7 @@
 
 <span class="sd">        :returns: Model item</span>
 <span class="sd">        :rtype: :class:`ShotgunStandardItem`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># construct tree view node object</span>
         <span class="n">item</span> <span class="o">=</span> <span class="n">ShotgunStandardItem</span><span class="p">()</span>
         <span class="n">item</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="n">data_item</span><span class="o">.</span><span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__editable_fields</span><span class="p">)</span>
@@ -766,12 +766,12 @@
         <span class="k">return</span> <span class="n">item</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">data_item</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Updates a model item with the given data</span>
 
 <span class="sd">        :param :class:`~PySide.QtGui.QStandardItem` item: Model item to update</span>
 <span class="sd">        :param :class:`ShotgunItemData` data_item: Data to update item with</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">field_display_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__generate_display_name</span><span class="p">(</span>
             <span class="n">data_item</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="n">data_item</span><span class="o">.</span><span class="n">shotgun_data</span>
@@ -790,7 +790,7 @@
 
         <span class="c1"># store the actual value we have</span>
         <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span>
-            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">data_item</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">data_item</span><span class="o">.</span><span class="n">shotgun_data</span><span class="p">[</span><span class="n">data_item</span><span class="o">.</span><span class="n">field</span><span class="p">]},</span>
+            <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">data_item</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="n">data_item</span><span class="o">.</span><span class="n">shotgun_data</span><span class="p">[</span><span class="n">data_item</span><span class="o">.</span><span class="n">field</span><span class="p">]},</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">SG_ASSOCIATED_FIELD_ROLE</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -823,9 +823,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_tooltip</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">data_item</span><span class="o">.</span><span class="n">shotgun_data</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_item_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">data_item</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Updates the text content of the additional columns in the model item.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">row</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">index</span><span class="p">()</span><span class="o">.</span><span class="n">row</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">row</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span>
@@ -842,21 +842,21 @@
                     <span class="n">sibling</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">!=</span> <span class="n">column_text</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updating sibling text content </span><span class="si">{</span><span class="n">sibling</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_log_debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Updating sibling text content </span><span class="si">{</span><span class="n">sibling</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="n">sibling</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">column_text</span><span class="p">)</span>
 
     <span class="c1">########################################################################################</span>
     <span class="c1"># private methods</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__compute_cache_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache_seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculates and returns a cache path to use for this instance&#39;s query.</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Calculates and returns a cache path to use for this instance's query.</span>
 
 <span class="sd">        :param cache_seed: Cache seed supplied to the ``__init__`` method.</span>
 
 <span class="sd">        :return: The path to use when caching the model data.</span>
 <span class="sd">        :rtype: str</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="c1"># when we cache the data associated with this model, create</span>
         <span class="c1"># the file name and path based on several parameters.</span>
@@ -886,30 +886,30 @@
         <span class="c1"># as soon as you start caching thumbnails, qpixmap will be used</span>
         <span class="c1"># internally by the serialization and this means that you get</span>
         <span class="c1"># warnings if you try to use those caches in threads. By keeping</span>
-        <span class="c1"># caches separate, there is no risk that a thumb cache &#39;pollutes&#39;</span>
+        <span class="c1"># caches separate, there is no risk that a thumb cache 'pollutes'</span>
         <span class="c1"># a non-thumb cache.</span>
         <span class="c1">#</span>
         <span class="c1"># now hash up the rest of the parameters and make that the filename</span>
         <span class="n">params_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
 
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__schema_generation</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fields</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__order</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__schema_generation</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fields</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__order</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__hierarchy</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">))</span>
         <span class="c1"># If this value changes over time (like between Qt4 and Qt5), we need to</span>
         <span class="c1"># assume our previous user roles are invalid since Qt might have taken over</span>
-        <span class="c1"># it. If role&#39;s value is 32, don&#39;t add it to the hash so we don&#39;t</span>
+        <span class="c1"># it. If role's value is 32, don't add it to the hash so we don't</span>
         <span class="c1"># invalidate PySide/PyQt4 caches.</span>
         <span class="k">if</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span> <span class="o">!=</span> <span class="mi">32</span><span class="p">:</span>
-            <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+            <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">))</span>
 
         <span class="c1"># now hash up the filter parameters and the seed - these are dynamic</span>
         <span class="c1"># values that tend to change and be data driven, so they are handled</span>
         <span class="c1"># on a different level in the path</span>
         <span class="n">filter_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
-        <span class="n">filter_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__filters</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-        <span class="n">filter_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__additional_filter_presets</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cache_seed</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+        <span class="n">filter_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__filters</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">))</span>
+        <span class="n">filter_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__additional_filter_presets</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">))</span>
+        <span class="n">params_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cache_seed</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">))</span>
 
         <span class="c1"># Organize files on disk based on entity type and then filter hash</span>
         <span class="c1"># keep extension names etc short in order to stay away from MAX_PATH</span>
@@ -918,63 +918,63 @@
         <span class="c1"># &gt; 0.18.118.</span>
         <span class="c1"># If not available, fallback on per project/pipeline config/plugin id</span>
         <span class="c1"># caching.</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="p">,</span> <span class="s2">&quot;site_cache_location&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="p">,</span> <span class="s2">"site_cache_location"</span><span class="p">):</span>
             <span class="n">cache_location</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">site_cache_location</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">cache_location</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">cache_location</span>
         <span class="n">data_cache_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="n">cache_location</span><span class="p">,</span>
-            <span class="s2">&quot;sg&quot;</span><span class="p">,</span>
+            <span class="s2">"sg"</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__entity_type</span><span class="p">,</span>
             <span class="n">params_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span>
-            <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filter_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span> <span class="n">ShotgunFindDataHandler</span><span class="o">.</span><span class="n">FORMAT_VERSION</span><span class="p">),</span>
+            <span class="s2">"</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">"</span> <span class="o">%</span> <span class="p">(</span><span class="n">filter_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span> <span class="n">ShotgunFindDataHandler</span><span class="o">.</span><span class="n">FORMAT_VERSION</span><span class="p">),</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">sgtk</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">is_windows</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_cache_path</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">250</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log_warning</span><span class="p">(</span>
-                <span class="s2">&quot;Flow Production Tracking model data cache file path may be affected by windows &quot;</span>
-                <span class="s2">&quot;windows MAX_PATH limitation.&quot;</span>
+                <span class="s2">"Flow Production Tracking model data cache file path may be affected by windows "</span>
+                <span class="s2">"windows MAX_PATH limitation."</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">data_cache_path</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__generate_display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">sg_data</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Generates a name from a shotgun field.</span>
-<span class="sd">        For non-nested structures, this is typically just &quot;code&quot;.</span>
+<span class="sd">        For non-nested structures, this is typically just "code".</span>
 <span class="sd">        For nested structures it can either be something like sg_sequence</span>
 <span class="sd">        or something like sg_asset_type.</span>
 
 <span class="sd">        :params field: field name to generate name from</span>
 <span class="sd">        :params sg_data: sg data dictionary, straight from shotgun, no unicode, all UTF-8</span>
 <span class="sd">        :returns: name string</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">sg_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">value</span> <span class="ow">and</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="s2">&quot;Unnamed&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"name"</span> <span class="ow">in</span> <span class="n">value</span> <span class="ow">and</span> <span class="s2">"type"</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">"Unnamed"</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">value</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">value</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span>
 
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="c1"># this is a list of some sort. Loop over all elements and extrat a comma separated list.</span>
             <span class="n">formatted_values</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># no items in list</span>
-                <span class="n">formatted_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;No Value&quot;</span><span class="p">)</span>
+                <span class="n">formatted_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"No Value"</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">v</span> <span class="ow">and</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"name"</span> <span class="ow">in</span> <span class="n">v</span> <span class="ow">and</span> <span class="s2">"type"</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
                     <span class="c1"># This is a link field</span>
-                    <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">):</span>
-                        <span class="n">formatted_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">):</span>
+                        <span class="n">formatted_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">formatted_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 
-            <span class="k">return</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">formatted_values</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">formatted_values</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;Unnamed&quot;</span>
+            <span class="k">return</span> <span class="s2">"Unnamed"</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># everything else just cast to string</span>

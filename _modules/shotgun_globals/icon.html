@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>shotgun_globals.icon &mdash; tk-framework-shotgunutils v5.11.2 documentation</title>
+  <title>shotgun_globals.icon &mdash; tk-framework-shotgunutils v5.11.3 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -85,7 +85,7 @@
                              text-decoration: underline; }
     </style>
 
-    <b>tk-framework-shotgunutils</b> v5.11.2.<br>
+    <b>tk-framework-shotgunutils</b> v5.11.3.<br>
     
         This documentation is part of the Flow Production Tracking.
     
@@ -133,7 +133,7 @@
 <span class="c1">#</span>
 <span class="c1"># CONFIDENTIAL AND PROPRIETARY</span>
 <span class="c1">#</span>
-<span class="c1"># This work is provided &quot;AS IS&quot; and subject to the Shotgun Pipeline Toolkit</span>
+<span class="c1"># This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit</span>
 <span class="c1"># Source Code License included in this distribution package. See LICENSE.</span>
 <span class="c1"># By accessing, using, copying or modifying this work you indicate your</span>
 <span class="c1"># agreement to the Shotgun Pipeline Toolkit Source Code License. All rights</span>
@@ -144,29 +144,29 @@
 
 <span class="c1"># list of all entity types for which an icon exists</span>
 <span class="n">_entity_types_with_icons</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;Asset&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;ClientUser&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;EventLogEntry&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Group&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;HumanUser&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;PublishedFile&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;TankPublishedFile&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Note&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Playlist&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Project&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Sequence&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Shot&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Tag&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Task&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Ticket&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Version&quot;</span><span class="p">,</span>
+    <span class="s2">"Asset"</span><span class="p">,</span>
+    <span class="s2">"ClientUser"</span><span class="p">,</span>
+    <span class="s2">"EventLogEntry"</span><span class="p">,</span>
+    <span class="s2">"Group"</span><span class="p">,</span>
+    <span class="s2">"HumanUser"</span><span class="p">,</span>
+    <span class="s2">"PublishedFile"</span><span class="p">,</span>
+    <span class="s2">"TankPublishedFile"</span><span class="p">,</span>
+    <span class="s2">"Note"</span><span class="p">,</span>
+    <span class="s2">"Playlist"</span><span class="p">,</span>
+    <span class="s2">"Project"</span><span class="p">,</span>
+    <span class="s2">"Sequence"</span><span class="p">,</span>
+    <span class="s2">"Shot"</span><span class="p">,</span>
+    <span class="s2">"Tag"</span><span class="p">,</span>
+    <span class="s2">"Task"</span><span class="p">,</span>
+    <span class="s2">"Ticket"</span><span class="p">,</span>
+    <span class="s2">"Version"</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="n">_cached_entity_icons</span> <span class="o">=</span> <span class="p">{}</span>
 
 
 <div class="viewcode-block" id="get_entity_type_icon_url"><a class="viewcode-back" href="../../shotgun_globals.html#shotgun_globals.get_entity_type_icon_url">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">get_entity_type_icon_url</span><span class="p">(</span><span class="n">entity_type</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve the icon resource path for the specified entity type if available.</span>
 
 <span class="sd">    This is useful if you want to include an icon in a ``QLabel`` using</span>
@@ -174,21 +174,21 @@
 
 <span class="sd">    :param entity_type: The entity type to retrieve the icon for</span>
 <span class="sd">    :returns:           A string url with a qt resource path</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">entity_type</span> <span class="ow">in</span> <span class="n">_entity_types_with_icons</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;:/tk-framework-shotgunutils/icon_</span><span class="si">%s</span><span class="s2">_dark.png&quot;</span> <span class="o">%</span> <span class="n">entity_type</span>
+        <span class="k">return</span> <span class="s2">":/tk-framework-shotgunutils/icon_</span><span class="si">%s</span><span class="s2">_dark.png"</span> <span class="o">%</span> <span class="n">entity_type</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="get_entity_type_icon"><a class="viewcode-back" href="../../shotgun_globals.html#shotgun_globals.get_entity_type_icon">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">get_entity_type_icon</span><span class="p">(</span><span class="n">entity_type</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve the icon for the specified entity type if available.</span>
 
 <span class="sd">    :param entity_type: The entity type to retrieve the icon for</span>
 <span class="sd">    :returns:           A QIcon if an icon was found for the specified entity</span>
 <span class="sd">                        type, otherwise None.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">global</span> <span class="n">_cached_entity_icons</span>
     <span class="k">if</span> <span class="n">entity_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_cached_entity_icons</span><span class="p">:</span>
         <span class="c1"># not yet cached</span>
@@ -200,7 +200,7 @@
         <span class="c1"># cache it</span>
         <span class="n">_cached_entity_icons</span><span class="p">[</span><span class="n">entity_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">icon</span>
 
-    <span class="c1"># we&#39;ve previously asked for the icon</span>
+    <span class="c1"># we've previously asked for the icon</span>
     <span class="k">return</span> <span class="n">_cached_entity_icons</span><span class="p">[</span><span class="n">entity_type</span><span class="p">]</span></div>
 </pre></div>
 
