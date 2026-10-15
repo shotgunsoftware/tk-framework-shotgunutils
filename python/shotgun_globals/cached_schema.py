@@ -11,6 +11,7 @@
 # make sure that py25 has access to with statement
 
 import os
+from collections import defaultdict
 import sgtk
 from sgtk.platform.qt import QtCore
 
@@ -65,7 +66,7 @@ class CachedShotgunSchema(QtCore.QObject):
 
         self._sg_schema_query_ids = {}
         self._sg_status_query_ids = {}
-
+        self._step_map_cache = {}
         # load cached values from disk
         self._load_cached_schema()
         self._load_cached_status()
@@ -851,6 +852,134 @@ class CachedShotgunSchema(QtCore.QObject):
             status_color = data.get("bg_color")
 
         return status_color
+
+    @classmethod
+    def _build_project_visible_steps_by_entity_type(cls, all_steps, project_id):
+        """
+        Build a mapping of entity type to project-visible Pipeline Steps.
+
+        :param list all_steps: List of Step dictionaries (e.g. from a Shotgun find).
+        :param int project_id: Project id whose schema visibility is applied.
+
+        This inspects the project's schema for each entity type and includes only
+        those Steps that are exposed via visible 'step_*' fields for the project.
+        A field is eligible when:
+          - its name starts with 'step_'
+          - it is marked visible for the project
+          - its display name is not "ALL TASKS"
+          - its display name matches a Step 'code' present in ``all_steps``
+
+        Notes:
+        - Input Steps must contain at least: 'id', 'code', 'entity_type' (and may include 'color').
+        - The resulting order follows the schema fields iteration order; no extra sorting is applied.
+
+
+        :returns: dict[str, list[dict]] mapping entity type to visible Step dicts.
+        """
+
+        self = cls.__get_instance()
+        steps_by_entity_and_code = defaultdict(dict)
+
+        for step in all_steps:
+            step_code = step.get("code")
+            entity_type = step.get("entity_type")
+            if not step_code or not entity_type:
+                continue
+            steps_by_entity_and_code[entity_type][step_code] = step
+        step_map = defaultdict(list)
+
+        for entity_type, step_lookup_by_code in steps_by_entity_and_code.items():
+            try:
+                entity_fields = cls.get_entity_fields(
+                    entity_type, project_id=project_id
+                )
+            except Exception:
+                self._bundle.log_debug(
+                    f"Could not get entity fields for entity type {entity_type}"
+                )
+                entity_fields = []
+
+            visible_step_codes = []
+            for field_name in entity_fields:
+                if not field_name.startswith("step_"):
+                    continue
+                try:
+                    if cls.field_is_visible(
+                        entity_type, field_name, project_id=project_id
+                    ):
+                        display_name = cls.get_field_display_name(
+                            entity_type, field_name, project_id=project_id
+                        )
+                        if (
+                            display_name
+                            and display_name != "ALL TASKS"
+                            and display_name in step_lookup_by_code
+                        ):
+                            visible_step_codes.append(display_name)
+                except Exception as e:
+                    self._bundle.log_debug(e)
+                    continue
+
+            if not visible_step_codes:
+                continue
+
+            step_map[entity_type].extend(
+                [step_lookup_by_code[code] for code in visible_step_codes]
+            )
+        return step_map
+
+    @classmethod
+    def get_pipeline_steps_by_entity_type(
+        cls, limit_to_project_visible=False, project_id=None
+    ):
+        """
+        Return a cached mapping of entity type to Pipeline Steps.
+
+        :param bool limit_to_project_visible: Filter to project-visible steps when True.
+        :param Optional[int] project_id: Project id; if None, current context's project is used.
+
+        - When ``limit_to_project_visible`` is True and a project is available,
+          includes only Pipeline Steps that are visible in the project's schema
+          (based on visible 'step_*' fields).
+        - Otherwise, returns all Pipeline Steps grouped by their ``entity_type``.
+        - Results are cached per context using the key
+          ``(limit_to_project_visible and project_id is not None, project_id)``.
+
+        :returns: dict[str, list[dict]] mapping entity type to ordered Step dicts.
+        """
+        self = cls.__get_instance()
+        all_steps = self._bundle.shotgun.find(
+            "Step",
+            [],
+            ["code", "entity_type", "color"],
+            order=[{"field_name": "code", "direction": "asc"}],
+        )
+
+        effective_project_id = project_id or self._get_current_project_id()
+        key = (
+            bool(limit_to_project_visible and effective_project_id),
+            effective_project_id,
+        )
+
+        # Return cached if available for this context
+        if key in self._step_map_cache:
+            return self._step_map_cache[key]
+
+        if not key[0]:
+            # Not limiting: group all steps by entity_type
+            step_map = defaultdict(list)
+            for step in all_steps:
+                entity_type = step.get("entity_type")
+                if entity_type:
+                    step_map[entity_type].append(step)
+        else:
+            # Limiting to project-visible steps
+            step_map = cls._build_project_visible_steps_by_entity_type(
+                all_steps, effective_project_id
+            )
+
+        self._step_map_cache[key] = step_map
+        return step_map
 
     @classmethod
     def field_is_editable(cls, sg_entity_type, field_name, project_id=None):
